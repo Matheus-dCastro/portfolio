@@ -1063,3 +1063,113 @@ footer {
   }
 }
 
+/* ==========================================================================
+   RESPONSIVIDADE EXCLUSIVA PARA A SEÇÃO DE EXPERIÊNCIA
+   ========================================================================== */
+
+/* 1. Ajuste para Tablets e Telas Médias (Até 850px) */
+@media (max-width: 920px) {
+  .experience-grid {
+    grid-template-columns: 1fr; /* Transforma as duas colunas em uma única coluna vertical */
+    gap: 25px;
+  }
+
+  .exp-vertical-accent-line {
+    display: none; /* Remove a linha vertical decorativa que ficava na lateral */
+  }
+
+  .exp-tabs-column {
+    padding-left: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  /* Transforma a lista de botões verticais em uma barra horizontal deslizante por toque */
+  .exp-tabs {
+    flex-direction: row !important;
+    overflow-x: auto !important;
+    white-space: nowrap;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch; /* Rolagem suave nativa no iOS/iPhone */
+    padding-bottom: 8px;
+    gap: 8px;
+    width: 100%;
+  }
+
+  /* Esconde a barra de rolagem padrão para manter o design clean */
+  .exp-tabs::-webkit-scrollbar {
+    display: none;
+  }
+  .exp-tabs {
+    scrollbar-width: none; /* Oculta no Firefox */
+  }
+
+  .tab-btn {
+    flex-shrink: 0; /* Impede os botões de esmagarem seu tamanho */
+    white-space: nowrap; /* Força o texto do botão a ficar em uma única linha */
+    padding: 10px 18px;
+    font-size: 0.9rem;
+    scroll-snap-align: start;
+  }
+
+  /* Centraliza o contador e as setas abaixo das abas deslizantes */
+  .exp-pagination {
+    margin-top: 5px;
+    justify-content: center;
+  }
+}
+
+/* 2. Ajuste Fino Cirúrgico para iPhone e Smartphones (Até 440px) */
+@media (max-width: 440px) {
+  .experience-section h2 {
+    font-size: 2rem;
+    margin-bottom: 30px;
+    text-align: left; /* Alinhamento mais natural para leitura mobile */
+  }
+
+  /* Reduz o recuo interno do card de 40px para 20px, dando espaço crucial para o texto */
+  .exp-display-card {
+    padding: 25px 20px !important;
+    border-radius: 12px;
+  }
+
+  .exp-display-card h3 {
+    font-size: 1.15rem;
+    line-height: 1.4;
+  }
+
+  .exp-timeline {
+    font-size: 0.8rem;
+    margin-top: 5px;
+  }
+
+  .card-inner-divider {
+    margin: 15px 0 !important;
+  }
+
+  /* Ajuste de espaçamento da lista de atribuições */
+  .exp-bullet-list {
+    gap: 12px !important;
+  }
+
+  .exp-bullet-list li {
+    font-size: 0.88rem;
+    line-height: 1.5;
+    padding-left: 22px; /* Diminui o recuo da bolinha para ganhar espaço horizontal */
+  }
+
+  /* Reposiciona a bolinha customizada e a linha guia nos marcadores da lista */
+  .exp-bullet-list li::before {
+    top: 6px;
+    width: 5px;
+    height: 5px;
+  }
+
+  .exp-bullet-list li::after {
+    top: 9px;
+    left: -4px;
+    width: 10px;
+  }
+}
+
