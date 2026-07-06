@@ -1004,3 +1004,62 @@ footer {
     gap: 10px;
   }
 }
+
+/* ==========================================================================
+   LOGO & BRANDING UNIFICADO (CORRIGIDO)
+   ========================================================================== */
+.logo {
+  font-weight: 900;
+  font-size: 1.1rem;
+  letter-spacing: -0.5px;
+  color: var(--text);
+  
+  /* Alinha o lobo perfeitamente no centro vertical com o seu nome */
+  display: inline-flex;
+  align-items: center;
+  gap: 10px; 
+  white-space: nowrap; /* Impede o nome de quebrar em duas linhas */
+}
+
+.logo-icon {
+  height: 24px;
+  width: auto;
+  object-fit: contain;
+  display: block;
+}
+
+/* Efeito Premium: Deixa apenas o "De Castro" ou parte do nome estilizado se usar a tag <span> */
+
+@media (max-width: 440px) {
+  /* ... mantenha as regras do body e sections anteriores ... */
+
+  /* Menu Pílula Otimizado para Nomes Longos */
+  header {
+    width: calc(100% - 16px); /* Margem fina para aproveitar o máximo de tela */
+    padding: 8px 12px;
+    top: 10px;
+    gap: 8px; /* Espaço controlado entre a logo e os links */
+    justify-content: space-between;
+  }
+
+  .logo {
+    font-size: 0.82rem; /* Tamanho exato para "Matheus de Castro" caber sem sumir */
+    gap: 6px;
+  }
+
+  .logo-icon {
+    height: 16px; /* Ajuste proporcional para telas Retina */
+  }
+
+  nav {
+    display: flex;
+    gap: 2px; /* Aproxima levemente os botões do menu */
+  }
+
+  nav a {
+    font-size: 0.72rem;
+    padding: 5px 8px;
+    margin-left: 0;
+  }
+}
+
