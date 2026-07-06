@@ -143,33 +143,29 @@ header:hover {
   font-weight: 900;
   font-size: 1.1rem;
   letter-spacing: -0.5px;
+  color: var(--text);
+  text-decoration: none;
   
-  /* Adicione estas linhas para alinhar o ícone perfeitamente com o texto */
   display: inline-flex;
   align-items: center;
-  gap: 8px; /* Espaçamento de 8px entre a imagem e o seu nome */
+  gap: 10px; 
+  white-space: nowrap;
 }
 
-/* Nova classe para controlar o tamanho do lobo */
 .logo-icon {
-  height: 24px; /* Ajuste esse valor se quiser o lobo maior ou menor */
+  height: 24px;
   width: auto;
   object-fit: contain;
+  display: block;
 }
 
-.logo span {
-  color: transparent;
-  -webkit-text-stroke: 1px var(--purple);
+.logo .first-name {
+  color: var(--text);
 }
-.logo {
-  font-weight: 900;
-  font-size: 1rem;
-  letter-spacing: -0.5px;
-}
-.logo span {
+
+.logo .last-name {
   color: var(--purple);
 }
-
 /* Links internos organizados como sub-pílulas no hover */
 nav {
   display: flex;
@@ -1066,110 +1062,176 @@ footer {
 /* ==========================================================================
    RESPONSIVIDADE EXCLUSIVA PARA A SEÇÃO DE EXPERIÊNCIA
    ========================================================================== */
-
-/* 1. Ajuste para Tablets e Telas Médias (Até 850px) */
 @media (max-width: 850px) {
   .experience-grid {
-    grid-template-columns: 1fr; /* Transforma as duas colunas em uma única coluna vertical */
-    gap: 25px;
+    grid-template-columns: 1fr; /* Força uma única coluna vertical */
+    gap: 20px;
+    width: 100%;
+    overflow: hidden; /* Evita vazamentos laterais no grid principal */
   }
 
   .exp-vertical-accent-line {
-    display: none; /* Remove a linha vertical decorativa que ficava na lateral */
+    display: none;
   }
 
   .exp-tabs-column {
     padding-left: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
+    width: 100%;
+    overflow: hidden; 
   }
 
-  /* Transforma a lista de botões verticais em uma barra horizontal deslizante por toque */
+  /* Contêiner de abas horizontal ultra responsivo */
   .exp-tabs {
     flex-direction: row !important;
+    display: flex !important;
     overflow-x: auto !important;
+    overflow-y: hidden !important;
     white-space: nowrap;
-    scroll-snap-type: x mandatory;
-    -webkit-overflow-scrolling: touch; /* Rolagem suave nativa no iOS/iPhone */
-    padding-bottom: 8px;
-    gap: 8px;
+    -webkit-overflow-scrolling: touch; /* Rolagem suave de toque no iOS */
+    padding-bottom: 12px; /* Espaço para não cortar a sombra/borda no scroll */
+    gap: 10px;
     width: 100%;
+    scroll-snap-type: x mandatory;
   }
 
-  /* Esconde a barra de rolagem padrão para manter o design clean */
+  /* Oculta completamente a barra de rolagem horizontal nativa em todos os navegadores */
   .exp-tabs::-webkit-scrollbar {
-    display: none;
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
   }
   .exp-tabs {
-    scrollbar-width: none; /* Oculta no Firefox */
+    scrollbar-width: none !important; /* Firefox */
+    -ms-overflow-style: none !important; /* IE/Edge */
   }
 
   .tab-btn {
-    flex-shrink: 0; /* Impede os botões de esmagarem seu tamanho */
-    white-space: nowrap; /* Força o texto do botão a ficar em uma única linha */
-    padding: 10px 18px;
-    font-size: 0.9rem;
+    flex: 0 0 auto; /* Impede os botões de esmagarem */
     scroll-snap-align: start;
+    padding: 12px 20px;
+    font-size: 0.9rem;
   }
 
-  /* Centraliza o contador e as setas abaixo das abas deslizantes */
   .exp-pagination {
     margin-top: 5px;
     justify-content: center;
   }
 }
 
-/* 2. Ajuste Fino Cirúrgico para iPhone e Smartphones (Até 440px) */
+/* Otimização cirúrgica para iPhones e Smartphones menores */
 @media (max-width: 440px) {
-  .experience-section h2 {
-    font-size: 2rem;
-    margin-bottom: 30px;
-    text-align: left; /* Alinhamento mais natural para leitura mobile */
+  
+  /* --- Modificação do Header Mobile --- */
+  header {
+    width: calc(100% - 16px);
+    padding: 8px 12px;
+    top: 10px;
+    gap: 4px;
   }
 
-  /* Reduz o recuo interno do card de 40px para 20px, dando espaço crucial para o texto */
+  .logo {
+    font-size: 0.9rem;
+    gap: 6px;
+  }
+
+  .logo-icon {
+    height: 18px;
+  }
+
+  /* O pulo do gato: Some o "Matheus" e mantém o "De Castro" */
+  .logo .first-name {
+    display: none !important;
+  }
+
+  nav a {
+    font-size: 0.72rem;
+    padding: 5px 8px;
+  }
+
+  /* --- Correção da Área de Experiência no Mobile --- */
+  .experience-section {
+    padding: 80px 4vw;
+  }
+
+  .experience-section h2 {
+    font-size: 1.8rem;
+    margin-bottom: 25px;
+    text-align: left;
+  }
+
+  /* Garante que o Card interno se adapte perfeitamente e não quebre paddings */
   .exp-display-card {
-    padding: 25px 20px !important;
+    padding: 24px 16px !important;
     border-radius: 12px;
+    width: 100%;
+    box-sizing: border-box;
   }
 
   .exp-display-card h3 {
-    font-size: 1.15rem;
+    font-size: 1.1rem;
     line-height: 1.4;
   }
 
   .exp-timeline {
-    font-size: 0.8rem;
-    margin-top: 5px;
+    font-size: 0.78rem;
   }
 
   .card-inner-divider {
     margin: 15px 0 !important;
   }
 
-  /* Ajuste de espaçamento da lista de atribuições */
   .exp-bullet-list {
     gap: 12px !important;
   }
 
   .exp-bullet-list li {
-    font-size: 0.88rem;
+    font-size: 0.85rem;
     line-height: 1.5;
-    padding-left: 22px; /* Diminui o recuo da bolinha para ganhar espaço horizontal */
+    padding-left: 20px; /* Reduz recuo para ganhar espaço de texto horizontal */
   }
 
-  /* Reposiciona a bolinha customizada e a linha guia nos marcadores da lista */
   .exp-bullet-list li::before {
     top: 6px;
-    width: 5px;
-    height: 5px;
+    width: 4px;
+    height: 4px;
   }
 
   .exp-bullet-list li::after {
-    top: 9px;
+    top: 8px;
     left: -4px;
-    width: 10px;
+    width: 8px;
   }
 }
+@media (max-width: 440px) {
+  
+  header {
+    width: calc(100% - 16px); /* Aproveita o máximo de espaço lateral no celular */
+    padding: 8px 12px;
+    top: 10px;
+    gap: 4px;
+  }
 
+  .logo {
+    font-size: 0.9rem;
+    gap: 6px;
+  }
+
+  .logo-icon {
+    height: 18px; /* Ajusta o tamanho do lobo para ficar proporcional */
+  }
+
+  /* O SEGREDO: Aplica o sumiço imediato do primeiro nome */
+  .logo .first-name {
+    display: none !important;
+  }
+  
+  /* Mantém o "De Castro" destacado com a cor do seu tema */
+  .logo .last-name {
+    color: var(--purple);
+  }
+
+  nav a {
+    font-size: 0.72rem;
+    padding: 5px 8px;
+  }
+}
