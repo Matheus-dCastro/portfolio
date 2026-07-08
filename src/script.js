@@ -1,5 +1,7 @@
 const textElement = document.getElementById("typewriter");
 const phrases = ["Matheus", "de Castro"];
+
+const textos = ["Matheus de Castro", "Backend Developer", "Machine Learning Student"];
 let phraseIndex = 0;
 let charIndex = 0;
 let isDeleting = false;
