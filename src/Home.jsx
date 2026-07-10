@@ -9,6 +9,9 @@ import Projects from "./components/Projects";
 import Contacts from "./components/Contacts";
 import About from "./components/About";
 import Hobbies from "./Hobbies";
+import logoWolf from "./assets/img/wolf(2).png";
+import fotoAlomyr from "./assets/img/alomyr.jpeg";
+import cvMatheus from "./docs/Matheus Vinicius Silva Freire de Castro.pdf";
 
 function Home({ onNavigateToHobbies }) {
   const dados = {
@@ -16,11 +19,11 @@ function Home({ onNavigateToHobbies }) {
     sobrenome: "de Castro",
     nomeCompleto: "Matheus de Castro",
   };
-  const imageWolf = "/img/wolf(2).png";
+  const imageWolf = logoWolf;
   const descriptionPerfil =
     "IT Technician — IFRN. Undergraduate student in Information Technology (BTI) at UFRN, focusing my studies on Machine Learning and backend development.";
-  const fotoPerfil = "/img/alomyr.jpeg";
-  const cv = "/docs/Matheus Vinicius Silva Freire de Castro.pdf";
+  const fotoPerfil = fotoAlomyr;
+  const cv = cvMatheus;
   const expData = [
     {
       title: "IT Intern",
