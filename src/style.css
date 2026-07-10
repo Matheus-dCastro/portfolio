@@ -1488,16 +1488,6 @@ footer {
     column-count: 1;
   }
 }
-body {
-  background-image:
-    linear-gradient(rgba(5, 5, 5, 0.9), rgba(5, 5, 5, 0.9)),
-    url("/img/ultrawide_onda_roxa.png");
-  background-size: cover;
-  background-position: center;
-  background-attachment: fixed;
-  background-repeat: no-repeat;
-  background-color: #050505; /* Fallback caso a imagem falhe */
-}
 
 /* Ajuste opcional para não deixar o fundo muito carregado atrás das artes */
 #art-gallery {
