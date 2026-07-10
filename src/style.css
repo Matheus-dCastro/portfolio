@@ -156,10 +156,12 @@ header {
   justify-content: space-between;
   align-items: center;
 
-  /* Efeito Vidro Fumê Premium */
-  background: rgba(10, 10, 14, 0.55); /* Base escura semi-transparente */
-  backdrop-filter: blur(16px) saturate(190%); /* Desfoque profundo do fundo */
-  -webkit-backdrop-filter: blur(16px) saturate(190%);
+  /* 1. Base escura semi-transparente (Corrigido para uma única declaração limpa) */
+  background: rgba(10, 10, 14, 0.55);
+
+  /* 2. Efeito Vidro Fumê Premium com suporte Webkit isolado no topo */
+  -webkit-backdrop-filter: blur(16px) saturate(190%) !important;
+  backdrop-filter: blur(16px) saturate(190%) !important;
 
   /* Borda sutil reflexiva simulando a lapidação do vidro */
   border: 1px solid #8a5cf686;
@@ -171,6 +173,13 @@ header {
     inset 0 1px 1px rgba(255, 255, 255, 0.05);
 
   transition: all 0.4s var(--ease);
+}
+
+main {
+  position: relative;
+  width: 100%;
+  /* Força o navegador a entender o fundo como uma camada independente */
+  isolation: isolate;
 }
 
 /* Efeito sutil ao rolar a página (opcional, dá um detalhe extra caso queira) */
