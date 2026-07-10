@@ -1,0 +1,541 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Matheus de Castro | Hobbies & Interests</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="src/wolf(2).png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="src/wolf(2).png" />
+
+    <link rel="stylesheet" href="src/style.css" />
+    <style>
+      /* Estilos específicos para a galeria de Hobbies */
+      .hobbies-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        grid-auto-rows: 250px;
+        gap: 20px;
+        margin-top: 50px;
+        margin-bottom: 100px; /* Espaço para a próxima seção */
+      }
+
+      .hobby-card {
+        background: var(--card-bg);
+        border: 1px solid #1a1a1a;
+        border-radius: 24px;
+        overflow: hidden;
+        position: relative;
+        transition: 0.4s var(--ease);
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        padding: 30px;
+      }
+
+      .hobby-card:hover {
+        border-color: var(--purple);
+        transform: translateY(-5px);
+      }
+
+      .tall {
+        grid-row: span 2;
+      }
+      .wide {
+        grid-column: span 2;
+      }
+
+      .hobby-card img {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        opacity: 0.4;
+        transition: 0.5s;
+        z-index: 1;
+      }
+
+      .hobby-card:hover img {
+        opacity: 0.7;
+        transform: scale(1.1);
+      }
+
+      .hobby-content {
+        position: relative;
+        z-index: 2;
+      }
+      .hobby-category {
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        color: var(--purple-bright);
+        letter-spacing: 2px;
+        font-weight: 900;
+      }
+
+      .hobby-card h3 {
+        font-size: 1.8rem;
+        margin: 5px 0;
+      }
+      .hobby-card p {
+        color: var(--muted);
+        font-size: 0.9rem;
+        max-width: 250px;
+      }
+
+      /* Layout Masonry - Galeria de Artes */
+      .masonry-gallery {
+        column-count: 3;
+        column-gap: 20px;
+        padding: 0 10vw; /* Alinhado com o resto do site */
+      }
+
+      .art-item {
+        position: relative;
+        margin-bottom: 20px;
+        break-inside: avoid;
+        border-radius: 15px;
+        overflow: hidden;
+        cursor: pointer;
+        border: 1px solid #1a1a1a;
+        transition: 0.4s var(--ease);
+      }
+
+      .art-item img {
+        width: 100%;
+        display: block;
+        transition: 0.5s;
+      }
+      .art-overlay {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: linear-gradient(transparent, rgba(139, 92, 246, 0.8));
+        padding: 20px;
+        opacity: 0;
+        transition: 0.3s;
+      }
+
+      .art-item:hover .art-overlay {
+        opacity: 1;
+      }
+      .art-item:hover {
+        border-color: var(--purple);
+        transform: scale(1.02);
+      }
+
+      /* Lightbox */
+      .lightbox {
+        display: none;
+        position: fixed;
+        z-index: 2000;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(5, 5, 5, 0.95);
+        backdrop-filter: blur(10px);
+        justify-content: center;
+        align-items: center;
+      }
+      .lightbox img {
+        max-width: 90%;
+        max-height: 80%;
+        border-radius: 10px;
+      }
+      .close-lightbox {
+        position: absolute;
+        top: 30px;
+        right: 50px;
+        font-size: 40px;
+        color: white;
+        cursor: pointer;
+      }
+
+      @media (max-width: 900px) {
+        .hobbies-grid {
+          grid-template-columns: 1fr;
+          grid-auto-rows: auto;
+        }
+        .wide,
+        .tall {
+          grid-column: span 1;
+          grid-row: span 1;
+        }
+        .masonry-gallery {
+          column-count: 2;
+          padding: 0 5vw;
+        }
+      }
+      @media (max-width: 480px) {
+        .masonry-gallery {
+          column-count: 1;
+        }
+      }
+      body {
+        background-image:
+          linear-gradient(rgba(5, 5, 5, 0.9), rgba(5, 5, 5, 0.9)),
+          url("src/ultrawide_onda_roxa.png");
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+        background-repeat: no-repeat;
+        background-color: #050505; /* Fallback caso a imagem falhe */
+      }
+
+      /* Ajuste opcional para não deixar o fundo muito carregado atrás das artes */
+      #art-gallery {
+        background: rgba(5, 5, 5, 0.7); /* Dá um leve destaque para a galeria */
+        backdrop-filter: blur(5px);
+        border-radius: 30px;
+        margin: 50px 2vw;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="logo">
+        <a href="index.html" class="logo">
+          <img src="src/wolf(2).png" class="logo-icon" alt="Lobo" />
+          <span class="first-name">Matheus</span>
+          <span class="last-name">De Castro</span>
+        </a>
+      </div>
+      <nav>
+        <a href="index.html">Home</a>
+        <a href="index.html#projects">Works</a>
+        <a href="#art-gallery">Arts</a>
+      </nav>
+    </header>
+
+    <main style="padding-top: 150px">
+      <section id="interests" style="padding: 0 10vw">
+        <p style="color: var(--purple); font-weight: bold; letter-spacing: 2px">
+          BEYOND THE CODE
+        </p>
+        <h2 style="font-size: 4rem; margin-bottom: 20px">
+          My <span>Hobbies</span> & Studies
+        </h2>
+        <p style="color: var(--muted); max-width: 600px; margin-bottom: 40px">
+          Quando não estou programando, estou explorando o lado criativo da
+          vida. 'A arte existe porque a vida não basta', Ferreira Gullar Mas
+          pela vida ser insuficiente é que criamos arte, Matheus de Castro
+        </p>
+
+        <div class="hobbies-grid">
+          <div class="hobby-card tall">
+            <img
+              src="src/1CF53B24-759E-48D5-B0C5-9CA7349A544E.webp"
+              alt="Desenho"
+            />
+            <div class="hobby-content">
+              <span class="hobby-category">Art</span>
+              <h3>Drawings</h3>
+              <p>Explorando anatomia e hiperrealismo.</p>
+            </div>
+          </div>
+
+          <div class="hobby-card wide">
+            <img
+              src="src/566644515_18081743411050733_8226103790257785455_n.webp"
+              alt="Gaming"
+            />
+            <div class="hobby-content">
+              <span class="hobby-category">Gaming</span>
+              <h3>Campaign and narratives</h3>
+              <p>De Elden Ring a cuphead.</p>
+            </div>
+          </div>
+
+          <div class="hobby-card">
+            <img
+              src="src/575981249_18291228211272949_514477677943118836_n.webp"
+              alt="Desenho"
+            />
+            <div class="hobby-content">
+              <span class="hobby-category">Future</span>
+              <h3>AR & AI</h3>
+              <p>O futuro da Realidade Aumentada.</p>
+            </div>
+          </div>
+
+          <div class="hobby-card">
+            <img
+              src="src/584385202_18086409646964312_3912764164389240104_n.webp"
+              alt="Desenho"
+            />
+            <div class="hobby-content">
+              <span class="hobby-category">Reading</span>
+              <h3>Sci-Fi & Tech</h3>
+              <p>Expansão de visão tecnológica.</p>
+            </div>
+          </div>
+          <div class="hobby-card">
+            <img src="src/Gama-4.webp" alt="Fitness Life" />
+            <div class="hobby-content">
+              <span class="hobby-category">Lifestyle</span>
+              <h3>Fitness & Strength</h3>
+              <p>Saúde física como pilar para a performance cognitiva.</p>
+            </div>
+          </div>
+          <div class="hobby-card">
+            <img src="src/IMG_3091.webp" alt="Fitness Life" />
+            <div class="hobby-content">
+              <span class="hobby-category">Coffee</span>
+              <h3>Code & coffee.</h3>
+              <p>
+                Convertendo cafeína em algoritmos e traços. A ciência por trás
+                do grão perfeito é o combustível que move minhas madrugadas de
+                criação.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section
+        id="art-gallery"
+        style="margin-top: 100px; padding-bottom: 100px"
+      >
+        <div
+          style="
+            padding: 0 10vw;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 40px;
+          "
+        >
+          <div>
+            <p
+              style="
+                color: var(--purple);
+                font-weight: bold;
+                letter-spacing: 2px;
+              "
+            >
+              GALLERY
+            </p>
+            <h2 style="margin-bottom: 0">My <span>Drawings</span></h2>
+          </div>
+          <!-- <span style="color: var(--muted); font-size: 0.9rem"
+            >Clique para ampliar</span
+          > -->
+        </div>
+
+        <div class="masonry-gallery">
+          <div class="art-item">
+            <img src="src/IMG_2998.webp" alt="Art 1" />
+            <div class="art-overlay"><span>Aquaman</span></div>
+          </div>
+
+          <div class="art-item">
+            <img src="src/IMG_3111.webp" alt="Art 2" />
+            <div class="art-overlay">
+              <span>HP</span>
+            </div>
+          </div>
+
+          <div class="art-item">
+            <img src="src/IMG_3112.webp" alt="Art 3" />
+            <div class="art-overlay">
+              <span>Wanda Maximoff</span>
+            </div>
+          </div>
+
+          <div class="art-item">
+            <img src="src/IMG_3114.webp" alt="Art 2" />
+            <div class="art-overlay">
+              <span>The joker of joaquin phoenix</span>
+            </div>
+          </div>
+
+          <div class="art-item">
+            <img src="src/IMG_3107.webp" alt="Art 2" />
+            <div class="art-overlay">
+              <span>GOT</span>
+            </div>
+          </div>
+
+          <div class="art-item">
+            <img src="src/IMG_3285-convertido-de-jpeg.webp" alt="Art 2" />
+            <div class="art-overlay">
+              <span>Jack Sparrow em tela A4</span>
+            </div>
+          </div>
+          <div class="art-item">
+            <img src="src/IMG_3104.webp" alt="Art 2" />
+            <div class="art-overlay">
+              <span>black widow</span>
+            </div>
+          </div>
+
+          <div class="art-item">
+            <img src="src/IMG_3110.webp" alt="Art 2" />
+            <div class="art-overlay">
+              <span>GOT</span>
+            </div>
+          </div>
+
+          <div class="art-item">
+            <img src="src/IMG_3286-convertido-de-jpeg.webp" alt="Art 2" />
+            <div class="art-overlay">
+              <span>geralt de rívia the witcher 3 em Tela A2</span>
+            </div>
+          </div>
+          <!-- <div class="art-item">
+            <img src="src/IMG_3109.webp" alt="Art 2" />
+            <div class="art-overlay">
+              <span>stan lee</span>
+            </div>
+          </div> -->
+        </div>
+      </section>
+
+      <div id="lightbox" class="lightbox">
+        <span class="close-lightbox">&times;</span>
+        <img id="lightbox-img" src="" alt="Ampliada" />
+      </div>
+    </main>
+    <section id="contact" class="contact-section">
+      <h2>My <span>Contacts</span></h2>
+      <div class="contact-grid">
+        <a href="mailto:matheus.vsf.castro.25@gmail.com" class="contact-item">
+          <div class="icon-box">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path
+                d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"
+              ></path>
+              <polyline points="22,6 12,13 2,6"></polyline>
+            </svg>
+          </div>
+          <h3>E-mail</h3>
+          <p>matheus.vsf.castro.25@gmail.com</p>
+        </a>
+
+        <a
+          href="https://www.linkedin.com/in/matheus-dcastro"
+          target="_blank"
+          class="contact-item"
+        >
+          <div class="icon-box">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path
+                d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"
+              ></path>
+              <rect x="2" y="9" width="4" height="12"></rect>
+              <circle cx="4" cy="4" r="2"></circle>
+            </svg>
+          </div>
+          <h3>Linkedin</h3>
+          <p>matheus-dcastro</p>
+        </a>
+
+        <a
+          href="https://github.com/Matheus-dCastro"
+          target="_blank"
+          class="contact-item"
+        >
+          <div class="icon-box">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path
+                d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"
+              ></path>
+            </svg>
+          </div>
+          <h3>Github</h3>
+          <p>@Matheus-dCastro</p>
+        </a>
+        <a
+          href="https://www.instagram.com/matheusdcastro._/"
+          target="_blank"
+          class="contact-item"
+        >
+          <div class="icon-box">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+              <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+              <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+            </svg>
+          </div>
+          <h3>Instagram</h3>
+          <p>@MatheusdCastro._</p>
+        </a>
+      </div>
+    </section>
+    <footer
+      style="
+        padding: 60px 10vw;
+        border-top: 1px solid #111;
+        color: var(--muted);
+        font-size: 0.8rem;
+      "
+    >
+      <p>© 2026 Matheus de Castro. Keep Creating.</p>
+    </footer>
+
+    <script>
+      // SCRIPT PARA O LIGHTBOX
+      const artItems = document.querySelectorAll(".art-item img");
+      const lightbox = document.getElementById("lightbox");
+      const lightboxImg = document.getElementById("lightbox-img");
+      const closeBtn = document.querySelector(".close-lightbox");
+
+      artItems.forEach((img) => {
+        img.addEventListener("click", () => {
+          lightbox.style.display = "flex";
+          lightboxImg.src = img.src;
+        });
+      });
+
+      closeBtn.addEventListener("click", () => {
+        lightbox.style.display = "none";
+      });
+
+      lightbox.addEventListener("click", (e) => {
+        if (e.target !== lightboxImg) lightbox.style.display = "none";
+      });
+    </script>
+  </body>
+</html>

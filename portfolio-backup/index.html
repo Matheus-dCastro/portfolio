@@ -1,0 +1,604 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta name="google-site-verification" content="google0dc5a3366f5cf572" />
+    <meta
+      name="description"
+      content="Official portfolio of Matheus de Castro, an IT Undergraduate student at UFRN specializing in Backend Development and Machine Learning Engineering."
+    />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Matheus de Castro | Portfolio</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="src/wolf(2).png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="src/wolf(2).png" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Apontando para o CSS novo para não interferir no atual -->
+    <link rel="stylesheet" href="src/style.css" />
+  </head>
+  <body>
+    <header>
+      <a href="#" class="logo">
+        <img src="src/wolf(2).png" class="logo-icon" alt="Lobo" />
+        <span class="first-name">Matheus</span>
+        <span class="last-name">De Castro</span>
+      </a>
+      <nav>
+        <a href="#experience">Experiência</a>
+        <a href="#skills">Skills</a>
+        <a href="#projects">Works</a>
+        <a href="#about">About</a>
+      </nav>
+    </header>
+    <main>
+      <section class="hero">
+        <div class="hero-content">
+          <div class="profile-wrapper">
+            <img
+              src="src/alomyr.jpeg"
+              alt="Matheus de Castro"
+              class="profile-pic"
+            />
+          </div>
+          <h1 id="typewriter" class="typewriter-text">Matheus de Castro</h1>
+          <p class="hero-subtitle">
+            IT Technician — IFRN. Undergraduate student in Information
+            Technology (BTI) at UFRN, focusing my studies on Machine Learning
+            and backend development.
+          </p>
+          <div class="btn-group">
+            <a href="#projects" class="btn">See My Projects</a>
+            <a
+              href="Matheus Vinicius Silva Freire de Castro.pdf"
+              target="_blank"
+              class="btn btn-outline"
+              >Download CV</a
+            >
+          </div>
+        </div>
+
+        <div class="card-container">
+          <div class="split-card">
+            <div class="side design">ART</div>
+            <div class="side coder">CODER IS</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SKILLS SECTION -->
+      <section id="skills" class="skills-section">
+        <div class="section-divider-line"></div>
+        <p class="section-tag">Stack & Tools</p>
+        <h2>My <span>Skills</span></h2>
+        <div class="skills-grid">
+          <div class="skill-item">
+            <img
+              src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg"
+              alt="Python"
+            />
+            <span>Python</span>
+          </div>
+          <div class="skill-item">
+            <img
+              src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/java/java-original.svg"
+              alt="Java"
+            />
+            <span>Java</span>
+          </div>
+          <div class="skill-item">
+            <img
+              src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/cplusplus/cplusplus-original.svg"
+              alt="C++"
+            />
+            <span>C++</span>
+          </div>
+          <div class="skill-item">
+            <img
+              src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/postgresql/postgresql-original.svg"
+              alt="PostgreSQL"
+            />
+            <span>PostgreSQL</span>
+          </div>
+          <div class="skill-item">
+            <img
+              src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/ubuntu/ubuntu-plain.svg"
+              alt="Ubuntu"
+            />
+            <span>Ubuntu</span>
+          </div>
+          <div class="skill-item">
+            <img
+              src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/git/git-original.svg"
+              alt="Git"
+            />
+            <span>Git</span>
+          </div>
+          <div class="skill-item">
+            <img
+              src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/html5/html5-original.svg"
+              alt="HTML5"
+            />
+            <span>HTML5</span>
+          </div>
+          <div class="skill-item">
+            <img
+              src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/css3/css3-original.svg"
+              alt="CSS3"
+            />
+            <span>CSS3</span>
+          </div>
+          <div class="skill-item focus-study">
+            <img
+              src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/javascript/javascript-original.svg"
+              alt="JS"
+            />
+            <span>JavaScript</span>
+          </div>
+          <div class="skill-item focus-study">
+            <img
+              src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg"
+              alt="React"
+            />
+            <span>React.js</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- EXPERIÊNCIA SECTION (CORRIGIDA) -->
+      <section id="experience" class="experience-section">
+        <div class="section-divider-line"></div>
+
+        <h2>Experiência</h2>
+
+        <div class="experience-grid">
+          <div class="exp-tabs-column">
+            <div class="exp-vertical-accent-line"></div>
+            <div class="exp-tabs">
+              <!-- Apenas o DETRAN inicia ativo por padrão no HTML -->
+              <button class="tab-btn active" onclick="setExperience(0)">
+                <span class="tab-dot"></span> DETRAN-RN
+              </button>
+              <button class="tab-btn" onclick="setExperience(1)">
+                Cachina Soluções
+              </button>
+              <button class="tab-btn" onclick="setExperience(2)">
+                UFRN Natal
+              </button>
+              <button class="tab-btn" onclick="setExperience(3)">
+                IFRN Lajes
+              </button>
+            </div>
+
+            <div class="exp-pagination">
+              <button class="pag-arrow" onclick="changeExp(-1)">&lt;</button>
+              <span id="pag-indicator" class="pag-text">1 de 4</span>
+              <button class="pag-arrow" onclick="changeExp(1)">&gt;</button>
+            </div>
+          </div>
+
+          <div class="exp-content-column">
+            <div class="exp-display-card">
+              <div id="exp-card-body">
+                <!-- O JavaScript vai preencher tudo aqui dinamicamente ao iniciar -->
+                <h3>IT Intern | <span class="company-highlight"></span></h3>
+                <p class="exp-timeline"></p>
+                <div class="card-inner-divider"></div>
+                <ul class="exp-bullet-list">
+                  <li></li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- PROJECTS SECTION -->
+      <section id="projects" class="projects-section">
+        <div class="section-divider-line"></div>
+        <p class="section-tag">Selected Portfolio</p>
+        <h2>Selected <span>Works</span></h2>
+        <div class="grid">
+          <div class="project-card">
+            <div class="project-header">
+              <span class="tag">FastAPI</span>
+              <span class="tag font-bold">Data & ML</span>
+            </div>
+            <h3>AgentMetrics</h3>
+            <p>
+              API de telemetria inteligente desenvolvida para monitorar o
+              consumo de recursos e metrificar o desempenho de agentes de IA em
+              tempo real.
+            </p>
+            <div class="project-links">
+              <a
+                href="https://github.com/Matheus-dCastro/AgentMetrics"
+                target="_blank"
+                class="link-arrow"
+                >View GitHub <span>→</span></a
+              >
+            </div>
+          </div>
+
+          <div class="project-card">
+            <div class="project-header">
+              <span class="tag">Python & SQL</span>
+            </div>
+            <h3>Task System CLI</h3>
+            <p>Arquitetura MVC completa com persistência em PostgreSQL.</p>
+            <div class="project-links">
+              <a
+                href="https://github.com/Matheus-dCastro/Sistema-de-Controle-em-Py3"
+                target="_blank"
+                class="link-arrow"
+                >View GitHub <span>→</span></a
+              >
+            </div>
+          </div>
+
+          <div class="project-card">
+            <div class="project-header">
+              <span class="tag">C++</span>
+            </div>
+            <h3>Zombie Dice</h3>
+            <p>
+              Implementação orientada a objetos e máquina de estados para
+              execução de jogo de dados lógico via terminal CLI.
+            </p>
+            <div class="project-links">
+              <a
+                href="https://github.com/Matheus-dCastro/trabalho-06-projeto-zombie-dice-Turma-DIM0176---PROGRAMA-O-I---T02-2025.1-.git"
+                target="_blank"
+                class="link-arrow"
+                >View GitHub <span>→</span></a
+              >
+            </div>
+          </div>
+
+          <div class="project-card">
+            <div class="project-header">
+              <span class="tag">Automation & Web</span>
+            </div>
+            <h3>Cachina Soluções</h3>
+            <p>
+              Desenvolvimento e hospedagem do ecossistema de interfaces e
+              apresentação estratégica corporativa.
+            </p>
+            <div class="project-links">
+              <a
+                href="https://github.com/Matheus-dCastro/Site-Cachina-2026"
+                target="_blank"
+                class="link-arrow"
+                >Code <span>→</span></a
+              >
+              <a
+                href="https://cachina.com.br/"
+                target="_blank"
+                class="link-arrow"
+                >Live Demo <span>→</span></a
+              >
+            </div>
+          </div>
+
+          <div class="project-card">
+            <div class="project-header">
+              <span class="tag">Python & Data</span>
+            </div>
+            <h3>Supervised Machine Learning</h3>
+            <p>
+              Análise estatística e implementação prática de algoritmos
+              preditivos supervisionados utilizando Scikit-Learn e Jupyter
+              Notebooks.
+            </p>
+            <div class="project-links">
+              <a
+                href="https://github.com/Matheus-dCastro/Apredizado-de-maquina-supervisonado"
+                target="_blank"
+                class="link-arrow"
+                >View GitHub <span>→</span></a
+              >
+            </div>
+          </div>
+          <div class="project-card">
+            <div class="project-header">
+              <span class="tag">Game in CPP</span>
+            </div>
+            <h3>Projeto snaze</h3>
+            <p>
+              implement a simulation in which your program must guide a snake
+              through a maze to a piece of food that appears in a random
+              position.
+            </p>
+            <a
+              href="https://github.com/Matheus-dCastro/trabalho-07-projeto-snaze--Turma-DIM0176---PROGRAMA-O-I---T02-2025.1-.git"
+              style="
+                color: var(--purple);
+                text-decoration: none;
+                font-weight: 700;
+              "
+              >View GitHub →</a
+            >
+          </div>
+          <div class="project-card">
+            <div class="project-header">
+              <span class="tag">Java</span>
+            </div>
+            <h3>TimeMaster</h3>
+            <p>
+              Sistema modular backend para gerenciamento de compromissos e
+              agendamentos complexos desenvolvido em LP2.
+            </p>
+            <div class="project-links">
+              <a
+                href="https://github.com/Matheus-dCastro/Sistema-de-Agenda-de-Compromissos.git"
+                target="_blank"
+                class="link-arrow"
+                >View GitHub <span>→</span></a
+              >
+            </div>
+          </div>
+          <div class="project-card">
+            <div class="project-header">
+              <span class="tag">CPP</span>
+            </div>
+            <h3>password generator</h3>
+            <p>
+              O objetivo do programa é produzir senhas de complexidade e tamanho
+              variados, dependendo das escolhas de configuração do usuário.
+            </p>
+            <a
+              href="https://github.com/Matheus-dCastro/trabalho-03-projeto-passgen-Turma-DIM0176---PROGRAMA-O-I---T02-2025.1-"
+              style="
+                color: var(--purple);
+                text-decoration: none;
+                font-weight: 700;
+              "
+              >View GitHub →</a
+            >
+          </div>
+        </div>
+      </section>
+
+      <!-- ABOUT SECTION -->
+      <section id="about" class="about-section">
+        <div class="section-divider-line"></div>
+        <p class="section-tag">Introduction</p>
+        <h2>About <span>Me</span></h2>
+        <div class="about-container">
+          <p class="about-text">
+            I am an Information Technology (BTI) student at UFRN, specializing
+            in building robust back-end architectures and processing intelligent
+            pipelines. I bridge the mathematical rigor of
+            <strong>Machine Learning Engineering</strong> with the clean
+            aesthetic execution of software architecture.
+          </p>
+          <p class="about-text text-muted">
+            With practical experience in automated workflows, and relational
+            data structures, I scale code with the same milimetric precision I
+            apply to hyperrealism drawings. Studying to become a machine
+            learning engineer
+          </p>
+          <a href="hobbies.html" class="btn btn-outline"
+            >Explore Creative Side</a
+          >
+        </div>
+      </section>
+    </main>
+
+    <!-- CONTACT SECTION -->
+    <section id="contact" class="contact-section">
+      <div class="section-divider-line"></div>
+      <p class="section-tag">Get in touch</p>
+      <h2>My <span>Contacts</span></h2>
+      <div class="contact-grid">
+        <a href="mailto:matheus.vsf.castro.25@gmail.com" class="contact-item">
+          <div class="icon-box">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path
+                d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"
+              ></path>
+              <polyline points="22,6 12,13 2,6"></polyline>
+            </svg>
+          </div>
+          <h3>E-mail</h3>
+          <p>matheus.vsf.castro.25@gmail.com</p>
+        </a>
+
+        <a
+          href="https://www.linkedin.com/in/matheus-dcastro"
+          target="_blank"
+          class="contact-item"
+        >
+          <div class="icon-box">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path
+                d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"
+              ></path>
+              <rect x="2" y="9" width="4" height="12"></rect>
+              <circle cx="4" cy="4" r="2"></circle>
+            </svg>
+          </div>
+          <h3>Linkedin</h3>
+          <p>linkedin.com/in/matheus-dcastro</p>
+        </a>
+
+        <a
+          href="https://github.com/Matheus-dCastro"
+          target="_blank"
+          class="contact-item"
+        >
+          <div class="icon-box">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path
+                d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"
+              ></path>
+            </svg>
+          </div>
+          <h3>Github</h3>
+          <p>@Matheus-dCastro</p>
+        </a>
+        <a
+          href="https://www.instagram.com/matheusdcastro._/"
+          target="_blank"
+          class="contact-item"
+        >
+          <div class="icon-box">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+              <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+              <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+            </svg>
+          </div>
+          <h3>Instagram</h3>
+          <p>@MatheusdCastro._</p>
+        </a>
+      </div>
+    </section>
+
+    <footer>
+      <p>© 2026 Matheus de Castro. Built with code & coffee.</p>
+      <div class="footer-links">
+        <a href="https://github.com/Matheus-dCastro" target="_blank">GitHub</a>
+        <a href="https://www.linkedin.com/in/matheus-dcastro" target="_blank"
+          >LinkedIn</a
+        >
+      </div>
+    </footer>
+
+    <script>
+      const expData = [
+        {
+          title: "IT Intern",
+          company: "Detran",
+          time: "Junho 2026 - Atual",
+          bullets: ["Em andamento"],
+        },
+        {
+          title: "IT Intern",
+          company: "Cachina Soluções",
+          time: "Março 2026 - Atualmente",
+          bullets: [
+            "Desenvolvimento e otimização de arquiteturas de backend;",
+            "Automação de fluxos de trabalho inteligentes utilizando n8n integrados a ecossistemas digitais;",
+            "Gerenciamento ágil de servidores Linux (Ubuntu Server) e documentação técnica de processos operacionais;",
+            "Principais tecnologias utilizadas: Python, SQL, n8n, Linux, Bash e Git.",
+          ],
+        },
+        {
+          title: "IT Technician Training",
+          company: "UFRN Campus Natal",
+          time: "2024 - Atual",
+          bullets: [
+            "Foco em desenvolvimento de Software e machine learning, em construção...",
+          ],
+        },
+        {
+          title: "IT Technician Training",
+          company: "IFRN Campus Lajes",
+          time: "2019 - 2022",
+          bullets: [
+            "Formação técnica integrada estruturada com foco em Desenvolvimento web;",
+            "Desenvolvimento de lógica algorítmica sólida e fundamentos de bancos de dados relacionais;",
+            "Práticas de laboratório envolvendo montagem, manutenção e implantação de arquiteturas operacionais locais.",
+          ],
+        },
+      ];
+
+      let currentExpIndex = 0;
+
+      function setExperience(index) {
+        currentExpIndex = index;
+        updateExperienceDOM();
+      }
+
+      function changeExp(direction) {
+        currentExpIndex += direction;
+        if (currentExpIndex < 0) currentExpIndex = expData.length - 1;
+        if (currentExpIndex >= expData.length) currentExpIndex = 0;
+        updateExperienceDOM();
+      }
+
+      function updateExperienceDOM() {
+        const data = expData[currentExpIndex];
+        const cardBody = document.getElementById("exp-card-body");
+        const indicator = document.getElementById("pag-indicator");
+        const buttons = document.querySelectorAll(".tab-btn");
+
+        buttons.forEach((btn, idx) => {
+          if (idx === currentExpIndex) {
+            btn.classList.add("active");
+            if (!btn.querySelector(".tab-dot")) {
+              btn.innerHTML = `<span class="tab-dot"></span> ${btn.textContent.trim()}`;
+            }
+          } else {
+            btn.classList.remove("active");
+            const dot = btn.querySelector(".tab-dot");
+            if (dot) dot.remove();
+          }
+        });
+
+        indicator.textContent = `${currentExpIndex + 1} de ${expData.length}`;
+
+        cardBody.style.opacity = 0;
+        setTimeout(() => {
+          let bulletsHTML = data.bullets.map((b) => `<li>${b}</li>`).join("");
+          cardBody.innerHTML = `
+            <h3>${data.title} | <span class="company-highlight">${data.company}</span></h3>
+            <p class="exp-timeline">${data.time}</p>
+            <div class="card-inner-divider"></div>
+            <ul class="exp-bullet-list">${bulletsHTML}</ul>
+          `;
+          cardBody.style.opacity = 1;
+        }, 150);
+      }
+
+      updateExperienceDOM();
+    </script>
+    <script src="src/script.js"></script>
+  </body>
+</html>

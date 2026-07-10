@@ -1,0 +1,538 @@
+:root {
+  --bg: #050505;
+  --card-bg: #0f0f15;
+  --purple: #8b5cf6;
+  --purple-bright: #a78bfa;
+  --text: #ffffff;
+  --muted: #888888;
+  --ease: cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+.hero-content h1 {
+  font-size: clamp(2.5rem, 7vw, 5.5rem);
+  line-height: 1.1; /* Ajuste leve para não cortar o topo das letras */
+  font-weight: 900;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+  display: block;
+  min-height: 110px; /* Garante que o espaço do texto já exista antes de digitar */
+  overflow: hidden;
+}
+
+body {
+  font-family: "Inter", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg);
+}
+::-webkit-scrollbar-thumb {
+  background: #222;
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--purple);
+}
+
+/* Efeito de letra vazada (Outline) */
+.outline {
+  color: transparent !important;
+  -webkit-text-stroke: 1px var(--purple);
+}
+
+header {
+  padding: 30px 6vw;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: fixed;
+  width: 100%;
+  top: 0;
+  z-index: 1000;
+  background: rgba(5, 5, 5, 0.8);
+  backdrop-filter: blur(10px);
+}
+
+.logo {
+  font-weight: 900;
+  font-size: 1.2rem;
+  letter-spacing: -1px;
+}
+.logo span {
+  color: var(--purple);
+}
+.logo span {
+  color: var(--purple) !important; /* Garante a cor roxa sem interferências */
+}
+
+nav a {
+  margin-left: 30px;
+  color: var(--muted);
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: 0.3s;
+}
+
+nav a:hover {
+  color: var(--purple-bright);
+}
+
+/* HERO SECTION */
+/* No seu style.css */
+.hero {
+  background-image:
+    linear-gradient(rgba(5, 5, 5, 0.8), rgba(5, 5, 5, 0.8)),
+    url("ultrawide_onda_roxa.png"); /* Remova qualquer barra ou 'src/' antes do nome */
+
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: scroll; /* Isso resolve o bug do fundo no celular */
+  background-position: center center;
+  background-size: cover;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 10vw;
+  gap: 50px;
+}
+.hero-content h1 {
+  font-size: clamp(2.5rem, 7vw, 5.5rem);
+  line-height: 1;
+  font-weight: 900;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+  min-height: 2.2em;
+}
+
+.typewriter-text::after {
+  content: "|";
+  animation: blink 0.7s infinite;
+  color: var(--purple);
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+.hero-content p {
+  color: var(--muted);
+  max-width: 450px;
+  font-size: 1.1rem;
+  margin-bottom: 30px;
+}
+
+/* BOTÕES */
+.btn-group {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+.btn {
+  display: inline-block;
+  padding: 14px 28px;
+  background: var(--purple);
+  color: #000;
+  font-weight: 700;
+  border-radius: 8px;
+  transition: 0.3s;
+  text-decoration: none;
+}
+
+.btn:hover {
+  background: var(--purple-bright);
+  transform: translateY(-3px);
+  box-shadow: 0 10px 20px rgba(139, 92, 246, 0.3);
+}
+
+.btn-outline {
+  background: transparent;
+  color: var(--text);
+  border: 1px solid #333;
+}
+
+/* CARD COM DESFOQUE (BLUR) */
+.card-container {
+  position: relative;
+  width: 400px;
+  height: 500px;
+  perspective: 1000px;
+}
+
+.split-card {
+  width: 100%;
+  height: 100%;
+  background: var(--bg);
+  border: 1px solid #222;
+  border-radius: 20px;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  transition: 0.6s var(--ease);
+  box-shadow: 0 40px 100px rgba(0, 0, 0, 0.5);
+}
+
+/* Camada de desfoque central */
+.split-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 120px; /* Largura da área de mistura */
+  height: 100%;
+  background: linear-gradient(to right, #000, var(--purple));
+  filter: blur(25px); /* Intensidade do esfumaçado */
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0.9;
+}
+
+.side {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  font-size: 2.5rem;
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  transition: 0.5s;
+  position: relative;
+  z-index: 2; /* Texto acima do blur */
+}
+
+.side.design {
+  background: #000;
+  color: var(--purple);
+}
+
+.side.coder {
+  background: var(--purple);
+  color: #000;
+  /* Cria uma transição suave na borda para não esconder o blur */
+  -webkit-mask-image: linear-gradient(to right, transparent, black 15%);
+  mask-image: linear-gradient(to right, transparent, black 15%);
+}
+
+.split-card:hover {
+  transform: rotateY(-10deg) rotateX(5deg);
+  border-color: var(--purple);
+}
+
+/* SKILLS SECTION */
+/* SKILLS SECTION - Com Transição de Cores */
+.skills-section {
+  padding: 100px 10vw;
+  /* Cria um fundo com transição suave do preto para um roxo profundo */
+  background: radial-gradient(circle at top, #0f0f15 0%, #050505 70%);
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Adiciona um "glow" (brilho) de fundo para a transição */
+.skills-section::before {
+  content: "";
+  position: absolute;
+  top: -10%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60%;
+  height: 40%;
+  background: var(--purple);
+  filter: blur(120px);
+  opacity: 0.15;
+  pointer-events: none;
+}
+
+.skills-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 20px;
+  margin-top: 50px;
+  position: relative;
+  z-index: 2;
+}
+
+.skill-item {
+  /* Efeito Frosted Glass (Vidro Fosco) para combinar com a transição */
+  background: rgba(15, 15, 21, 0.5);
+  backdrop-filter: blur(5px);
+  padding: 30px 15px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  transition: 0.4s var(--ease);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+}
+
+.skill-item:hover {
+  transform: translateY(-8px);
+  background: rgba(139, 92, 246, 0.1); /* Roxo bem suave no hover */
+  border-color: var(--purple);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.5);
+}
+
+.skill-item img {
+  width: 40px;
+  height: 40px;
+  filter: grayscale(1) brightness(1.2);
+  transition: 0.4s;
+}
+
+.skill-item:hover img {
+  filter: grayscale(0) brightness(1);
+  transform: scale(1.1);
+}
+
+.skill-item span {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--muted);
+  letter-spacing: 0.5px;
+  transition: 0.3s;
+}
+
+.skill-item:hover span {
+  color: var(--text);
+} /* PROJECTS SECTION */
+section {
+  padding: 100px 10vw;
+}
+h2 {
+  font-size: 2.5rem;
+  margin-bottom: 50px;
+  font-weight: 900;
+}
+h2 span {
+  color: var(--purple);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 30px;
+}
+
+.project-card {
+  background: var(--card-bg);
+  padding: 40px;
+  border-radius: 24px;
+  border: 1px solid #1a1a1a;
+  transition: 0.4s var(--ease);
+}
+
+.project-card:hover {
+  background: #151520;
+  transform: translateY(-10px);
+  border-color: var(--purple);
+}
+
+.project-card h3 {
+  font-size: 1.5rem;
+  margin-bottom: 15px;
+}
+.project-card p {
+  color: var(--muted);
+  font-size: 0.95rem;
+  margin-bottom: 20px;
+}
+
+.tag {
+  display: inline-block;
+  padding: 5px 12px;
+  background: rgba(124, 58, 237, 0.1);
+  color: var(--purple-bright);
+  border-radius: 50px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+@media (max-width: 1000px) {
+  .hero {
+    flex-direction: column;
+    text-align: center;
+    height: auto;
+    padding-top: 150px;
+  }
+  .card-container {
+    width: 300px;
+    height: 380px;
+  }
+  .btn-group {
+    justify-content: center;
+  }
+}
+
+/* SECTION CONTACT */
+.contact-section {
+  padding: 100px 10vw;
+  background: radial-gradient(circle at bottom, #0f0f15 0%, #050505 70%);
+  text-align: center;
+}
+
+.contact-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 40px;
+  margin-top: 60px;
+}
+
+.contact-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: 0.3s var(--ease);
+}
+
+/* Ícone Circular */
+.icon-box {
+  width: 60px;
+  height: 60px;
+  background: #11111a;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+  color: var(--purple);
+  border: 1px solid rgba(139, 92, 246, 0.1);
+  transition: 0.4s var(--ease);
+}
+
+.contact-item h3 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: var(--text);
+}
+
+.contact-item p {
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+/* Efeito de Hover */
+.contact-item:hover .icon-box {
+  transform: translateY(-10px);
+  background: var(--purple);
+  color: #000;
+  box-shadow: 0 0 25px rgba(139, 92, 246, 0.4);
+}
+
+.contact-item:hover h3 {
+  color: var(--purple-bright);
+}
+/* Container da foto para garantir centralização e espaçamento */
+.profile-wrapper {
+  display: flex;
+  justify-content: flex-start; /* Alinha à esquerda acompanhando o texto */
+  margin-bottom: 20px;
+}
+
+.profile-pic {
+  width: 120px; /* Tamanho no desktop */
+  height: 120px;
+  border-radius: 50%; /* Deixa redonda */
+  object-fit: cover; /* Garante que não distorça a imagem */
+  border: 3px solid var(--purple); /* Usa a cor roxa que você já tem no projeto */
+  box-shadow: 0 0 20px rgba(168, 85, 247, 0.4); /* Efeito de brilho leve */
+  transition: transform 0.3s ease;
+}
+
+.profile-pic:hover {
+  transform: scale(1.05) rotate(5deg); /* Efeito interativo ao passar o mouse */
+}
+
+/* Responsividade para Celular */
+@media (max-width: 768px) {
+  .profile-wrapper {
+    justify-content: center; /* Centraliza no celular */
+  }
+
+  .profile-pic {
+    width: 100px;
+    height: 100px;
+  }
+}
+.profile-pic {
+  display: block; /* Garante que a imagem se comporte como bloco */
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid var(--purple);
+  box-shadow: 0 0 20px rgba(168, 85, 247, 0.4);
+  transition: transform 0.3s ease;
+  background-color: var(
+    --card-bg
+  ); /* Caso a imagem demore a carregar, fica um fundo */
+}
+/* Container da foto para garantir centralização e espaçamento */
+.profile-wrapper {
+  display: flex;
+  justify-content: flex-start;
+  margin-bottom: 25px;
+}
+
+.profile-pic {
+  display: block;
+  width: 140px; /* Aumentei um pouco para destaque */
+  height: 140px;
+  border-radius: 50% !important; /* Força o arredondamento */
+  object-fit: cover; /* Não distorce a imagem */
+  border: 4px solid var(--purple);
+  box-shadow: 0 0 25px rgba(139, 92, 246, 0.4);
+  transition: all 0.4s var(--ease);
+  background-color: var(--card-bg);
+}
+
+.profile-pic:hover {
+  transform: scale(1.08) rotate(3deg);
+  border-color: var(--purple-bright);
+  box-shadow: 0 0 35px rgba(139, 92, 246, 0.6);
+}
+
+/* Ajuste de Responsividade para o Hero */
+@media (max-width: 1000px) {
+  .hero {
+    flex-direction: column-reverse; /* Foto e texto em ordem melhor no mobile */
+    text-align: center;
+    height: auto;
+    padding: 120px 5vw 50px;
+  }
+
+  .profile-wrapper {
+    justify-content: center; /* Centraliza a foto no mobile */
+  }
+
+  .hero-content p {
+    margin: 0 auto 30px auto;
+  }
+}
