@@ -31,6 +31,7 @@ function HeadSite({
               Home
             </a>
             <a href="index.html#projects">Works</a>
+            <a href="#interests">Intereces</a>
             <a href="#art-gallery">Arts</a>
           </>
         ) : (

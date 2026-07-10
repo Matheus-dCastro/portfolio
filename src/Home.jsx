@@ -12,12 +12,14 @@ import Hobbies from "./Hobbies";
 import logoWolf from "./assets/img/wolf(2).png";
 import fotoAlomyr from "./assets/img/alomyr.jpeg";
 import cvMatheus from "./docs/Matheus Vinicius Silva Freire de Castro.pdf";
+import Rodape from "./components/Rodape";
 
 function Home({ onNavigateToHobbies, onBackToHome }) {
   const dados = {
     nome: "Matheus",
     sobrenome: "de Castro",
     nomeCompleto: "Matheus de Castro",
+    ano: "2026",
   };
   const imageWolf = logoWolf;
   const descriptionPerfil =
@@ -120,6 +122,13 @@ function Home({ onNavigateToHobbies, onBackToHome }) {
             linkedin_link={Contatos.linkedin_link}
           />
         </section>
+        <footer>
+          <Rodape
+            ano={dados.ano}
+            github_link={Contatos.github_link}
+            linkedin_link={Contatos.linkedin_link}
+          />
+        </footer>
       </body>
     </>
   );
