@@ -299,7 +299,7 @@ h2 span {
 .hero {
   background-image:
     linear-gradient(rgba(3, 3, 6, 0.75), rgba(5, 5, 5, 0.95)),
-    url("./src/assets/img/ultrawide_onda_roxa.png");
+    url("/img/ultrawide_onda_roxa.png");
   background-size: cover;
   background-position: center;
   min-height: 100vh;
