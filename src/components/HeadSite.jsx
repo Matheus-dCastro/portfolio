@@ -3,19 +3,28 @@ function HeadSite({
   sobrenome = "de Castro",
   lobo = "./assets/img/wolf(2).png",
   isHobbies = false,
+  isLinks = false,
   onBackToHome,
+  onNavigateToLinks,
 }) {
   const handleLogoClick = (e) => {
-    if (isHobbies) {
+    if (isHobbies || isLinks) {
       e.preventDefault();
       onBackToHome();
+    }
+  };
+
+  const handleLinksClick = (e) => {
+    if (onNavigateToLinks) {
+      e.preventDefault();
+      onNavigateToLinks();
     }
   };
 
   return (
     <header>
       <a
-        href={isHobbies ? "#" : "#"}
+        href={(isHobbies || isLinks) ? "#" : "#"}
         onClick={handleLogoClick}
         className="logo"
       >
@@ -25,7 +34,13 @@ function HeadSite({
       </a>
 
       <nav>
-        {isHobbies ? (
+        {isLinks ? (
+          <>
+            <a href="#" onClick={handleLogoClick}>
+              Home
+            </a>
+          </>
+        ) : isHobbies ? (
           <>
             <a href="#" onClick={handleLogoClick}>
               Home
@@ -40,6 +55,7 @@ function HeadSite({
             <a href="#skills">Skills</a>
             <a href="#projects">Works</a>
             <a href="#about">About</a>
+            <a href="#" onClick={handleLinksClick}>Links</a>
           </>
         )}
       </nav>
