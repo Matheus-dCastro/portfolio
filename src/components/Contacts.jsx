@@ -1,3 +1,5 @@
+import { useState } from "react";
+
 function Contacts({
   instagram,
   instagram_link,
@@ -7,6 +9,17 @@ function Contacts({
   linkedin,
   linkedin_link,
 }) {
+  const [showToast, setShowToast] = useState(false);
+
+  const handleEmailClick = (e) => {
+    e.preventDefault();
+    navigator.clipboard.writeText(email);
+    setShowToast(true);
+    setTimeout(() => {
+      setShowToast(false);
+    }, 3000);
+  };
+
   return (
     <>
       <div className="section-divider-line"></div>
@@ -15,7 +28,7 @@ function Contacts({
         My <span>Contacts</span>
       </h2>
       <div className="contact-grid">
-        <a href={`mailto:${email}`} className="contact-item">
+        <a href={`mailto:${email}`} className="contact-item" onClick={handleEmailClick}>
           <div className="icon-box">
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -115,6 +128,12 @@ function Contacts({
           <p>{instagram}</p>
         </a>
       </div>
+      
+      {showToast && (
+        <div className="toast-notification">
+          O email foi copiado
+        </div>
+      )}
     </>
   );
 }

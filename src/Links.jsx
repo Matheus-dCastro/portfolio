@@ -1,3 +1,4 @@
+import { useState } from "react";
 import HeadSite from "./components/HeadSite";
 import Rodape from "./components/Rodape";
 import fotoAlomyr from "./assets/img/alomyr.jpeg";
@@ -5,6 +6,17 @@ import logoWolf from "./assets/img/wolf(2).png";
 import "./style.css";
 
 function Links({ onBackToHome }) {
+  const [showToast, setShowToast] = useState(false);
+
+  const handleEmailClick = (e, email) => {
+    e.preventDefault();
+    navigator.clipboard.writeText(email);
+    setShowToast(true);
+    setTimeout(() => {
+      setShowToast(false);
+    }, 3000);
+  };
+
   const dados = {
     nome: "Matheus",
     sobrenome: "de Castro",
@@ -77,7 +89,7 @@ function Links({ onBackToHome }) {
               <span className="link-text">Instagram</span>
             </a>
 
-            <a href={`mailto:${Contatos.email}`} className="link-item">
+            <a href={`mailto:${Contatos.email}`} className="link-item" onClick={(e) => handleEmailClick(e, Contatos.email)}>
               <div className="link-icon">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
@@ -97,6 +109,12 @@ function Links({ onBackToHome }) {
           linkedin_link={Contatos.linkedin_link}
         />
       </footer>
+      
+      {showToast && (
+        <div className="toast-notification">
+          O email foi copiado
+        </div>
+      )}
     </>
   );
 }
