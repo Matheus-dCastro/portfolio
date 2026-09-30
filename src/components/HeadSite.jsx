@@ -55,7 +55,7 @@ function HeadSite({
             <a href="#skills">Skills</a>
             <a href="#projects">Works</a>
             <a href="#about">About</a>
-            <a href="#" onClick={handleLinksClick}>Conecte-se</a>
+            <a href="#" onClick={handleLinksClick} className="connect-link">Conecte-se</a>
           </>
         )}
       </nav>

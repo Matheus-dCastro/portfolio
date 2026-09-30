@@ -1371,6 +1371,10 @@ footer {
     font-size: 0.72rem;
     padding: 5px 8px;
   }
+
+  .connect-link {
+    display: none !important;
+  }
 }
 
 /* ==========================================================================
