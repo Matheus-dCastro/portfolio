@@ -80,6 +80,8 @@ function Home({ onNavigateToHobbies, onNavigateToLinks, onBackToHome }) {
     email: "matheus.vsf.castro.25@gmail.com",
     linkedin: "linkedin.com/in/matheus-dcastro",
     linkedin_link: "https://www.linkedin.com/in/matheus-dcastro",
+    portfolio_link: "https://matheusdecastro.com/",
+    vscode_extension_link: "https://marketplace.visualstudio.com/items?itemName=Alomyr.obsidian-neon-110",
   };
   return (
     <>
