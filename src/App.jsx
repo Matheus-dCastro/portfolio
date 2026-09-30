@@ -1,20 +1,31 @@
 import { useState } from "react";
 import Home from "./Home";
 import Hobbies from "./Hobbies";
+import Links from "./Links";
 
 function App() {
-  // Estado que define qual página renderizar: 'home' ou 'hobbies'
-  // Exemplo de como deve estar no seu arquivo pai (App.jsx)
-  const [isHobbies, setIsHobbies] = useState(false);
+  const [currentPage, setCurrentPage] = useState(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const page = urlParams.get("page");
+    if (page === "links" || page === "hobbies") {
+      return page;
+    }
+    return "home";
+  });
 
-  if (isHobbies) {
-    return <Hobbies onBackToHome={() => setIsHobbies(false)} />;
+  if (currentPage === "hobbies") {
+    return <Hobbies onBackToHome={() => setCurrentPage("home")} />;
+  }
+
+  if (currentPage === "links") {
+    return <Links onBackToHome={() => setCurrentPage("home")} />;
   }
 
   return (
     <Home
-      onNavigateToHobbies={() => setIsHobbies(true)}
-      onBackToHome={() => setIsHobbies(false)} // Passa a função aqui
+      onNavigateToHobbies={() => setCurrentPage("hobbies")}
+      onNavigateToLinks={() => setCurrentPage("links")}
+      onBackToHome={() => setCurrentPage("home")}
     />
   );
 }

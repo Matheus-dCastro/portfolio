@@ -12,7 +12,7 @@ import fotoAlomyr from "./assets/img/alomyr.jpeg";
 import cvMatheus from "./docs/Matheus Vinicius Silva Freire de Castro.pdf";
 import Rodape from "./components/Rodape";
 
-function Home({ onNavigateToHobbies, onBackToHome }) {
+function Home({ onNavigateToHobbies, onNavigateToLinks, onBackToHome }) {
   const dados = {
     nome: "Matheus",
     sobrenome: "de Castro",
@@ -91,6 +91,7 @@ function Home({ onNavigateToHobbies, onBackToHome }) {
             lobo={imageWolf}
             isHobbies={false}
             onBackToHome={onBackToHome}
+            onNavigateToLinks={onNavigateToLinks}
             description={descriptionPerfil}
           />{" "}
           <Perfil

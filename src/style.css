@@ -1690,3 +1690,102 @@ footer {
     top: 16px;
   }
 }
+
+/* ==========================================================================
+   LINKS PAGE STYLES
+   ========================================================================== */
+.links-page-main {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding-top: 100px;
+}
+
+.links-section {
+  padding: 40px 5vw;
+  width: 100%;
+  max-width: 600px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.links-profile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 40px;
+  text-align: center;
+}
+
+.links-pic {
+  width: 120px;
+  height: 120px;
+  margin-bottom: 20px;
+}
+
+.links-profile h2 {
+  font-size: 2.5rem;
+  margin-bottom: 10px;
+}
+
+.links-subtitle {
+  color: var(--muted);
+  font-size: 1rem;
+}
+
+.links-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.link-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  background: #08080c;
+  padding: 18px 24px;
+  border-radius: 12px;
+  border: 1px solid #121218;
+  text-decoration: none;
+  color: var(--text);
+  font-weight: 600;
+  font-size: 1.1rem;
+  transition: 0.4s var(--ease);
+  width: 100%;
+}
+
+.link-item:hover {
+  border-color: var(--purple);
+  background: #0d0d14;
+  transform: translateY(-4px);
+  box-shadow: 0 10px 25px rgba(139, 92, 246, 0.2);
+}
+
+.link-icon {
+  position: absolute;
+  left: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--purple);
+  transition: 0.4s var(--ease);
+}
+
+.link-item:hover .link-icon {
+  color: var(--purple-bright);
+}
+
+.link-text {
+  text-align: center;
+  transition: color 0.3s var(--ease);
+}
+
+.link-item:hover .link-text {
+  color: var(--purple-bright);
+}
