@@ -42,6 +42,7 @@ import {
 } from "../lib/supabaseService";
 import { isSupabaseConfigured } from "../lib/supabaseClient";
 import { DOCUMENT_TEMPLATES } from "../data/templatesData";
+import { sendChatMessage } from "../lib/llmService";
 import "./AdminDraft.css";
 
 const generateUniqueId = () => `item-${Date.now()}`;
@@ -104,6 +105,7 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
   });
   const [agentModel] = useState("Qwen 2.5 Coder 32B-Instruct");
   const [testChatMessage, setTestChatMessage] = useState("");
+  const [isChatLoading, setIsChatLoading] = useState(false);
   const [chatMessages, setChatMessages] = useState([
     { sender: "bot", text: "Olá! Sou o assistente de IA do Matheus. Como posso ajudar com os projetos ou currículo?" }
   ]);
@@ -921,21 +923,37 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
     );
   };
 
-  const handleTestChatSubmit = (e) => {
+  const handleTestChatSubmit = async (e) => {
     e.preventDefault();
-    if (!testChatMessage.trim()) return;
+    if (!testChatMessage.trim() || isChatLoading) return;
 
     const userText = testChatMessage;
     setTestChatMessage("");
-    setChatMessages((prev) => [...prev, { sender: "user", text: userText }]);
+    const newHistory = [...chatMessages, { sender: "user", text: userText }];
+    setChatMessages(newHistory);
+    setIsChatLoading(true);
 
-    setTimeout(() => {
-      let botResponse = "Com base no contexto do Matheus de Castro, ele desenvolveu o AgentMetrics (telemetria em FastAPI/Python) e pesquisas em U-Net para segmentação médica na UFRN. Você pode ver todos os detalhes na seção Works!";
-      if (userText.toLowerCase().includes("experiência") || userText.toLowerCase().includes("currículo")) {
-        botResponse = "Matheus possui sólida experiência em backend, atuando no Detran e na Cachina Soluções com automações em n8n, Linux Server, Python e banco de dados relacional.";
-      }
-      setChatMessages((prev) => [...prev, { sender: "bot", text: botResponse }]);
-    }, 600);
+    try {
+      const res = await sendChatMessage(newHistory, agentPrompt);
+      setChatMessages((prev) => [
+        ...prev,
+        {
+          sender: "bot",
+          text: res.text,
+          model: res.model
+        }
+      ]);
+    } catch (err) {
+      setChatMessages((prev) => [
+        ...prev,
+        {
+          sender: "bot",
+          text: `Erro ao obter resposta da IA: ${err.message}`
+        }
+      ]);
+    } finally {
+      setIsChatLoading(false);
+    }
   };
 
   // Word Status calculations
@@ -1185,28 +1203,39 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
               <div className="chat-sim-header">
                 <div className="bot-status-indicator">
                   <span className="status-dot"></span>
-                  <strong>Simulador do Chatbot (Front-end Preview)</strong>
+                  <strong>Simulador do Chatbot (Groq • Qwen Real)</strong>
                 </div>
-                <span className="bot-pill">Qwen Ready</span>
+                <span className="bot-pill" style={{ background: "rgba(52, 211, 153, 0.15)", color: "#34d399", borderColor: "rgba(52, 211, 153, 0.3)" }}>
+                  ⚡ Qwen 2.5/3.8 Online
+                </span>
               </div>
 
               <div className="chat-sim-messages">
                 {chatMessages.map((msg, mIdx) => (
                   <div key={mIdx} className={`chat-bubble ${msg.sender}`}>
                     <span className="bubble-sender">{msg.sender === "user" ? "Visitante" : "Assistente Qwen"}</span>
-                    <p>{msg.text}</p>
+                    <p style={{ margin: 0, whiteSpace: "pre-wrap" }}>{msg.text}</p>
                   </div>
                 ))}
+                {isChatLoading && (
+                  <div className="chat-bubble bot" style={{ opacity: 0.85, fontStyle: "italic", display: "flex", alignItems: "center", gap: "8px" }}>
+                    <span className="typing-dot"></span>
+                    <span>Qwen processando via Groq API...</span>
+                  </div>
+                )}
               </div>
 
               <form className="chat-sim-input-row" onSubmit={handleTestChatSubmit}>
                 <input
                   type="text"
-                  placeholder="Pergunte sobre os projetos do Matheus..."
+                  placeholder={isChatLoading ? "Aguardando resposta do modelo..." : "Pergunte sobre os projetos do Matheus..."}
                   value={testChatMessage}
                   onChange={(e) => setTestChatMessage(e.target.value)}
+                  disabled={isChatLoading}
                 />
-                <button type="submit">Enviar ↗</button>
+                <button type="submit" disabled={isChatLoading || !testChatMessage.trim()}>
+                  {isChatLoading ? "Enviando..." : "Enviar ↗"}
+                </button>
               </form>
             </div>
           </div>

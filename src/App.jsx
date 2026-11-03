@@ -6,6 +6,7 @@ import AdminDraft from "./components/AdminDraft";
 import ViewDraft from "./components/ViewDraft";
 import OrderDraft from "./components/OrderDraft";
 import LoginDraft from "./components/LoginDraft";
+import ChatWidget from "./components/ChatWidget";
 import { getStoredProjects } from "./data/projectsData";
 import { getCurrentUser, onAuthChange, isAuthorizedAdmin } from "./lib/supabaseService";
 
@@ -139,7 +140,12 @@ function App() {
   };
 
   if (currentPage === "hobbies") {
-    return <Hobbies onBackToHome={handleBackToHome} />;
+    return (
+      <>
+        <Hobbies onBackToHome={handleBackToHome} />
+        <ChatWidget />
+      </>
+    );
   }
 
   if (currentPage === "links") {
@@ -211,33 +217,39 @@ function App() {
 
   if (currentPage === "view-draft" || currentPage === "project-detail") {
     return (
-      <ViewDraft
-        project={selectedProject}
-        onBackToHome={handleBackToHome}
-        onSelectProject={(proj) => {
-          setSelectedProject(proj);
-          window.history.pushState(
-            { project: proj.id },
-            "",
-            `/?project=${encodeURIComponent(proj.id)}`
-          );
-        }}
-      />
+      <>
+        <ViewDraft
+          project={selectedProject}
+          onBackToHome={handleBackToHome}
+          onSelectProject={(proj) => {
+            setSelectedProject(proj);
+            window.history.pushState(
+              { project: proj.id },
+              "",
+              `/?project=${encodeURIComponent(proj.id)}`
+            );
+          }}
+        />
+        <ChatWidget />
+      </>
     );
   }
 
   return (
-    <Home
-      onNavigateToHobbies={() => {
-        setCurrentPage("hobbies");
-        window.history.pushState({}, "", "/?page=hobbies");
-      }}
-      onNavigateToLinks={() => {
-        setCurrentPage("links");
-      }}
-      onBackToHome={handleBackToHome}
-      onOpenProject={handleOpenProject}
-    />
+    <>
+      <Home
+        onNavigateToHobbies={() => {
+          setCurrentPage("hobbies");
+          window.history.pushState({}, "", "/?page=hobbies");
+        }}
+        onNavigateToLinks={() => {
+          setCurrentPage("links");
+        }}
+        onBackToHome={handleBackToHome}
+        onOpenProject={handleOpenProject}
+      />
+      <ChatWidget />
+    </>
   );
 }
 
