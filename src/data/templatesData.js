@@ -48,7 +48,7 @@ Descreva sucintamente o problema de negócio ou científico que este modelo busc
 
 ---
 
-## 🚀 5. Como Reproduzir e Executar
+##  5. Como Reproduzir e Executar
 \`\`\`bash
 # 1. Instale as dependências
 pip install -r requirements.txt
@@ -113,7 +113,7 @@ docker-compose up -d --build
   },
   {
     id: "scientific-paper",
-    name: "📄 Artigo Científico / Paper Técnico",
+    name: " Artigo Científico / Paper Técnico",
     description: "Estrutura acadêmica formal com Abstract, Introdução, Trabalhos Relacionados, Metodologia, Discussão e Referências.",
     category: "Acadêmico",
     defaultTags: "Pesquisa, Engenharia, Artigo Técnico, UFRN",
@@ -158,7 +158,7 @@ O estudo estabelece um novo patamar de eficiência para aplicações futuras no 
   },
   {
     id: "github-readme",
-    name: "🚀 README Completo de Repositório (Open Source)",
+    name: " README Completo de Repositório (Open Source)",
     description: "Modelo padrão da indústria para GitHub com badges, preview, funcionalidades, stack e instruções de contribuição.",
     category: "Profissional",
     defaultTags: "GitHub, Open Source, Documentação, README",
@@ -238,7 +238,7 @@ Antes de começar, certifique-se de ter instalado:
 
 ---
 
-## 🚀 Passo 1: Configuração Inicial
+##  Passo 1: Configuração Inicial
 O primeiro passo consiste em inicializar o ambiente isolado:
 \`\`\`bash
 mkdir meu-projeto && cd meu-projeto

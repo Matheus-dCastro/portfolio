@@ -221,7 +221,7 @@ export default function ViewDraft({ project: propProject, onBackToHome, onSelect
                   className={`format-tab-btn ${currentFormat === "gdocs" ? "active" : ""}`}
                   onClick={() => setActiveContentTab("gdocs")}
                 >
-                  🌐 Google Docs Interativo
+                  Google Docs Interativo
                 </button>
               )}
               {hasPdf && (
@@ -230,7 +230,7 @@ export default function ViewDraft({ project: propProject, onBackToHome, onSelect
                   className={`format-tab-btn ${currentFormat === "pdf" ? "active" : ""}`}
                   onClick={() => setActiveContentTab("pdf")}
                 >
-                  📄 Documento PDF Integrado
+                  Documento PDF Integrado
                 </button>
               )}
             </div>
@@ -243,7 +243,7 @@ export default function ViewDraft({ project: propProject, onBackToHome, onSelect
           {currentFormat === "gdocs" && embedGDocsUrl && (
             <div className="gdocs-reader-wrapper">
               <div className="reader-info-bar">
-                <span>📄 Documento sincronizado diretamente com o Google Docs</span>
+                <span>Documento sincronizado diretamente com o Google Docs</span>
                 <a
                   href={project.googleDocsUrl}
                   target="_blank"
@@ -267,7 +267,7 @@ export default function ViewDraft({ project: propProject, onBackToHome, onSelect
           {currentFormat === "pdf" && project.pdfUrl && (
             <div className="pdf-reader-wrapper">
               <div className="reader-info-bar">
-                <span>📄 Visualizador de Documento PDF</span>
+                <span> Visualizador de Documento PDF</span>
                 <a
                   href={project.pdfUrl}
                   target="_blank"

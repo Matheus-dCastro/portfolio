@@ -47,7 +47,7 @@ async def process_prompt(prompt: str) -> str:
     return response
 \`\`\`
 
-## 🚀 Como Executar Localmente
+##  Como Executar Localmente
 \`\`\`bash
 # Clone o repositório
 git clone https://github.com/Matheus-dCastro/AgentMetrics.git
@@ -253,44 +253,7 @@ Utilitário criptográfico para geração de senhas e passphrases com cálculo e
   }
 ];
 
-export const DEFAULT_ARTICLES = [
-  {
-    id: "art-1",
-    title: "Otimização de Inferência em Modelos de Linguagem na Borda",
-    category: "Acadêmico",
-    tags: ["LLM", "Quantização", "Edge Computing", "IA"],
-    relatedProjectId: "agentmetrics",
-    shortDescription: "Análise comparativa entre quantizações 4-bit (AWQ vs GGUF) executadas em hardware de consumo.",
-    aboutContext: "Estudo sobre viabilidade e redução de latência no deploy de modelos de ponta em servidores locais.",
-    contentType: "google-docs",
-    googleDocsUrl: "https://docs.google.com/document/d/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms/edit?usp=sharing",
-    pdfUrl: "",
-    updatedAt: "2026-03-01",
-    content: `# Otimização de Inferência em Modelos de Linguagem na Borda
-
-Este artigo encontra-se sincronizado com o documento no Google Docs. Caso deseje editar o conteúdo original, basta alterar no Google Docs.
-
-> O documento pode ser lido abaixo pelo leitor integrado ou acessado externamente.
-`
-  },
-  {
-    id: "art-2",
-    title: "Segmentação U-Net Aplicada a Tomografias Pulmonares",
-    category: "Acadêmico",
-    tags: ["Deep Learning", "Visão Computacional", "Artigo"],
-    relatedProjectId: "medical-segmentation",
-    shortDescription: "Relatório de experimentos com funções de perda combinadas (Dice + Focal Loss).",
-    aboutContext: "Artigo científico detalhando o processo experimental de treinamento supervisionado em imagens biomédicas.",
-    contentType: "pdf",
-    googleDocsUrl: "",
-    pdfUrl: "/Matheus Vinicius Silva Freire de Castro.pdf",
-    updatedAt: "2026-02-15",
-    content: `# Segmentação U-Net Aplicada a Tomografias Pulmonares
-
-Artigo publicado com diagramas de arquitetura, curvas de convergência e métricas detalhadas.
-`
-  }
-];
+export const DEFAULT_ARTICLES = [];
 
 export const DEFAULT_THOUGHTS = [
   {
@@ -384,9 +347,9 @@ const STORAGE_KEYS = {
 export function getStoredProjects() {
   try {
     const raw = localStorage.getItem(STORAGE_KEYS.PROJECTS);
-    if (raw) {
+    if (raw !== null) {
       const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      if (Array.isArray(parsed)) return parsed;
     }
   } catch (e) {
     console.error("Erro ao ler projetos do localStorage:", e);
@@ -410,9 +373,9 @@ export function resetProjectsToDefault() {
 export function getStoredArticles() {
   try {
     const raw = localStorage.getItem(STORAGE_KEYS.ARTICLES);
-    if (raw) {
+    if (raw !== null) {
       const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      if (Array.isArray(parsed)) return parsed;
     }
   } catch (e) {
     console.error("Erro ao ler artigos:", e);
@@ -431,9 +394,9 @@ export function saveArticles(articles) {
 export function getStoredThoughts() {
   try {
     const raw = localStorage.getItem(STORAGE_KEYS.THOUGHTS);
-    if (raw) {
+    if (raw !== null) {
       const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      if (Array.isArray(parsed)) return parsed;
     }
   } catch (e) {
     console.error("Erro ao ler pensamentos:", e);
@@ -452,9 +415,9 @@ export function saveThoughts(thoughts) {
 export function getStoredExperiences() {
   try {
     const raw = localStorage.getItem(STORAGE_KEYS.EXPERIENCES);
-    if (raw) {
+    if (raw !== null) {
       const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      if (Array.isArray(parsed)) return parsed;
     }
   } catch (e) {
     console.error("Erro ao ler experiências do localStorage:", e);

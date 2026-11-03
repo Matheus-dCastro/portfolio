@@ -1,12 +1,17 @@
 import { createClient } from '@supabase/supabase-js'
 
-const supabaseUrl =
+const rawSupabaseUrl =
   (typeof import.meta !== "undefined" && import.meta.env?.VITE_SUPABASE_URL) ||
-  (typeof globalThis !== "undefined" && globalThis.process?.env?.VITE_SUPABASE_URL);
+  (typeof globalThis !== "undefined" && globalThis.process?.env?.VITE_SUPABASE_URL) ||
+  "";
+
+// Remove /rest/v1 ou barras no final, pois o client adiciona /auth, /rest e /storage automaticamente
+const supabaseUrl = rawSupabaseUrl.trim().replace(/\/rest\/v1\/?$/, "").replace(/\/$/, "");
 
 const supabaseAnonKey =
-  (typeof import.meta !== "undefined" && import.meta.env?.VITE_SUPABASE_ANON_KEY) ||
-  (typeof globalThis !== "undefined" && globalThis.process?.env?.VITE_SUPABASE_ANON_KEY);
+  ((typeof import.meta !== "undefined" && import.meta.env?.VITE_SUPABASE_ANON_KEY) ||
+  (typeof globalThis !== "undefined" && globalThis.process?.env?.VITE_SUPABASE_ANON_KEY) ||
+  "").trim();
 
 // Flag exportada para sabermos se devemos usar Nuvem ou LocalStorage (Fallback)
 export const isSupabaseConfigured = Boolean(supabaseUrl && supabaseAnonKey)

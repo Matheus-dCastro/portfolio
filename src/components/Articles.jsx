@@ -9,7 +9,7 @@ export default function Articles({ onOpenArticle }) {
   useEffect(() => {
     let isMounted = true;
     fetchArticles(false).then((loaded) => {
-      if (isMounted && Array.isArray(loaded) && loaded.length > 0) {
+      if (isMounted && Array.isArray(loaded)) {
         setArticles(loaded);
       }
     });
@@ -58,7 +58,7 @@ export default function Articles({ onOpenArticle }) {
               className={`category-filter-btn ${activeFilter === cat ? "active" : ""}`}
               onClick={() => setActiveFilter(cat)}
             >
-              {cat === "Acadêmico" ? "🎓 " : cat === "Profissional" ? "🏢 " : "🚀 "}
+              {cat === "Acadêmico" ? " " : cat === "Profissional" ? " " : " "}
               {cat} ({count})
             </button>
           );
@@ -88,7 +88,7 @@ export default function Articles({ onOpenArticle }) {
                 )}
                 {article.contentType === "pdf" && (
                   <span className="pdf-badge" title="Disponível via PDF">
-                    📄 PDF
+                    PDF
                   </span>
                 )}
                 {article.relatedProjectId && (

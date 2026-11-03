@@ -24,7 +24,7 @@ function Home({ onNavigateToHobbies, onNavigateToLinks, onBackToHome, onOpenProj
 
   useEffect(() => {
     fetchExperiences().then((loaded) => {
-      if (Array.isArray(loaded) && loaded.length > 0) setExperiences(loaded);
+      if (Array.isArray(loaded)) setExperiences(loaded);
     });
     fetchWorks(false).then((loaded) => {
       if (Array.isArray(loaded)) setProjectsCount(loaded.length);

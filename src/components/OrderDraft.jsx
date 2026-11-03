@@ -17,21 +17,21 @@ const CATEGORIES = [
   {
     id: "Profissional",
     label: "Profissional & Corporativo",
-    icon: "🏢",
+    icon: "",
     badgeClass: "cat-profissional",
     description: "Projetos desenvolvidos para empresas, clientes corporativos e soluções de produção em larga escala."
   },
   {
     id: "Pessoal",
     label: "Projetos Pessoais & Inovações",
-    icon: "🚀",
+    icon: "",
     badgeClass: "cat-pessoal",
     description: "Projetos autorais, ferramentas de produtividade, suítes de design e extensões públicas."
   },
   {
     id: "Acadêmico",
     label: "Acadêmico & Pesquisa Científica",
-    icon: "🎓",
+    icon: "",
     badgeClass: "cat-academico",
     description: "Pesquisas na UFRN/IFRN, experimentos de Machine Learning, Deep Learning, Visão Computacional e algoritmos complexos."
   }
@@ -62,15 +62,15 @@ export default function OrderDraft({ onBackToHome, onOpenProjectDetail, onNaviga
   useEffect(() => {
     if (activeTab === "projects") {
       fetchWorks(true).then((data) => {
-        if (data && data.length > 0) setItems(data);
+        if (Array.isArray(data)) setItems(data);
       });
     } else if (activeTab === "articles") {
       fetchArticles(true).then((data) => {
-        if (data && data.length > 0) setItems(data);
+        if (Array.isArray(data)) setItems(data);
       });
     } else {
       fetchThoughts(true).then((data) => {
-        if (data && data.length > 0) setItems(data);
+        if (Array.isArray(data)) setItems(data);
       });
     }
   }, [activeTab]);
@@ -207,8 +207,8 @@ export default function OrderDraft({ onBackToHome, onOpenProjectDetail, onNaviga
   const handlePublishOrder = async () => {
     const res = await persistBatchOrder(activeTab, items);
     const msg = res.cloud
-      ? "🚀 Nova ordem sincronizada no Supabase e publicada com sucesso!"
-      : "💾 Nova ordem salva localmente (offline)!";
+      ? " Nova ordem sincronizada no Supabase e publicada com sucesso!"
+      : " Nova ordem salva localmente (offline)!";
     showNotification(msg);
   };
 
@@ -272,7 +272,7 @@ export default function OrderDraft({ onBackToHome, onOpenProjectDetail, onNaviga
             ↺ Restaurar Padrão
           </button>
           <button className="publish-order-btn" onClick={handlePublishOrder}>
-            🚀 Publicar Nova Ordem
+        Publicar Nova Ordem
           </button>
           <button className="exit-order-btn" onClick={onBackToHome}>
             ← Voltar ao Portfólio
@@ -419,9 +419,9 @@ export default function OrderDraft({ onBackToHome, onOpenProjectDetail, onNaviga
                               onChange={(e) => changeItemCategory(item.id, e.target.value)}
                               onClick={(e) => e.stopPropagation()}
                             >
-                              <option value="Profissional">🏢 Profissional</option>
-                              <option value="Pessoal">🚀 Pessoal</option>
-                              <option value="Acadêmico">🎓 Acadêmico</option>
+                              <option value="Profissional"> Profissional</option>
+                              <option value="Pessoal"> Pessoal</option>
+                              <option value="Acadêmico"> Acadêmico</option>
                             </select>
                           </div>
                         )}

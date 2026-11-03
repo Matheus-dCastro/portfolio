@@ -6,21 +6,21 @@ const WORK_CATEGORIES = [
   {
     id: "Profissional",
     title: "Profissional & Corporativo",
-    icon: "🏢",
+    icon: "",
     badgeClass: "cat-profissional",
     description: "Sistemas corporativos, arquiteturas escaláveis e soluções em produção desenvolvidas para empresas e clientes."
   },
   {
     id: "Pessoal",
     title: "Projetos Pessoais & Inovações",
-    icon: "🚀",
+    icon: "",
     badgeClass: "cat-pessoal",
     description: "Projetos autorais, ferramentas de produtividade, design systems e extensões públicas."
   },
   {
     id: "Acadêmico",
     title: "Acadêmico & Pesquisa Científica",
-    icon: "🎓",
+    icon: "",
     badgeClass: "cat-academico",
     description: "Pesquisas na UFRN/IFRN em Machine Learning, Deep Learning, Visão Computacional e algoritmos complexos."
   }
@@ -33,7 +33,7 @@ function Projects({ onOpenProject }) {
   useEffect(() => {
     let isMounted = true;
     fetchWorks(false).then((loaded) => {
-      if (isMounted && Array.isArray(loaded) && loaded.length > 0) {
+      if (isMounted && Array.isArray(loaded)) {
         setProjects(loaded);
       }
     });
@@ -75,7 +75,7 @@ function Projects({ onOpenProject }) {
               className={`category-filter-btn ${activeCategory === "Profissional" ? "active" : ""}`}
               onClick={() => setActiveCategory("Profissional")}
             >
-              🏢 Profissional ({profCount})
+              Profissional ({profCount})
             </button>
           )}
           {pessoalCount > 0 && (
@@ -84,7 +84,7 @@ function Projects({ onOpenProject }) {
               className={`category-filter-btn ${activeCategory === "Pessoal" ? "active" : ""}`}
               onClick={() => setActiveCategory("Pessoal")}
             >
-              🚀 Pessoal ({pessoalCount})
+               Pessoal ({pessoalCount})
             </button>
           )}
           {academicoCount > 0 && (
@@ -93,7 +93,7 @@ function Projects({ onOpenProject }) {
               className={`category-filter-btn ${activeCategory === "Acadêmico" ? "active" : ""}`}
               onClick={() => setActiveCategory("Acadêmico")}
             >
-              🎓 Acadêmico ({academicoCount})
+               Acadêmico ({academicoCount})
             </button>
           )}
         </div>

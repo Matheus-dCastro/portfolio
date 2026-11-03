@@ -213,7 +213,7 @@ export async function fetchWorks(includeDrafts = false) {
       }
 
       const { data, error } = await query;
-      if (!error && Array.isArray(data) && data.length > 0) {
+      if (!error && Array.isArray(data)) {
         const mapped = data.map(mapDbWorkToProject);
         saveProjects(mapped); // Mantém cache offline sincronizado
         return mapped;
@@ -241,7 +241,7 @@ export async function fetchArticles(includeDrafts = false) {
       }
 
       const { data, error } = await query;
-      if (!error && Array.isArray(data) && data.length > 0) {
+      if (!error && Array.isArray(data)) {
         const mapped = data.map(mapDbArticle);
         saveArticles(mapped);
         return mapped;
@@ -269,7 +269,7 @@ export async function fetchThoughts(includeDrafts = false) {
       }
 
       const { data, error } = await query;
-      if (!error && Array.isArray(data) && data.length > 0) {
+      if (!error && Array.isArray(data)) {
         const mapped = data.map(mapDbThought);
         saveThoughts(mapped);
         return mapped;
@@ -297,7 +297,7 @@ export async function fetchExperiences(includeDrafts = false) {
       }
 
       const { data, error } = await query;
-      if (!error && Array.isArray(data) && data.length > 0) {
+      if (!error && Array.isArray(data)) {
         const mapped = data.map(mapDbExperience);
         saveExperiences(mapped);
         return mapped;
@@ -397,6 +397,20 @@ export async function removeWork(id) {
   const current = getStoredProjects();
   saveProjects(current.filter((p) => p.id !== id));
 
+  // Desvincular artigos que apontavam para este projeto
+  const currentArticles = getStoredArticles();
+  let articleChanged = false;
+  const updatedArticles = currentArticles.map((a) => {
+    if (a.relatedProjectId === id) {
+      articleChanged = true;
+      return { ...a, relatedProjectId: "" };
+    }
+    return a;
+  });
+  if (articleChanged) {
+    saveArticles(updatedArticles);
+  }
+
   if (isSupabaseConfigured && supabase) {
     try {
       const { error } = await supabase.from("works").delete().eq("id", id);
@@ -439,6 +453,20 @@ export async function persistArticle(item) {
 export async function removeArticle(id) {
   const current = getStoredArticles();
   saveArticles(current.filter((a) => a.id !== id));
+
+  // Desvincular projetos que apontavam para este artigo
+  const currentProjects = getStoredProjects();
+  let projectChanged = false;
+  const updatedProjects = currentProjects.map((p) => {
+    if (p.relatedArticleId === id) {
+      projectChanged = true;
+      return { ...p, relatedArticleId: "" };
+    }
+    return p;
+  });
+  if (projectChanged) {
+    saveProjects(updatedProjects);
+  }
 
   if (isSupabaseConfigured && supabase) {
     try {

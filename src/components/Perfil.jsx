@@ -88,7 +88,7 @@ function Perfil({ nomeCompleto, description, foto, cv }) {
             onClick={handleOpenCvModal}
             title="Escolha entre a versão Web no Google Docs ou arquivo PDF"
           >
-            📄 Download CV / Docs
+            Download CV / Docs
           </button>
         </div>
       </div>
@@ -106,7 +106,7 @@ function Perfil({ nomeCompleto, description, foto, cv }) {
           <div className="cv-modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="cv-modal-header">
               <div className="cv-modal-title-group">
-                <span className="cv-modal-icon">📄</span>
+                <span className="cv-modal-icon"></span>
                 <div>
                   <h3>Currículo de Matheus de Castro</h3>
                   <p>Escolha o formato que deseja visualizar ou baixar:</p>
@@ -124,7 +124,6 @@ function Perfil({ nomeCompleto, description, foto, cv }) {
                 className="cv-option-card gdocs-card"
                 onClick={() => setShowCvModal(false)}
               >
-                <div className="cv-option-icon">🌐</div>
                 <div className="cv-option-text">
                   <div className="cv-option-badge">Versão Web Interativa</div>
                   <h4>Abrir no Google Docs</h4>
@@ -142,7 +141,6 @@ function Perfil({ nomeCompleto, description, foto, cv }) {
                 className="cv-option-card pdf-card"
                 onClick={() => setShowCvModal(false)}
               >
-                <div className="cv-option-icon">📄</div>
                 <div className="cv-option-text">
                   <div className="cv-option-badge">Documento Oficial PDF</div>
                   <h4>Baixar Arquivo PDF</h4>
@@ -153,7 +151,7 @@ function Perfil({ nomeCompleto, description, foto, cv }) {
             </div>
 
             <div className="cv-modal-footer">
-              <span className="cv-footer-hint">💡 Ambos os formatos possuem o conteúdo completo e revisado.</span>
+              <span className="cv-footer-hint">Ambos os formatos possuem o conteúdo completo e revisado.</span>
             </div>
           </div>
         </div>

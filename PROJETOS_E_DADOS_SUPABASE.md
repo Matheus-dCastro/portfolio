@@ -36,7 +36,7 @@ CREATE POLICY "Admin Delete Works" ON public.works FOR DELETE TO authenticated U
 
 ---
 
-## 🏢 PARTE 1: Projetos Profissionais & Corporativos
+##  PARTE 1: Projetos Profissionais & Corporativos
 
 ```sql
 INSERT INTO public.works (

@@ -122,19 +122,19 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
   useEffect(() => {
     if (activeTab === "projects") {
       fetchWorks(true).then((data) => {
-        if (data && data.length > 0) setItems(data);
+        if (Array.isArray(data)) setItems(data);
       });
     } else if (activeTab === "articles") {
       fetchArticles(true).then((data) => {
-        if (data && data.length > 0) setItems(data);
+        if (Array.isArray(data)) setItems(data);
       });
     } else if (activeTab === "thoughts") {
       fetchThoughts(true).then((data) => {
-        if (data && data.length > 0) setItems(data);
+        if (Array.isArray(data)) setItems(data);
       });
     } else if (activeTab === "experiences") {
       fetchExperiences(true).then((data) => {
-        if (data && data.length > 0) setItems(data);
+        if (Array.isArray(data)) setItems(data);
       });
     } else if (activeTab === "cv") {
       fetchCvConfig().then((cfg) => {
@@ -185,11 +185,10 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
   };
 
   const clearForm = () => {
-    const newId = generateUniqueId();
-    setSelectedId(newId);
-    setTitle(activeTab === "experiences" ? "Novo Cargo / Formação" : "Novo Documento");
-    setCategory("Profissional");
-    setTags("Python, IA, Backend");
+    setSelectedId(null);
+    setTitle("");
+    setCategory(activeTab === "articles" ? "Acadêmico" : "Profissional");
+    setTags("");
     setShortDescription("");
     setAboutContext("");
     setGithubUrl("");
@@ -197,7 +196,7 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
     setContentType(activeTab === "articles" ? "google-docs" : "markdown");
     setGoogleDocsUrl("");
     setPdfUrl("");
-    setMarkdownContent("# Novo Título\n\nComece a redigir o conteúdo aqui...");
+    setMarkdownContent("");
     setRelatedArticleId("");
     setRelatedProjectId("");
     setCompany("");
@@ -811,7 +810,7 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
                 border: "1px solid #30363d"
               }}
             >
-              🔒 Login Supabase
+              Login Supabase
             </a>
           )}
           <div className="category-tabs">
@@ -820,42 +819,42 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
               className={`cat-btn ${activeTab === "projects" ? "active" : ""}`}
               onClick={() => handleTabChange("projects")}
             >
-              💻 Projetos
+              Projetos
             </button>
             <button
               type="button"
               className={`cat-btn ${activeTab === "articles" ? "active" : ""}`}
               onClick={() => handleTabChange("articles")}
             >
-              📑 Artigos
+              Artigos
             </button>
             <button
               type="button"
               className={`cat-btn ${activeTab === "thoughts" ? "active" : ""}`}
               onClick={() => handleTabChange("thoughts")}
             >
-              💭 Pensamentos
+              Pensamentos
             </button>
             <button
               type="button"
               className={`cat-btn ${activeTab === "experiences" ? "active" : ""}`}
               onClick={() => handleTabChange("experiences")}
             >
-              💼 Experiências
+              Experiências
             </button>
             <button
               type="button"
               className={`cat-btn ${activeTab === "cv" ? "active" : ""}`}
               onClick={() => handleTabChange("cv")}
             >
-              📄 Currículo (CV)
+              Currículo (CV)
             </button>
             <button
               type="button"
               className={`cat-btn agent-tab ${activeTab === "agent" ? "active" : ""}`}
               onClick={() => handleTabChange("agent")}
             >
-              🤖 Assistente IA (Qwen)
+              Assistente IA (Qwen)
             </button>
           </div>
         </div>
@@ -870,7 +869,7 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
             }}
             title="Ir para o organizador visual em cards das 3 sessões"
           >
-            🗂️ Organizar Vitrine por Tipo
+            Organizar Vitrine por Tipo
           </button>
           {onOpenProjectDetail && activeTab !== "agent" && activeTab !== "cv" && (
             <button
@@ -879,7 +878,7 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
               onClick={() => onOpenProjectDetail(currentItemObject)}
               title="Abrir como o visitante vê na tela 'Saber Mais'"
             >
-              👁️ Prévia Pública (Saber Mais)
+              Prévia Pública (Saber Mais)
             </button>
           )}
           <button type="button" className="back-site-btn" onClick={onBackToHome}>
@@ -894,7 +893,7 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
           <div className="agent-dash-left">
             <div className="agent-card-section">
               <div className="agent-section-header">
-                <h3>🤖 Arquitetura do Assistente IA</h3>
+                <h3>Arquitetura do Assistente IA</h3>
                 <span className="badge-model">{agentModel}</span>
               </div>
               <p className="agent-section-desc">
@@ -1188,7 +1187,7 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
           <div className="cv-dash-right">
             <div className="cv-preview-container">
               <div className="cv-preview-bar">
-                <span className="preview-label">👁️ Prévia Interativa do Modal</span>
+                <span className="preview-label"> Prévia Interativa do Modal</span>
                 <span className="preview-sublabel">Como o visitante vê</span>
               </div>
 
@@ -1196,7 +1195,7 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
                 <div className="cv-modal-content">
                   <div className="cv-modal-header">
                     <div className="cv-modal-title-group">
-                      <span className="cv-modal-icon">📄</span>
+                      <span className="cv-modal-icon"></span>
                       <div>
                         <h3>Currículo de Matheus de Castro</h3>
                         <p>Escolha o formato que deseja visualizar ou baixar:</p>
@@ -1211,7 +1210,6 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
                       rel="noopener noreferrer"
                       className="cv-option-card gdocs-card"
                     >
-                      <div className="cv-option-icon">🌐</div>
                       <div className="cv-option-text">
                         <div className="cv-option-badge">Versão Web Interativa</div>
                         <h4>Abrir no Google Docs</h4>
@@ -1226,7 +1224,6 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
                       rel="noopener noreferrer"
                       className="cv-option-card pdf-card"
                     >
-                      <div className="cv-option-icon">📄</div>
                       <div className="cv-option-text">
                         <div className="cv-option-badge">Documento Oficial PDF</div>
                         <h4>Baixar Arquivo PDF</h4>
@@ -1245,7 +1242,7 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
               </div>
 
               <div className="cv-preview-footer-note">
-                💡 <em>Você pode clicar nos cards acima para testar seus links exatamente como o visitante!</em>
+                <em>Você pode clicar nos cards acima para testar seus links exatamente como o visitante!</em>
               </div>
             </div>
           </div>
@@ -1272,50 +1269,70 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
             </div>
 
             <div className="explorer-items-list">
-              {items.map((item, idx) => {
-                const isSelected = item.id === selectedId;
-                return (
-                  <div
-                    key={item.id}
-                    className={`explorer-item-card ${isSelected ? "selected" : ""}`}
-                    onClick={() => loadItemIntoForm(item)}
-                  >
-                    <div className="item-card-header">
-                      <span className="card-order-num">#{idx + 1}</span>
-                      <span className="card-category-pill">
-                        {activeTab === "experiences" ? (item.company || "Experiência") : item.category}
-                      </span>
-                    </div>
-                    <h4 className="item-card-title">{item.title}</h4>
-                    <p className="item-card-desc">
-                      {activeTab === "experiences"
-                        ? `${item.time || "Período"} • ${item.bullets?.length || 0} atividades`
-                        : (item.shortDescription || item.aboutContext || "Sem descrição")}
-                    </p>
-                    <div className="item-card-footer">
-                      <span className="item-format-tag">
+              {items.length === 0 ? (
+                <div
+                  className="explorer-empty-state"
+                  style={{
+                    padding: "36px 16px",
+                    textAlign: "center",
+                    color: "#8b949e",
+                    fontSize: "13px",
+                    lineHeight: "1.5"
+                  }}
+                >
+                  <p style={{ margin: "0 0 8px 0" }}>
+                    Nenhum {activeTab === "projects" ? "projeto" : activeTab === "articles" ? "artigo" : activeTab === "experiences" ? "cargo" : "pensamento"} cadastrado.
+                  </p>
+                  <span style={{ fontSize: "11px", color: "#6e7681" }}>
+                    A lista está vazia. Clique em <b>+ Novo</b> acima para adicionar.
+                  </span>
+                </div>
+              ) : (
+                items.map((item, idx) => {
+                  const isSelected = item.id === selectedId;
+                  return (
+                    <div
+                      key={item.id}
+                      className={`explorer-item-card ${isSelected ? "selected" : ""}`}
+                      onClick={() => loadItemIntoForm(item)}
+                    >
+                      <div className="item-card-header">
+                        <span className="card-order-num">#{idx + 1}</span>
+                        <span className="card-category-pill">
+                          {activeTab === "experiences" ? (item.company || "Experiência") : item.category}
+                        </span>
+                      </div>
+                      <h4 className="item-card-title">{item.title}</h4>
+                      <p className="item-card-desc">
                         {activeTab === "experiences"
-                          ? "💼 Experiência"
-                          : item.contentType === "google-docs"
-                          ? "🌐 Google Docs"
-                          : item.contentType === "pdf"
-                          ? "📄 PDF"
-                          : "✍️ Markdown"}
-                      </span>
-                      <button
-                        className="delete-item-btn"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDeleteItem(item.id);
-                        }}
-                        title="Excluir item"
-                      >
-                        🗑
-                      </button>
+                          ? `${item.time || "Período"} • ${item.bullets?.length || 0} atividades`
+                          : (item.shortDescription || item.aboutContext || "Sem descrição")}
+                      </p>
+                      <div className="item-card-footer">
+                        <span className="item-format-tag">
+                          {activeTab === "experiences"
+                            ? "💼 Experiência"
+                            : item.contentType === "google-docs"
+                            ? "🌐 Google Docs"
+                            : item.contentType === "pdf"
+                            ? "📄 PDF"
+                            : "✍️ Markdown"}
+                        </span>
+                        <button
+                          className="delete-item-btn"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteItem(item.id);
+                          }}
+                          title="Excluir item"
+                        >
+                          🗑
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                })
+              )}
             </div>
 
             <div className="explorer-footer">
@@ -1411,7 +1428,7 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
                       onChange={(e) => setBulletsText(e.target.value)}
                     />
                     <small style={{ color: "#8b949e", fontSize: "12px", display: "block", marginTop: "6px" }}>
-                      💡 Cada linha quebrada será renderizada como um ponto na lista de experiência do portfólio.
+                       Cada linha quebrada será renderizada como um ponto na lista de experiência do portfólio.
                     </small>
                   </div>
                 </div>
@@ -1420,7 +1437,7 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
                 <div style={{ background: "#0d1117", border: "1px solid rgba(139, 92, 246, 0.4)", borderRadius: "12px", padding: "24px", boxShadow: "0 8px 30px rgba(139, 92, 246, 0.1)" }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
                     <span style={{ color: "#a78bfa", fontWeight: "700", fontSize: "14px", textTransform: "uppercase", letterSpacing: "1px" }}>
-                      👁️ Prévia Idêntica ao Site Oficial
+                       Prévia Idêntica ao Site Oficial
                     </span>
                     <span style={{ fontSize: "12px", color: "#8b949e" }}>Seção &quot;Experiência&quot;</span>
                   </div>

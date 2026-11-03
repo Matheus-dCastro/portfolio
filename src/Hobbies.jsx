@@ -108,7 +108,7 @@ function Hobbies({ onBackToHome }) {
             Pensamentos <span>& Insights</span>
           </h2>
           <p className="section-lead-text">
-            Reflexões concisas sobre a intersecção entre Deep Learning, arquitetura de software e desenho hiper-realista.
+            Reflexões.
           </p>
           <div className="thoughts-mini-grid">
             {thoughts.map((t) => (
