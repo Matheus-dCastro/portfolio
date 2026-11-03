@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { getStoredProjects, convertGoogleDocsToEmbedUrl } from "../data/projectsData";
+import { getStoredProjects, getStoredArticles, convertGoogleDocsToEmbedUrl } from "../data/projectsData";
 import "./ViewDraft.css";
 
 function getInitialProject(propProject) {

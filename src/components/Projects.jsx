@@ -95,7 +95,7 @@ function Projects({ onOpenProject }) {
           if (catProjects.length === 0) return null;
 
           return (
-            <section
+            <div
               key={cat.id}
               id={`works-${cat.id.toLowerCase()}`}
               className="works-category-section"
@@ -130,6 +130,11 @@ function Projects({ onOpenProject }) {
                       )}
                       {project.contentType === "pdf" && (
                         <span className="tag font-bold pdf-badge">PDF</span>
+                      )}
+                      {project.relatedArticleId && (
+                        <span className="tag font-bold related-tag" title="Possui artigo técnico associado">
+                          📑 Artigo
+                        </span>
                       )}
                     </div>
 
@@ -178,7 +183,7 @@ function Projects({ onOpenProject }) {
                   </div>
                 ))}
               </div>
-            </section>
+            </div>
           );
         })}
       </div>

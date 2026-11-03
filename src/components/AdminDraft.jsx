@@ -56,6 +56,8 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
   const [googleDocsUrl, setGoogleDocsUrl] = useState(() => initialItem?.googleDocsUrl || "");
   const [pdfUrl, setPdfUrl] = useState(() => initialItem?.pdfUrl || "");
   const [markdownContent, setMarkdownContent] = useState(() => initialItem?.content || "");
+  const [relatedArticleId, setRelatedArticleId] = useState(() => initialItem?.relatedArticleId || "");
+  const [relatedProjectId, setRelatedProjectId] = useState(() => initialItem?.relatedProjectId || "");
 
   // AI Agent States
   const [agentPrompt, setAgentPrompt] = useState(() => {
@@ -87,6 +89,8 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
     setGoogleDocsUrl(item.googleDocsUrl || "");
     setPdfUrl(item.pdfUrl || "");
     setMarkdownContent(item.content || "");
+    setRelatedArticleId(item.relatedArticleId || "");
+    setRelatedProjectId(item.relatedProjectId || "");
   };
 
   const clearForm = () => {
@@ -103,6 +107,8 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
     setGoogleDocsUrl("");
     setPdfUrl("");
     setMarkdownContent("# Novo Título\n\nComece a redigir o conteúdo aqui...");
+    setRelatedArticleId("");
+    setRelatedProjectId("");
   };
 
   const handleTabChange = (tab) => {
@@ -437,6 +443,8 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
       googleDocsUrl,
       pdfUrl,
       content: markdownContent,
+      relatedArticleId: activeTab === "projects" ? relatedArticleId : undefined,
+      relatedProjectId: activeTab === "articles" ? relatedProjectId : undefined,
       updatedAt: new Date().toISOString().split("T")[0]
     };
 
@@ -506,6 +514,8 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
     googleDocsUrl,
     pdfUrl,
     content: markdownContent,
+    relatedArticleId: activeTab === "projects" ? relatedArticleId : undefined,
+    relatedProjectId: activeTab === "articles" ? relatedProjectId : undefined,
     updatedAt: "Recém Editado"
   };
 
@@ -961,6 +971,67 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
                       />
                     </div>
                   </div>
+
+                  {/* Two-way attachment: Project <-> Article */}
+                  {activeTab === "projects" && (
+                    <div className="meta-attachment-row">
+                      <label>🔗 Anexar Artigo Técnico ao Projeto:</label>
+                      <div className="attachment-select-wrap">
+                        <select
+                          value={relatedArticleId}
+                          onChange={(e) => setRelatedArticleId(e.target.value)}
+                          className="meta-relation-select"
+                        >
+                          <option value="">Nenhum artigo vinculado</option>
+                          {getStoredArticles().map((art) => (
+                            <option key={art.id} value={art.id}>
+                              📑 {art.title}
+                            </option>
+                          ))}
+                        </select>
+                        {relatedArticleId && (
+                          <button
+                            type="button"
+                            className="btn-clear-attachment"
+                            onClick={() => setRelatedArticleId("")}
+                            title="Remover anexo de artigo"
+                          >
+                            ✕ Desanexar
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {activeTab === "articles" && (
+                    <div className="meta-attachment-row">
+                      <label>🔗 Anexar Projeto Prático ao Artigo:</label>
+                      <div className="attachment-select-wrap">
+                        <select
+                          value={relatedProjectId}
+                          onChange={(e) => setRelatedProjectId(e.target.value)}
+                          className="meta-relation-select"
+                        >
+                          <option value="">Nenhum projeto vinculado</option>
+                          {getStoredProjects().map((p) => (
+                            <option key={p.id} value={p.id}>
+                              💻 {p.title}
+                            </option>
+                          ))}
+                        </select>
+                        {relatedProjectId && (
+                          <button
+                            type="button"
+                            className="btn-clear-attachment"
+                            onClick={() => setRelatedProjectId("")}
+                            title="Remover anexo de projeto"
+                          >
+                            ✕ Desanexar
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  )}
 
                   <div className="meta-synopsis-row">
                     <label>Sinopse / Contexto IA (Resumo destacado na página):</label>

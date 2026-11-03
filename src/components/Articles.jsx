@@ -74,6 +74,11 @@ export default function Articles({ onOpenArticle }) {
                     📄 PDF
                   </span>
                 )}
+                {article.relatedProjectId && (
+                  <span className="related-badge" title="Possui projeto prático associado">
+                    💻 Projeto
+                  </span>
+                )}
               </div>
 
               <h3>{article.title}</h3>
