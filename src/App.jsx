@@ -2,9 +2,13 @@ import { useState } from "react";
 import Home from "./Home";
 import Hobbies from "./Hobbies";
 import Links from "./Links";
+import AdminDraft from "./components/AdminDraft";
 
 function App() {
   const [currentPage, setCurrentPage] = useState(() => {
+    if (window.location.pathname.includes("/4dm1n")) {
+      return "admin";
+    }
     if (window.location.pathname.includes("/contacts")) {
       return "links";
     }
@@ -17,7 +21,7 @@ function App() {
   });
 
   const handleBackToHome = () => {
-    if (window.location.pathname.includes("/contacts")) {
+    if (window.location.pathname.includes("/contacts") || window.location.pathname.includes("/4dm1n")) {
       window.location.href = "/";
     } else {
       setCurrentPage("home");
@@ -31,6 +35,10 @@ function App() {
 
   if (currentPage === "links") {
     return <Links onBackToHome={handleBackToHome} />;
+  }
+
+  if (currentPage === "admin") {
+    return <AdminDraft onBackToHome={handleBackToHome} />;
   }
 
   return (

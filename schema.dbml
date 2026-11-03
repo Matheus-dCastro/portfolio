@@ -1,0 +1,59 @@
+// Portfolio & AI Agent Database Schema
+// Use with dbdiagram.io or VSCode dbdiagram extension
+
+Project portfolio {
+  database_type: 'PostgreSQL'
+  Note: 'Schema for JAMstack Portfolio with AI integration'
+}
+
+Table projects {
+  id uuid [pk, default: `gen_random_uuid()`]
+  name varchar [not null]
+  about text [note: "Contexto para o agente de IA e introdução"]
+  description text [note: "Descrição detalhada do projeto"]
+  readme_content text [note: "Conteúdo Markdown do README"]
+  media_urls text[] [note: "Array de URLs para imagens/vídeos"]
+  project_type varchar [note: "Ex: 'Web', 'Mobile', 'Data Science'"]
+  tech_stack text[] [note: "Linguagens e ferramentas usadas"]
+  category varchar [note: "'personal', 'academic', or 'professional' (Filtro)"]
+  created_at timestamp [default: `now()`]
+  updated_at timestamp
+}
+
+Table scientific_articles {
+  id uuid [pk, default: `gen_random_uuid()`]
+  title varchar [not null]
+  slug varchar [unique, not null]
+  about text [note: "Contexto resumido para o agente de IA"]
+  content text [note: "Texto corrido/conteúdo completo em Markdown"]
+  abstract text [note: "Resumo do artigo científico"]
+  publication_date date
+  authors text[]
+  doi_link varchar
+  pdf_url varchar [note: "Link para o arquivo PDF"]
+  tags text[]
+  created_at timestamp [default: `now()`]
+  updated_at timestamp
+}
+
+Table drawings {
+  id uuid [pk, default: `gen_random_uuid()`]
+  title varchar [not null]
+  about text [note: "Contexto sobre a obra para a IA"]
+  image_url varchar [not null]
+  medium varchar [note: "Ex: 'Digital', 'Aquarela', 'Lápis'"]
+  creation_date date
+  created_at timestamp [default: `now()`]
+}
+
+Table thoughts {
+  id uuid [pk, default: `gen_random_uuid()`]
+  title varchar
+  about text [note: "Contexto para o agente buscar sobre visões/estudos"]
+  content text [note: "Pensamentos filosóficos, ideias soltas em Markdown"]
+  tags text[] [note: "Ex: 'Filosofia', 'Tech', 'Random'"]
+  created_at timestamp [default: `now()`]
+}
+
+// Relacionamentos podem ser adicionados no futuro, ex: tags separadas,
+// mas para otimizar com IA e Markdown, Arrays de texto funcionam bem no Supabase/PostgreSQL.
