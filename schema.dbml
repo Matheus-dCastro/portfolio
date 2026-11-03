@@ -13,6 +13,7 @@ Table projects {
   description text [note: "Descrição detalhada do projeto"]
   readme_content text [note: "Conteúdo Markdown do README"]
   media_urls text[] [note: "Array de URLs para imagens/vídeos"]
+  external_link varchar [note: "Link do GitHub ou outra plataforma"]
   project_type varchar [note: "Ex: 'Web', 'Mobile', 'Data Science'"]
   tech_stack text[] [note: "Linguagens e ferramentas usadas"]
   category varchar [note: "'personal', 'academic', or 'professional' (Filtro)"]
@@ -31,10 +32,13 @@ Table scientific_articles {
   authors text[]
   doi_link varchar
   pdf_url varchar [note: "Link para o arquivo PDF"]
+  related_project_id uuid [note: "Chave estrangeira caso seja um Artigo de um Projeto específico"]
   tags text[]
   created_at timestamp [default: `now()`]
   updated_at timestamp
 }
+
+Ref: scientific_articles.related_project_id > projects.id
 
 Table drawings {
   id uuid [pk, default: `gen_random_uuid()`]

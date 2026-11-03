@@ -197,6 +197,16 @@
   color: white !important;
 }
 
+.type-selector {
+  background-color: var(--bg);
+  color: var(--text-h);
+  border: 1px solid var(--border);
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  margin-right: 1rem;
+  font-family: var(--sans);
+}
+
 .editor-form {
   flex: 1;
   display: flex;
@@ -234,6 +244,13 @@
   color: var(--text-h);
 }
 
+.editor-split-view {
+  display: flex;
+  flex: 1;
+  gap: 1rem;
+  min-height: 400px;
+}
+
 .markdown-editor {
   flex: 1;
   border: none;
@@ -245,4 +262,29 @@
   font-size: 1rem;
   line-height: 1.6;
   padding: 1rem 0;
+}
+
+.pdf-preview-pane {
+  flex: 1;
+  border: 1px dashed var(--border);
+  border-radius: 8px;
+  background-color: var(--code-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pdf-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: var(--text);
+  text-align: center;
+  padding: 2rem;
+}
+
+.pdf-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  opacity: 0.5;
 }
