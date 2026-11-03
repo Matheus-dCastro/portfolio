@@ -49,10 +49,10 @@ Recomenda-se criar colunas: `To Do`, `In Progress`, `Review/Test`, `Done`.
 ### Issue 5: CRUD de Artigos (Blog) no Painel
 - **Descrição Técnica:** Criar o formulário que permitirá redigir e salvar os artigos no banco.
 - **Tasks:**
-  - [ ] Desenvolver a interface do formulário (Título, Slug, Conteúdo, Data).
-  - [ ] Integrar biblioteca de edição Markdown (ex: `easymde` ou `react-markdown`).
-  - [ ] Desenvolver a função de 'Submit' enviando o objeto para a tabela `posts` (via `.insert()` do Supabase).
-  - [ ] Exibir lista simples (tabela) de artigos já criados dentro do admin para controle (edição/exclusão básica).
+  - [x] Desenvolver a interface do formulário (Título, Slug, Conteúdo, Data, Tags, Sinopse e seleção de tipo).
+  - [x] Integrar mecanismo de edição visual estilo Word + atalhos de teclado Markdown (Obsidian) com leitor integrado de Google Docs e PDF.
+  - [ ] Desenvolver a função de 'Submit' enviando o objeto para a tabela `posts` (via `.insert()` do Supabase). *(Pendente: etapa de integração com Supabase)*
+  - [x] Exibir lista simples (cards) de artigos/projetos já criados dentro do admin para controle (edição/exclusão/duplicação local).
 
 ---
 
@@ -63,8 +63,8 @@ Recomenda-se criar colunas: `To Do`, `In Progress`, `Review/Test`, `Done`.
 - **Tasks:**
   - [ ] Popular a tabela `works` no Supabase com os dados atuais do portfólio.
   - [ ] No componente React da seção Works, criar requisição `fetch` com Supabase (`supabase.from('works').select('*')`).
-  - [ ] Implementar lógica de separação visual/filtros entre 'Projetos Pessoais' e 'Empresas/Corporativos'.
-  - [ ] Ajustar UI para renderizar os cards a partir do estado React (dados do banco).
+  - [x] Implementar lógica de separação visual/filtros entre 'Projetos Pessoais', 'Empresas/Corporativos' e 'Acadêmicos' (tanto na vitrine pública quanto no gerenciador de ordem).
+  - [x] Ajustar UI para renderizar os cards a partir do estado React (dados centralizados com persistência local).
 
 ### Issue 7: Refatoração da Seção "Experiências"
 - **Descrição Técnica:** Tornar o currículo/histórico profissional atualizável pelo banco de dados.
@@ -81,17 +81,17 @@ Recomenda-se criar colunas: `To Do`, `In Progress`, `Review/Test`, `Done`.
 - **Descrição Técnica:** Construir o visual público onde visitantes leem os artigos gravados pelo Admin.
 - **Tasks:**
   - [ ] Criar requisição à tabela `posts` no componente principal do Blog para listar cards (título, resumo, data).
-  - [ ] Criar a rota de visualização do artigo completo (ex: `/blog/:slug`).
-  - [ ] Buscar o conteúdo do artigo via slug e renderizá-lo na tela.
-  - [ ] Converter o conteúdo Markdown salvo no banco para HTML seguro (usando `react-markdown` e plugins necessários).
+  - [x] Criar a visualização do projeto/artigo completo ("Saber mais") com retorno suave à página inicial.
+  - [x] Buscar o conteúdo do artigo via estado/ID e renderizá-lo na tela.
+  - [x] Renderizar conteúdo Markdown, Google Docs interativo e visualizador de PDF seguro com tipografia refinada.
 
 ### Issue 9: Controles de Tema e Personalização Visual (Josh Comeau Style)
 - **Descrição Técnica:** Implementar suporte avançado a Dark/Light mode com micro-interações.
 - **Tasks:**
   - [ ] Implementar sistema global de tema (Context API, Zustand ou configuração Tailwind/CSS Variables).
   - [ ] Desenvolver o botão (Toggle) de troca de tema no Header com animações suaves.
-  - [ ] Definir e ajustar a paleta de cores para ambos os modos, focando em contraste e estética refinada.
-  - [ ] Revisar transições de cores e efeitos hover em botões e cards de todo o site.
+  - [x] Definir e ajustar a paleta de cores para os componentes, focando em contraste e estética refinada (Neon Cósmico / Dark Space).
+  - [x] Revisar transições de cores e efeitos hover em botões e cards de todo o site.
 
 ---
 

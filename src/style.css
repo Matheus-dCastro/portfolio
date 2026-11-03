@@ -737,6 +737,39 @@ h2 span {
   background-size: 300px 300px;
   background-position: center;
 }
+
+.portfolio-category-bar {
+  display: flex;
+  gap: 10px;
+  margin: 25px 0 35px;
+  flex-wrap: wrap;
+}
+
+.category-filter-btn {
+  background: #08080c;
+  border: 1px solid #1a1a24;
+  color: #9ca3af;
+  padding: 8px 16px;
+  border-radius: 50px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.category-filter-btn:hover {
+  background: #12121a;
+  color: #ffffff;
+  border-color: rgba(139, 92, 246, 0.4);
+}
+
+.category-filter-btn.active {
+  background: rgba(139, 92, 246, 0.2);
+  color: #c084fc;
+  border-color: #8b5cf6;
+  box-shadow: 0 0 15px rgba(139, 92, 246, 0.25);
+}
+
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));

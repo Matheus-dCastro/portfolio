@@ -12,7 +12,7 @@ import fotoAlomyr from "./assets/img/alomyr.jpeg";
 import cvMatheus from "./docs/Matheus Vinicius Silva Freire de Castro.pdf";
 import Rodape from "./components/Rodape";
 
-function Home({ onNavigateToHobbies, onNavigateToLinks, onBackToHome }) {
+function Home({ onNavigateToHobbies, onNavigateToLinks, onBackToHome, onOpenProject }) {
   const dados = {
     nome: "Matheus",
     sobrenome: "de Castro",
@@ -110,7 +110,7 @@ function Home({ onNavigateToHobbies, onNavigateToLinks, onBackToHome }) {
             <Experience expData={expData} />
           </section>
           <section id="projects" className="Projects-section">
-            <Projects />
+            <Projects onOpenProject={onOpenProject} />
           </section>
           <section id="about" className="about-section">
             <About
