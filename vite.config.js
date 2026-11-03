@@ -14,7 +14,13 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: resolve(__dirname, 'index.html'),
-        contacts: resolve(__dirname, 'contacts/index.html')
+        admin: resolve(__dirname, '4dm1n/index.html'),
+        l0g1n: resolve(__dirname, 'l0g1n/index.html'),
+        login: resolve(__dirname, 'login/index.html'),
+        order: resolve(__dirname, 'draft-order/index.html'),
+        view: resolve(__dirname, 'draft-view/index.html'),
+        contacts: resolve(__dirname, 'contacts/index.html'),
+        notFound: resolve(__dirname, '404.html')
       }
     }
   }
