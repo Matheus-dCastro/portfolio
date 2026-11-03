@@ -563,6 +563,66 @@ export async function persistCvConfig(config) {
   return { success: true, cloud: false };
 }
 
+/**
+ * Faz upload do arquivo PDF do CV diretamente para o bucket "documents" do Supabase Storage.
+ * Atualiza automaticamente a tabela cv_configs com a URL pública gerada.
+ */
+export async function uploadCvPdf(file) {
+  if (!file) throw new Error("Nenhum arquivo fornecido.");
+  const isPdf = file.name?.toLowerCase().endsWith(".pdf") || file.type === "application/pdf";
+  if (!isPdf) {
+    throw new Error("Formato inválido. Apenas arquivos PDF (.pdf) são permitidos para o Currículo.");
+  }
+
+  if (isSupabaseConfigured && supabase) {
+    const timestamp = Date.now();
+    const cleanName = (file.name || "curriculo.pdf").replace(/[^a-zA-Z0-9._-]/g, "_");
+    const filePath = `cv/${timestamp}-${cleanName}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from("documents")
+      .upload(filePath, file, {
+        cacheControl: "3600",
+        upsert: true,
+        contentType: "application/pdf"
+      });
+
+    if (uploadError) {
+      console.error("Erro no upload do PDF para o Supabase Storage:", uploadError);
+      throw new Error(`Falha no Supabase Storage: ${uploadError.message || "Certifique-se de que o bucket 'documents' está criado no Supabase."}`);
+    }
+
+    const { data: publicUrlData } = supabase.storage
+      .from("documents")
+      .getPublicUrl(filePath);
+
+    const publicUrl = publicUrlData?.publicUrl;
+    if (!publicUrl) {
+      throw new Error("Arquivo enviado, mas não foi possível obter a URL pública no Supabase.");
+    }
+
+    const currentConfig = getStoredCvConfig();
+    const updatedConfig = {
+      ...currentConfig,
+      pdfUrl: publicUrl,
+      updatedAt: new Date().toISOString().split("T")[0]
+    };
+
+    await persistCvConfig(updatedConfig);
+    return { success: true, publicUrl, config: updatedConfig, cloud: true };
+  } else {
+    const localUrl = URL.createObjectURL(file);
+    const currentConfig = getStoredCvConfig();
+    const updatedConfig = {
+      ...currentConfig,
+      pdfUrl: localUrl,
+      updatedAt: new Date().toISOString().split("T")[0]
+    };
+    saveCvConfig(updatedConfig);
+    return { success: true, publicUrl: localUrl, config: updatedConfig, cloud: false };
+  }
+}
+
 export async function persistAgentConfig(systemPrompt, modelName = "Qwen 2.5 Coder 32B-Instruct") {
   localStorage.setItem("portfolio_agent_system_prompt", systemPrompt);
 

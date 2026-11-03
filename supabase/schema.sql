@@ -575,3 +575,37 @@ ON CONFLICT (id) DO UPDATE SET
     max_tokens = EXCLUDED.max_tokens,
     temperature = EXCLUDED.temperature,
     updated_at = EXCLUDED.updated_at;
+
+-- ==============================================================================
+-- 11. SUPABASE STORAGE (BUCKET PÚBLICO PARA DOCUMENTOS E CV)
+-- ==============================================================================
+INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+VALUES ('documents', 'documents', true, 10485760, ARRAY['application/pdf'])
+ON CONFLICT (id) DO UPDATE SET
+    public = true,
+    file_size_limit = 10485760,
+    allowed_mime_types = ARRAY['application/pdf'];
+
+DO $$ BEGIN
+    CREATE POLICY "Public Document Access" ON storage.objects
+        FOR SELECT USING (bucket_id = 'documents');
+EXCEPTION WHEN duplicate_object THEN null;
+END $$;
+
+DO $$ BEGIN
+    CREATE POLICY "Admin Document Upload" ON storage.objects
+        FOR INSERT WITH CHECK (bucket_id = 'documents');
+EXCEPTION WHEN duplicate_object THEN null;
+END $$;
+
+DO $$ BEGIN
+    CREATE POLICY "Admin Document Update" ON storage.objects
+        FOR UPDATE USING (bucket_id = 'documents');
+EXCEPTION WHEN duplicate_object THEN null;
+END $$;
+
+DO $$ BEGIN
+    CREATE POLICY "Admin Document Delete" ON storage.objects
+        FOR DELETE USING (bucket_id = 'documents');
+EXCEPTION WHEN duplicate_object THEN null;
+END $$;

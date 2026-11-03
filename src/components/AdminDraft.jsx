@@ -29,6 +29,7 @@ import {
   persistExperience,
   removeExperience,
   persistCvConfig,
+  uploadCvPdf,
   persistAgentConfig,
   getCurrentUser,
   logoutUser
@@ -105,6 +106,10 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
   const [cvGoogleDocsUrl, setCvGoogleDocsUrl] = useState(() => getStoredCvConfig().googleDocsUrl);
   const [cvPdfUrl, setCvPdfUrl] = useState(() => getStoredCvConfig().pdfUrl);
   const [cvUpdatedAt, setCvUpdatedAt] = useState(() => getStoredCvConfig().updatedAt || new Date().toISOString().split("T")[0]);
+  const [isUploadingCvPdf, setIsUploadingCvPdf] = useState(false);
+  const [isDraggingCvPdf, setIsDraggingCvPdf] = useState(false);
+  const [cvUploadFeedback, setCvUploadFeedback] = useState(null);
+  const cvFileInputRef = useRef(null);
 
   const [currentUser, setCurrentUser] = useState(null);
 
@@ -246,6 +251,70 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
       setCvPdfUrl(DEFAULT_CV_CONFIG.pdfUrl);
       setCvUpdatedAt(DEFAULT_CV_CONFIG.updatedAt);
       showToast("Configurações do currículo restauradas para o padrão.");
+    }
+  };
+
+  const handleProcessCvFile = async (file) => {
+    if (!file) return;
+    const isPdf = file.name?.toLowerCase().endsWith(".pdf") || file.type === "application/pdf";
+    if (!isPdf) {
+      setCvUploadFeedback({
+        type: "error",
+        message: "Apenas arquivos em formato PDF (.pdf) são permitidos para o Currículo."
+      });
+      return;
+    }
+
+    try {
+      setIsUploadingCvPdf(true);
+      setCvUploadFeedback(null);
+      const res = await uploadCvPdf(file);
+      setCvPdfUrl(res.publicUrl);
+      if (res.config?.updatedAt) {
+        setCvUpdatedAt(res.config.updatedAt);
+      }
+      setCvUploadFeedback({
+        type: "success",
+        message: `Novo PDF "${file.name}" enviado com sucesso ao Supabase Storage e vinculado!`
+      });
+      showToast("☁️ Novo PDF do CV enviado com sucesso para o Supabase Storage!");
+    } catch (err) {
+      console.error("Falha ao subir CV PDF:", err);
+      setCvUploadFeedback({
+        type: "error",
+        message: err.message || "Erro ao enviar o PDF para o Supabase Storage."
+      });
+    } finally {
+      setIsUploadingCvPdf(false);
+    }
+  };
+
+  const handleCvDragOver = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDraggingCvPdf(true);
+  };
+
+  const handleCvDragLeave = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDraggingCvPdf(false);
+  };
+
+  const handleCvDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDraggingCvPdf(false);
+    const files = e.dataTransfer?.files;
+    if (files && files.length > 0) {
+      handleProcessCvFile(files[0]);
+    }
+  };
+
+  const handleCvFileInputChange = (e) => {
+    const files = e.target.files;
+    if (files && files.length > 0) {
+      handleProcessCvFile(files[0]);
     }
   };
 
@@ -991,17 +1060,58 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
                   <label htmlFor="cv-pdf-url">
                     <span className="label-icon">📄</span>
                     <strong>Documento Oficial (Arquivo PDF)</strong>
-                    <span className="cv-input-badge pdf-badge">Download Direto</span>
+                    <span className="cv-input-badge pdf-badge">Upload Direto / Supabase</span>
                   </label>
                   <p className="cv-field-hint">
-                    Caminho local da pasta <code>/public</code> ou URL direta (Supabase Storage / GitHub Raw).
+                    Arraste o novo PDF do seu currículo para substituir o antigo. O arquivo será enviado direto ao Supabase Storage e vinculado instantaneamente.
                   </p>
-                  <div className="cv-input-with-action">
+
+                  {/* Drag and Drop Zone Exclusiva para PDF */}
+                  <div
+                    className={`cv-pdf-dropzone ${isDraggingCvPdf ? "dragging" : ""} ${isUploadingCvPdf ? "uploading" : ""}`}
+                    onDragOver={handleCvDragOver}
+                    onDragLeave={handleCvDragLeave}
+                    onDrop={handleCvDrop}
+                    onClick={() => !isUploadingCvPdf && cvFileInputRef.current?.click()}
+                    title="Clique ou arraste um PDF aqui"
+                  >
+                    <input
+                      ref={cvFileInputRef}
+                      type="file"
+                      accept=".pdf,application/pdf"
+                      style={{ display: "none" }}
+                      onChange={handleCvFileInputChange}
+                    />
+                    <div className="cv-dropzone-inner">
+                      {isUploadingCvPdf ? (
+                        <div className="cv-dropzone-status">
+                          <div className="cv-dropzone-spinner"></div>
+                          <span>Enviando novo PDF para o Supabase Storage...</span>
+                        </div>
+                      ) : (
+                        <>
+                          <div className="cv-dropzone-icon">📥</div>
+                          <div className="cv-dropzone-text">
+                            <strong>Arraste seu novo PDF aqui</strong> ou <u>clique para navegar</u>
+                          </div>
+                          <span className="cv-dropzone-badge">Somente arquivos .pdf • Substituição direta na nuvem</span>
+                        </>
+                      )}
+                    </div>
+                  </div>
+
+                  {cvUploadFeedback && (
+                    <div className={`cv-upload-feedback-box ${cvUploadFeedback.type}`}>
+                      <span>{cvUploadFeedback.type === "success" ? "✅" : "⚠️"} {cvUploadFeedback.message}</span>
+                    </div>
+                  )}
+
+                  <div className="cv-input-with-action" style={{ marginTop: "12px" }}>
                     <input
                       id="cv-pdf-url"
                       type="text"
                       className="cv-input"
-                      placeholder="/Matheus Vinicius Silva Freire de Castro.pdf"
+                      placeholder="URL do PDF no Supabase Storage ou caminho local"
                       value={cvPdfUrl}
                       onChange={(e) => setCvPdfUrl(e.target.value)}
                       required
@@ -1014,12 +1124,12 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
                         className="cv-action-test-btn pdf-btn"
                         title="Testar visualização ou download do PDF"
                       >
-                        Testar PDF ↗
+                        Abrir PDF ↗
                       </a>
                     )}
                   </div>
                   <small className="cv-hint-note">
-                    💡 <em>Hospedagem 100% gratuita:</em> Coloque o arquivo PDF na pasta <code>public/</code> do projeto Vite ou envie para o Supabase Storage no plano gratuito.
+                    💡 <em>Link ativo:</em> Qualquer novo upload substitui o link anterior automaticamente no banco de dados e no portfólio.
                   </small>
                 </div>
 
