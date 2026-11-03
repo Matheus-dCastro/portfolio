@@ -13,9 +13,11 @@ function About({ descriptionP1, descriptionP2, onAction }) {
         ></p>
         <p className="about-text text-muted">{descriptionP2}</p>
 
-        <button onClick={onAction} className="btn btn-outline">
-          Explore Me
-        </button>
+        <div className="about-action-buttons">
+          <button onClick={onAction} className="btn btn-outline">
+            Explore Me (Hobbies & Arts) →
+          </button>
+        </div>
       </div>
     </>
   );

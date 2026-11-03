@@ -22,7 +22,7 @@ function HeadSite({
   };
 
   return (
-    <header>
+    <header className="site-header">
       <a
         href={(isHobbies || isLinks) ? "#" : "#"}
         onClick={handleLogoClick}
@@ -45,9 +45,10 @@ function HeadSite({
             <a href="#" onClick={handleLogoClick}>
               Home
             </a>
-            <a href="index.html#projects">Works</a>
+            <a href="/#projects">Works</a>
             <a href="#interests">Intereces</a>
             <a href="#art-gallery">Arts</a>
+            <a href="#thoughts">Pensamentos</a>
           </>
         ) : (
           <>

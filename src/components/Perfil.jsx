@@ -1,22 +1,37 @@
 import { useState, useEffect } from "react";
+import { getStoredCvConfig } from "../data/projectsData";
+import { fetchCvConfig } from "../lib/supabaseService";
+
+const FRASES = [
+  "Matheus de Castro",
+  // "Backend Developer",
+  // "Machine Learning Student",
+];
 
 function Perfil({ nomeCompleto, description, foto, cv }) {
-  const frases = [
-    "Matheus de Castro",
-    // "Backend Developer",
-    // "Machine Learning Student",
-  ];
-
   const [textoAtual, setTextoAtual] = useState("");
   const [phraseIndex, setPhraseIndex] = useState(0);
   const [charIndex, setCharIndex] = useState(0);
   const [isDeleting, setIsDeleting] = useState(false);
   const [typeSpeed, setTypeSpeed] = useState(150);
+  const [showCvModal, setShowCvModal] = useState(false);
+  const [cvConfig, setCvConfig] = useState(() => getStoredCvConfig());
 
   useEffect(() => {
-    const currentPhrase = frases[phraseIndex];
+    fetchCvConfig().then((cfg) => {
+      if (cfg) setCvConfig(cfg);
+    });
+  }, []);
 
-    const isSpecialPhrase = currentPhrase === "Backend Developer";
+  const handleOpenCvModal = () => {
+    fetchCvConfig().then((cfg) => {
+      if (cfg) setCvConfig(cfg);
+    });
+    setShowCvModal(true);
+  };
+
+  useEffect(() => {
+    const currentPhrase = FRASES[phraseIndex];
 
     const handleTyping = () => {
       if (!isDeleting) {
@@ -35,7 +50,7 @@ function Perfil({ nomeCompleto, description, foto, cv }) {
 
         if (charIndex - 1 === 0) {
           setIsDeleting(false);
-          setPhraseIndex((prev) => (prev + 1) % frases.length);
+          setPhraseIndex((prev) => (prev + 1) % FRASES.length);
           setTypeSpeed(500);
         }
       }
@@ -67,14 +82,14 @@ function Perfil({ nomeCompleto, description, foto, cv }) {
           <a href="#projects" className="btn">
             See My Projects
           </a>
-          <a
-            href={cv}
-            target="_blank"
+          <button
+            type="button"
             className="btn btn-outline"
-            rel="noreferrer"
+            onClick={handleOpenCvModal}
+            title="Escolha entre a versão Web no Google Docs ou arquivo PDF"
           >
-            Download CV
-          </a>
+            Download CV / Docs
+          </button>
         </div>
       </div>
 
@@ -84,6 +99,63 @@ function Perfil({ nomeCompleto, description, foto, cv }) {
           <div className="side coder">CODER IS</div>
         </div>
       </div>
+
+      {/* CV Download / View Modal */}
+      {showCvModal && (
+        <div className="cv-modal-overlay" onClick={() => setShowCvModal(false)}>
+          <div className="cv-modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="cv-modal-header">
+              <div className="cv-modal-title-group">
+                <span className="cv-modal-icon"></span>
+                <div>
+                  <h3>Currículo de Matheus de Castro</h3>
+                  <p>Escolha o formato que deseja visualizar ou baixar:</p>
+                </div>
+              </div>
+              <button className="btn-close-cv-modal" onClick={() => setShowCvModal(false)}>✕</button>
+            </div>
+
+            <div className="cv-modal-options">
+              {/* Option 1: Google Docs Web Version */}
+              <a
+                href={cvConfig.googleDocsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="cv-option-card gdocs-card"
+                onClick={() => setShowCvModal(false)}
+              >
+                <div className="cv-option-text">
+                  <div className="cv-option-badge">Versão Web Interativa</div>
+                  <h4>Abrir no Google Docs</h4>
+                  <p>Visualização instantânea, sempre atualizada com as últimas experiências e projetos.</p>
+                </div>
+                <span className="cv-option-arrow">↗</span>
+              </a>
+
+              {/* Option 2: PDF Download */}
+              <a
+                href={cvConfig.pdfUrl || cv}
+                target="_blank"
+                rel="noopener noreferrer"
+                download="Matheus_de_Castro_Curriculo.pdf"
+                className="cv-option-card pdf-card"
+                onClick={() => setShowCvModal(false)}
+              >
+                <div className="cv-option-text">
+                  <div className="cv-option-badge">Documento Oficial PDF</div>
+                  <h4>Baixar Arquivo PDF</h4>
+                  <p>Formato clássico ideal para impressão, arquivamento ou anexar em processos seletivos.</p>
+                </div>
+                <span className="cv-option-arrow">↓</span>
+              </a>
+            </div>
+
+            <div className="cv-modal-footer">
+              <span className="cv-footer-hint">Ambos os formatos possuem o conteúdo completo e revisado.</span>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 }

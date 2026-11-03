@@ -1,4 +1,56 @@
-function Projects() {
+import { useState, useEffect } from "react";
+import { getStoredProjects } from "../data/projectsData";
+import { fetchWorks } from "../lib/supabaseService";
+
+const WORK_CATEGORIES = [
+  {
+    id: "Profissional",
+    title: "Profissional & Corporativo",
+    icon: "",
+    badgeClass: "cat-profissional",
+    description: "Sistemas corporativos, arquiteturas escaláveis e soluções em produção desenvolvidas para empresas e clientes."
+  },
+  {
+    id: "Pessoal",
+    title: "Projetos Pessoais & Inovações",
+    icon: "",
+    badgeClass: "cat-pessoal",
+    description: "Projetos autorais, ferramentas de produtividade, design systems e extensões públicas."
+  },
+  {
+    id: "Acadêmico",
+    title: "Acadêmico & Pesquisa Científica",
+    icon: "",
+    badgeClass: "cat-academico",
+    description: "Pesquisas na UFRN/IFRN em Machine Learning, Deep Learning, Visão Computacional e algoritmos complexos."
+  }
+];
+
+function Projects({ onOpenProject }) {
+  const [projects, setProjects] = useState(() => getStoredProjects());
+  const [activeCategory, setActiveCategory] = useState("all");
+
+  useEffect(() => {
+    let isMounted = true;
+    fetchWorks(false).then((loaded) => {
+      if (isMounted && Array.isArray(loaded)) {
+        setProjects(loaded);
+      }
+    });
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const profCount = projects.filter((p) => (p.category || "Profissional") === "Profissional").length;
+  const pessoalCount = projects.filter((p) => p.category === "Pessoal").length;
+  const academicoCount = projects.filter((p) => p.category === "Acadêmico").length;
+
+  const visibleCategories =
+    activeCategory === "all"
+      ? WORK_CATEGORIES
+      : WORK_CATEGORIES.filter((cat) => cat.id === activeCategory);
+
   return (
     <>
       <div className="section-divider-line"></div>
@@ -6,195 +58,148 @@ function Projects() {
       <h2>
         Selected <span>Works</span>
       </h2>
-      <div className="grid">
-        <div className="project-card">
-          <div className="project-header">
-            <span className="tag">FastAPI</span>
-            <span className="tag font-bold">Data & ML</span>
-          </div>
-          <h3>AgentMetrics</h3>
-          <p>
-            API de telemetria inteligente desenvolvida para monitorar o consumo
-            de recursos e metrificar o desempenho de agentes de IA em tempo
-            real.
-          </p>
-          <div className="project-links">
-            <a
-              href="https://github.com/Matheus-dCastro/AgentMetrics"
-              target="_blank"
-              className="link-arrow"
-            >
-              View GitHub <span>→</span>
-            </a>
-          </div>
-        </div>
 
-        <div className="project-card">
-          <div className="project-header">
-            <span className="tag">Deep Learning</span>
-            <span className="tag font-bold">Python</span>
-          </div>
-          <h3>Medical Image Segmentation</h3>
-          <p>
-            Pipeline de Deep Learning supervisionado para segmentação pixel a
-            pixel de estruturas e lesões em imagens médicas utilizando
-            arquitetura U-Net.
-          </p>
-          <div className="project-links">
-            <a
-              href="https://github.com/Matheus-dCastro/Projeto-de-AM-Supervisionado"
-              target="_blank"
-              className="link-arrow"
+      {/* 3 Sessions Filter Bar */}
+      {projects.length > 0 && (
+        <div className="portfolio-category-bar">
+          <button
+            type="button"
+            className={`category-filter-btn ${activeCategory === "all" ? "active" : ""}`}
+            onClick={() => setActiveCategory("all")}
+          >
+            Todos ({projects.length})
+          </button>
+          {profCount > 0 && (
+            <button
+              type="button"
+              className={`category-filter-btn ${activeCategory === "Profissional" ? "active" : ""}`}
+              onClick={() => setActiveCategory("Profissional")}
             >
-              View GitHub <span>→</span>
-            </a>
-          </div>
+              Profissional ({profCount})
+            </button>
+          )}
+          {pessoalCount > 0 && (
+            <button
+              type="button"
+              className={`category-filter-btn ${activeCategory === "Pessoal" ? "active" : ""}`}
+              onClick={() => setActiveCategory("Pessoal")}
+            >
+               Pessoal ({pessoalCount})
+            </button>
+          )}
+          {academicoCount > 0 && (
+            <button
+              type="button"
+              className={`category-filter-btn ${activeCategory === "Acadêmico" ? "active" : ""}`}
+              onClick={() => setActiveCategory("Acadêmico")}
+            >
+               Acadêmico ({academicoCount})
+            </button>
+          )}
         </div>
+      )}
 
-        <div className="project-card">
-          <div className="project-header">
-            <span className="tag">VS Code Theme</span>
-            <span className="tag font-bold">UI & Design</span>
-          </div>
-          <h3>Obsidian Neon Theme</h3>
-          <p>
-            Tema e suíte visual para VS Code com paletas neon de alto contraste,
-            ícones customizados e realce de sintaxe semântico refinado.
-          </p>
-          <div className="project-links">
-            <a
-              href="https://github.com/Matheus-dCastro/obsidian-neon-thema"
-              target="_blank"
-              className="link-arrow"
-            >
-              View GitHub <span>→</span>
-            </a>
-          </div>
-        </div>
+      {/* Render the 3 category sessions (shown all together when 'all', or filtered individually) */}
+      <div className="works-sessions-container">
+        {visibleCategories.map((cat) => {
+          const catProjects = projects.filter(
+            (p) => (p.category || "Profissional") === cat.id
+          );
 
-        <div className="project-card">
-          <div className="project-header">
-            <span className="tag">Automation & Web</span>
-          </div>
-          <h3>Cachina Soluções</h3>
-          <p>
-            Desenvolvimento e hospedagem do ecossistema de interfaces e
-            apresentação estratégica corporativa.
-          </p>
-          <div className="project-links">
-            <a
-              href="https://github.com/Matheus-dCastro/Site-Cachina-2026"
-              target="_blank"
-              className="link-arrow"
-            >
-              Code <span>→</span>
-            </a>
-            <a
-              href="https://cachina.com.br/"
-              target="_blank"
-              className="link-arrow"
-            >
-              Live Demo <span>→</span>
-            </a>
-          </div>
-        </div>
+          if (catProjects.length === 0) return null;
 
-        <div className="project-card">
-          <div className="project-header">
-            <span className="tag">Python & SQL</span>
-          </div>
-          <h3>Task System CLI</h3>
-          <p>Arquitetura MVC completa com persistência em PostgreSQL.</p>
-          <div className="project-links">
-            <a
-              href="https://github.com/Matheus-dCastro/Sistema-de-Controle-em-Py3"
-              target="_blank"
-              className="link-arrow"
+          return (
+            <div
+              key={cat.id}
+              id={`works-${cat.id.toLowerCase()}`}
+              className="works-category-section"
             >
-              View GitHub <span>→</span>
-            </a>
-          </div>
-        </div>
+              <div className="works-category-header">
+                <div className="works-category-title-group">
+                  <span className="works-category-icon">{cat.icon}</span>
+                  <div>
+                    <h3 className="works-category-title">
+                      {cat.title}{" "}
+                      <span className="works-count-pill">({catProjects.length})</span>
+                    </h3>
+                    <p className="works-category-desc">{cat.description}</p>
+                  </div>
+                </div>
+              </div>
 
-        <div className="project-card">
-          <div className="project-header">
-            <span className="tag">Java</span>
-          </div>
-          <h3>TimeMaster</h3>
-          <p>
-            Sistema modular backend para gerenciamento de compromissos e
-            agendamentos complexos desenvolvido em LP2.
-          </p>
-          <div className="project-links">
-            <a
-              href="https://github.com/Matheus-dCastro/Sistema-de-Agenda-de-Compromissos.git"
-              target="_blank"
-              className="link-arrow"
-            >
-              View GitHub <span>→</span>
-            </a>
-          </div>
-        </div>
+              <div className="grid">
+                {catProjects.map((project) => (
+                  <div key={project.id} className="project-card">
+                    <div className="project-header">
+                      {project.tags?.map((tag, tIdx) => (
+                        <span
+                          key={tIdx}
+                          className={`tag ${tIdx === 1 ? "font-bold" : ""}`}
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                      {project.contentType === "google-docs" && (
+                        <span className="tag font-bold gdocs-badge">Google Docs</span>
+                      )}
+                      {project.contentType === "pdf" && (
+                        <span className="tag font-bold pdf-badge">PDF</span>
+                      )}
+                      {project.relatedArticleId && (
+                        <span className="tag font-bold related-tag" title="Possui artigo técnico associado">
+                          📑 Artigo
+                        </span>
+                      )}
+                    </div>
 
-        <div className="project-card">
-          <div className="project-header">
-            <span className="tag">C++</span>
-          </div>
-          <h3>Zombie Dice</h3>
-          <p>
-            Implementação orientada a objetos e máquina de estados para execução
-            de jogo de dados lógico via terminal CLI.
-          </p>
-          <div className="project-links">
-            <a
-              href="https://github.com/Matheus-dCastro/trabalho-06-projeto-zombie-dice-Turma-DIM0176---PROGRAMA-O-I---T02-2025.1-.git"
-              target="_blank"
-              className="link-arrow"
-            >
-              View GitHub <span>→</span>
-            </a>
-          </div>
-        </div>
+                    <h3>{project.title}</h3>
+                    <p>{project.shortDescription || project.aboutContext}</p>
 
-        <div className="project-card">
-          <div className="project-header">
-            <span className="tag">Game in CPP</span>
-          </div>
-          <h3>Projeto snaze</h3>
-          <p>
-            implement a simulation in which your program must guide a snake
-            through a maze to a piece of food that appears in a random position.
-          </p>
-          <div className="project-links">
-            <a
-              href="https://github.com/Matheus-dCastro/trabalho-07-projeto-snaze--Turma-DIM0176---PROGRAMA-O-I---T02-2025.1-.git"
-              target="_blank"
-              className="link-arrow"
-            >
-              View GitHub <span>→</span>
-            </a>
-          </div>
-        </div>
-
-        <div className="project-card">
-          <div className="project-header">
-            <span className="tag">CPP</span>
-          </div>
-          <h3>password generator</h3>
-          <p>
-            O objetivo do programa é produzir senhas de complexidade e tamanho
-            variados, dependendo das escolhas de configuração do usuário.
-          </p>
-          <div className="project-links">
-            <a
-              href="https://github.com/Matheus-dCastro/trabalho-03-projeto-passgen-Turma-DIM0176---PROGRAMA-O-I---T02-2025.1-"
-              target="_blank"
-              className="link-arrow"
-            >
-              View GitHub <span>→</span>
-            </a>
-          </div>
-        </div>
+                    <div className="project-links">
+                      {onOpenProject && (
+                        <button
+                          type="button"
+                          className="link-arrow highlight"
+                          onClick={() => onOpenProject(project)}
+                          style={{
+                            background: "none",
+                            border: "none",
+                            fontFamily: "inherit",
+                            fontSize: "inherit",
+                            cursor: "pointer",
+                            padding: 0
+                          }}
+                        >
+                          Saber mais <span>→</span>
+                        </button>
+                      )}
+                      {project.github && (
+                        <a
+                          href={project.github}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="link-arrow"
+                        >
+                          View GitHub <span>→</span>
+                        </a>
+                      )}
+                      {project.demo && (
+                        <a
+                          href={project.demo}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="link-arrow"
+                        >
+                          Live Demo <span>→</span>
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
+        })}
       </div>
     </>
   );
