@@ -114,6 +114,10 @@ function App() {
       <AdminDraft
         onBackToHome={handleBackToHome}
         onOpenProjectDetail={handleOpenProject}
+        onNavigateToOrder={() => {
+          setCurrentPage("order-draft");
+          window.history.pushState({}, "", "/draft-order");
+        }}
       />
     );
   }
@@ -123,6 +127,10 @@ function App() {
       <OrderDraft
         onBackToHome={handleBackToHome}
         onOpenProjectDetail={handleOpenProject}
+        onNavigateToAdmin={() => {
+          setCurrentPage("admin");
+          window.history.pushState({}, "", "/4dm1n");
+        }}
       />
     );
   }

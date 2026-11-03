@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
 
+const FRASES = [
+  "Matheus de Castro",
+  // "Backend Developer",
+  // "Machine Learning Student",
+];
+
 function Perfil({ nomeCompleto, description, foto, cv }) {
-  const frases = [
-    "Matheus de Castro",
-    // "Backend Developer",
-    // "Machine Learning Student",
-  ];
 
   const [textoAtual, setTextoAtual] = useState("");
   const [phraseIndex, setPhraseIndex] = useState(0);
@@ -14,9 +15,7 @@ function Perfil({ nomeCompleto, description, foto, cv }) {
   const [typeSpeed, setTypeSpeed] = useState(150);
 
   useEffect(() => {
-    const currentPhrase = frases[phraseIndex];
-
-    const isSpecialPhrase = currentPhrase === "Backend Developer";
+    const currentPhrase = FRASES[phraseIndex];
 
     const handleTyping = () => {
       if (!isDeleting) {
@@ -35,7 +34,7 @@ function Perfil({ nomeCompleto, description, foto, cv }) {
 
         if (charIndex - 1 === 0) {
           setIsDeleting(false);
-          setPhraseIndex((prev) => (prev + 1) % frases.length);
+          setPhraseIndex((prev) => (prev + 1) % FRASES.length);
           setTypeSpeed(500);
         }
       }

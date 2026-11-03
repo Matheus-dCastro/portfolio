@@ -101,6 +101,28 @@
   flex-wrap: wrap;
 }
 
+.editor-nav-btn {
+  background: #141422;
+  border: 1px solid #2e3046;
+  color: #c4b5fd;
+  padding: 0.55rem 1rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.editor-nav-btn:hover {
+  background: rgba(139, 92, 246, 0.2);
+  border-color: #8b5cf6;
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
 .preview-toggle-btn {
   background: rgba(139, 92, 246, 0.15);
   border: 1px solid rgba(139, 92, 246, 0.35);

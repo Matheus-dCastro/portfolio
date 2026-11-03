@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import HeadSite from "./components/HeadSite";
 import logoWolf from "./assets/img/wolf(2).png";
 import Intereceses from "./components/Interecese";

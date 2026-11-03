@@ -34,7 +34,7 @@ const CATEGORIES = [
   }
 ];
 
-export default function OrderDraft({ onBackToHome, onOpenProjectDetail }) {
+export default function OrderDraft({ onBackToHome, onOpenProjectDetail, onNavigateToAdmin }) {
   const [activeTab, setActiveTab] = useState("projects"); // 'projects' | 'articles' | 'thoughts'
   const [items, setItems] = useState(() => getStoredProjects());
   const [searchQuery, setSearchQuery] = useState("");
@@ -236,6 +236,18 @@ export default function OrderDraft({ onBackToHome, onOpenProjectDetail }) {
 
         <div className="order-top-actions">
           <button
+            type="button"
+            className="editor-nav-btn"
+            onClick={() => {
+              if (onNavigateToAdmin) onNavigateToAdmin();
+              else window.location.href = "/4dm1n";
+            }}
+            title="Ir para o editor de conteúdo e assistente IA"
+          >
+            ✍️ Editor & Agente
+          </button>
+          <button
+            type="button"
             className={`preview-toggle-btn ${previewMode ? "active" : ""}`}
             onClick={() => setPreviewMode(!previewMode)}
             title="Alternar entre modo de edição e visualização final sem controles"

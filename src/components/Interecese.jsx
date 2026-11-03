@@ -1,4 +1,3 @@
-import React from "react";
 
 function Intereceses({ mensagem, capa1, capa2, capa3, capa4, capa5, capa6 }) {
   return (

@@ -100,18 +100,18 @@ Recomenda-se criar colunas: `To Do`, `In Progress`, `Review/Test`, `Done`.
 ### Issue 10: Setup Seguro do Assistente IA (Backend Serverless)
 - **Descrição Técnica:** Isolar a chamada para a API do modelo Qwen em um ambiente seguro para proteger chaves e impor regras rígidas.
 - **Tasks:**
-  - [ ] Desenvolver uma Supabase Edge Function (ou API route se usar framework compatível) chamada `chat-qwen`.
-  - [ ] Adicionar a API Key do modelo Qwen nos Secrets do Supabase.
-  - [ ] Implementar a lógica na Edge Function: receber query, formatar o payload para a API do Qwen.
-  - [ ] **Crucial:** Injetar no payload o *System Prompt* rígido (limitando contexto a dúvidas sobre seus projetos, currículo e artigos, proibindo geração de código ou conversas genéricas).
+  - [x] Desenhar a arquitetura da Supabase Edge Function (`chat-qwen`) com isolamento de chaves e injeção de contexto via Deno (`ROADMAP_SUPABASE_SEGURANCA_IA.md`).
+  - [x] Elaborar o *System Prompt* de produção rígido (limitando contexto a dúvidas sobre seus projetos, currículo e artigos, proibindo alucinações e conversas fora de escopo).
+  - [ ] Deploy efetivo da Edge Function no Supabase CLI e configuração do secret `QWEN_API_KEY`.
+  - [ ] Integrar chamada HTTP da Edge Function com o modelo Qwen 2.5 Coder 32B-Instruct.
 
 ### Issue 11: Interface de Chat no Front-end
 - **Descrição Técnica:** Criar a UI para o usuário interagir com o agente de IA.
 - **Tasks:**
-  - [ ] Construir o componente visual do Chatbot (janela fixa no canto da tela ou seção dedicada).
-  - [ ] Implementar estados React para histórico de mensagens (user e bot) e estado de *loading*.
-  - [ ] Fazer a requisição HTTP da interface para a Edge Function (`chat-qwen`).
-  - [ ] Tratamento de erros e formatação da resposta no balão de chat.
+  - [x] Construir o painel e simulador visual do Chatbot na aba de administração (`AdminDraft.jsx`) com histórico de mensagens e preview em tempo real.
+  - [x] Implementar editor de System Prompt com atalhos de salvar, copiar e restaurar padrão.
+  - [ ] Construir o widget flutuante de chat para o visitante na vitrine pública do portfólio.
+  - [ ] Conectar requisição HTTP do chat à Edge Function (`chat-qwen`).
 
 ### Issue 12: Revisão Final (QA) e Deploy
 - **Descrição Técnica:** Garantir estabilidade e atualizar a versão de produção no GitHub Pages.
