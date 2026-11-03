@@ -2309,6 +2309,46 @@
   min-width: 0;
 }
 
+.drawing-order-badge-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.drawing-order-arrows {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.btn-order-arrow {
+  background: #21262d;
+  color: #c9d1d9;
+  border: 1px solid #30363d;
+  border-radius: 4px;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  line-height: 1;
+}
+
+.btn-order-arrow:hover:not(:disabled) {
+  background: #30363d;
+  color: #58a6ff;
+  border-color: #58a6ff;
+}
+
+.btn-order-arrow:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
 .drawing-status-pill {
   font-size: 10px;
   font-weight: 700;

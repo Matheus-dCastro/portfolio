@@ -36,6 +36,7 @@ import {
   persistCvConfig,
   uploadCvPdf,
   persistAgentConfig,
+  persistBatchOrder,
   getCurrentUser,
   logoutUser
 } from "../lib/supabaseService";
@@ -124,6 +125,7 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
   const [isUploadingDrawing, setIsUploadingDrawing] = useState(false);
   const [isDraggingDrawing, setIsDraggingDrawing] = useState(false);
   const [drawingUploadFeedback, setDrawingUploadFeedback] = useState(null);
+  const [drawingDisplayOrder, setDrawingDisplayOrder] = useState(0);
   const drawingFileInputRef = useRef(null);
 
   const [currentUser, setCurrentUser] = useState(null);
@@ -229,6 +231,7 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
     setDrawingSrc(item.src || "");
     setDrawingDescription(item.description || "");
     setDrawingIsPublished(item.isPublished !== false);
+    setDrawingDisplayOrder(item.displayOrder ?? 0);
     setDrawingUploadFeedback(null);
   };
 
@@ -238,6 +241,7 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
     setDrawingSrc("");
     setDrawingDescription("");
     setDrawingIsPublished(true);
+    setDrawingDisplayOrder(items.length);
     setDrawingUploadFeedback(null);
   };
 
@@ -430,6 +434,28 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
     }
   };
 
+  const handleMoveDrawing = async (currentIndex, delta) => {
+    const targetIndex = currentIndex + delta;
+    if (targetIndex < 0 || targetIndex >= items.length) return;
+
+    const newItems = [...items];
+    const [moved] = newItems.splice(currentIndex, 1);
+    newItems.splice(targetIndex, 0, moved);
+
+    const reordered = newItems.map((it, idx) => ({
+      ...it,
+      displayOrder: idx
+    }));
+
+    setItems(reordered);
+    const res = await persistBatchOrder("drawings", reordered);
+    showToast(
+      res.cloud
+        ? "☁️ Ordem dos desenhos atualizada no Supabase!"
+        : "💾 Ordem dos desenhos atualizada localmente!"
+    );
+  };
+
   const handleSaveDrawing = async (e) => {
     if (e) e.preventDefault();
     if (!drawingTitle.trim()) {
@@ -441,14 +467,14 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
       return;
     }
 
+    const targetOrder = Math.max(0, drawingDisplayOrder);
+
     const drawingItem = {
       id: selectedId || generateUniqueId(),
       title: drawingTitle.trim(),
       src: drawingSrc.trim(),
       description: drawingDescription.trim(),
-      displayOrder: items.findIndex((d) => d.id === selectedId) >= 0
-        ? items.find((d) => d.id === selectedId).displayOrder
-        : items.length,
+      displayOrder: targetOrder,
       isPublished: drawingIsPublished !== false,
       updatedAt: new Date().toISOString().split("T")[0]
     };
@@ -456,18 +482,25 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
     let newItems = [...items];
     const existingIndex = newItems.findIndex((it) => it.id === drawingItem.id);
     if (existingIndex >= 0) {
-      newItems[existingIndex] = drawingItem;
-    } else {
-      newItems.unshift(drawingItem);
+      newItems.splice(existingIndex, 1);
     }
+    const insertIdx = Math.min(newItems.length, targetOrder);
+    newItems.splice(insertIdx, 0, drawingItem);
 
-    setItems(newItems);
+    // Normalize display orders sequentially
+    const normalized = newItems.map((it, idx) => ({
+      ...it,
+      displayOrder: idx
+    }));
+
+    setItems(normalized);
     setSelectedId(drawingItem.id);
 
     const res = await persistDrawing(drawingItem);
+    await persistBatchOrder("drawings", normalized);
     showToast(
       res.cloud
-        ? "☁️ Desenho salvo e sincronizado no Supabase!"
+        ? "☁️ Desenho salvo e ordem sincronizada no Supabase!"
         : "💾 Desenho salvo localmente (offline)!"
     );
   };
@@ -1491,7 +1524,35 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
                       </div>
                       <div className="drawing-card-info">
                         <div className="item-card-header">
-                          <span className="card-order-num">#{idx + 1}</span>
+                          <div className="drawing-order-badge-row">
+                            <span className="card-order-num">#{idx + 1}</span>
+                            <div className="drawing-order-arrows">
+                              <button
+                                type="button"
+                                className="btn-order-arrow"
+                                disabled={idx === 0}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleMoveDrawing(idx, -1);
+                                }}
+                                title="Mover para cima"
+                              >
+                                ▲
+                              </button>
+                              <button
+                                type="button"
+                                className="btn-order-arrow"
+                                disabled={idx === items.length - 1}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleMoveDrawing(idx, 1);
+                                }}
+                                title="Mover para baixo"
+                              >
+                                ▼
+                              </button>
+                            </div>
+                          </div>
                           <span className={`drawing-status-pill ${drawing.isPublished !== false ? "published" : "draft"}`}>
                             {drawing.isPublished !== false ? "Publicado" : "Rascunho"}
                           </span>
@@ -1601,6 +1662,31 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
                       <small className="drawings-hint">
                         💡 Exibido como legenda ao abrir o desenho no modo ampliado (lightbox).
                       </small>
+                    </div>
+
+                    <div className="drawings-form-group">
+                      <label htmlFor="drawing-order-input">
+                        <strong>Posição na Ordem de Exibição</strong>
+                        <span className="drawings-upload-badge">Posição #{drawingDisplayOrder + 1} de {items.length}</span>
+                      </label>
+                      <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                        <input
+                          id="drawing-order-input"
+                          type="number"
+                          min="1"
+                          max={items.length + 1}
+                          className="drawings-input"
+                          style={{ width: "90px" }}
+                          value={drawingDisplayOrder + 1}
+                          onChange={(e) => {
+                            const val = parseInt(e.target.value, 10);
+                            if (!isNaN(val)) setDrawingDisplayOrder(Math.max(0, val - 1));
+                          }}
+                        />
+                        <span style={{ fontSize: "12px", color: "#8b949e" }}>
+                          Define a posição (#1 aparece primeiro). Você também pode usar as setas ▲ e ▼ na lista lateral.
+                        </span>
+                      </div>
                     </div>
 
                     <div className="drawings-form-group">
