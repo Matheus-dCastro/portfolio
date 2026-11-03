@@ -114,13 +114,54 @@
 }
 
 .admin-card {
-  padding: 1rem;
+  padding: 0.75rem 1rem;
   border: 1px solid var(--border);
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s;
   background-color: var(--bg);
   box-shadow: var(--shadow);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.card-drag-handle {
+  color: var(--border);
+  cursor: grab;
+  user-select: none;
+  font-size: 1.2rem;
+  line-height: 1;
+}
+
+.card-drag-handle:active {
+  cursor: grabbing;
+}
+
+.card-content-area {
+  flex: 1;
+}
+
+.sidebar-footer {
+  padding: 1rem;
+  border-top: 1px solid var(--border);
+}
+
+.publish-order-btn {
+  width: 100%;
+  background-color: var(--accent-bg);
+  color: var(--accent);
+  border: 1px solid var(--accent);
+  padding: 0.75rem;
+  border-radius: 4px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.publish-order-btn:hover {
+  background-color: var(--accent);
+  color: white;
 }
 
 .admin-card:hover {
@@ -242,6 +283,24 @@
   border-radius: 4px;
   background: var(--code-bg);
   color: var(--text-h);
+}
+
+.link-entity-btn {
+  background-color: var(--social-bg);
+  color: var(--text-h);
+  border: 1px solid var(--border);
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: var(--sans);
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.link-entity-btn:hover {
+  background-color: var(--accent-bg);
+  border-color: var(--accent);
+  color: var(--accent);
 }
 
 .editor-split-view {

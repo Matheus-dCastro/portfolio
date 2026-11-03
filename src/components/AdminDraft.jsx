@@ -43,22 +43,37 @@ export default function AdminDraft({ onBackToHome }) {
           </div>
 
           <div className="card-list">
-            {/* Notion style cards */}
-            <div className="admin-card active">
-              <h4>Exemplo de {activeTab} 1</h4>
-              <p className="card-meta">Atualizado hoje</p>
-              <span className="badge">Profissional</span>
+            {/* Notion style cards with Drag handles */}
+            <div className="admin-card active" draggable="true">
+              <div className="card-drag-handle">⋮⋮</div>
+              <div className="card-content-area">
+                <h4>1. Exemplo de {activeTab} Principal</h4>
+                <p className="card-meta">Atualizado hoje</p>
+                <span className="badge">Profissional</span>
+              </div>
             </div>
-            <div className="admin-card">
-              <h4>Exemplo de {activeTab} 2</h4>
-              <p className="card-meta">Ontem</p>
-              <span className="badge">Pessoal</span>
+            <div className="admin-card" draggable="true">
+              <div className="card-drag-handle">⋮⋮</div>
+              <div className="card-content-area">
+                <h4>2. Exemplo de {activeTab} Secundário</h4>
+                <p className="card-meta">Ontem</p>
+                <span className="badge">Pessoal</span>
+              </div>
             </div>
-            <div className="admin-card">
-              <h4>Exemplo de {activeTab} 3</h4>
-              <p className="card-meta">Semana passada</p>
-              <span className="badge">Acadêmico</span>
+            <div className="admin-card" draggable="true">
+              <div className="card-drag-handle">⋮⋮</div>
+              <div className="card-content-area">
+                <h4>3. Exemplo de {activeTab} Antigo</h4>
+                <p className="card-meta">Semana passada</p>
+                <span className="badge">Acadêmico</span>
+              </div>
             </div>
+          </div>
+
+          <div className="sidebar-footer">
+            <button className="publish-order-btn" onClick={() => window.location.href = '/draft-order'}>
+              ☰ Gerenciar Ordem do Site
+            </button>
           </div>
         </aside>
 
@@ -93,6 +108,9 @@ export default function AdminDraft({ onBackToHome }) {
             <div className="meta-inputs">
               <input type="text" placeholder="Link (GitHub, Plataforma...)" />
               <input type="text" placeholder="Tags / Categoria..." />
+              <button className="link-entity-btn" title="Vincular Artigo a um Projeto ou Projeto a um Artigo">
+                🔗 Vincular a {activeTab === 'projects' ? 'Artigo' : 'Projeto'}
+              </button>
             </div>
 
             <div className="meta-inputs">
