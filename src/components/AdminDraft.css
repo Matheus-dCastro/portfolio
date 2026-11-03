@@ -40,7 +40,7 @@
   }
 }
 
-/* Top Nav */
+/* Top Nav - Integrated with system, not floating */
 .admin-top-nav {
   display: flex;
   justify-content: space-between;
@@ -48,11 +48,17 @@
   padding: 0.75rem 1.5rem;
   background: #08080c;
   border-bottom: 1px solid #1a1a26;
-  z-index: 10;
+  position: sticky;
+  top: 0;
+  left: 0;
+  width: 100%;
+  box-sizing: border-box;
+  z-index: 100;
   flex-wrap: wrap;
   gap: 0.75rem;
   min-height: 56px;
   flex-shrink: 0;
+  border-radius: 0;
 }
 
 .nav-left {

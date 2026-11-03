@@ -5,6 +5,7 @@ import "./style.css";
 import Skills from "./components/Skills";
 import Experience from "./components/Experience";
 import Projects from "./components/Projects";
+import Articles from "./components/Articles";
 import Contacts from "./components/Contacts";
 import About from "./components/About";
 import logoWolf from "./assets/img/wolf(2).png";
@@ -111,6 +112,9 @@ function Home({ onNavigateToHobbies, onNavigateToLinks, onBackToHome, onOpenProj
           </section>
           <section id="projects" className="Projects-section">
             <Projects onOpenProject={onOpenProject} />
+          </section>
+          <section id="articles" className="articles-section">
+            <Articles onOpenArticle={onOpenProject} />
           </section>
           <section id="about" className="about-section">
             <About

@@ -76,6 +76,13 @@ function Projects({ onOpenProject }) {
         >
           🎓 Acadêmico ({academicoCount})
         </button>
+        <a
+          href="#articles"
+          className="category-filter-btn articles-link-btn"
+          title="Navegar até a seção de artigos técnicos e estudos de IA"
+        >
+          📑 Ver Artigos Técnicos →
+        </a>
       </div>
 
       {/* Render the 3 category sessions (shown all together when 'all', or filtered individually) */}

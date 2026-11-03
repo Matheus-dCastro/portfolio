@@ -222,8 +222,8 @@ export default function OrderDraft({ onBackToHome, onOpenProjectDetail, onNaviga
         </div>
       )}
 
-      {/* Header Bar */}
-      <header className="order-top-bar">
+      {/* Header Bar - Integrated with system */}
+      <nav className="order-top-bar">
         <div className="order-brand">
           <div className="order-logo-badge">✦</div>
           <div>
@@ -264,7 +264,7 @@ export default function OrderDraft({ onBackToHome, onOpenProjectDetail, onNaviga
             ← Voltar ao Portfólio
           </button>
         </div>
-      </header>
+      </nav>
 
       {/* Navigation & Search Bar */}
       <div className="order-controls-bar">

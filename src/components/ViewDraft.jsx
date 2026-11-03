@@ -62,8 +62,8 @@ export default function ViewDraft({ project: propProject, onBackToHome, onSelect
 
   return (
     <div className="view-detail-page">
-      {/* Top Header Sticky Bar */}
-      <header className="view-top-header">
+      {/* Top Header Bar - Integrated with system */}
+      <nav className="view-top-header">
         <button className="back-to-projects-btn" onClick={onBackToHome}>
           <span className="arrow">←</span> Voltar aos Projetos
         </button>
@@ -114,12 +114,12 @@ export default function ViewDraft({ project: propProject, onBackToHome, onSelect
             </a>
           )}
         </div>
-      </header>
+      </nav>
 
       {/* Main Container */}
       <main className="view-main-article">
         {/* Article Header */}
-        <header className="article-header">
+        <div className="article-header">
           <div className="article-badges-row">
             <span
               className={`category-badge cat-${project.category
@@ -155,7 +155,7 @@ export default function ViewDraft({ project: propProject, onBackToHome, onSelect
                 "Visão técnica desenvolvida com foco em performance, arquitetura escalável e código limpo."}
             </p>
           </div>
-        </header>
+        </div>
 
         {/* Content Type Selector (if multiple formats available) */}
         {(hasGDocs || hasPdf) && (
