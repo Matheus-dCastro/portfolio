@@ -2,11 +2,11 @@ import { createClient } from '@supabase/supabase-js'
 
 const supabaseUrl =
   (typeof import.meta !== "undefined" && import.meta.env?.VITE_SUPABASE_URL) ||
-  (typeof process !== "undefined" && process.env?.VITE_SUPABASE_URL);
+  (typeof globalThis !== "undefined" && globalThis.process?.env?.VITE_SUPABASE_URL);
 
 const supabaseAnonKey =
   (typeof import.meta !== "undefined" && import.meta.env?.VITE_SUPABASE_ANON_KEY) ||
-  (typeof process !== "undefined" && process.env?.VITE_SUPABASE_ANON_KEY);
+  (typeof globalThis !== "undefined" && globalThis.process?.env?.VITE_SUPABASE_ANON_KEY);
 
 // Flag exportada para sabermos se devemos usar Nuvem ou LocalStorage (Fallback)
 export const isSupabaseConfigured = Boolean(supabaseUrl && supabaseAnonKey)
