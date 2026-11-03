@@ -24,6 +24,8 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail }) {
   const [selectedTemplate, setSelectedTemplate] = useState("");
   const [notification, setNotification] = useState("");
   const [showShortcutsModal, setShowShortcutsModal] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isMetaOpen, setIsMetaOpen] = useState(false);
 
   // Form states
   const [title, setTitle] = useState(() => initialItem?.title || "");
@@ -181,7 +183,6 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail }) {
       if (!e.shiftKey) {
         replaceSelection("  ", start + 2, start + 2);
       } else {
-        // Unindent previous spaces if any
         if (start >= 2 && text.substring(start - 2, start) === "  ") {
           const newText = text.substring(0, start - 2) + text.substring(start);
           setMarkdownContent(newText);
@@ -205,7 +206,6 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail }) {
       if (checklistMatch) {
         e.preventDefault();
         if (checklistMatch[3].trim() === "") {
-          // Empty item, clear bullet
           const newText = text.substring(0, lineStart) + text.substring(start);
           setMarkdownContent(newText);
           setTimeout(() => {
@@ -251,7 +251,6 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail }) {
     }
   };
 
-  // Helper to replace selection and position cursor
   const replaceSelection = (insertion, cursorStart, cursorEnd) => {
     const textarea = textareaRef.current;
     if (!textarea) return;
@@ -269,7 +268,6 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail }) {
     }, 0);
   };
 
-  // Helper to wrap selection
   const insertWrapFormatting = (prefix, suffix, placeholder) => {
     const textarea = textareaRef.current;
     if (!textarea) return;
@@ -294,7 +292,6 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail }) {
     }, 0);
   };
 
-  // Toolbar Actions (Word-like click buttons)
   const applyToolbarFormat = (action) => {
     switch (action) {
       case "bold":
@@ -382,7 +379,7 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail }) {
       .filter(Boolean);
 
     const updatedItem = {
-      id: selectedId || `item-${Date.now()}`,
+      id: selectedId || generateUniqueId(),
       title,
       category,
       tags: tagsArray,
@@ -464,7 +461,7 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail }) {
 
   return (
     <div className="admin-editor-layout">
-      {/* Toast Notification */}
+      {/* Toast Notification (Repositioned to bottom-right to never overlap top controls) */}
       {notification && (
         <div className="admin-toast">
           <span>{notification}</span>
@@ -522,13 +519,22 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail }) {
 
       {/* Main Workspace */}
       <div className="admin-body">
-        {/* SIDEBAR: Item Explorer */}
-        <aside className="admin-sidebar-explorer">
+        {/* SIDEBAR: Item Explorer (with collapsible toggle) */}
+        <aside className={`admin-sidebar-explorer ${!isSidebarOpen ? "collapsed" : ""}`}>
           <div className="explorer-header">
             <h3>{activeTab === "projects" ? "Meus Projetos" : activeTab === "articles" ? "Artigos & Papers" : "Pensamentos"}</h3>
-            <button className="btn-new-item" onClick={clearForm} title="Criar novo item do zero">
-              + Novo
-            </button>
+            <div className="explorer-header-actions">
+              <button className="btn-new-item" onClick={clearForm} title="Criar novo item do zero">
+                + Novo
+              </button>
+              <button
+                className="btn-collapse-sidebar"
+                onClick={() => setIsSidebarOpen(false)}
+                title="Recolher barra lateral"
+              >
+                ◀
+              </button>
+            </div>
           </div>
 
           <div className="explorer-items-list">
@@ -587,6 +593,17 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail }) {
           {/* Metadata & Source Form */}
           <section className="document-meta-header">
             <div className="meta-row-primary">
+              {!isSidebarOpen && (
+                <button
+                  type="button"
+                  className="btn-expand-sidebar"
+                  onClick={() => setIsSidebarOpen(true)}
+                  title="Expandir lista de itens"
+                >
+                  ▶ Itens ({items.length})
+                </button>
+              )}
+
               <input
                 type="text"
                 className="document-title-input"
@@ -596,6 +613,16 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail }) {
               />
 
               <div className="primary-actions-group">
+                {/* Toggle button to collapse/expand properties drawer */}
+                <button
+                  type="button"
+                  className={`btn-toggle-meta ${isMetaOpen ? "active" : ""}`}
+                  onClick={() => setIsMetaOpen(!isMetaOpen)}
+                  title="Configurar Categoria, Tags, Links, Google Docs/PDF e Sinopse"
+                >
+                  ⚙️ Propriedades {isMetaOpen ? "▲" : "▼"}
+                </button>
+
                 {/* Template Selector */}
                 <div className="template-picker">
                   <select
@@ -605,7 +632,7 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail }) {
                       if (e.target.value) handleApplyTemplate(e.target.value);
                     }}
                   >
-                    <option value="">📋 Usar Modelo Pré-Pronto...</option>
+                    <option value="">📋 Modelos...</option>
                     {DOCUMENT_TEMPLATES.map((tpl) => (
                       <option key={tpl.id} value={tpl.id}>
                         {tpl.name}
@@ -615,157 +642,162 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail }) {
                 </div>
 
                 <button className="btn-save-document" onClick={handleSaveItem}>
-                  💾 Salvar Alterações
+                  💾 Salvar
                 </button>
               </div>
             </div>
 
-            {/* Content Source Switcher: Markdown vs Google Docs vs PDF */}
-            <div className="content-source-selector-bar">
-              <span className="source-label">Origem do Conteúdo:</span>
-              <div className="source-options">
-                <button
-                  type="button"
-                  className={`source-btn ${contentType === "markdown" ? "active" : ""}`}
-                  onClick={() => setContentType("markdown")}
-                >
-                  ✍️ Markdown & README
-                </button>
-                <button
-                  type="button"
-                  className={`source-btn ${contentType === "google-docs" ? "active" : ""}`}
-                  onClick={() => setContentType("google-docs")}
-                >
-                  🌐 Google Docs Integrado
-                </button>
-                <button
-                  type="button"
-                  className={`source-btn ${contentType === "pdf" ? "active" : ""}`}
-                  onClick={() => setContentType("pdf")}
-                >
-                  📄 Documento PDF
-                </button>
-              </div>
-
-              {contentType === "google-docs" && (
-                <span className="source-hint">
-                  ✨ Permite editar artigos direto no Google Docs enquanto o site reflete as alterações!
-                </span>
-              )}
-            </div>
-
-            {/* Dynamic Inputs depending on Content Type */}
-            {contentType === "google-docs" && (
-              <div className="external-source-card gdocs-source-card">
-                <div className="source-card-header">
-                  <strong>🌐 Link do Google Docs</strong>
-                  <span className="card-subtext">Cole o link público de compartilhamento ou publicação</span>
-                </div>
-                <div className="source-input-row">
-                  <input
-                    type="url"
-                    placeholder="Ex: https://docs.google.com/document/d/.../edit ou /pub?embedded=true"
-                    value={googleDocsUrl}
-                    onChange={(e) => setGoogleDocsUrl(e.target.value)}
-                  />
-                  {googleDocsUrl && (
-                    <a
-                      href={googleDocsUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="btn-test-link"
+            {/* Collapsible Meta Drawer (only rendered when isMetaOpen is true) */}
+            {isMetaOpen && (
+              <div className="collapsible-meta-drawer">
+                {/* Content Source Selector: Markdown vs Google Docs vs PDF */}
+                <div className="content-source-selector-bar">
+                  <span className="source-label">Origem do Conteúdo:</span>
+                  <div className="source-options">
+                    <button
+                      type="button"
+                      className={`source-btn ${contentType === "markdown" ? "active" : ""}`}
+                      onClick={() => setContentType("markdown")}
                     >
-                      Abrir no Google Docs ↗
-                    </a>
+                      ✍️ Markdown & README
+                    </button>
+                    <button
+                      type="button"
+                      className={`source-btn ${contentType === "google-docs" ? "active" : ""}`}
+                      onClick={() => setContentType("google-docs")}
+                    >
+                      🌐 Google Docs Integrado
+                    </button>
+                    <button
+                      type="button"
+                      className={`source-btn ${contentType === "pdf" ? "active" : ""}`}
+                      onClick={() => setContentType("pdf")}
+                    >
+                      📄 Documento PDF
+                    </button>
+                  </div>
+
+                  {contentType === "google-docs" && (
+                    <span className="source-hint">
+                      ✨ Artigos editados no Google Docs atualizam automaticamente no site!
+                    </span>
                   )}
+                </div>
+
+                {/* Dynamic Inputs depending on Content Type */}
+                {contentType === "google-docs" && (
+                  <div className="external-source-card gdocs-source-card">
+                    <div className="source-card-header">
+                      <strong>🌐 Link do Google Docs</strong>
+                      <span className="card-subtext">Cole o link público de compartilhamento ou publicação</span>
+                    </div>
+                    <div className="source-input-row">
+                      <input
+                        type="url"
+                        placeholder="Ex: https://docs.google.com/document/d/.../edit ou /pub?embedded=true"
+                        value={googleDocsUrl}
+                        onChange={(e) => setGoogleDocsUrl(e.target.value)}
+                      />
+                      {googleDocsUrl && (
+                        <a
+                          href={googleDocsUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="btn-test-link"
+                        >
+                          Abrir no Google Docs ↗
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {contentType === "pdf" && (
+                  <div className="external-source-card pdf-source-card">
+                    <div className="source-card-header">
+                      <strong>📄 Documento PDF (URL ou Arquivo)</strong>
+                      <span className="card-subtext">Insira o link direto ou caminho do arquivo PDF</span>
+                    </div>
+                    <div className="source-input-row">
+                      <input
+                        type="text"
+                        placeholder="Ex: /Matheus Vinicius Silva Freire de Castro.pdf ou URL externa"
+                        value={pdfUrl}
+                        onChange={(e) => setPdfUrl(e.target.value)}
+                      />
+                      {pdfUrl && (
+                        <a
+                          href={pdfUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="btn-test-link"
+                        >
+                          Visualizar PDF ↗
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Secondary Metadata: Tags, Category, Links, Synopsis */}
+                <div className="meta-secondary-grid">
+                  <div className="meta-field">
+                    <label>Categoria:</label>
+                    <select
+                      value={category}
+                      onChange={(e) => setCategory(e.target.value)}
+                    >
+                      <option value="Profissional">Profissional</option>
+                      <option value="Acadêmico">Acadêmico</option>
+                      <option value="Pessoal">Pessoal</option>
+                    </select>
+                  </div>
+
+                  <div className="meta-field flex-2">
+                    <label>Tags (separadas por vírgula):</label>
+                    <input
+                      type="text"
+                      placeholder="Ex: FastAPI, Python, Deep Learning, PyTorch"
+                      value={tags}
+                      onChange={(e) => setTags(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="meta-field flex-2">
+                    <label>GitHub Repositório:</label>
+                    <input
+                      type="text"
+                      placeholder="https://github.com/Matheus-dCastro/..."
+                      value={githubUrl}
+                      onChange={(e) => setGithubUrl(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="meta-field">
+                    <label>Live Demo (Opcional):</label>
+                    <input
+                      type="text"
+                      placeholder="https://meusite.com"
+                      value={demoUrl}
+                      onChange={(e) => setDemoUrl(e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                <div className="meta-synopsis-row">
+                  <label>Sinopse / Contexto IA (Resumo destacado na página):</label>
+                  <textarea
+                    rows="2"
+                    placeholder="Breve resumo objetivo que os visitantes e o agente Qwen usam para contextualizar o projeto..."
+                    value={shortDescription}
+                    onChange={(e) => setShortDescription(e.target.value)}
+                  ></textarea>
                 </div>
               </div>
             )}
-
-            {contentType === "pdf" && (
-              <div className="external-source-card pdf-source-card">
-                <div className="source-card-header">
-                  <strong>📄 Documento PDF (URL ou Arquivo)</strong>
-                  <span className="card-subtext">Insira o link direto ou caminho do arquivo PDF</span>
-                </div>
-                <div className="source-input-row">
-                  <input
-                    type="text"
-                    placeholder="Ex: /Matheus Vinicius Silva Freire de Castro.pdf ou URL externa"
-                    value={pdfUrl}
-                    onChange={(e) => setPdfUrl(e.target.value)}
-                  />
-                  {pdfUrl && (
-                    <a
-                      href={pdfUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="btn-test-link"
-                    >
-                      Visualizar PDF ↗
-                    </a>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {/* Secondary Metadata: Tags, Category, Links, Synopsis */}
-            <div className="meta-secondary-grid">
-              <div className="meta-field">
-                <label>Categoria:</label>
-                <select
-                  value={category}
-                  onChange={(e) => setCategory(e.target.value)}
-                >
-                  <option value="Profissional">Profissional</option>
-                  <option value="Acadêmico">Acadêmico</option>
-                  <option value="Pessoal">Pessoal</option>
-                </select>
-              </div>
-
-              <div className="meta-field flex-2">
-                <label>Tags (separadas por vírgula):</label>
-                <input
-                  type="text"
-                  placeholder="Ex: FastAPI, Python, Deep Learning, PyTorch"
-                  value={tags}
-                  onChange={(e) => setTags(e.target.value)}
-                />
-              </div>
-
-              <div className="meta-field flex-2">
-                <label>GitHub Repositório:</label>
-                <input
-                  type="text"
-                  placeholder="https://github.com/Matheus-dCastro/..."
-                  value={githubUrl}
-                  onChange={(e) => setGithubUrl(e.target.value)}
-                />
-              </div>
-
-              <div className="meta-field">
-                <label>Live Demo (Opcional):</label>
-                <input
-                  type="text"
-                  placeholder="https://meusite.com"
-                  value={demoUrl}
-                  onChange={(e) => setDemoUrl(e.target.value)}
-                />
-              </div>
-            </div>
-
-            <div className="meta-synopsis-row">
-              <label>Sinopse / Contexto IA (Resumo destacado na página):</label>
-              <textarea
-                rows="2"
-                placeholder="Breve resumo objetivo que os visitantes e o agente Qwen usam para contextualizar o projeto..."
-                value={shortDescription}
-                onChange={(e) => setShortDescription(e.target.value)}
-              ></textarea>
-            </div>
           </section>
 
-          {/* Word-like WYSIWYG Toolbar */}
+          {/* Word-like WYSIWYG Toolbar (with horizontal scroll on small screens to never overlap canvas) */}
           <section className="word-toolbar">
             <div className="toolbar-group">
               <button
@@ -1015,7 +1047,6 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail }) {
                 ) : (
                   <div className="rendered-markdown-content">
                     <div className="preview-label-tag">Obsidian Live Preview</div>
-                    {/* Rendered content fallback using clean HTML structure */}
                     <SimpleMarkdownRenderer content={markdownContent} />
                   </div>
                 )}
@@ -1104,7 +1135,6 @@ function SimpleMarkdownRenderer({ content }) {
     return <p className="empty-preview-text">Comece a digitar no editor para ver a prévia em tempo real...</p>;
   }
 
-  // Parse lines to create standard elements
   const lines = content.split("\n");
   const elements = [];
   let inCodeBlock = false;
@@ -1125,7 +1155,6 @@ function SimpleMarkdownRenderer({ content }) {
                   .map((c) => c.trim())
                   .filter((_, idx, arr) => idx > 0 && idx < arr.length - 1);
                 
-                // If it's the separator row (:---)
                 if (row.includes("---")) return null;
 
                 return (
@@ -1233,11 +1262,9 @@ function SimpleMarkdownRenderer({ content }) {
   return <div className="markdown-render-flow">{elements}</div>;
 }
 
-// Convert inline markdown (**bold**, *italic*, `code`, [link](url)) to JSX
 function formatInlineMarkdown(text) {
   if (!text) return "";
 
-  // Split by bold (**text**)
   const parts = [];
   const boldRegex = /\*\*(.*?)\*\*/g;
   let lastIndex = 0;
@@ -1259,7 +1286,6 @@ function formatInlineMarkdown(text) {
 }
 
 function processItalicAndCode(text) {
-  // Inline code (`code`)
   if (text.includes("`")) {
     const codeParts = text.split("`");
     return codeParts.map((sub, idx) =>

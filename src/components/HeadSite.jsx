@@ -22,7 +22,7 @@ function HeadSite({
   };
 
   return (
-    <header>
+    <header className="site-header">
       <a
         href={(isHobbies || isLinks) ? "#" : "#"}
         onClick={handleLogoClick}

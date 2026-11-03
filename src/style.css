@@ -141,7 +141,7 @@ body {
 /* ==========================================================================
    HEADER & NAVBAR - ESTILO PÍLULA VIDRO FUMÊ
    ========================================================================== */
-header {
+header.site-header {
   /* Transforma o menu em uma pílula flutuante centralizada */
   position: fixed;
   top: 20px;
@@ -770,6 +770,80 @@ h2 span {
   box-shadow: 0 0 15px rgba(139, 92, 246, 0.25);
 }
 
+.works-sessions-container {
+  display: flex;
+  flex-direction: column;
+  gap: 55px;
+}
+
+.works-category-section {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  scroll-margin-top: 100px;
+}
+
+.works-category-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding-bottom: 14px;
+  border-bottom: 1px solid rgba(139, 92, 246, 0.15);
+}
+
+.works-category-title-group {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.works-category-icon {
+  font-size: 1.6rem;
+  background: #08080c;
+  border: 1px solid #1a1a24;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+}
+
+.works-category-title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0 0 4px;
+  letter-spacing: -0.01em;
+}
+
+.works-count-pill {
+  font-size: 0.85rem;
+  color: #a78bfa;
+  font-weight: 600;
+}
+
+.works-category-desc {
+  font-size: 0.88rem;
+  color: #9ca3af;
+  margin: 0;
+  max-width: 650px;
+  line-height: 1.5;
+}
+
+.gdocs-badge {
+  background: rgba(66, 133, 244, 0.15) !important;
+  color: #93c5fd !important;
+  border-color: rgba(66, 133, 244, 0.3) !important;
+}
+
+.pdf-badge {
+  background: rgba(239, 68, 68, 0.15) !important;
+  color: #fca5a5 !important;
+  border-color: rgba(239, 68, 68, 0.3) !important;
+}
+
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
@@ -1079,7 +1153,7 @@ footer {
   }
 
   /* 2. Ajuste do Menu Pílula Flutuante */
-  header {
+  header.site-header {
     width: calc(100% - 24px); /* Margem fina nas laterais */
     padding: 8px 16px;
     top: 12px;
@@ -1200,7 +1274,7 @@ footer {
   /* ... mantenha as regras do body e sections anteriores ... */
 
   /* Menu Pílula Otimizado para Nomes Longos */
-  header {
+  header.site-header {
     width: calc(100% - 16px); /* Margem fina para aproveitar o máximo de tela */
     padding: 8px 12px;
     top: 10px;
@@ -1291,7 +1365,7 @@ footer {
 /* Otimização cirúrgica para iPhones e Smartphones menores */
 @media (max-width: 440px) {
   /* --- Modificação do Header Mobile --- */
-  header {
+  header.site-header {
     width: calc(100% - 16px);
     padding: 8px 12px;
     top: 10px;
@@ -1372,7 +1446,7 @@ footer {
   }
 }
 @media (max-width: 440px) {
-  header {
+  header.site-header {
     width: calc(
       100% - 16px
     ); /* Aproveita o máximo de espaço lateral no celular */
