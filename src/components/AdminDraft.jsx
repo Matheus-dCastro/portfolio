@@ -6,6 +6,9 @@ import {
   saveArticles,
   getStoredThoughts,
   saveThoughts,
+  getStoredCvConfig,
+  saveCvConfig,
+  DEFAULT_CV_CONFIG,
   convertGoogleDocsToEmbedUrl
 } from "../data/projectsData";
 import { DOCUMENT_TEMPLATES } from "../data/templatesData";
@@ -70,6 +73,11 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
     { sender: "bot", text: "Olá! Sou o assistente de IA do Matheus. Como posso ajudar com os projetos ou currículo?" }
   ]);
 
+  // CV Dual-Mode States (Google Docs & PDF)
+  const [cvGoogleDocsUrl, setCvGoogleDocsUrl] = useState(() => getStoredCvConfig().googleDocsUrl);
+  const [cvPdfUrl, setCvPdfUrl] = useState(() => getStoredCvConfig().pdfUrl);
+  const [cvUpdatedAt, setCvUpdatedAt] = useState(() => getStoredCvConfig().updatedAt || new Date().toISOString().split("T")[0]);
+
   const textareaRef = useRef(null);
 
   const showToast = (msg) => {
@@ -114,7 +122,7 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
 
   const handleTabChange = (tab) => {
     setActiveTab(tab);
-    if (tab === "agent") return;
+    if (tab === "agent" || tab === "cv") return;
 
     let nextList;
     if (tab === "projects") {
@@ -129,6 +137,29 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
       loadItemIntoForm(nextList[0]);
     } else {
       clearForm();
+    }
+  };
+
+  const handleSaveCv = (e) => {
+    if (e) e.preventDefault();
+    const cleanDocs = cvGoogleDocsUrl.trim();
+    const cleanPdf = cvPdfUrl.trim();
+    const newConfig = {
+      googleDocsUrl: cleanDocs,
+      pdfUrl: cleanPdf,
+      updatedAt: cvUpdatedAt || new Date().toISOString().split("T")[0]
+    };
+    saveCvConfig(newConfig);
+    showToast("✅ Configurações do Currículo (Google Docs & PDF) salvas com sucesso!");
+  };
+
+  const handleResetCv = () => {
+    if (window.confirm("Deseja restaurar as configurações padrão do currículo?")) {
+      saveCvConfig(DEFAULT_CV_CONFIG);
+      setCvGoogleDocsUrl(DEFAULT_CV_CONFIG.googleDocsUrl);
+      setCvPdfUrl(DEFAULT_CV_CONFIG.pdfUrl);
+      setCvUpdatedAt(DEFAULT_CV_CONFIG.updatedAt);
+      showToast("Configurações do currículo restauradas para o padrão.");
     }
   };
 
@@ -557,6 +588,13 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
             </button>
             <button
               type="button"
+              className={`cat-btn ${activeTab === "cv" ? "active" : ""}`}
+              onClick={() => handleTabChange("cv")}
+            >
+              📄 Currículo (CV)
+            </button>
+            <button
+              type="button"
               className={`cat-btn agent-tab ${activeTab === "agent" ? "active" : ""}`}
               onClick={() => handleTabChange("agent")}
             >
@@ -577,7 +615,7 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
           >
             🗂️ Organizar Vitrine por Tipo
           </button>
-          {onOpenProjectDetail && activeTab !== "agent" && (
+          {onOpenProjectDetail && activeTab !== "agent" && activeTab !== "cv" && (
             <button
               type="button"
               className="preview-public-btn"
@@ -705,6 +743,212 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
                 />
                 <button type="submit">Enviar ↗</button>
               </form>
+            </div>
+          </div>
+        </div>
+      ) : activeTab === "cv" ? (
+        <div className="cv-admin-dashboard">
+          <div className="cv-dash-left">
+            <div className="cv-card-section">
+              <div className="cv-section-header">
+                <div>
+                  <h2>📄 Gestão do Currículo (Dual-Mode)</h2>
+                  <p className="cv-section-subtitle">
+                    Configure os links do seu currículo. O visitante poderá escolher entre a versão interativa no <strong>Google Docs</strong> ou baixar o <strong>PDF Oficial</strong> diretamente pelo modal do Hero.
+                  </p>
+                </div>
+                <div className="cv-status-badge">
+                  <span className="cv-status-dot"></span> Ativo no Portfólio
+                </div>
+              </div>
+
+              <form onSubmit={handleSaveCv} className="cv-form">
+                <div className="cv-form-group">
+                  <label htmlFor="cv-docs-url">
+                    <span className="label-icon">🌐</span>
+                    <strong>Versão Web Interativa (Google Docs)</strong>
+                    <span className="cv-input-badge docs-badge">Sempre Atualizado</span>
+                  </label>
+                  <p className="cv-field-hint">
+                    Link público do seu currículo no Google Docs. Permite que recrutadores leiam imediatamente no navegador sem precisar baixar nada.
+                  </p>
+                  <div className="cv-input-with-action">
+                    <input
+                      id="cv-docs-url"
+                      type="url"
+                      className="cv-input"
+                      placeholder="https://docs.google.com/document/d/.../edit?usp=sharing"
+                      value={cvGoogleDocsUrl}
+                      onChange={(e) => setCvGoogleDocsUrl(e.target.value)}
+                      required
+                    />
+                    {cvGoogleDocsUrl && (
+                      <a
+                        href={cvGoogleDocsUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="cv-action-test-btn docs-btn"
+                        title="Abrir no Google Docs em nova aba"
+                      >
+                        Abrir Docs ↗
+                      </a>
+                    )}
+                  </div>
+                  <small className="cv-hint-note">
+                    💡 <em>Como obter:</em> No Google Docs &gt; Compartilhar &gt; Acesso Geral: &quot;Qualquer pessoa com o link&quot; (Leitor) &gt; Copiar link.
+                  </small>
+                </div>
+
+                <div className="cv-form-group">
+                  <label htmlFor="cv-pdf-url">
+                    <span className="label-icon">📄</span>
+                    <strong>Documento Oficial (Arquivo PDF)</strong>
+                    <span className="cv-input-badge pdf-badge">Download Direto</span>
+                  </label>
+                  <p className="cv-field-hint">
+                    Caminho local da pasta <code>/public</code> ou URL direta (Supabase Storage / GitHub Raw).
+                  </p>
+                  <div className="cv-input-with-action">
+                    <input
+                      id="cv-pdf-url"
+                      type="text"
+                      className="cv-input"
+                      placeholder="/Matheus Vinicius Silva Freire de Castro.pdf"
+                      value={cvPdfUrl}
+                      onChange={(e) => setCvPdfUrl(e.target.value)}
+                      required
+                    />
+                    {cvPdfUrl && (
+                      <a
+                        href={cvPdfUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="cv-action-test-btn pdf-btn"
+                        title="Testar visualização ou download do PDF"
+                      >
+                        Testar PDF ↗
+                      </a>
+                    )}
+                  </div>
+                  <small className="cv-hint-note">
+                    💡 <em>Hospedagem 100% gratuita:</em> Coloque o arquivo PDF na pasta <code>public/</code> do projeto Vite ou envie para o Supabase Storage no plano gratuito.
+                  </small>
+                </div>
+
+                <div className="cv-form-group">
+                  <label htmlFor="cv-updated-at">
+                    <span className="label-icon">📅</span>
+                    <strong>Data da Última Atualização</strong>
+                  </label>
+                  <input
+                    id="cv-updated-at"
+                    type="date"
+                    className="cv-input cv-date-input"
+                    value={cvUpdatedAt}
+                    onChange={(e) => setCvUpdatedAt(e.target.value)}
+                  />
+                  <small className="cv-hint-note">
+                    Exibida no rodapé do modal para garantir ao recrutador que o currículo está atualizado.
+                  </small>
+                </div>
+
+                <div className="cv-form-actions">
+                  <button type="submit" className="btn-save-cv-primary">
+                    💾 Salvar Configurações do CV
+                  </button>
+                  <button type="button" onClick={handleResetCv} className="btn-reset-cv-secondary">
+                    ↺ Restaurar Padrões
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            <div className="cv-info-card">
+              <h3>ℹ️ Fluxo de Experiência do Visitante</h3>
+              <ul className="cv-flow-list">
+                <li>
+                  <span className="step-num">1</span>
+                  <span>O visitante clica no botão <strong>&quot;📄 Download CV / Docs&quot;</strong> na tela inicial.</span>
+                </li>
+                <li>
+                  <span className="step-num">2</span>
+                  <span>Surge o popup moderno perguntando: <em>&quot;Versão Web Interativa (Google Docs)&quot;</em> ou <em>&quot;Documento Oficial PDF&quot;</em>.</span>
+                </li>
+                <li>
+                  <span className="step-num">3</span>
+                  <span>Ao clicar em <strong>Google Docs</strong>, visualiza na hora sem download prévio.</span>
+                </li>
+                <li>
+                  <span className="step-num">4</span>
+                  <span>Ao clicar em <strong>PDF</strong>, faz download direto ou abre para impressão.</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          {/* Right Column: Live Preview of Visitor Popup Modal */}
+          <div className="cv-dash-right">
+            <div className="cv-preview-container">
+              <div className="cv-preview-bar">
+                <span className="preview-label">👁️ Prévia Interativa do Modal</span>
+                <span className="preview-sublabel">Como o visitante vê</span>
+              </div>
+
+              <div className="cv-modal-preview-shell">
+                <div className="cv-modal-content">
+                  <div className="cv-modal-header">
+                    <div className="cv-modal-title-group">
+                      <span className="cv-modal-icon">📄</span>
+                      <div>
+                        <h3>Currículo de Matheus de Castro</h3>
+                        <p>Escolha o formato que deseja visualizar ou baixar:</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="cv-modal-options">
+                    <a
+                      href={cvGoogleDocsUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="cv-option-card gdocs-card"
+                    >
+                      <div className="cv-option-icon">🌐</div>
+                      <div className="cv-option-text">
+                        <div className="cv-option-badge">Versão Web Interativa</div>
+                        <h4>Abrir no Google Docs</h4>
+                        <p>Visualização instantânea, sempre atualizada com as últimas experiências e projetos.</p>
+                      </div>
+                      <span className="cv-option-arrow">↗</span>
+                    </a>
+
+                    <a
+                      href={cvPdfUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="cv-option-card pdf-card"
+                    >
+                      <div className="cv-option-icon">📄</div>
+                      <div className="cv-option-text">
+                        <div className="cv-option-badge">Documento Oficial PDF</div>
+                        <h4>Baixar Arquivo PDF</h4>
+                        <p>Formato clássico ideal para impressão, arquivamento ou anexar em processos seletivos.</p>
+                      </div>
+                      <span className="cv-option-arrow">↓</span>
+                    </a>
+                  </div>
+
+                  <div className="cv-modal-footer">
+                    <div className="cv-footer-hint">
+                      ℹ️ Atualizado em: <strong>{cvUpdatedAt || "Recente"}</strong> • Dual-Mode Docs &amp; PDF
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="cv-preview-footer-note">
+                💡 <em>Você pode clicar nos cards acima para testar seus links exatamente como o visitante!</em>
+              </div>
             </div>
           </div>
         </div>

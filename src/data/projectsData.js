@@ -313,10 +313,17 @@ Na engenharia de software e no treinamento de redes neurais, o princípio é id�
   }
 ];
 
+export const DEFAULT_CV_CONFIG = {
+  pdfUrl: "/Matheus Vinicius Silva Freire de Castro.pdf",
+  googleDocsUrl: "https://docs.google.com/document/d/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms/edit?usp=sharing",
+  updatedAt: "2026-03-15"
+};
+
 const STORAGE_KEYS = {
   PROJECTS: "portfolio_projects_data_v1",
   ARTICLES: "portfolio_articles_data_v1",
-  THOUGHTS: "portfolio_thoughts_data_v1"
+  THOUGHTS: "portfolio_thoughts_data_v1",
+  CV_CONFIG: "portfolio_cv_config_v1"
 };
 
 // Helper methods with localStorage fallback
@@ -385,6 +392,29 @@ export function saveThoughts(thoughts) {
     localStorage.setItem(STORAGE_KEYS.THOUGHTS, JSON.stringify(thoughts));
   } catch (e) {
     console.error("Erro ao salvar pensamentos:", e);
+  }
+}
+
+export function getStoredCvConfig() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEYS.CV_CONFIG);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed && typeof parsed === "object") {
+        return { ...DEFAULT_CV_CONFIG, ...parsed };
+      }
+    }
+  } catch (e) {
+    console.error("Erro ao ler configuração do CV:", e);
+  }
+  return DEFAULT_CV_CONFIG;
+}
+
+export function saveCvConfig(config) {
+  try {
+    localStorage.setItem(STORAGE_KEYS.CV_CONFIG, JSON.stringify(config));
+  } catch (e) {
+    console.error("Erro ao salvar configuração do CV:", e);
   }
 }
 
