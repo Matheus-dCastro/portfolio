@@ -82,9 +82,6 @@ function Perfil({ nomeCompleto, description, foto, cv }) {
           <a href="#projects" className="btn">
             See My Projects
           </a>
-          <a href="#articles" className="btn btn-outline">
-            📑 Artigos Técnicos
-          </a>
           <button
             type="button"
             className="btn btn-outline"

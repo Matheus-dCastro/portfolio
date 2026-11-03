@@ -46,7 +46,6 @@ function HeadSite({
               Home
             </a>
             <a href="/#projects">Works</a>
-            <a href="/#articles">Artigos</a>
             <a href="#interests">Intereces</a>
             <a href="#art-gallery">Arts</a>
             <a href="#thoughts">Pensamentos</a>
@@ -56,7 +55,6 @@ function HeadSite({
             <a href="#experience">Experiência</a>
             <a href="#skills">Skills</a>
             <a href="#projects">Works</a>
-            <a href="#articles">Artigos</a>
             <a href="#about">About</a>
             <a href="#" onClick={handleLinksClick} className="connect-link">Conecte-se</a>
           </>
