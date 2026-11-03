@@ -6,6 +6,8 @@ import {
   saveArticles,
   getStoredThoughts,
   saveThoughts,
+  getStoredExperiences,
+  saveExperiences,
   getStoredCvConfig,
   saveCvConfig,
   DEFAULT_CV_CONFIG,
@@ -15,6 +17,7 @@ import {
   fetchWorks,
   fetchArticles,
   fetchThoughts,
+  fetchExperiences,
   fetchCvConfig,
   fetchAgentConfig,
   persistWork,
@@ -23,6 +26,8 @@ import {
   removeArticle,
   persistThought,
   removeThought,
+  persistExperience,
+  removeExperience,
   persistCvConfig,
   persistAgentConfig,
   getCurrentUser,
@@ -81,6 +86,11 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
   const [relatedArticleId, setRelatedArticleId] = useState(() => initialItem?.relatedArticleId || "");
   const [relatedProjectId, setRelatedProjectId] = useState(() => initialItem?.relatedProjectId || "");
 
+  // Experience states
+  const [company, setCompany] = useState(() => initialItem?.company || "");
+  const [timePeriod, setTimePeriod] = useState(() => initialItem?.time || "");
+  const [bulletsText, setBulletsText] = useState(() => (Array.isArray(initialItem?.bullets) ? initialItem.bullets.join("\n") : ""));
+
   // AI Agent States
   const [agentPrompt, setAgentPrompt] = useState(() => {
     return localStorage.getItem("portfolio_agent_system_prompt") || DEFAULT_AGENT_SYSTEM_PROMPT;
@@ -115,6 +125,10 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
       });
     } else if (activeTab === "thoughts") {
       fetchThoughts(true).then((data) => {
+        if (data && data.length > 0) setItems(data);
+      });
+    } else if (activeTab === "experiences") {
+      fetchExperiences(true).then((data) => {
         if (data && data.length > 0) setItems(data);
       });
     } else if (activeTab === "cv") {
@@ -160,12 +174,15 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
     setMarkdownContent(item.content || "");
     setRelatedArticleId(item.relatedArticleId || "");
     setRelatedProjectId(item.relatedProjectId || "");
+    setCompany(item.company || "");
+    setTimePeriod(item.time || "");
+    setBulletsText(Array.isArray(item.bullets) ? item.bullets.join("\n") : item.bullets || "");
   };
 
   const clearForm = () => {
     const newId = generateUniqueId();
     setSelectedId(newId);
-    setTitle("Novo Documento");
+    setTitle(activeTab === "experiences" ? "Novo Cargo / Formação" : "Novo Documento");
     setCategory("Profissional");
     setTags("Python, IA, Backend");
     setShortDescription("");
@@ -178,6 +195,9 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
     setMarkdownContent("# Novo Título\n\nComece a redigir o conteúdo aqui...");
     setRelatedArticleId("");
     setRelatedProjectId("");
+    setCompany("");
+    setTimePeriod("");
+    setBulletsText("");
   };
 
   const handleTabChange = (tab) => {
@@ -189,8 +209,10 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
       nextList = getStoredProjects();
     } else if (tab === "articles") {
       nextList = getStoredArticles();
-    } else {
+    } else if (tab === "thoughts") {
       nextList = getStoredThoughts();
+    } else if (tab === "experiences") {
+      nextList = getStoredExperiences();
     }
     setItems(nextList);
     if (nextList.length > 0) {
@@ -508,6 +530,9 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
     } else if (activeTab === "articles") {
       saveArticles(newItems);
       await removeArticle(id);
+    } else if (activeTab === "experiences") {
+      saveExperiences(newItems);
+      await removeExperience(id);
     } else {
       saveThoughts(newItems);
       await removeThought(id);
@@ -524,7 +549,36 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
   // Save Item
   const handleSaveItem = async () => {
     if (!title.trim()) {
-      alert("Por favor, preencha o título do item.");
+      alert(activeTab === "experiences" ? "Por favor, preencha o cargo ou formação." : "Por favor, preencha o título do item.");
+      return;
+    }
+
+    if (activeTab === "experiences") {
+      const expItem = {
+        id: selectedId || generateUniqueId(),
+        title,
+        company: company || "Empresa / Instituição",
+        time: timePeriod || "Período",
+        bullets: bulletsText.split("\n").map((b) => b.trim()).filter(Boolean),
+        displayOrder: items.findIndex((it) => it.id === selectedId) >= 0 ? items.find((it) => it.id === selectedId).displayOrder : items.length,
+        isPublished: true,
+        updatedAt: new Date().toISOString().split("T")[0]
+      };
+
+      let newItems = [...items];
+      const existingIndex = newItems.findIndex((it) => it.id === expItem.id);
+      if (existingIndex >= 0) newItems[existingIndex] = expItem;
+      else newItems.unshift(expItem);
+
+      setItems(newItems);
+      setSelectedId(expItem.id);
+
+      const res = await persistExperience(expItem);
+      showToast(
+        res.cloud
+          ? "☁️ Experiência profissional salva no Supabase!"
+          : "💾 Experiência salva localmente (offline)!"
+      );
       return;
     }
 
@@ -712,6 +766,13 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
               onClick={() => handleTabChange("thoughts")}
             >
               💭 Pensamentos
+            </button>
+            <button
+              type="button"
+              className={`cat-btn ${activeTab === "experiences" ? "active" : ""}`}
+              onClick={() => handleTabChange("experiences")}
+            >
+              💼 Experiências
             </button>
             <button
               type="button"
@@ -1111,15 +1172,21 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
                   >
                     <div className="item-card-header">
                       <span className="card-order-num">#{idx + 1}</span>
-                      <span className="card-category-pill">{item.category}</span>
+                      <span className="card-category-pill">
+                        {activeTab === "experiences" ? (item.company || "Experiência") : item.category}
+                      </span>
                     </div>
                     <h4 className="item-card-title">{item.title}</h4>
                     <p className="item-card-desc">
-                      {item.shortDescription || item.aboutContext || "Sem descrição"}
+                      {activeTab === "experiences"
+                        ? `${item.time || "Período"} • ${item.bullets?.length || 0} atividades`
+                        : (item.shortDescription || item.aboutContext || "Sem descrição")}
                     </p>
                     <div className="item-card-footer">
                       <span className="item-format-tag">
-                        {item.contentType === "google-docs"
+                        {activeTab === "experiences"
+                          ? "💼 Experiência"
+                          : item.contentType === "google-docs"
                           ? "🌐 Google Docs"
                           : item.contentType === "pdf"
                           ? "📄 PDF"
@@ -1156,6 +1223,120 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
 
           {/* EDITOR AREA */}
           <main className="admin-editor-workspace">
+            {activeTab === "experiences" ? (
+              <div className="experience-admin-form" style={{ padding: "28px", maxWidth: "960px", margin: "0 auto", width: "100%" }}>
+                <div style={{ background: "#161b22", border: "1px solid #30363d", borderRadius: "12px", padding: "24px", marginBottom: "28px", boxShadow: "0 4px 20px rgba(0,0,0,0.3)" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
+                    <h2 style={{ margin: 0, color: "#f0f6fc", fontSize: "20px", display: "flex", alignItems: "center", gap: "10px" }}>
+                      <span>💼</span> {selectedId ? "Editar Experiência Profissional" : "Nova Experiência"}
+                    </h2>
+                    <div style={{ display: "flex", gap: "10px" }}>
+                      <button
+                        type="button"
+                        onClick={clearForm}
+                        style={{ padding: "8px 14px", background: "#21262d", color: "#c9d1d9", border: "1px solid #30363d", borderRadius: "6px", cursor: "pointer", fontSize: "13px" }}
+                      >
+                        + Novo Cadastro
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleSaveItem}
+                        style={{ padding: "8px 18px", background: "#238636", color: "#fff", border: "none", borderRadius: "6px", fontWeight: "600", cursor: "pointer", fontSize: "14px", display: "flex", alignItems: "center", gap: "6px" }}
+                      >
+                        💾 Salvar Experiência
+                      </button>
+                    </div>
+                  </div>
+
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "18px", marginBottom: "18px" }}>
+                    <div>
+                      <label style={{ display: "block", marginBottom: "8px", fontSize: "13px", fontWeight: "600", color: "#8b949e" }}>
+                        Cargo ou Formação:
+                      </label>
+                      <input
+                        type="text"
+                        style={{ width: "100%", fontSize: "15px", padding: "12px", borderRadius: "8px", background: "#0d1117", border: "1px solid #30363d", color: "#fff" }}
+                        placeholder="Ex: IT Intern, Backend Developer, Bacharelado em BTI..."
+                        value={title}
+                        onChange={(e) => setTitle(e.target.value)}
+                      />
+                    </div>
+
+                    <div>
+                      <label style={{ display: "block", marginBottom: "8px", fontSize: "13px", fontWeight: "600", color: "#8b949e" }}>
+                        Empresa / Órgão / Instituição:
+                      </label>
+                      <input
+                        type="text"
+                        style={{ width: "100%", fontSize: "15px", padding: "12px", borderRadius: "8px", background: "#0d1117", border: "1px solid #30363d", color: "#fff" }}
+                        placeholder="Ex: Detran, Cachina Soluções, UFRN..."
+                        value={company}
+                        onChange={(e) => setCompany(e.target.value)}
+                      />
+                    </div>
+                  </div>
+
+                  <div style={{ marginBottom: "18px" }}>
+                    <label style={{ display: "block", marginBottom: "8px", fontSize: "13px", fontWeight: "600", color: "#8b949e" }}>
+                      Período / Linha do Tempo:
+                    </label>
+                    <input
+                      type="text"
+                      style={{ width: "100%", fontSize: "14px", padding: "12px", borderRadius: "8px", background: "#0d1117", border: "1px solid #30363d", color: "#fff" }}
+                      placeholder="Ex: Junho 2026 - Atualmente ou 2024.1 - Presente"
+                      value={timePeriod}
+                      onChange={(e) => setTimePeriod(e.target.value)}
+                    />
+                  </div>
+
+                  <div style={{ marginBottom: "20px" }}>
+                    <label style={{ display: "block", marginBottom: "8px", fontSize: "13px", fontWeight: "600", color: "#8b949e" }}>
+                      Atividades & Conquistas (digite 1 por linha):
+                    </label>
+                    <textarea
+                      rows="6"
+                      style={{ width: "100%", fontSize: "14px", padding: "14px", borderRadius: "8px", background: "#0d1117", border: "1px solid #30363d", color: "#fff", lineHeight: "1.6", resize: "vertical" }}
+                      placeholder="Ex:&#10;Desenvolvimento e otimização de arquiteturas de backend em Python&#10;Automação de processos com n8n&#10;Gestão de servidores Linux Ubuntu..."
+                      value={bulletsText}
+                      onChange={(e) => setBulletsText(e.target.value)}
+                    />
+                    <small style={{ color: "#8b949e", fontSize: "12px", display: "block", marginTop: "6px" }}>
+                      💡 Cada linha quebrada será renderizada como um ponto na lista de experiência do portfólio.
+                    </small>
+                  </div>
+                </div>
+
+                {/* Live Preview Card */}
+                <div style={{ background: "#0d1117", border: "1px solid rgba(139, 92, 246, 0.4)", borderRadius: "12px", padding: "24px", boxShadow: "0 8px 30px rgba(139, 92, 246, 0.1)" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
+                    <span style={{ color: "#a78bfa", fontWeight: "700", fontSize: "14px", textTransform: "uppercase", letterSpacing: "1px" }}>
+                      👁️ Prévia Idêntica ao Site Oficial
+                    </span>
+                    <span style={{ fontSize: "12px", color: "#8b949e" }}>Seção &quot;Experiência&quot;</span>
+                  </div>
+
+                  <div className="exp-display-card">
+                    <div className="exp-card-body">
+                      <h3>
+                        {title || "Cargo ou Título"} |{" "}
+                        <span className="company-highlight">{company || "Empresa"}</span>
+                      </h3>
+                      <p className="exp-timeline">{timePeriod || "Período / Ano"}</p>
+                      <div className="card-inner-divider"></div>
+                      <ul className="exp-bullet-list">
+                        {(bulletsText.split("\n").map((b) => b.trim()).filter(Boolean).length > 0
+                          ? bulletsText.split("\n").map((b) => b.trim()).filter(Boolean)
+                          : ["Sua atividade ou responsabilidade aparecerá aqui..."]
+                        ).map((bullet, idx) => (
+                          <li key={idx}>{bullet}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <>
             {/* Metadata Header Form */}
             <section className="document-meta-header">
               <div className="meta-row-primary">
@@ -1713,6 +1894,8 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
                 <span className="status-shortcut-hint"><code>Ctrl+S</code> para salvar</span>
               </div>
             </footer>
+          </>
+        )}
           </main>
         </div>
       )}

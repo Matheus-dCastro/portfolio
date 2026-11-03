@@ -241,7 +241,7 @@ export default function OrderDraft({ onBackToHome, onOpenProjectDetail, onNaviga
         <div className="order-brand">
           <div className="order-logo-badge">✦</div>
           <div>
-            <h1>Organizador de Vitrine por Tipo (Draft)</h1>
+            <h1>Organizador de Vitrine por Tipo</h1>
             <p className="order-subtitle">
               Sessões separadas: Pessoal, Profissional e Acadêmico em cards idênticos ao site
             </p>

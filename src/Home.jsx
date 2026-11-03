@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import HeadSite from "./components/HeadSite";
 import Perfil from "./components/Perfil";
 
@@ -12,8 +13,32 @@ import logoWolf from "./assets/img/wolf(2).png";
 import fotoAlomyr from "./assets/img/alomyr.jpeg";
 import cvMatheus from "./docs/Matheus Vinicius Silva Freire de Castro.pdf";
 import Rodape from "./components/Rodape";
+import { fetchWorks, fetchArticles, fetchExperiences } from "./lib/supabaseService";
+import { getStoredProjects, getStoredArticles, getStoredExperiences } from "./data/projectsData";
 
 function Home({ onNavigateToHobbies, onNavigateToLinks, onBackToHome, onOpenProject }) {
+  const [experiences, setExperiences] = useState(() => getStoredExperiences());
+  const [projectsCount, setProjectsCount] = useState(() => getStoredProjects().length);
+  const [articlesCount, setArticlesCount] = useState(() => getStoredArticles().length);
+  const [activeShowcaseTab, setActiveShowcaseTab] = useState("projects"); // 'projects' | 'articles'
+
+  useEffect(() => {
+    fetchExperiences().then((loaded) => {
+      if (Array.isArray(loaded) && loaded.length > 0) setExperiences(loaded);
+    });
+    fetchWorks(false).then((loaded) => {
+      if (Array.isArray(loaded)) setProjectsCount(loaded.length);
+    });
+    fetchArticles(false).then((loaded) => {
+      if (Array.isArray(loaded)) {
+        setArticlesCount(loaded.length);
+        if (projectsCount === 0 && loaded.length > 0) {
+          setActiveShowcaseTab("articles");
+        }
+      }
+    });
+  }, [projectsCount]);
+
   const dados = {
     nome: "Matheus",
     sobrenome: "de Castro",
@@ -25,50 +50,6 @@ function Home({ onNavigateToHobbies, onNavigateToLinks, onBackToHome, onOpenProj
     "IT Technician — IFRN. Undergraduate student in Information Technology (BTI) at UFRN, focusing my studies on Machine Learning and backend development.";
   const fotoPerfil = fotoAlomyr;
   const cv = cvMatheus;
-  const expData = [
-    {
-      title: "IT Intern",
-      company: "Detran",
-      time: "Junho 2026 - Atualmente",
-      bullets: [
-        "Projetar, desenvolver e implementar softwares para atender as necessidades do Órgão;",
-        "Utilizando tecnicas de programação e gestão de projetos;",
-        "Desenvolver analise de requisitos;",
-        "Desenvolver projetos para aplicativo mobile. ",
-      ],
-    },
-    {
-      title: "IT Intern",
-      company: "Cachina Soluções",
-      time: "Março 2026 - Julho 2026",
-      bullets: [
-        "Desenvolvimento e otimização de arquiteturas de backend;",
-        "Automação de fluxos de trabalho inteligentes utilizando n8n integrados a ecossistemas digitais;",
-        "Gerenciamento ágil de servidores Linux (Ubuntu Server) e documentação técnica de processos operacionais;",
-        "Principais tecnologias utilizadas: Python, SQL, n8n, Linux, Bash e Git.",
-      ],
-    },
-    {
-      title: "Bacharelado em Tecnologia da Informação (BTI)",
-      company: "UFRN - Campus Natal",
-      time: "2024.1 - Presente",
-      bullets: [
-        "Cursando o 6º período",
-        "Sólida base acadêmica em algoritmos, estruturas de dados avançadas, estatística e álgebra linear aplicadas.",
-        "Foco em andamento nas áreas de MLOps, Deep Learning, Aprendizado por Reforço e Computação de Alto Desempenho.",
-      ],
-    },
-    {
-      title: "IT Technician Training",
-      company: "IFRN Campus Lajes",
-      time: "2019 - 2022",
-      bullets: [
-        "Formação técnica integrada estruturada com foco em Desenvolvimento web;",
-        "Desenvolvimento de lógica algorítmica sólida e fundamentos de bancos de dados relacionais;",
-        "Práticas de laboratório envolvendo montagem, manutenção e implantação de arquiteturas operacionais locais.",
-      ],
-    },
-  ];
   const descriptionP1About =
     "I am an Information Technology (BTI) student at UFRN, specializing in building robust back-end architectures and processing intelligent pipelines. I bridge the mathematical rigor of <strong>Machine Learning Engineering</strong> with the clean aesthetic execution of software architecture.";
   const descriptionP2About =
@@ -108,14 +89,44 @@ function Home({ onNavigateToHobbies, onNavigateToLinks, onBackToHome, onOpenProj
             <Skills />
           </section>
           <section id="experience" className="experience-section">
-            <Experience expData={expData} />
+            <Experience expData={experiences} />
           </section>
-          <section id="projects" className="Projects-section">
-            <Projects onOpenProject={onOpenProject} />
-          </section>
-          <section id="articles" className="articles-section">
-            <Articles onOpenArticle={onOpenProject} />
-          </section>
+
+          {/* Browser-style Tab Showcase (Selected Works vs Technical Articles) */}
+          {(projectsCount > 0 || articlesCount > 0) && (
+            <section id="projects" className="Projects-section browser-showcase-container">
+              {projectsCount > 0 && articlesCount > 0 && (
+                <div className="browser-tabs-header">
+                  <button
+                    type="button"
+                    className={`browser-tab-button ${activeShowcaseTab === "projects" ? "active" : ""}`}
+                    onClick={() => setActiveShowcaseTab("projects")}
+                  >
+                    <span>💻 Selected Works</span>
+                    <span className="browser-tab-pill">{projectsCount}</span>
+                  </button>
+                  <button
+                    type="button"
+                    className={`browser-tab-button ${activeShowcaseTab === "articles" ? "active" : ""}`}
+                    onClick={() => setActiveShowcaseTab("articles")}
+                  >
+                    <span>📑 Technical Articles</span>
+                    <span className="browser-tab-pill">{articlesCount}</span>
+                  </button>
+                </div>
+              )}
+
+              {activeShowcaseTab === "projects" && projectsCount > 0 && (
+                <Projects onOpenProject={onOpenProject} />
+              )}
+
+              {activeShowcaseTab === "articles" && articlesCount > 0 && (
+                <div id="articles">
+                  <Articles onOpenArticle={onOpenProject} />
+                </div>
+              )}
+            </section>
+          )}
           <section id="about" className="about-section">
             <About
               descriptionP1={descriptionP1About}

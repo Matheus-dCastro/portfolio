@@ -7,6 +7,7 @@ import ViewDraft from "./components/ViewDraft";
 import OrderDraft from "./components/OrderDraft";
 import LoginDraft from "./components/LoginDraft";
 import { getStoredProjects } from "./data/projectsData";
+import { getCurrentUser, onAuthChange, isAuthorizedAdmin } from "./lib/supabaseService";
 
 function App() {
   const [selectedProject, setSelectedProject] = useState(() => {
@@ -46,6 +47,38 @@ function App() {
     }
     return "home";
   });
+
+  const [currentUser, setCurrentUser] = useState(null);
+  const [authChecked, setAuthChecked] = useState(false);
+
+  useEffect(() => {
+    getCurrentUser().then((user) => {
+      setCurrentUser(user);
+      setAuthChecked(true);
+    });
+
+    const sub = onAuthChange((event, session) => {
+      const user = session?.user || null;
+      setCurrentUser(user);
+      setAuthChecked(true);
+
+      if (event === "SIGNED_IN" && user) {
+        if (window.location.pathname.includes("/l0g1n") || window.location.pathname.includes("/login")) {
+          setCurrentPage("admin");
+          window.history.pushState({}, "", "/4dm1n");
+        }
+      } else if (event === "SIGNED_OUT") {
+        if (currentPage === "admin" || currentPage === "order-draft") {
+          setCurrentPage("login");
+          window.history.pushState({}, "", "/l0g1n");
+        }
+      }
+    });
+
+    return () => {
+      if (sub?.unsubscribe) sub.unsubscribe();
+    };
+  }, [currentPage]);
 
   // Handle browser back/forward buttons
   useEffect(() => {
@@ -126,6 +159,19 @@ function App() {
   }
 
   if (currentPage === "admin") {
+    // Bloqueia acesso a usuários não autenticados ou não autorizados
+    if (authChecked && (!currentUser || !isAuthorizedAdmin(currentUser))) {
+      return (
+        <LoginDraft
+          onBackToHome={handleBackToHome}
+          onNavigateToAdmin={() => {
+            setCurrentPage("admin");
+            window.history.pushState({}, "", "/4dm1n");
+          }}
+        />
+      );
+    }
+
     return (
       <AdminDraft
         onBackToHome={handleBackToHome}
@@ -139,6 +185,18 @@ function App() {
   }
 
   if (currentPage === "order-draft") {
+    if (authChecked && (!currentUser || !isAuthorizedAdmin(currentUser))) {
+      return (
+        <LoginDraft
+          onBackToHome={handleBackToHome}
+          onNavigateToAdmin={() => {
+            setCurrentPage("admin");
+            window.history.pushState({}, "", "/4dm1n");
+          }}
+        />
+      );
+    }
+
     return (
       <OrderDraft
         onBackToHome={handleBackToHome}

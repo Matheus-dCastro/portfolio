@@ -60,43 +60,44 @@ function Projects({ onOpenProject }) {
       </h2>
 
       {/* 3 Sessions Filter Bar */}
-      <div className="portfolio-category-bar">
-        <button
-          type="button"
-          className={`category-filter-btn ${activeCategory === "all" ? "active" : ""}`}
-          onClick={() => setActiveCategory("all")}
-        >
-          Todos ({projects.length})
-        </button>
-        <button
-          type="button"
-          className={`category-filter-btn ${activeCategory === "Profissional" ? "active" : ""}`}
-          onClick={() => setActiveCategory("Profissional")}
-        >
-          🏢 Profissional ({profCount})
-        </button>
-        <button
-          type="button"
-          className={`category-filter-btn ${activeCategory === "Pessoal" ? "active" : ""}`}
-          onClick={() => setActiveCategory("Pessoal")}
-        >
-          🚀 Pessoal ({pessoalCount})
-        </button>
-        <button
-          type="button"
-          className={`category-filter-btn ${activeCategory === "Acadêmico" ? "active" : ""}`}
-          onClick={() => setActiveCategory("Acadêmico")}
-        >
-          🎓 Acadêmico ({academicoCount})
-        </button>
-        <a
-          href="#articles"
-          className="category-filter-btn articles-link-btn"
-          title="Navegar até a seção de artigos técnicos e estudos de IA"
-        >
-          📑 Ver Artigos Técnicos →
-        </a>
-      </div>
+      {projects.length > 0 && (
+        <div className="portfolio-category-bar">
+          <button
+            type="button"
+            className={`category-filter-btn ${activeCategory === "all" ? "active" : ""}`}
+            onClick={() => setActiveCategory("all")}
+          >
+            Todos ({projects.length})
+          </button>
+          {profCount > 0 && (
+            <button
+              type="button"
+              className={`category-filter-btn ${activeCategory === "Profissional" ? "active" : ""}`}
+              onClick={() => setActiveCategory("Profissional")}
+            >
+              🏢 Profissional ({profCount})
+            </button>
+          )}
+          {pessoalCount > 0 && (
+            <button
+              type="button"
+              className={`category-filter-btn ${activeCategory === "Pessoal" ? "active" : ""}`}
+              onClick={() => setActiveCategory("Pessoal")}
+            >
+              🚀 Pessoal ({pessoalCount})
+            </button>
+          )}
+          {academicoCount > 0 && (
+            <button
+              type="button"
+              className={`category-filter-btn ${activeCategory === "Acadêmico" ? "active" : ""}`}
+              onClick={() => setActiveCategory("Acadêmico")}
+            >
+              🎓 Acadêmico ({academicoCount})
+            </button>
+          )}
+        </div>
+      )}
 
       {/* Render the 3 category sessions (shown all together when 'all', or filtered individually) */}
       <div className="works-sessions-container">

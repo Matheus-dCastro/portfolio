@@ -1,7 +1,7 @@
 // src/lib/supabaseService.js
 // Camada unificada de dados: Supabase Cloud + LocalStorage Fallback transparente
 
-import { supabase, isSupabaseConfigured } from "./supabaseClient";
+import { supabase, isSupabaseConfigured } from "./supabaseClient.js";
 import {
   getStoredProjects,
   saveProjects,
@@ -9,9 +9,34 @@ import {
   saveArticles,
   getStoredThoughts,
   saveThoughts,
+  getStoredExperiences,
+  saveExperiences,
   getStoredCvConfig,
   saveCvConfig
-} from "../data/projectsData";
+} from "../data/projectsData.js";
+
+// ==========================================
+// CONTROLE DE ACESSO DO ADMINISTRADOR (WHITELIST)
+// ==========================================
+export const ALLOWED_ADMINS = [
+  "matheus.vsf.castro.25@gmail.com",
+  "matheus-dcastro"
+];
+
+export function isAuthorizedAdmin(user) {
+  if (!user) return false;
+  const email = (user.email || "").toLowerCase();
+  const githubUser = (
+    user.user_metadata?.user_name ||
+    user.user_metadata?.preferred_username ||
+    ""
+  ).toLowerCase();
+
+  return (
+    ALLOWED_ADMINS.some((a) => a.toLowerCase() === email) ||
+    (githubUser && ALLOWED_ADMINS.some((a) => a.toLowerCase() === githubUser))
+  );
+}
 
 // ==========================================
 // MAPPERS: Banco (snake_case) <-> Frontend (camelCase)
@@ -142,6 +167,35 @@ export function mapThoughtToDb(item) {
   };
 }
 
+export function mapDbExperience(row) {
+  return {
+    id: row.id,
+    title: row.title,
+    company: row.company,
+    time: row.time,
+    bullets: Array.isArray(row.bullets) ? row.bullets : [],
+    displayOrder: row.display_order ?? 0,
+    isPublished: row.is_published ?? true,
+    updatedAt: row.updated_at ? row.updated_at.split("T")[0] : ""
+  };
+}
+
+export function mapExperienceToDb(item) {
+  return {
+    id: item.id,
+    title: item.title,
+    company: item.company,
+    time: item.time,
+    bullets: Array.isArray(item.bullets)
+      ? item.bullets
+      : typeof item.bullets === "string"
+        ? item.bullets.split("\n").map((b) => b.trim()).filter(Boolean)
+        : [],
+    display_order: item.displayOrder ?? 0,
+    is_published: item.isPublished !== false
+  };
+}
+
 // ==========================================
 // OPERAÇÕES DE LEITURA (FETCH)
 // ==========================================
@@ -228,6 +282,34 @@ export async function fetchThoughts(includeDrafts = false) {
     }
   }
   return getStoredThoughts();
+}
+
+export async function fetchExperiences(includeDrafts = false) {
+  if (isSupabaseConfigured && supabase) {
+    try {
+      let query = supabase
+        .from("experiences")
+        .select("*")
+        .order("display_order", { ascending: true });
+
+      if (!includeDrafts) {
+        query = query.eq("is_published", true);
+      }
+
+      const { data, error } = await query;
+      if (!error && Array.isArray(data) && data.length > 0) {
+        const mapped = data.map(mapDbExperience);
+        saveExperiences(mapped);
+        return mapped;
+      }
+      if (error) {
+        console.warn("Supabase fetchExperiences avisou:", error.message);
+      }
+    } catch (err) {
+      console.warn("Falha de rede em fetchExperiences:", err);
+    }
+  }
+  return getStoredExperiences();
 }
 
 export async function fetchCvConfig() {
@@ -408,6 +490,49 @@ export async function removeThought(id) {
       return { success: true, cloud: true };
     } catch (err) {
       console.error("Erro ao remover pensamento no Supabase:", err);
+      return { success: true, cloud: false, error: err.message };
+    }
+  }
+  return { success: true, cloud: false };
+}
+
+export async function persistExperience(item) {
+  const current = getStoredExperiences();
+  const idx = current.findIndex((e) => e.id === item.id);
+  let updatedList;
+  if (idx >= 0) {
+    updatedList = [...current];
+    updatedList[idx] = item;
+  } else {
+    updatedList = [item, ...current];
+  }
+  saveExperiences(updatedList);
+
+  if (isSupabaseConfigured && supabase) {
+    try {
+      const payload = mapExperienceToDb(item);
+      const { error } = await supabase.from("experiences").upsert(payload, { onConflict: "id" });
+      if (error) throw error;
+      return { success: true, cloud: true };
+    } catch (err) {
+      console.error("Erro ao salvar experiência no Supabase:", err);
+      return { success: true, cloud: false, error: err.message };
+    }
+  }
+  return { success: true, cloud: false };
+}
+
+export async function removeExperience(id) {
+  const current = getStoredExperiences();
+  saveExperiences(current.filter((e) => e.id !== id));
+
+  if (isSupabaseConfigured && supabase) {
+    try {
+      const { error } = await supabase.from("experiences").delete().eq("id", id);
+      if (error) throw error;
+      return { success: true, cloud: true };
+    } catch (err) {
+      console.error("Erro ao remover experiência no Supabase:", err);
       return { success: true, cloud: false, error: err.message };
     }
   }

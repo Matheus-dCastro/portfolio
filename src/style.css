@@ -2320,3 +2320,64 @@ footer {
     visibility: hidden;
   }
 }
+
+/* =========================================================
+   BROWSER-STYLE SHOWCASE TABS (Works & Articles)
+   ========================================================= */
+.browser-showcase-container {
+  margin-top: 50px;
+  position: relative;
+}
+
+.browser-tabs-header {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  background: rgba(15, 17, 23, 0.85);
+  border-bottom: 2px solid rgba(139, 92, 246, 0.35);
+  padding: 10px 16px 0;
+  border-radius: 14px 14px 0 0;
+  backdrop-filter: blur(12px);
+  margin-bottom: 24px;
+}
+
+.browser-tab-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(26, 31, 46, 0.7);
+  color: #94a3b8;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: none;
+  border-radius: 10px 10px 0 0;
+  padding: 12px 22px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  top: 2px;
+}
+
+.browser-tab-button:hover {
+  color: #f8fafc;
+  background: rgba(30, 41, 59, 0.95);
+  transform: translateY(-1px);
+}
+
+.browser-tab-button.active {
+  color: #ffffff;
+  background: #090d16;
+  border-color: rgba(139, 92, 246, 0.6);
+  border-bottom: 2px solid #090d16;
+  box-shadow: 0 -4px 15px rgba(139, 92, 246, 0.25);
+}
+
+.browser-tab-pill {
+  font-size: 12px;
+  background: rgba(139, 92, 246, 0.25);
+  color: #c4b5fd;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-weight: 700;
+}

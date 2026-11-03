@@ -1,5 +1,12 @@
-import { useState } from "react";
-import { loginWithEmail, signupWithEmail, loginWithGitHub } from "../lib/supabaseService";
+import { useState, useEffect } from "react";
+import {
+  loginWithEmail,
+  signupWithEmail,
+  loginWithGitHub,
+  getCurrentUser,
+  logoutUser,
+  isAuthorizedAdmin
+} from "../lib/supabaseService";
 import "./LoginDraft.css";
 
 export default function LoginDraft({ onBackToHome, onNavigateToAdmin }) {
@@ -9,6 +16,24 @@ export default function LoginDraft({ onBackToHome, onNavigateToAdmin }) {
   const [errorNotice, setErrorNotice] = useState("");
   const [loading, setLoading] = useState(false);
   const [isSignUpMode, setIsSignUpMode] = useState(false);
+
+  useEffect(() => {
+    // Se o usuário já estiver logado (ex: retorno do GitHub OAuth)
+    getCurrentUser().then((user) => {
+      if (user) {
+        if (isAuthorizedAdmin(user)) {
+          setNotice("✅ Sessão ativa de Matheus de Castro detectada. Redirecionando...");
+          setTimeout(() => {
+            if (onNavigateToAdmin) onNavigateToAdmin();
+            else window.location.href = "/4dm1n";
+          }, 500);
+        } else {
+          logoutUser();
+          setErrorNotice("⛔ Acesso Negado: Apenas a conta de Matheus de Castro (Matheus-dCastro) possui autorização.");
+        }
+      }
+    });
+  }, [onNavigateToAdmin]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -31,9 +56,15 @@ export default function LoginDraft({ onBackToHome, onNavigateToAdmin }) {
             : "Cadastro realizado com sucesso! Se a confirmação de email estiver ativada no Supabase, verifique sua caixa de entrada."
         );
       } else {
-        const { error } = await loginWithEmail(email, password);
+        const { data, error } = await loginWithEmail(email, password);
         if (error) throw error;
-        setNotice("✅ Autenticado com sucesso! Redirecionando para o painel 4dm1n...");
+        
+        if (!isAuthorizedAdmin(data?.user)) {
+          await logoutUser();
+          throw new Error("⛔ Acesso Negado: Este email não está autorizado como administrador.");
+        }
+
+        setNotice("✅ Autenticado como Matheus de Castro! Redirecionando para o painel 4dm1n...");
         setTimeout(() => {
           if (onNavigateToAdmin) onNavigateToAdmin();
           else window.location.href = "/4dm1n";
@@ -163,7 +194,7 @@ export default function LoginDraft({ onBackToHome, onNavigateToAdmin }) {
             else window.location.href = "/4dm1n";
           }}
         >
-          ⚡ Acessar Painel 4dm1n (Modo Rascunho) →
+          ⚡ Acessar Painel 4dm1n →
         </button>
       </div>
 

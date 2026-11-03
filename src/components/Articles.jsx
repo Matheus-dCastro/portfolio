@@ -23,6 +23,10 @@ export default function Articles({ onOpenArticle }) {
       ? articles
       : articles.filter((a) => (a.category || "Acadêmico") === activeFilter);
 
+  if (!articles || articles.length === 0) {
+    return null;
+  }
+
   return (
     <>
       <div className="section-divider-line"></div>
