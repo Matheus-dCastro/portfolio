@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import {
   getStoredProjects,
   saveProjects,
@@ -11,6 +11,24 @@ import {
   DEFAULT_CV_CONFIG,
   convertGoogleDocsToEmbedUrl
 } from "../data/projectsData";
+import {
+  fetchWorks,
+  fetchArticles,
+  fetchThoughts,
+  fetchCvConfig,
+  fetchAgentConfig,
+  persistWork,
+  removeWork,
+  persistArticle,
+  removeArticle,
+  persistThought,
+  removeThought,
+  persistCvConfig,
+  persistAgentConfig,
+  getCurrentUser,
+  logoutUser
+} from "../lib/supabaseService";
+import { isSupabaseConfigured } from "../lib/supabaseClient";
 import { DOCUMENT_TEMPLATES } from "../data/templatesData";
 import "./AdminDraft.css";
 
@@ -78,6 +96,48 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
   const [cvPdfUrl, setCvPdfUrl] = useState(() => getStoredCvConfig().pdfUrl);
   const [cvUpdatedAt, setCvUpdatedAt] = useState(() => getStoredCvConfig().updatedAt || new Date().toISOString().split("T")[0]);
 
+  const [currentUser, setCurrentUser] = useState(null);
+
+  useEffect(() => {
+    getCurrentUser().then((u) => {
+      if (u) setCurrentUser(u);
+    });
+  }, []);
+
+  useEffect(() => {
+    if (activeTab === "projects") {
+      fetchWorks(true).then((data) => {
+        if (data && data.length > 0) setItems(data);
+      });
+    } else if (activeTab === "articles") {
+      fetchArticles(true).then((data) => {
+        if (data && data.length > 0) setItems(data);
+      });
+    } else if (activeTab === "thoughts") {
+      fetchThoughts(true).then((data) => {
+        if (data && data.length > 0) setItems(data);
+      });
+    } else if (activeTab === "cv") {
+      fetchCvConfig().then((cfg) => {
+        if (cfg) {
+          setCvGoogleDocsUrl(cfg.googleDocsUrl || "");
+          setCvPdfUrl(cfg.pdfUrl || "");
+          setCvUpdatedAt(cfg.updatedAt || "");
+        }
+      });
+    } else if (activeTab === "agent") {
+      fetchAgentConfig().then((cfg) => {
+        if (cfg?.systemPrompt) setAgentPrompt(cfg.systemPrompt);
+      });
+    }
+  }, [activeTab]);
+
+  const handleLogout = async () => {
+    await logoutUser();
+    setCurrentUser(null);
+    showToast("Você encerrou a sessão de administrador.");
+  };
+
   const textareaRef = useRef(null);
 
   const showToast = (msg) => {
@@ -140,7 +200,7 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
     }
   };
 
-  const handleSaveCv = (e) => {
+  const handleSaveCv = async (e) => {
     if (e) e.preventDefault();
     const cleanDocs = cvGoogleDocsUrl.trim();
     const cleanPdf = cvPdfUrl.trim();
@@ -149,8 +209,12 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
       pdfUrl: cleanPdf,
       updatedAt: cvUpdatedAt || new Date().toISOString().split("T")[0]
     };
-    saveCvConfig(newConfig);
-    showToast("✅ Configurações do Currículo (Google Docs & PDF) salvas com sucesso!");
+    const res = await persistCvConfig(newConfig);
+    showToast(
+      res.cloud
+        ? "☁️ Configurações do Currículo sincronizadas no Supabase!"
+        : "💾 Configurações do Currículo salvas localmente (offline)!"
+    );
   };
 
   const handleResetCv = () => {
@@ -434,13 +498,20 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
   };
 
   // Delete item
-  const handleDeleteItem = (id) => {
+  const handleDeleteItem = async (id) => {
     if (!window.confirm("Deseja realmente remover este item?")) return;
     const newItems = items.filter((it) => it.id !== id);
     setItems(newItems);
-    if (activeTab === "projects") saveProjects(newItems);
-    else if (activeTab === "articles") saveArticles(newItems);
-    else saveThoughts(newItems);
+    if (activeTab === "projects") {
+      saveProjects(newItems);
+      await removeWork(id);
+    } else if (activeTab === "articles") {
+      saveArticles(newItems);
+      await removeArticle(id);
+    } else {
+      saveThoughts(newItems);
+      await removeThought(id);
+    }
 
     if (newItems.length > 0) {
       loadItemIntoForm(newItems[0]);
@@ -451,7 +522,7 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
   };
 
   // Save Item
-  const handleSaveItem = () => {
+  const handleSaveItem = async () => {
     if (!title.trim()) {
       alert("Por favor, preencha o título do item.");
       return;
@@ -493,21 +564,37 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
     setSelectedId(updatedItem.id);
 
     if (activeTab === "projects") {
-      saveProjects(newItems);
-      showToast("✅ Projeto salvo localmente com sucesso!");
+      const res = await persistWork(updatedItem);
+      showToast(
+        res.cloud
+          ? "☁️ Projeto salvo e sincronizado no Supabase!"
+          : "💾 Projeto salvo localmente (offline)!"
+      );
     } else if (activeTab === "articles") {
-      saveArticles(newItems);
-      showToast("✅ Artigo técnico salvo localmente com sucesso!");
+      const res = await persistArticle(updatedItem);
+      showToast(
+        res.cloud
+          ? "☁️ Artigo técnico salvo no Supabase!"
+          : "💾 Artigo técnico salvo localmente (offline)!"
+      );
     } else {
-      saveThoughts(newItems);
-      showToast("✅ Pensamento salvo localmente com sucesso!");
+      const res = await persistThought(updatedItem);
+      showToast(
+        res.cloud
+          ? "☁️ Pensamento salvo no Supabase!"
+          : "💾 Pensamento salvo localmente (offline)!"
+      );
     }
   };
 
   // Save Agent Prompt
-  const handleSaveAgentPrompt = () => {
-    localStorage.setItem("portfolio_agent_system_prompt", agentPrompt);
-    showToast("🤖 System Prompt do Agente salvo com sucesso!");
+  const handleSaveAgentPrompt = async () => {
+    const res = await persistAgentConfig(agentPrompt);
+    showToast(
+      res.cloud
+        ? "🤖 System Prompt salvo e sincronizado no Supabase!"
+        : "💾 Prompt do Agente salvo localmente!"
+    );
   };
 
   const handleTestChatSubmit = (e) => {
@@ -563,7 +650,47 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
       {/* Top Header Navigation */}
       <nav className="admin-top-nav">
         <div className="nav-left">
-          <div className="admin-badge">⚡ Painel 4dm1n</div>
+          <div className="admin-badge" title="Status de persistência do banco">
+            {isSupabaseConfigured ? "🟢 Supabase Cloud" : "🟡 Modo Offline"}
+          </div>
+          {currentUser ? (
+            <div style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "12px", color: "#8b949e", background: "#161b22", padding: "4px 10px", borderRadius: "6px", border: "1px solid #30363d" }}>
+              <span>👤 {currentUser.email}</span>
+              <button
+                type="button"
+                onClick={handleLogout}
+                style={{
+                  background: "#21262d",
+                  border: "1px solid #484f58",
+                  color: "#f85149",
+                  borderRadius: "4px",
+                  padding: "2px 6px",
+                  cursor: "pointer",
+                  fontSize: "11px"
+                }}
+              >
+                Sair
+              </button>
+            </div>
+          ) : (
+            <a
+              href="/l0g1n"
+              style={{
+                fontSize: "12px",
+                color: "#58a6ff",
+                textDecoration: "none",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "4px",
+                background: "#161b22",
+                padding: "4px 10px",
+                borderRadius: "6px",
+                border: "1px solid #30363d"
+              }}
+            >
+              🔒 Login Supabase
+            </a>
+          )}
           <div className="category-tabs">
             <button
               type="button"

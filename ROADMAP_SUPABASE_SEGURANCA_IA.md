@@ -22,31 +22,29 @@ Nesta etapa, o front-end (React + Vite) já possui:
 ## 📋 SEÇÃO 1: O Que Falta Ser Feito para Deixar Dinâmico
 Atualmente os dados são gerenciados via `localStorage` através de `src/data/projectsData.js`. Para transformar o portfólio em uma aplicação distribuída em nuvem em produção, o checklist a seguir deve ser executado:
 
-- [ ] **1. Criação do Projeto no Supabase**:
+- [x] **1. Criação do Projeto no Supabase**:
   - Criar organização e projeto com região no Brasil (`sa-east-1 - São Paulo`) para latência mínima (<30ms).
-  - Obter `VITE_SUPABASE_URL` e `VITE_SUPABASE_ANON_KEY`.
-- [ ] **2. Instalação do SDK Oficial**:
-  - Executar: `npm install @supabase/supabase-js`.
-- [ ] **3. Criação da Camada de Serviço (`src/lib/supabaseClient.js`)**:
-  - Inicializar o cliente com variáveis de ambiente do Vite (`import.meta.env`).
-  - Implementar fallback automático para `localStorage` caso as variáveis não estejam configuradas ou ocorra falha de rede offline.
-- [ ] **4. Migração e Execução do Schema SQL**:
-  - Executar o script DDL com tabelas `works`, `articles`, `thoughts`, `agent_configs`.
-  - Executar script de seed populando o banco com os dados que hoje estão em `src/data/projectsData.js`.
-- [ ] **5. Conexão das Leituras Públicas (SELECT)**:
-  - `src/components/Projects.jsx`: carregar projetos direto da tabela `works` com `is_published = true` ordenados por `display_order ASC`.
-  - `src/components/ViewDraft.jsx`: buscar projeto por `id` ou `slug`.
-- [ ] **6. Conexão das Telas Administrativas (C.R.U.D. & Ordem)**:
-  - `src/components/AdminDraft.jsx`: substituir chamadas de `saveProjects` por `supabase.from('works').upsert(...)`.
-  - `src/components/OrderDraft.jsx`: atualizar a coluna `display_order` de múltiplos itens em batch transaction (`rpc` ou loop otimizado).
-- [ ] **7. Camada de Autenticação para 4dm1n**:
-  - Criar tela de Login segura (`/login` ou modal protegido em `/4dm1n`).
-  - Habilitar autenticação por Email/Senha no Supabase Auth.
-  - Bloquear rotas de edição para qualquer usuário que não esteja com sessão ativa autenticada.
-- [ ] **8. Deploy da Edge Function do Agente**:
-  - Criar Edge Function `chat-qwen` no Supabase CLI.
-  - Configurar secret `QWEN_API_KEY` na nuvem.
-  - Conectar o simulador do admin e o widget público do chat à URL da Edge Function.
+  - Obter `VITE_SUPABASE_URL` e `VITE_SUPABASE_ANON_KEY` (configurados no `.env`).
+- [x] **2. Instalação do SDK Oficial**:
+  - Executado: `npm install @supabase/supabase-js`.
+- [x] **3. Criação da Camada de Serviço (`src/lib/supabaseClient.js` e `src/lib/supabaseService.js`)**:
+  - Inicialização do cliente Supabase e camada unificada de persistência com fallback automático para `localStorage` em caso offline.
+- [ ] **4. Migração e Execução do Schema SQL (`supabase/schema.sql`)**:
+  - Criado script completo pronto para rodar no SQL Editor do Supabase com tabelas `works`, `articles`, `thoughts`, `cv_configs`, `agent_configs`, RLS e SEED com todos os 8 projetos, artigos e configurações.
+  - Ação: Executar `supabase/schema.sql` no painel do Supabase.
+- [x] **5. Conexão das Leituras Públicas (SELECT)**:
+  - `src/components/Projects.jsx`: consome dinamicamente `fetchWorks` com fallback resiliente.
+  - `src/components/Articles.jsx`: consome dinamicamente `fetchArticles`.
+  - `src/Hobbies.jsx`: consome dinamicamente `fetchThoughts`.
+  - `src/components/Perfil.jsx`: consome dinamicamente `fetchCvConfig`.
+- [x] **6. Conexão das Telas Administrativas (C.R.U.D. & Ordem)**:
+  - `src/components/AdminDraft.jsx`: CRUD assíncrono conectado a `works`, `articles`, `thoughts`, `cv_configs` e `agent_configs`.
+  - `src/components/OrderDraft.jsx`: atualização em lote da ordem via `persistBatchOrder`.
+- [x] **7. Camada de Autenticação para 4dm1n**:
+  - Tela `src/components/LoginDraft.jsx` integrada ao Supabase Auth (Email/Senha + GitHub OAuth + Criação de Administrador).
+  - Barra de status no painel mostrando o estado da nuvem e sessão do administrador com logout.
+- [x] **8. Edge Function do Agente Criada**:
+  - Código criado em `supabase/functions/chat-qwen/index.ts` com injeção de contexto RAG e proteção das chaves.
 
 ---
 

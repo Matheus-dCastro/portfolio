@@ -1,13 +1,16 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   getStoredProjects,
-  saveProjects,
   resetProjectsToDefault,
   getStoredArticles,
-  saveArticles,
-  getStoredThoughts,
-  saveThoughts
+  getStoredThoughts
 } from "../data/projectsData";
+import {
+  fetchWorks,
+  fetchArticles,
+  fetchThoughts,
+  persistBatchOrder
+} from "../lib/supabaseService";
 import "./OrderDraft.css";
 
 const CATEGORIES = [
@@ -55,6 +58,22 @@ export default function OrderDraft({ onBackToHome, onOpenProjectDetail, onNaviga
       setItems(getStoredThoughts());
     }
   };
+
+  useEffect(() => {
+    if (activeTab === "projects") {
+      fetchWorks(true).then((data) => {
+        if (data && data.length > 0) setItems(data);
+      });
+    } else if (activeTab === "articles") {
+      fetchArticles(true).then((data) => {
+        if (data && data.length > 0) setItems(data);
+      });
+    } else {
+      fetchThoughts(true).then((data) => {
+        if (data && data.length > 0) setItems(data);
+      });
+    }
+  }, [activeTab]);
 
   const showNotification = (msg) => {
     setNotification(msg);
@@ -185,17 +204,12 @@ export default function OrderDraft({ onBackToHome, onOpenProjectDetail, onNaviga
   };
 
   // Save current order
-  const handlePublishOrder = () => {
-    if (activeTab === "projects") {
-      saveProjects(items);
-      showNotification("🚀 Nova ordem por sessões publicada com sucesso no portfólio!");
-    } else if (activeTab === "articles") {
-      saveArticles(items);
-      showNotification("🚀 Ordem dos artigos atualizada com sucesso!");
-    } else {
-      saveThoughts(items);
-      showNotification("🚀 Ordem dos pensamentos atualizada com sucesso!");
-    }
+  const handlePublishOrder = async () => {
+    const res = await persistBatchOrder(activeTab, items);
+    const msg = res.cloud
+      ? "🚀 Nova ordem sincronizada no Supabase e publicada com sucesso!"
+      : "💾 Nova ordem salva localmente (offline)!";
+    showNotification(msg);
   };
 
   // Reset to default

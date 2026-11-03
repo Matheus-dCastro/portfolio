@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { getStoredCvConfig } from "../data/projectsData";
+import { fetchCvConfig } from "../lib/supabaseService";
 
 const FRASES = [
   "Matheus de Castro",
@@ -16,8 +17,16 @@ function Perfil({ nomeCompleto, description, foto, cv }) {
   const [showCvModal, setShowCvModal] = useState(false);
   const [cvConfig, setCvConfig] = useState(() => getStoredCvConfig());
 
+  useEffect(() => {
+    fetchCvConfig().then((cfg) => {
+      if (cfg) setCvConfig(cfg);
+    });
+  }, []);
+
   const handleOpenCvModal = () => {
-    setCvConfig(getStoredCvConfig());
+    fetchCvConfig().then((cfg) => {
+      if (cfg) setCvConfig(cfg);
+    });
     setShowCvModal(true);
   };
 

@@ -6,6 +6,7 @@ import Contacts from "./components/Contacts";
 import Rodape from "./components/Rodape";
 import ArtGallery from "./components/ArtGallery";
 import { getStoredThoughts } from "./data/projectsData";
+import { fetchThoughts } from "./lib/supabaseService";
 
 // Capas
 import capa1 from "./assets/img/1CF53B24-759E-48D5-B0C5-9CA7349A544E.webp";
@@ -26,7 +27,19 @@ import arte8 from "./assets/img/IMG_3110.webp";
 import arte9 from "./assets/img/IMG_3286-convertido-de-jpeg.webp";
 
 function Hobbies({ onBackToHome }) {
-  const [thoughts] = useState(() => getStoredThoughts());
+  const [thoughts, setThoughts] = useState(() => getStoredThoughts());
+
+  useEffect(() => {
+    let isMounted = true;
+    fetchThoughts(false).then((loaded) => {
+      if (isMounted && Array.isArray(loaded) && loaded.length > 0) {
+        setThoughts(loaded);
+      }
+    });
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   useEffect(() => {
     const timer = window.setTimeout(() => {

@@ -1,9 +1,22 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { getStoredArticles } from "../data/projectsData";
+import { fetchArticles } from "../lib/supabaseService";
 
 export default function Articles({ onOpenArticle }) {
-  const [articles] = useState(() => getStoredArticles());
+  const [articles, setArticles] = useState(() => getStoredArticles());
   const [activeFilter, setActiveFilter] = useState("all");
+
+  useEffect(() => {
+    let isMounted = true;
+    fetchArticles(false).then((loaded) => {
+      if (isMounted && Array.isArray(loaded) && loaded.length > 0) {
+        setArticles(loaded);
+      }
+    });
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const filteredArticles =
     activeFilter === "all"

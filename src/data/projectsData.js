@@ -319,10 +319,64 @@ export const DEFAULT_CV_CONFIG = {
   updatedAt: "2026-03-15"
 };
 
+export const DEFAULT_EXPERIENCES = [
+  {
+    id: "exp-detran",
+    title: "IT Intern",
+    company: "Detran",
+    time: "Junho 2026 - Atualmente",
+    displayOrder: 0,
+    bullets: [
+      "Projetar, desenvolver e implementar softwares para atender as necessidades do Órgão;",
+      "Utilizando técnicas de programação e gestão de projetos;",
+      "Desenvolver análise de requisitos;",
+      "Desenvolver projetos para aplicativo mobile."
+    ]
+  },
+  {
+    id: "exp-cachina",
+    title: "IT Intern",
+    company: "Cachina Soluções",
+    time: "Março 2026 - Julho 2026",
+    displayOrder: 1,
+    bullets: [
+      "Desenvolvimento e otimização de arquiteturas de backend;",
+      "Automação de fluxos de trabalho inteligentes utilizando n8n integrados a ecossistemas digitais;",
+      "Gerenciamento ágil de servidores Linux (Ubuntu Server) e documentação técnica de processos operacionais;",
+      "Principais tecnologias utilizadas: Python, SQL, n8n, Linux, Bash e Git."
+    ]
+  },
+  {
+    id: "exp-ufrn",
+    title: "Bacharelado em Tecnologia da Informação (BTI)",
+    company: "UFRN - Campus Natal",
+    time: "2024.1 - Presente",
+    displayOrder: 2,
+    bullets: [
+      "Cursando o 6º período",
+      "Sólida base acadêmica em algoritmos, estruturas de dados avançadas, estatística e álgebra linear aplicadas.",
+      "Foco em andamento nas áreas de MLOps, Deep Learning, Aprendizado por Reforço e Computação de Alto Desempenho."
+    ]
+  },
+  {
+    id: "exp-ifrn",
+    title: "IT Technician Training",
+    company: "IFRN Campus Lajes",
+    time: "2019 - 2022",
+    displayOrder: 3,
+    bullets: [
+      "Formação técnica integrada estruturada com foco em Desenvolvimento web;",
+      "Desenvolvimento de lógica algorítmica sólida e fundamentos de bancos de dados relacionais;",
+      "Práticas de laboratório envolvendo montagem, manutenção e implantação de arquiteturas operacionais locais."
+    ]
+  }
+];
+
 const STORAGE_KEYS = {
   PROJECTS: "portfolio_projects_data_v1",
   ARTICLES: "portfolio_articles_data_v1",
   THOUGHTS: "portfolio_thoughts_data_v1",
+  EXPERIENCES: "portfolio_experiences_data_v1",
   CV_CONFIG: "portfolio_cv_config_v1"
 };
 
@@ -392,6 +446,27 @@ export function saveThoughts(thoughts) {
     localStorage.setItem(STORAGE_KEYS.THOUGHTS, JSON.stringify(thoughts));
   } catch (e) {
     console.error("Erro ao salvar pensamentos:", e);
+  }
+}
+
+export function getStoredExperiences() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEYS.EXPERIENCES);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+    }
+  } catch (e) {
+    console.error("Erro ao ler experiências do localStorage:", e);
+  }
+  return DEFAULT_EXPERIENCES;
+}
+
+export function saveExperiences(experiences) {
+  try {
+    localStorage.setItem(STORAGE_KEYS.EXPERIENCES, JSON.stringify(experiences));
+  } catch (e) {
+    console.error("Erro ao salvar experiências:", e);
   }
 }
 

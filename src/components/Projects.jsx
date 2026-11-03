@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { getStoredProjects } from "../data/projectsData";
+import { fetchWorks } from "../lib/supabaseService";
 
 const WORK_CATEGORIES = [
   {
@@ -26,8 +27,20 @@ const WORK_CATEGORIES = [
 ];
 
 function Projects({ onOpenProject }) {
-  const [projects] = useState(() => getStoredProjects());
+  const [projects, setProjects] = useState(() => getStoredProjects());
   const [activeCategory, setActiveCategory] = useState("all");
+
+  useEffect(() => {
+    let isMounted = true;
+    fetchWorks(false).then((loaded) => {
+      if (isMounted && Array.isArray(loaded) && loaded.length > 0) {
+        setProjects(loaded);
+      }
+    });
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const profCount = projects.filter((p) => (p.category || "Profissional") === "Profissional").length;
   const pessoalCount = projects.filter((p) => p.category === "Pessoal").length;
