@@ -1,6 +1,16 @@
 // src/data/projectsData.js
 // Centralized project and publication data with local storage support
 
+import arte1 from "../assets/img/IMG_2998.webp";
+import arte2 from "../assets/img/IMG_3111.webp";
+import arte3 from "../assets/img/IMG_3112.webp";
+import arte4 from "../assets/img/IMG_3114.webp";
+import arte5 from "../assets/img/IMG_3107.webp";
+import arte6 from "../assets/img/IMG_3285-convertido-de-jpeg.webp";
+import arte7 from "../assets/img/IMG_3104.webp";
+import arte8 from "../assets/img/IMG_3110.webp";
+import arte9 from "../assets/img/IMG_3286-convertido-de-jpeg.webp";
+
 export const DEFAULT_PROJECTS = [
   {
     id: "agentmetrics",
@@ -335,12 +345,25 @@ export const DEFAULT_EXPERIENCES = [
   }
 ];
 
+export const DEFAULT_DRAWINGS = [
+  { id: "draw-1", title: "Aquaman", src: arte1, displayOrder: 0, description: "Arte realista em grafite" },
+  { id: "draw-2", title: "HP", src: arte2, displayOrder: 1, description: "Arte realista em grafite" },
+  { id: "draw-3", title: "Wanda Maximoff", src: arte3, displayOrder: 2, description: "Arte realista em grafite" },
+  { id: "draw-4", title: "The joker of joaquin phoenix", src: arte4, displayOrder: 3, description: "Arte realista em grafite" },
+  { id: "draw-5", title: "GOT", src: arte5, displayOrder: 4, description: "Arte realista em grafite" },
+  { id: "draw-6", title: "Jack Sparrow em tela A4", src: arte6, displayOrder: 5, description: "Grafite sobre tela A4" },
+  { id: "draw-7", title: "black widow", src: arte7, displayOrder: 6, description: "Arte realista em grafite" },
+  { id: "draw-8", title: "GOT", src: arte8, displayOrder: 7, description: "Arte realista em grafite" },
+  { id: "draw-9", title: "geralt de rívia the witcher 3 em Tela A2", src: arte9, displayOrder: 8, description: "Grafite em Tela A2" }
+];
+
 const STORAGE_KEYS = {
   PROJECTS: "portfolio_projects_data_v1",
   ARTICLES: "portfolio_articles_data_v1",
   THOUGHTS: "portfolio_thoughts_data_v1",
   EXPERIENCES: "portfolio_experiences_data_v1",
-  CV_CONFIG: "portfolio_cv_config_v1"
+  CV_CONFIG: "portfolio_cv_config_v1",
+  DRAWINGS: "portfolio_drawings_data_v1"
 };
 
 // Helper methods with localStorage fallback
@@ -430,6 +453,27 @@ export function saveExperiences(experiences) {
     localStorage.setItem(STORAGE_KEYS.EXPERIENCES, JSON.stringify(experiences));
   } catch (e) {
     console.error("Erro ao salvar experiências:", e);
+  }
+}
+
+export function getStoredDrawings() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEYS.DRAWINGS);
+    if (raw !== null) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) return parsed;
+    }
+  } catch (e) {
+    console.error("Erro ao ler desenhos do localStorage:", e);
+  }
+  return DEFAULT_DRAWINGS;
+}
+
+export function saveDrawings(drawings) {
+  try {
+    localStorage.setItem(STORAGE_KEYS.DRAWINGS, JSON.stringify(drawings));
+  } catch (e) {
+    console.error("Erro ao salvar desenhos:", e);
   }
 }
 

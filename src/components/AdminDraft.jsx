@@ -8,6 +8,7 @@ import {
   saveThoughts,
   getStoredExperiences,
   saveExperiences,
+  getStoredDrawings,
   getStoredCvConfig,
   saveCvConfig,
   DEFAULT_CV_CONFIG,
@@ -18,6 +19,7 @@ import {
   fetchArticles,
   fetchThoughts,
   fetchExperiences,
+  fetchDrawings,
   fetchCvConfig,
   fetchAgentConfig,
   persistWork,
@@ -28,6 +30,9 @@ import {
   removeThought,
   persistExperience,
   removeExperience,
+  persistDrawing,
+  removeDrawing,
+  uploadDrawingImage,
   persistCvConfig,
   uploadCvPdf,
   persistAgentConfig,
@@ -111,6 +116,16 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
   const [cvUploadFeedback, setCvUploadFeedback] = useState(null);
   const cvFileInputRef = useRef(null);
 
+  // Drawings states
+  const [drawingTitle, setDrawingTitle] = useState("");
+  const [drawingSrc, setDrawingSrc] = useState("");
+  const [drawingDescription, setDrawingDescription] = useState("");
+  const [drawingIsPublished, setDrawingIsPublished] = useState(true);
+  const [isUploadingDrawing, setIsUploadingDrawing] = useState(false);
+  const [isDraggingDrawing, setIsDraggingDrawing] = useState(false);
+  const [drawingUploadFeedback, setDrawingUploadFeedback] = useState(null);
+  const drawingFileInputRef = useRef(null);
+
   const [currentUser, setCurrentUser] = useState(null);
 
   useEffect(() => {
@@ -134,6 +149,10 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
       });
     } else if (activeTab === "experiences") {
       fetchExperiences(true).then((data) => {
+        if (Array.isArray(data)) setItems(data);
+      });
+    } else if (activeTab === "drawings") {
+      fetchDrawings(true).then((data) => {
         if (Array.isArray(data)) setItems(data);
       });
     } else if (activeTab === "cv") {
@@ -204,11 +223,29 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
     setBulletsText("");
   };
 
+  const loadDrawingIntoForm = (item) => {
+    setSelectedId(item.id);
+    setDrawingTitle(item.title || "");
+    setDrawingSrc(item.src || "");
+    setDrawingDescription(item.description || "");
+    setDrawingIsPublished(item.isPublished !== false);
+    setDrawingUploadFeedback(null);
+  };
+
+  const clearDrawingForm = () => {
+    setSelectedId(null);
+    setDrawingTitle("");
+    setDrawingSrc("");
+    setDrawingDescription("");
+    setDrawingIsPublished(true);
+    setDrawingUploadFeedback(null);
+  };
+
   const handleTabChange = (tab) => {
     setActiveTab(tab);
     if (tab === "agent" || tab === "cv") return;
 
-    let nextList;
+    let nextList = [];
     if (tab === "projects") {
       nextList = getStoredProjects();
     } else if (tab === "articles") {
@@ -217,12 +254,22 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
       nextList = getStoredThoughts();
     } else if (tab === "experiences") {
       nextList = getStoredExperiences();
+    } else if (tab === "drawings") {
+      nextList = getStoredDrawings();
     }
     setItems(nextList);
-    if (nextList.length > 0) {
-      loadItemIntoForm(nextList[0]);
+    if (tab === "drawings") {
+      if (nextList.length > 0) {
+        loadDrawingIntoForm(nextList[0]);
+      } else {
+        clearDrawingForm();
+      }
     } else {
-      clearForm();
+      if (nextList.length > 0) {
+        loadItemIntoForm(nextList[0]);
+      } else {
+        clearForm();
+      }
     }
   };
 
@@ -315,6 +362,128 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
     if (files && files.length > 0) {
       handleProcessCvFile(files[0]);
     }
+  };
+
+  // Drawing Handlers
+  const handleProcessDrawingFile = async (file) => {
+    if (!file) return;
+    const isImage = file.type.startsWith("image/") || /\.(webp|jpg|jpeg|png|gif|svg)$/i.test(file.name);
+    if (!isImage) {
+      setDrawingUploadFeedback({
+        type: "error",
+        message: "Apenas arquivos de imagem (WebP, PNG, JPG, GIF, SVG) são permitidos."
+      });
+      return;
+    }
+
+    try {
+      setIsUploadingDrawing(true);
+      setDrawingUploadFeedback(null);
+      const res = await uploadDrawingImage(file);
+      setDrawingSrc(res.publicUrl);
+      if (!drawingTitle) {
+        const fallbackTitle = file.name.replace(/\.[^/.]+$/, "").replace(/[-_]/g, " ");
+        setDrawingTitle(fallbackTitle);
+      }
+      setDrawingUploadFeedback({
+        type: "success",
+        message: `Imagem "${file.name}" carregada com sucesso!`
+      });
+      showToast(res.cloud ? "☁️ Imagem enviada ao Supabase Storage!" : "💾 Imagem carregada (offline)!");
+    } catch (err) {
+      console.error("Falha ao subir imagem do desenho:", err);
+      setDrawingUploadFeedback({
+        type: "error",
+        message: err.message || "Erro ao processar imagem."
+      });
+    } finally {
+      setIsUploadingDrawing(false);
+    }
+  };
+
+  const handleDrawingDragOver = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDraggingDrawing(true);
+  };
+
+  const handleDrawingDragLeave = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDraggingDrawing(false);
+  };
+
+  const handleDrawingDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDraggingDrawing(false);
+    const files = e.dataTransfer?.files;
+    if (files && files.length > 0) {
+      handleProcessDrawingFile(files[0]);
+    }
+  };
+
+  const handleDrawingFileInputChange = (e) => {
+    const files = e.target.files;
+    if (files && files.length > 0) {
+      handleProcessDrawingFile(files[0]);
+    }
+  };
+
+  const handleSaveDrawing = async (e) => {
+    if (e) e.preventDefault();
+    if (!drawingTitle.trim()) {
+      alert("Por favor, preencha o título do desenho.");
+      return;
+    }
+    if (!drawingSrc.trim()) {
+      alert("Por favor, selecione uma imagem ou informe a URL da arte.");
+      return;
+    }
+
+    const drawingItem = {
+      id: selectedId || generateUniqueId(),
+      title: drawingTitle.trim(),
+      src: drawingSrc.trim(),
+      description: drawingDescription.trim(),
+      displayOrder: items.findIndex((d) => d.id === selectedId) >= 0
+        ? items.find((d) => d.id === selectedId).displayOrder
+        : items.length,
+      isPublished: drawingIsPublished !== false,
+      updatedAt: new Date().toISOString().split("T")[0]
+    };
+
+    let newItems = [...items];
+    const existingIndex = newItems.findIndex((it) => it.id === drawingItem.id);
+    if (existingIndex >= 0) {
+      newItems[existingIndex] = drawingItem;
+    } else {
+      newItems.unshift(drawingItem);
+    }
+
+    setItems(newItems);
+    setSelectedId(drawingItem.id);
+
+    const res = await persistDrawing(drawingItem);
+    showToast(
+      res.cloud
+        ? "☁️ Desenho salvo e sincronizado no Supabase!"
+        : "💾 Desenho salvo localmente (offline)!"
+    );
+  };
+
+  const handleDeleteDrawing = async (id) => {
+    if (!window.confirm("Deseja realmente remover esta arte da galeria?")) return;
+    const newItems = items.filter((d) => d.id !== id);
+    setItems(newItems);
+    await removeDrawing(id);
+
+    if (newItems.length > 0) {
+      loadDrawingIntoForm(newItems[0]);
+    } else {
+      clearDrawingForm();
+    }
+    showToast("Arte removida com sucesso.");
   };
 
   // Apply template
@@ -851,6 +1020,13 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
             </button>
             <button
               type="button"
+              className={`cat-btn ${activeTab === "drawings" ? "active" : ""}`}
+              onClick={() => handleTabChange("drawings")}
+            >
+            Desenhos
+            </button>
+            <button
+              type="button"
               className={`cat-btn agent-tab ${activeTab === "agent" ? "active" : ""}`}
               onClick={() => handleTabChange("agent")}
             >
@@ -871,7 +1047,7 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
           >
             Organizar Vitrine por Tipo
           </button>
-          {onOpenProjectDetail && activeTab !== "agent" && activeTab !== "cv" && (
+          {onOpenProjectDetail && activeTab !== "agent" && activeTab !== "cv" && activeTab !== "drawings" && (
             <button
               type="button"
               className="preview-public-btn"
@@ -1246,6 +1422,344 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
               </div>
             </div>
           </div>
+        </div>
+      ) : activeTab === "drawings" ? (
+        <div className="admin-body">
+          {/* SIDEBAR: Drawings Explorer */}
+          <aside className={`admin-sidebar-explorer ${!isSidebarOpen ? "collapsed" : ""}`}>
+            <div className="explorer-header">
+              <h3>🎨 Meus Desenhos ({items.length})</h3>
+              <div className="explorer-header-actions">
+                <button
+                  type="button"
+                  className="btn-new-item"
+                  onClick={clearDrawingForm}
+                  title="Cadastrar nova arte do zero"
+                >
+                  + Novo
+                </button>
+                <button
+                  type="button"
+                  className="btn-collapse-sidebar"
+                  onClick={() => setIsSidebarOpen(false)}
+                  title="Recolher barra lateral"
+                >
+                  ◀
+                </button>
+              </div>
+            </div>
+
+            <div className="explorer-items-list">
+              {items.length === 0 ? (
+                <div
+                  className="explorer-empty-state"
+                  style={{
+                    padding: "36px 16px",
+                    textAlign: "center",
+                    color: "#8b949e",
+                    fontSize: "13px",
+                    lineHeight: "1.5"
+                  }}
+                >
+                  <p style={{ margin: "0 0 8px 0" }}>Nenhum desenho cadastrado.</p>
+                  <span style={{ fontSize: "11px", color: "#6e7681" }}>
+                    A galeria está vazia. Clique em <b>+ Novo</b> acima para adicionar.
+                  </span>
+                </div>
+              ) : (
+                items.map((drawing, idx) => {
+                  const isSelected = drawing.id === selectedId;
+                  return (
+                    <div
+                      key={drawing.id || idx}
+                      className={`explorer-item-card drawing-sidebar-card ${isSelected ? "selected" : ""}`}
+                      onClick={() => loadDrawingIntoForm(drawing)}
+                    >
+                      <div className="drawing-card-thumb-wrap">
+                        {drawing.src ? (
+                          <img
+                            src={drawing.src}
+                            alt={drawing.title}
+                            className="drawing-card-thumb-img"
+                            onError={(e) => {
+                              e.target.style.display = "none";
+                            }}
+                          />
+                        ) : (
+                          <div className="drawing-card-thumb-placeholder">🖼️</div>
+                        )}
+                      </div>
+                      <div className="drawing-card-info">
+                        <div className="item-card-header">
+                          <span className="card-order-num">#{idx + 1}</span>
+                          <span className={`drawing-status-pill ${drawing.isPublished !== false ? "published" : "draft"}`}>
+                            {drawing.isPublished !== false ? "Publicado" : "Rascunho"}
+                          </span>
+                        </div>
+                        <h4 className="item-card-title">{drawing.title || "Sem título"}</h4>
+                        <p className="item-card-desc">
+                          {drawing.description || "Sem técnica/descrição"}
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        className="delete-item-btn"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteDrawing(drawing.id);
+                        }}
+                        title="Excluir desenho da galeria"
+                      >
+                        🗑
+                      </button>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+
+            <div className="explorer-footer">
+              <a
+                href="/hobbies#art-gallery"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-reorder-link"
+                style={{ textDecoration: "none", display: "flex", alignItems: "center", justifyContent: "center", gap: "6px" }}
+              >
+                👁️ Ver Galeria no Site ↗
+              </a>
+            </div>
+          </aside>
+
+          {/* MAIN WORKSPACE FOR DRAWINGS */}
+          <main className="admin-editor-workspace">
+            <div className="drawings-editor-container">
+              {/* Top Banner / Actions */}
+              <div className="drawings-top-header">
+                <div>
+                  <h2>
+                    <span>🎨</span> Gestão de Desenhos &amp; Galeria
+                  </h2>
+                  <p className="drawings-subtitle">
+                    Adicione, edite e organize os desenhos e artes exibidos em /hobbies. Suporta upload de imagens para Supabase Storage e URLs diretas.
+                  </p>
+                </div>
+                <div className="drawings-header-actions">
+                  <button
+                    type="button"
+                    onClick={clearDrawingForm}
+                    className="btn-new-drawing-secondary"
+                  >
+                    + Novo Desenho
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleSaveDrawing}
+                    className="btn-save-drawing-primary"
+                  >
+                    💾 Salvar Desenho
+                  </button>
+                </div>
+              </div>
+
+              {/* 2-Column Grid: Form + Live Preview */}
+              <div className="drawings-workspace-grid">
+                {/* Form Column */}
+                <div className="drawings-form-card">
+                  <div className="drawings-card-title">
+                    <span>✏️</span> Informações da Arte
+                  </div>
+
+                  <form onSubmit={handleSaveDrawing}>
+                    <div className="drawings-form-group">
+                      <label htmlFor="drawing-title-input">
+                        <strong>Título da Obra *</strong>
+                      </label>
+                      <input
+                        id="drawing-title-input"
+                        type="text"
+                        className="drawings-input"
+                        placeholder="Ex: Jack Sparrow em tela A4, Aquaman, GOT..."
+                        value={drawingTitle}
+                        onChange={(e) => setDrawingTitle(e.target.value)}
+                        required
+                      />
+                    </div>
+
+                    <div className="drawings-form-group">
+                      <label htmlFor="drawing-desc-input">
+                        <strong>Técnica / Detalhes (Legenda)</strong>
+                      </label>
+                      <input
+                        id="drawing-desc-input"
+                        type="text"
+                        className="drawings-input"
+                        placeholder="Ex: Arte realista em grafite sobre papel Canson A4..."
+                        value={drawingDescription}
+                        onChange={(e) => setDrawingDescription(e.target.value)}
+                      />
+                      <small className="drawings-hint">
+                        💡 Exibido como legenda ao abrir o desenho no modo ampliado (lightbox).
+                      </small>
+                    </div>
+
+                    <div className="drawings-form-group">
+                      <label>
+                        <strong>Upload de Imagem</strong>
+                        <span className="drawings-upload-badge">Supabase Storage</span>
+                      </label>
+
+                      {/* Dropzone */}
+                      <div
+                        className={`drawing-dropzone ${isDraggingDrawing ? "dragging" : ""} ${isUploadingDrawing ? "uploading" : ""}`}
+                        onDragOver={handleDrawingDragOver}
+                        onDragLeave={handleDrawingDragLeave}
+                        onDrop={handleDrawingDrop}
+                        onClick={() => !isUploadingDrawing && drawingFileInputRef.current?.click()}
+                      >
+                        <input
+                          ref={drawingFileInputRef}
+                          type="file"
+                          accept="image/*"
+                          style={{ display: "none" }}
+                          onChange={handleDrawingFileInputChange}
+                        />
+                        {isUploadingDrawing ? (
+                          <div className="dropzone-status">
+                            <div className="dropzone-spinner"></div>
+                            <span>Enviando imagem ao Supabase Storage...</span>
+                          </div>
+                        ) : (
+                          <div className="dropzone-status">
+                            <span className="dropzone-icon">🖼️</span>
+                            <p className="dropzone-text">
+                              <strong>Arraste e solte uma imagem aqui</strong> ou clique para selecionar
+                            </p>
+                            <span className="dropzone-formats">
+                              Formatos aceitos: WebP, PNG, JPG, JPEG, GIF
+                            </span>
+                          </div>
+                        )}
+                      </div>
+
+                      {drawingUploadFeedback && (
+                        <div className={`drawing-upload-msg ${drawingUploadFeedback.type}`}>
+                          {drawingUploadFeedback.type === "success" ? "✅" : "⚠️"} {drawingUploadFeedback.message}
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="drawings-form-group">
+                      <label htmlFor="drawing-src-input">
+                        <strong>URL ou Caminho da Imagem *</strong>
+                      </label>
+                      <div className="drawings-url-input-wrap">
+                        <input
+                          id="drawing-src-input"
+                          type="text"
+                          className="drawings-input"
+                          placeholder="https://... ou preenchido automaticamente pelo upload"
+                          value={drawingSrc}
+                          onChange={(e) => setDrawingSrc(e.target.value)}
+                          required
+                        />
+                        {drawingSrc && (
+                          <a
+                            href={drawingSrc}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="drawings-test-url-btn"
+                            title="Abrir imagem original em nova aba"
+                          >
+                            Abrir ↗
+                          </a>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="drawings-form-group checkbox-group">
+                      <label className="drawings-checkbox-label">
+                        <input
+                          type="checkbox"
+                          checked={drawingIsPublished}
+                          onChange={(e) => setDrawingIsPublished(e.target.checked)}
+                        />
+                        <span>Publicado (visível para todos os visitantes em /hobbies)</span>
+                      </label>
+                    </div>
+
+                    <div className="drawings-form-actions">
+                      <button type="submit" className="btn-save-drawing-primary">
+                        💾 Salvar Alterações
+                      </button>
+                      {selectedId && (
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteDrawing(selectedId)}
+                          className="btn-delete-drawing-danger"
+                        >
+                          🗑 Excluir Desenho
+                        </button>
+                      )}
+                    </div>
+                  </form>
+                </div>
+
+                {/* Live Preview Column */}
+                <div className="drawings-preview-card">
+                  <div className="drawings-card-title">
+                    <span>👁️</span> Prévia Idêntica ao Portfólio (/hobbies)
+                  </div>
+                  <div className="drawings-preview-inner">
+                    <p className="drawings-preview-explanation">
+                      Veja abaixo como sua arte se comportará na galeria masonry e no modal ampliado:
+                    </p>
+
+                    {/* Simulation of ArtGallery card */}
+                    <div className="drawing-preview-masonry-card">
+                      {drawingSrc ? (
+                        <div className="art-item-simulation">
+                          <img
+                            src={drawingSrc}
+                            alt={drawingTitle || "Sem título"}
+                            className="preview-img-tag"
+                          />
+                          <div className="art-overlay-simulation">
+                            <span>{drawingTitle || "Título da Obra"}</span>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="preview-empty-image">
+                          <span>🖼️</span>
+                          <p>Nenhuma imagem selecionada ainda.</p>
+                          <small>Faça upload acima ou digite uma URL para visualizar a prévia.</small>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Simulation of Lightbox details */}
+                    <div className="drawing-preview-lightbox-details">
+                      <div className="preview-lightbox-header">
+                        <span className="lightbox-badge">Prévia da Legenda</span>
+                        <span className="lightbox-dimensions">
+                          {drawingIsPublished ? "🟢 Visível no site" : "🟡 Rascunho privado"}
+                        </span>
+                      </div>
+                      <h3 className="preview-lightbox-title">{drawingTitle || "Título da Obra"}</h3>
+                      <p className="preview-lightbox-desc">
+                        {drawingDescription || "Técnica e detalhes não informados."}
+                      </p>
+                      {drawingSrc && (
+                        <div className="preview-url-tag">
+                          <code>{drawingSrc.startsWith("data:") ? "Imagem local em Base64" : drawingSrc}</code>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </main>
         </div>
       ) : (
         /* TABS 1, 2, 3: PROJECTS / ARTICLES / THOUGHTS EDITING */

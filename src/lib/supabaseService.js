@@ -12,7 +12,9 @@ import {
   getStoredExperiences,
   saveExperiences,
   getStoredCvConfig,
-  saveCvConfig
+  saveCvConfig,
+  getStoredDrawings,
+  saveDrawings
 } from "../data/projectsData.js";
 
 // ==========================================
@@ -196,6 +198,29 @@ export function mapExperienceToDb(item) {
   };
 }
 
+export function mapDbDrawing(row) {
+  return {
+    id: row.id,
+    title: row.title,
+    src: row.src,
+    description: row.description || "",
+    displayOrder: row.display_order ?? 0,
+    isPublished: row.is_published ?? true,
+    updatedAt: row.updated_at ? row.updated_at.split("T")[0] : ""
+  };
+}
+
+export function mapDrawingToDb(item) {
+  return {
+    id: item.id,
+    title: item.title,
+    src: item.src,
+    description: item.description || "",
+    display_order: item.displayOrder ?? 0,
+    is_published: item.isPublished !== false
+  };
+}
+
 // ==========================================
 // OPERAÇÕES DE LEITURA (FETCH)
 // ==========================================
@@ -310,6 +335,34 @@ export async function fetchExperiences(includeDrafts = false) {
     }
   }
   return getStoredExperiences();
+}
+
+export async function fetchDrawings(includeDrafts = false) {
+  if (isSupabaseConfigured && supabase) {
+    try {
+      let query = supabase
+        .from("drawings")
+        .select("*")
+        .order("display_order", { ascending: true });
+
+      if (!includeDrafts) {
+        query = query.eq("is_published", true);
+      }
+
+      const { data, error } = await query;
+      if (!error && Array.isArray(data)) {
+        const mapped = data.map(mapDbDrawing);
+        saveDrawings(mapped);
+        return mapped;
+      }
+      if (error) {
+        console.warn("Supabase fetchDrawings avisou:", error.message);
+      }
+    } catch (err) {
+      console.warn("Falha de rede em fetchDrawings:", err);
+    }
+  }
+  return getStoredDrawings();
 }
 
 export async function fetchCvConfig() {
@@ -651,6 +704,93 @@ export async function uploadCvPdf(file) {
   }
 }
 
+export async function persistDrawing(item) {
+  const current = getStoredDrawings();
+  const idx = current.findIndex((d) => d.id === item.id);
+  let updatedList;
+  if (idx >= 0) {
+    updatedList = [...current];
+    updatedList[idx] = item;
+  } else {
+    updatedList = [...current, item];
+  }
+  saveDrawings(updatedList);
+
+  if (isSupabaseConfigured && supabase) {
+    try {
+      const payload = mapDrawingToDb(item);
+      const { error } = await supabase.from("drawings").upsert(payload, { onConflict: "id" });
+      if (error) throw error;
+      return { success: true, cloud: true };
+    } catch (err) {
+      console.error("Erro ao salvar desenho no Supabase:", err);
+      return { success: true, cloud: false, error: err.message };
+    }
+  }
+  return { success: true, cloud: false };
+}
+
+export async function removeDrawing(id) {
+  const current = getStoredDrawings();
+  saveDrawings(current.filter((d) => d.id !== id));
+
+  if (isSupabaseConfigured && supabase) {
+    try {
+      const { error } = await supabase.from("drawings").delete().eq("id", id);
+      if (error) throw error;
+      return { success: true, cloud: true };
+    } catch (err) {
+      console.error("Erro ao remover desenho no Supabase:", err);
+      return { success: true, cloud: false, error: err.message };
+    }
+  }
+  return { success: true, cloud: false };
+}
+
+export async function uploadDrawingImage(file) {
+  if (!file) throw new Error("Nenhum arquivo de imagem fornecido.");
+
+  if (isSupabaseConfigured && supabase) {
+    try {
+      const timestamp = Date.now();
+      const cleanName = (file.name || "desenho.webp").replace(/[^a-zA-Z0-9._-]/g, "_");
+      const filePath = `drawings/${timestamp}-${cleanName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("documents")
+        .upload(filePath, file, {
+          cacheControl: "3600",
+          upsert: true,
+          contentType: file.type || "image/webp"
+        });
+
+      if (!uploadError) {
+        const { data: publicUrlData } = supabase.storage
+          .from("documents")
+          .getPublicUrl(filePath);
+
+        if (publicUrlData?.publicUrl) {
+          return { success: true, publicUrl: publicUrlData.publicUrl, cloud: true };
+        }
+      } else {
+        console.warn("Upload de desenho no Supabase Storage avisou:", uploadError.message);
+      }
+    } catch (err) {
+      console.warn("Falha de rede ao subir imagem no Supabase Storage:", err);
+    }
+  }
+
+  // Fallback em Base64 para funcionamento offline transparente
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      resolve({ success: true, publicUrl: reader.result, cloud: false });
+    };
+    reader.onerror = (err) => reject(err);
+    reader.readAsDataURL(file);
+  });
+}
+
 export async function persistAgentConfig(systemPrompt, modelName = "Qwen 2.5 Coder 32B-Instruct") {
   localStorage.setItem("portfolio_agent_system_prompt", systemPrompt);
 
@@ -723,6 +863,22 @@ export async function persistBatchOrder(type, orderedItems) {
         return { success: true, cloud: true };
       } catch (err) {
         console.error("Erro ao ordenar thoughts no Supabase:", err);
+      }
+    }
+  } else if (type === "drawings") {
+    saveDrawings(orderedItems);
+    if (isSupabaseConfigured && supabase) {
+      try {
+        const updates = orderedItems.map((item, index) =>
+          supabase
+            .from("drawings")
+            .update({ display_order: index })
+            .eq("id", item.id)
+        );
+        await Promise.all(updates);
+        return { success: true, cloud: true };
+      } catch (err) {
+        console.error("Erro ao ordenar desenhos no Supabase:", err);
       }
     }
   }

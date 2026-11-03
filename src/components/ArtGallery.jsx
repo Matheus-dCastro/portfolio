@@ -1,16 +1,19 @@
 import { useState } from "react";
 
-export default function ArtGallery({ artDrawings }) {
+export default function ArtGallery({ artDrawings = [] }) {
   const [selectedArtIndex, setSelectedArtIndex] = useState(null);
 
   const selectedArt =
-    selectedArtIndex !== null ? artDrawings[selectedArtIndex] : null;
+    selectedArtIndex !== null && artDrawings[selectedArtIndex]
+      ? artDrawings[selectedArtIndex]
+      : null;
 
   const openArt = (index) => setSelectedArtIndex(index);
   const closeLightbox = () => setSelectedArtIndex(null);
 
   const showPrev = (event) => {
     event.stopPropagation();
+    if (artDrawings.length === 0) return;
     setSelectedArtIndex((prev) =>
       prev === 0 || prev === null ? artDrawings.length - 1 : prev - 1,
     );
@@ -18,6 +21,7 @@ export default function ArtGallery({ artDrawings }) {
 
   const showNext = (event) => {
     event.stopPropagation();
+    if (artDrawings.length === 0) return;
     setSelectedArtIndex((prev) =>
       prev === null || prev === artDrawings.length - 1 ? 0 : prev + 1,
     );
@@ -76,6 +80,19 @@ export default function ArtGallery({ artDrawings }) {
               ←
             </button>
             <img src={selectedArt.src} alt={selectedArt.title} />
+            {selectedArt.description && (
+              <p
+                style={{
+                  color: "#cbd5e1",
+                  textAlign: "center",
+                  marginTop: "12px",
+                  fontSize: "1rem",
+                  fontStyle: "italic"
+                }}
+              >
+                {selectedArt.description}
+              </p>
+            )}
             <button className="lightbox-nav next" onClick={showNext}>
               →
             </button>

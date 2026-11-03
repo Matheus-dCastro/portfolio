@@ -577,14 +577,14 @@ ON CONFLICT (id) DO UPDATE SET
     updated_at = EXCLUDED.updated_at;
 
 -- ==============================================================================
--- 11. SUPABASE STORAGE (BUCKET PÚBLICO PARA DOCUMENTOS E CV)
+-- 11. SUPABASE STORAGE (BUCKET PÚBLICO PARA DOCUMENTOS, CV E DESENHOS)
 -- ==============================================================================
 INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
-VALUES ('documents', 'documents', true, 10485760, ARRAY['application/pdf'])
+VALUES ('documents', 'documents', true, 10485760, ARRAY['application/pdf', 'image/webp', 'image/png', 'image/jpeg', 'image/jpg', 'image/gif'])
 ON CONFLICT (id) DO UPDATE SET
     public = true,
     file_size_limit = 10485760,
-    allowed_mime_types = ARRAY['application/pdf'];
+    allowed_mime_types = ARRAY['application/pdf', 'image/webp', 'image/png', 'image/jpeg', 'image/jpg', 'image/gif'];
 
 DO $$ BEGIN
     CREATE POLICY "Public Document Access" ON storage.objects
@@ -609,3 +609,46 @@ DO $$ BEGIN
         FOR DELETE USING (bucket_id = 'documents');
 EXCEPTION WHEN duplicate_object THEN null;
 END $$;
+
+-- ==============================================================================
+-- 12. TABELA DE DESENHOS E ARTES VISUAIS (DRAWINGS)
+-- ==============================================================================
+CREATE TABLE IF NOT EXISTS public.drawings (
+    id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
+    title VARCHAR(255) NOT NULL,
+    src TEXT NOT NULL,
+    description TEXT,
+    display_order INTEGER NOT NULL DEFAULT 0,
+    is_published BOOLEAN NOT NULL DEFAULT true,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_drawings_order ON public.drawings(display_order ASC);
+CREATE INDEX IF NOT EXISTS idx_drawings_published ON public.drawings(is_published);
+
+DROP TRIGGER IF EXISTS trg_drawings_updated_at ON public.drawings;
+CREATE TRIGGER trg_drawings_updated_at BEFORE UPDATE ON public.drawings FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
+
+ALTER TABLE public.drawings ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Public Read Drawings" ON public.drawings;
+CREATE POLICY "Public Read Drawings" ON public.drawings
+    FOR SELECT TO anon, authenticated
+    USING (is_published = true OR auth.role() = 'authenticated');
+
+DROP POLICY IF EXISTS "Admin Insert Drawings" ON public.drawings;
+CREATE POLICY "Admin Insert Drawings" ON public.drawings
+    FOR INSERT TO authenticated
+    WITH CHECK (auth.role() = 'authenticated');
+
+DROP POLICY IF EXISTS "Admin Update Drawings" ON public.drawings;
+CREATE POLICY "Admin Update Drawings" ON public.drawings
+    FOR UPDATE TO authenticated
+    USING (auth.role() = 'authenticated')
+    WITH CHECK (auth.role() = 'authenticated');
+
+DROP POLICY IF EXISTS "Admin Delete Drawings" ON public.drawings;
+CREATE POLICY "Admin Delete Drawings" ON public.drawings
+    FOR DELETE TO authenticated
+    USING (auth.role() = 'authenticated');
