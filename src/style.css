@@ -792,13 +792,15 @@ h2 span {
 .works-sessions-container {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 18px;
 }
 
 .works-category-section {
+  padding: 0 !important;
+  margin: 0 !important;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
   scroll-margin-top: 100px;
 }
 
@@ -806,8 +808,27 @@ h2 span {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  padding-bottom: 8px;
+  padding-bottom: 6px;
   border-bottom: 1px solid rgba(139, 92, 246, 0.15);
+}
+
+.related-tag,
+.related-badge {
+  background: rgba(139, 92, 246, 0.15) !important;
+  border: 1px solid rgba(139, 92, 246, 0.4) !important;
+  color: #c084fc !important;
+  font-size: 0.72rem !important;
+  font-weight: 700 !important;
+  padding: 3px 8px !important;
+  border-radius: 6px !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.3px !important;
+  white-space: nowrap !important;
+}
+
+.hobbies-thoughts-section {
+  margin-top: 40px;
+  position: relative;
 }
 
 .works-category-title-group {

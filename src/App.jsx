@@ -5,6 +5,7 @@ import Links from "./Links";
 import AdminDraft from "./components/AdminDraft";
 import ViewDraft from "./components/ViewDraft";
 import OrderDraft from "./components/OrderDraft";
+import LoginDraft from "./components/LoginDraft";
 import { getStoredProjects } from "./data/projectsData";
 
 function App() {
@@ -19,6 +20,9 @@ function App() {
   });
 
   const [currentPage, setCurrentPage] = useState(() => {
+    if (window.location.pathname.includes("/l0g1n") || window.location.pathname.includes("/login")) {
+      return "login";
+    }
     if (window.location.pathname.includes("/4dm1n")) {
       return "admin";
     }
@@ -107,6 +111,18 @@ function App() {
 
   if (currentPage === "links") {
     return <Links onBackToHome={handleBackToHome} />;
+  }
+
+  if (currentPage === "login") {
+    return (
+      <LoginDraft
+        onBackToHome={handleBackToHome}
+        onNavigateToAdmin={() => {
+          setCurrentPage("admin");
+          window.history.pushState({}, "", "/4dm1n");
+        }}
+      />
+    );
   }
 
   if (currentPage === "admin") {

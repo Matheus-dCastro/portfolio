@@ -60,6 +60,13 @@ export default function ViewDraft({ project: propProject, onBackToHome, onSelect
   const wordCount = project.content ? project.content.trim().split(/\s+/).length : 0;
   const readingTime = Math.max(1, Math.ceil(wordCount / 180));
 
+  const linkedArticle = project.relatedArticleId
+    ? getStoredArticles().find((a) => a.id === project.relatedArticleId)
+    : null;
+  const linkedProject = project.relatedProjectId
+    ? getStoredProjects().find((p) => p.id === project.relatedProjectId)
+    : null;
+
   return (
     <div className="view-detail-page">
       {/* Top Header Bar - Integrated with system */}
@@ -155,6 +162,43 @@ export default function ViewDraft({ project: propProject, onBackToHome, onSelect
                 "Visão técnica desenvolvida com foco em performance, arquitetura escalável e código limpo."}
             </p>
           </div>
+
+          {/* Attached / Linked Item Banner (Bidirectional Project <-> Article) */}
+          {linkedArticle && (
+            <div className="linked-item-banner">
+              <div className="linked-banner-icon">📑</div>
+              <div className="linked-banner-info">
+                <span className="linked-banner-tag">Artigo Técnico Anexo</span>
+                <h4 className="linked-banner-title">{linkedArticle.title}</h4>
+                <p className="linked-banner-desc">{linkedArticle.shortDescription}</p>
+              </div>
+              <button
+                type="button"
+                className="btn-open-linked"
+                onClick={() => onSelectProject && onSelectProject(linkedArticle)}
+              >
+                Ler Artigo Anexo →
+              </button>
+            </div>
+          )}
+
+          {linkedProject && (
+            <div className="linked-item-banner">
+              <div className="linked-banner-icon">💻</div>
+              <div className="linked-banner-info">
+                <span className="linked-banner-tag">Projeto Prático Anexo</span>
+                <h4 className="linked-banner-title">{linkedProject.title}</h4>
+                <p className="linked-banner-desc">{linkedProject.shortDescription}</p>
+              </div>
+              <button
+                type="button"
+                className="btn-open-linked"
+                onClick={() => onSelectProject && onSelectProject(linkedProject)}
+              >
+                Ver Projeto no Portfólio →
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Content Type Selector (if multiple formats available) */}

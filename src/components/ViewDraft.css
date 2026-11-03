@@ -256,6 +256,79 @@
   margin: 0;
 }
 
+/* Linked Item Banner (Project <-> Article Bidirectional) */
+.linked-item-banner {
+  margin-top: 1.25rem;
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.12), rgba(30, 27, 75, 0.4));
+  border: 1px solid rgba(139, 92, 246, 0.35);
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  transition: all 0.25s ease;
+  flex-wrap: wrap;
+}
+
+.linked-item-banner:hover {
+  border-color: #8b5cf6;
+  box-shadow: 0 8px 30px rgba(139, 92, 246, 0.25);
+}
+
+.linked-banner-icon {
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.linked-banner-info {
+  flex: 1;
+  min-width: 240px;
+}
+
+.linked-banner-tag {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #a78bfa;
+  letter-spacing: 0.5px;
+  display: block;
+  margin-bottom: 3px;
+}
+
+.linked-banner-title {
+  font-size: 1.05rem;
+  color: #ffffff;
+  margin: 0 0 4px;
+  font-weight: 700;
+}
+
+.linked-banner-desc {
+  font-size: 0.82rem;
+  color: #d1d5db;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.btn-open-linked {
+  background: linear-gradient(135deg, #7c3aed, #4f46e5);
+  color: #ffffff;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  border-radius: 8px;
+  font-size: 0.84rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  box-shadow: 0 4px 15px rgba(124, 58, 237, 0.35);
+  transition: all 0.2s ease;
+}
+
+.btn-open-linked:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(124, 58, 237, 0.55);
+}
+
 /* Format Switcher Tabs */
 .content-format-switcher {
   display: flex;

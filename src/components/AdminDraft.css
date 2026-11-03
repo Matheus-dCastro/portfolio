@@ -463,6 +463,36 @@
   color: #c084fc;
 }
 
+.btn-attach-relation {
+  background: rgba(139, 92, 246, 0.1);
+  border: 1px solid rgba(139, 92, 246, 0.35);
+  color: #c084fc;
+  padding: 0.45rem 0.85rem;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.btn-attach-relation:hover {
+  background: rgba(139, 92, 246, 0.25);
+  border-color: #8b5cf6;
+  color: #ffffff;
+}
+
+.btn-attach-relation.is-linked {
+  background: rgba(16, 185, 129, 0.15);
+  border-color: rgba(16, 185, 129, 0.4);
+  color: #34d399;
+}
+
+.btn-attach-relation.is-linked:hover {
+  background: rgba(16, 185, 129, 0.25);
+  border-color: #10b981;
+}
+
 .template-picker select {
   background: #0e0e15;
   color: #c084fc;
@@ -706,6 +736,64 @@
   outline: none;
   font-family: inherit;
   min-height: 48px;
+}
+
+/* Attachment / Relation Row */
+.meta-attachment-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  background: rgba(139, 92, 246, 0.05);
+  border: 1px dashed rgba(139, 92, 246, 0.3);
+  padding: 0.6rem 0.85rem;
+  border-radius: 8px;
+}
+
+.meta-attachment-row label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #c084fc;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.attachment-select-wrap {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.meta-relation-select {
+  flex: 1;
+  background: #0b0b12;
+  border: 1px solid #28283e;
+  color: #ffffff;
+  padding: 0.45rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.82rem;
+  outline: none;
+}
+
+.meta-relation-select:focus {
+  border-color: #8b5cf6;
+}
+
+.btn-clear-attachment {
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  color: #fca5a5;
+  padding: 0.45rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s;
+}
+
+.btn-clear-attachment:hover {
+  background: rgba(239, 68, 68, 0.3);
+  color: #ffffff;
 }
 
 .meta-synopsis-row textarea:focus {

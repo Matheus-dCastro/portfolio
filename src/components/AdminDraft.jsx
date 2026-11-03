@@ -41,6 +41,7 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
   const [selectedTemplate, setSelectedTemplate] = useState("");
   const [notification, setNotification] = useState("");
   const [showShortcutsModal, setShowShortcutsModal] = useState(false);
+  const [showRelationModal, setShowRelationModal] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isMetaOpen, setIsMetaOpen] = useState(false);
 
@@ -807,6 +808,29 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
                 />
 
                 <div className="primary-actions-group">
+                  {/* Direct Visible Button to Link / Attach Project <-> Article */}
+                  {activeTab === "projects" && (
+                    <button
+                      type="button"
+                      className={`btn-attach-relation ${relatedArticleId ? "is-linked" : ""}`}
+                      onClick={() => setShowRelationModal(true)}
+                      title="Clique para anexar um artigo técnico a este projeto"
+                    >
+                      🔗 {relatedArticleId ? `Artigo Anexo: ${getStoredArticles().find((a) => a.id === relatedArticleId)?.title.slice(0, 16) || "Vinculado"}...` : "Anexar Artigo"}
+                    </button>
+                  )}
+
+                  {activeTab === "articles" && (
+                    <button
+                      type="button"
+                      className={`btn-attach-relation ${relatedProjectId ? "is-linked" : ""}`}
+                      onClick={() => setShowRelationModal(true)}
+                      title="Clique para anexar um projeto prático a este artigo"
+                    >
+                      🔗 {relatedProjectId ? `Projeto Anexo: ${getStoredProjects().find((p) => p.id === relatedProjectId)?.title.slice(0, 16) || "Vinculado"}...` : "Anexar Projeto"}
+                    </button>
+                  )}
+
                   <button
                     type="button"
                     className={`btn-toggle-meta ${isMetaOpen ? "active" : ""}`}
@@ -1355,6 +1379,112 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
             <div className="modal-footer">
               <button className="btn-close-modal-bottom" onClick={() => setShowShortcutsModal(false)}>
                 Entendido
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Attachment / Relation Picker Modal */}
+      {showRelationModal && (
+        <div className="shortcuts-modal-overlay" onClick={() => setShowRelationModal(false)}>
+          <div className="relation-modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>
+                {activeTab === "projects"
+                  ? `🔗 Anexar Artigo Técnico ao Projeto: "${title}"`
+                  : `🔗 Anexar Projeto Prático ao Artigo: "${title}"`}
+              </h3>
+              <button className="btn-close-modal" onClick={() => setShowRelationModal(false)}>✕</button>
+            </div>
+
+            <div className="relation-modal-body">
+              <p className="relation-modal-intro">
+                {activeTab === "projects"
+                  ? "Selecione o artigo técnico correspondente para que os visitantes possam alternar com um clique entre o repositório/código e a fundamentação teórica."
+                  : "Selecione o projeto prático correspondente para que os leitores do artigo possam acessar o código e deploy em produção."}
+              </p>
+
+              {activeTab === "projects" ? (
+                <div className="relation-items-list">
+                  <div
+                    className={`relation-item-card ${!relatedArticleId ? "is-active" : ""}`}
+                    onClick={() => {
+                      setRelatedArticleId("");
+                      showToast("Vínculo removido.");
+                    }}
+                  >
+                    <div className="relation-card-info">
+                      <strong>🚫 Nenhum artigo anexado</strong>
+                      <span>Este projeto não exibirá chamada para artigo técnico.</span>
+                    </div>
+                    {!relatedArticleId && <span className="relation-active-tag">Ativo</span>}
+                  </div>
+
+                  {getStoredArticles().map((art) => (
+                    <div
+                      key={art.id}
+                      className={`relation-item-card ${relatedArticleId === art.id ? "is-active" : ""}`}
+                      onClick={() => {
+                        setRelatedArticleId(art.id);
+                        showToast(`Artigo "${art.title}" anexado ao projeto!`);
+                      }}
+                    >
+                      <div className="relation-card-info">
+                        <strong>📑 {art.title}</strong>
+                        <span>{art.shortDescription || art.aboutContext || "Sem descrição"}</span>
+                      </div>
+                      {relatedArticleId === art.id ? (
+                        <span className="relation-active-tag">✅ Vinculado</span>
+                      ) : (
+                        <button type="button" className="btn-select-relation">Vincular</button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="relation-items-list">
+                  <div
+                    className={`relation-item-card ${!relatedProjectId ? "is-active" : ""}`}
+                    onClick={() => {
+                      setRelatedProjectId("");
+                      showToast("Vínculo removido.");
+                    }}
+                  >
+                    <div className="relation-card-info">
+                      <strong>🚫 Nenhum projeto anexado</strong>
+                      <span>Este artigo não exibirá chamada para projeto prático.</span>
+                    </div>
+                    {!relatedProjectId && <span className="relation-active-tag">Ativo</span>}
+                  </div>
+
+                  {getStoredProjects().map((p) => (
+                    <div
+                      key={p.id}
+                      className={`relation-item-card ${relatedProjectId === p.id ? "is-active" : ""}`}
+                      onClick={() => {
+                        setRelatedProjectId(p.id);
+                        showToast(`Projeto "${p.title}" anexado ao artigo!`);
+                      }}
+                    >
+                      <div className="relation-card-info">
+                        <strong>💻 {p.title}</strong>
+                        <span>{p.shortDescription || p.aboutContext || "Sem descrição"}</span>
+                      </div>
+                      {relatedProjectId === p.id ? (
+                        <span className="relation-active-tag">✅ Vinculado</span>
+                      ) : (
+                        <button type="button" className="btn-select-relation">Vincular</button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="modal-footer">
+              <button className="btn-close-modal-bottom" onClick={() => setShowRelationModal(false)}>
+                Concluir & Voltar ao Editor
               </button>
             </div>
           </div>

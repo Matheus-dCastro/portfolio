@@ -73,6 +73,7 @@ CREATE TABLE public.works (
     google_docs_url TEXT,
     pdf_url TEXT,
     content TEXT, -- Markdown rico
+    related_article_id UUID, -- Vínculo opcional com artigo técnico anexo
     display_order INTEGER NOT NULL DEFAULT 0,
     is_published BOOLEAN NOT NULL DEFAULT true,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
@@ -90,6 +91,7 @@ CREATE TABLE public.articles (
     google_docs_url TEXT,
     pdf_url TEXT,
     content TEXT,
+    related_work_id UUID, -- Vínculo opcional com projeto prático anexo
     display_order INTEGER NOT NULL DEFAULT 0,
     is_published BOOLEAN NOT NULL DEFAULT true,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
@@ -118,11 +120,26 @@ CREATE TABLE public.agent_configs (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
--- 6. ÍNDICES DE PERFORMANCE
+-- 6. RELACIONAMENTO BIDIRECIONAL (PROJETO <-> ARTIGO)
+ALTER TABLE public.works 
+    ADD CONSTRAINT fk_works_related_article 
+    FOREIGN KEY (related_article_id) 
+    REFERENCES public.articles(id) 
+    ON DELETE SET NULL;
+
+ALTER TABLE public.articles 
+    ADD CONSTRAINT fk_articles_related_work 
+    FOREIGN KEY (related_work_id) 
+    REFERENCES public.works(id) 
+    ON DELETE SET NULL;
+
+-- 7. ÍNDICES DE PERFORMANCE
 CREATE INDEX idx_works_category ON public.works(category);
 CREATE INDEX idx_works_order ON public.works(display_order ASC);
 CREATE INDEX idx_works_published ON public.works(is_published);
+CREATE INDEX idx_works_related_article ON public.works(related_article_id);
 CREATE INDEX idx_articles_order ON public.articles(display_order ASC);
+CREATE INDEX idx_articles_related_work ON public.articles(related_work_id);
 
 -- 7. TRIGGER PARA ATUALIZAÇÃO AUTOMÁTICA DE updated_at
 CREATE OR REPLACE FUNCTION update_updated_at_column()
