@@ -2311,6 +2311,35 @@ footer {
   color: #8b5cf6;
 }
 
+.thought-actions {
+  margin-top: 6px;
+  display: flex;
+  gap: 8px;
+}
+
+.thought-doc-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: rgba(139, 92, 246, 0.12);
+  border: 1px solid rgba(139, 92, 246, 0.35);
+  border-radius: 6px;
+  color: #c4b5fd;
+  font-size: 0.78rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  width: fit-content;
+}
+
+.thought-doc-link:hover {
+  background: rgba(139, 92, 246, 0.25);
+  border-color: #8b5cf6;
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
 @keyframes fadeOut {
   from {
     opacity: 1;

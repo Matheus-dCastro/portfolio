@@ -120,6 +120,30 @@ function Hobbies({ onBackToHome }) {
                 <div className="thought-body-text">
                   <p>{t.content}</p>
                 </div>
+                {t.googleDocsUrl && (
+                  <div className="thought-actions">
+                    <a
+                      href={t.googleDocsUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="thought-doc-link"
+                    >
+                      <span>🌐</span> Ler no Google Docs ↗
+                    </a>
+                  </div>
+                )}
+                {t.pdfUrl && !t.googleDocsUrl && (
+                  <div className="thought-actions">
+                    <a
+                      href={t.pdfUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="thought-doc-link"
+                    >
+                      <span>📄</span> Abrir PDF ↗
+                    </a>
+                  </div>
+                )}
                 {t.tags && t.tags.length > 0 && (
                   <div className="thought-tags">
                     {t.tags.map((tag, idx) => (
