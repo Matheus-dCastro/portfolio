@@ -375,27 +375,6 @@ export default function ViewDraft({ project: propProject, onBackToHome, onSelect
             )}
           </div>
         </section>
-
-        {/* Call to action footer */}
-        <footer className="article-end-cta">
-          <h3>{t("view.cta_title")}</h3>
-          <p>{t("view.cta_desc")}</p>
-          <div className="cta-links">
-            {project.github && (
-              <a
-                href={project.github}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="btn-cta primary"
-              >
-                {t("view.cta_github")} <span>→</span>
-              </a>
-            )}
-            <button className="btn-cta secondary" onClick={onBackToHome}>
-              {t("view.cta_home")}
-            </button>
-          </div>
-        </footer>
       </main>
     </div>
   );

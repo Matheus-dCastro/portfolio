@@ -44,29 +44,67 @@ export function isAuthorizedAdmin(user) {
 // MAPPERS: Banco (snake_case) <-> Frontend (camelCase)
 // ==========================================
 
+const BILINGUAL_SPLIT = "<!-- BILINGUAL_SPLIT -->";
+
 export function mapDbWorkToProject(row) {
   const existing = getStoredProjects().find((p) => p.id === row.id);
+
+  let titleEn = row.title_en || existing?.titleEn || row.title || "";
+  let titlePt = row.title_pt || existing?.titlePt || row.title || "";
+  if (row.title && row.title.includes(BILINGUAL_SPLIT)) {
+    const parts = row.title.split(BILINGUAL_SPLIT);
+    titleEn = parts[0].trim();
+    titlePt = parts[1].trim();
+  }
+
+  let shortDescEn = row.short_description_en || existing?.shortDescriptionEn || row.short_description || "";
+  let shortDescPt = row.short_description_pt || existing?.shortDescriptionPt || row.short_description || "";
+  if (row.short_description && row.short_description.includes(BILINGUAL_SPLIT)) {
+    const parts = row.short_description.split(BILINGUAL_SPLIT);
+    shortDescEn = parts[0].trim();
+    shortDescPt = parts[1].trim();
+  }
+
+  let aboutEn = row.about_context_en || existing?.aboutContextEn || row.about_context || "";
+  let aboutPt = row.about_context_pt || existing?.aboutContextPt || row.about_context || "";
+  if (row.about_context && row.about_context.includes(BILINGUAL_SPLIT)) {
+    const parts = row.about_context.split(BILINGUAL_SPLIT);
+    aboutEn = parts[0].trim();
+    aboutPt = parts[1].trim();
+  }
+
+  let contentEn = row.content_en || existing?.contentEn || "";
+  let contentPt = row.content_pt || existing?.contentPt || "";
+  if (row.content && row.content.includes(BILINGUAL_SPLIT)) {
+    const parts = row.content.split(BILINGUAL_SPLIT);
+    contentEn = parts[0].trim();
+    contentPt = parts[1].trim();
+  } else if (!contentEn && !contentPt && row.content) {
+    contentEn = row.content;
+    contentPt = row.content;
+  }
+
   return {
     id: row.id,
-    title: row.title,
-    titleEn: row.title_en || existing?.titleEn || row.title,
-    titlePt: row.title_pt || existing?.titlePt || row.title,
+    title: titleEn || row.title,
+    titleEn,
+    titlePt,
     category: row.category,
     tags: Array.isArray(row.tags) ? row.tags : [],
-    shortDescription: row.short_description || "",
-    shortDescriptionEn: row.short_description_en || existing?.shortDescriptionEn || row.short_description || "",
-    shortDescriptionPt: row.short_description_pt || existing?.shortDescriptionPt || row.short_description || "",
-    aboutContext: row.about_context || "",
-    aboutContextEn: row.about_context_en || existing?.aboutContextEn || row.about_context || "",
-    aboutContextPt: row.about_context_pt || existing?.aboutContextPt || row.about_context || "",
+    shortDescription: shortDescEn || row.short_description || "",
+    shortDescriptionEn: shortDescEn,
+    shortDescriptionPt: shortDescPt,
+    aboutContext: aboutEn || row.about_context || "",
+    aboutContextEn: aboutEn,
+    aboutContextPt: aboutPt,
     github: row.github_url || "",
     demo: row.demo_url || "",
     contentType: row.content_type || "markdown",
     googleDocsUrl: row.google_docs_url || "",
     pdfUrl: row.pdf_url || "",
-    content: row.content || "",
-    contentEn: row.content_en || existing?.contentEn || row.content || "",
-    contentPt: row.content_pt || existing?.contentPt || row.content || "",
+    content: contentEn || row.content || "",
+    contentEn: contentEn || existing?.contentEn || row.content || "",
+    contentPt: contentPt || existing?.contentPt || row.content || "",
     relatedArticleId: row.related_article_id || "",
     displayOrder: row.display_order ?? 0,
     isPublished: row.is_published ?? true,
@@ -75,23 +113,39 @@ export function mapDbWorkToProject(row) {
 }
 
 export function mapProjectToDbWork(item) {
+  const titleToSave = (item.titleEn && item.titlePt && item.titleEn !== item.titlePt)
+    ? `${item.titleEn.trim()} ${BILINGUAL_SPLIT} ${item.titlePt.trim()}`
+    : (item.titleEn || item.title || "");
+
+  const shortDescToSave = (item.shortDescriptionEn && item.shortDescriptionPt && item.shortDescriptionEn !== item.shortDescriptionPt)
+    ? `${item.shortDescriptionEn.trim()} ${BILINGUAL_SPLIT} ${item.shortDescriptionPt.trim()}`
+    : (item.shortDescriptionEn || item.shortDescription || "");
+
+  const aboutToSave = (item.aboutContextEn && item.aboutContextPt && item.aboutContextEn !== item.aboutContextPt)
+    ? `${item.aboutContextEn.trim()} ${BILINGUAL_SPLIT} ${item.aboutContextPt.trim()}`
+    : (item.aboutContextEn || item.aboutContext || "");
+
+  const contentToSave = (item.contentEn && item.contentPt && item.contentEn !== item.contentPt)
+    ? `${item.contentEn.trim()}\n\n${BILINGUAL_SPLIT}\n\n${item.contentPt.trim()}`
+    : (item.contentEn || item.content || "");
+
   return {
     id: item.id,
-    title: item.titleEn || item.title,
+    title: titleToSave,
     category: item.category || "Profissional",
     tags: Array.isArray(item.tags)
       ? item.tags
       : typeof item.tags === "string"
         ? item.tags.split(",").map((t) => t.trim()).filter(Boolean)
         : [],
-    short_description: item.shortDescriptionEn || item.shortDescription || "",
-    about_context: item.aboutContextEn || item.aboutContext || "",
+    short_description: shortDescToSave,
+    about_context: aboutToSave,
     github_url: item.github || "",
     demo_url: item.demo || "",
     content_type: item.contentType || "markdown",
     google_docs_url: item.googleDocsUrl || "",
     pdf_url: item.pdfUrl || "",
-    content: item.contentEn || item.content || "",
+    content: contentToSave,
     related_article_id: item.relatedArticleId ? item.relatedArticleId : null,
     display_order: item.displayOrder ?? 0,
     is_published: item.isPublished !== false
@@ -100,25 +154,61 @@ export function mapProjectToDbWork(item) {
 
 export function mapDbArticle(row) {
   const existing = getStoredArticles().find((a) => a.id === row.id);
+
+  let titleEn = row.title_en || existing?.titleEn || row.title || "";
+  let titlePt = row.title_pt || existing?.titlePt || row.title || "";
+  if (row.title && row.title.includes(BILINGUAL_SPLIT)) {
+    const parts = row.title.split(BILINGUAL_SPLIT);
+    titleEn = parts[0].trim();
+    titlePt = parts[1].trim();
+  }
+
+  let shortDescEn = row.short_description_en || existing?.shortDescriptionEn || row.short_description || "";
+  let shortDescPt = row.short_description_pt || existing?.shortDescriptionPt || row.short_description || "";
+  if (row.short_description && row.short_description.includes(BILINGUAL_SPLIT)) {
+    const parts = row.short_description.split(BILINGUAL_SPLIT);
+    shortDescEn = parts[0].trim();
+    shortDescPt = parts[1].trim();
+  }
+
+  let aboutEn = row.about_context_en || existing?.aboutContextEn || row.about_context || "";
+  let aboutPt = row.about_context_pt || existing?.aboutContextPt || row.about_context || "";
+  if (row.about_context && row.about_context.includes(BILINGUAL_SPLIT)) {
+    const parts = row.about_context.split(BILINGUAL_SPLIT);
+    aboutEn = parts[0].trim();
+    aboutPt = parts[1].trim();
+  }
+
+  let contentEn = row.content_en || existing?.contentEn || "";
+  let contentPt = row.content_pt || existing?.contentPt || "";
+  if (row.content && row.content.includes(BILINGUAL_SPLIT)) {
+    const parts = row.content.split(BILINGUAL_SPLIT);
+    contentEn = parts[0].trim();
+    contentPt = parts[1].trim();
+  } else if (!contentEn && !contentPt && row.content) {
+    contentEn = row.content;
+    contentPt = row.content;
+  }
+
   return {
     id: row.id,
-    title: row.title,
-    titleEn: row.title_en || existing?.titleEn || row.title,
-    titlePt: row.title_pt || existing?.titlePt || row.title,
+    title: titleEn || row.title,
+    titleEn,
+    titlePt,
     category: row.category || "Acadêmico",
     tags: Array.isArray(row.tags) ? row.tags : [],
-    shortDescription: row.short_description || "",
-    shortDescriptionEn: row.short_description_en || existing?.shortDescriptionEn || row.short_description || "",
-    shortDescriptionPt: row.short_description_pt || existing?.shortDescriptionPt || row.short_description || "",
-    aboutContext: row.about_context || "",
-    aboutContextEn: row.about_context_en || existing?.aboutContextEn || row.about_context || "",
-    aboutContextPt: row.about_context_pt || existing?.aboutContextPt || row.about_context || "",
+    shortDescription: shortDescEn || row.short_description || "",
+    shortDescriptionEn: shortDescEn,
+    shortDescriptionPt: shortDescPt,
+    aboutContext: aboutEn || row.about_context || "",
+    aboutContextEn: aboutEn,
+    aboutContextPt: aboutPt,
     contentType: row.content_type || "markdown",
     googleDocsUrl: row.google_docs_url || "",
     pdfUrl: row.pdf_url || "",
-    content: row.content || "",
-    contentEn: row.content_en || existing?.contentEn || row.content || "",
-    contentPt: row.content_pt || existing?.contentPt || row.content || "",
+    content: contentEn || row.content || "",
+    contentEn: contentEn || existing?.contentEn || row.content || "",
+    contentPt: contentPt || existing?.contentPt || row.content || "",
     relatedProjectId: row.related_work_id || "",
     displayOrder: row.display_order ?? 0,
     isPublished: row.is_published ?? true,
@@ -127,21 +217,37 @@ export function mapDbArticle(row) {
 }
 
 export function mapArticleToDb(item) {
+  const titleToSave = (item.titleEn && item.titlePt && item.titleEn !== item.titlePt)
+    ? `${item.titleEn.trim()} ${BILINGUAL_SPLIT} ${item.titlePt.trim()}`
+    : (item.titleEn || item.title || "");
+
+  const shortDescToSave = (item.shortDescriptionEn && item.shortDescriptionPt && item.shortDescriptionEn !== item.shortDescriptionPt)
+    ? `${item.shortDescriptionEn.trim()} ${BILINGUAL_SPLIT} ${item.shortDescriptionPt.trim()}`
+    : (item.shortDescriptionEn || item.shortDescription || "");
+
+  const aboutToSave = (item.aboutContextEn && item.aboutContextPt && item.aboutContextEn !== item.aboutContextPt)
+    ? `${item.aboutContextEn.trim()} ${BILINGUAL_SPLIT} ${item.aboutContextPt.trim()}`
+    : (item.aboutContextEn || item.aboutContext || "");
+
+  const contentToSave = (item.contentEn && item.contentPt && item.contentEn !== item.contentPt)
+    ? `${item.contentEn.trim()}\n\n${BILINGUAL_SPLIT}\n\n${item.contentPt.trim()}`
+    : (item.contentEn || item.content || "");
+
   return {
     id: item.id,
-    title: item.titleEn || item.title,
+    title: titleToSave,
     category: item.category || "Acadêmico",
     tags: Array.isArray(item.tags)
       ? item.tags
       : typeof item.tags === "string"
         ? item.tags.split(",").map((t) => t.trim()).filter(Boolean)
         : [],
-    short_description: item.shortDescriptionEn || item.shortDescription || "",
-    about_context: item.aboutContextEn || item.aboutContext || "",
+    short_description: shortDescToSave,
+    about_context: aboutToSave,
     content_type: item.contentType || "markdown",
     google_docs_url: item.googleDocsUrl || "",
     pdf_url: item.pdfUrl || "",
-    content: item.contentEn || item.content || "",
+    content: contentToSave,
     related_work_id: item.relatedProjectId ? item.relatedProjectId : null,
     display_order: item.displayOrder ?? 0,
     is_published: item.isPublished !== false
@@ -150,21 +256,51 @@ export function mapArticleToDb(item) {
 
 export function mapDbThought(row) {
   const existing = getStoredThoughts().find((t) => t.id === row.id);
+
+  let titleEn = row.title_en || existing?.titleEn || row.title || "";
+  let titlePt = row.title_pt || existing?.titlePt || row.title || "";
+  if (row.title && row.title.includes(BILINGUAL_SPLIT)) {
+    const parts = row.title.split(BILINGUAL_SPLIT);
+    titleEn = parts[0].trim();
+    titlePt = parts[1].trim();
+  }
+
+  let aboutEn = row.about_context_en || existing?.aboutContextEn || row.about_context || "";
+  let aboutPt = row.about_context_pt || existing?.aboutContextPt || row.about_context || "";
+  if (row.about_context && row.about_context.includes(BILINGUAL_SPLIT)) {
+    const parts = row.about_context.split(BILINGUAL_SPLIT);
+    aboutEn = parts[0].trim();
+    aboutPt = parts[1].trim();
+  }
+
+  let contentEn = row.content_en || existing?.contentEn || "";
+  let contentPt = row.content_pt || existing?.contentPt || "";
+  if (row.content && row.content.includes(BILINGUAL_SPLIT)) {
+    const parts = row.content.split(BILINGUAL_SPLIT);
+    contentEn = parts[0].trim();
+    contentPt = parts[1].trim();
+  } else if (!contentEn && !contentPt && row.content) {
+    contentEn = row.content;
+    contentPt = row.content;
+  }
+
   return {
     id: row.id,
-    title: row.title,
-    titleEn: row.title_en || existing?.titleEn || row.title,
-    titlePt: row.title_pt || existing?.titlePt || row.title,
+    title: titleEn || row.title,
+    titleEn,
+    titlePt,
     category: row.category || "Pessoal",
     tags: Array.isArray(row.tags) ? row.tags : [],
     shortDescription: row.short_description || "",
-    aboutContext: row.about_context || "",
+    aboutContext: aboutEn || row.about_context || "",
+    aboutContextEn: aboutEn,
+    aboutContextPt: aboutPt,
     contentType: row.content_type || "markdown",
     googleDocsUrl: row.google_docs_url || "",
     pdfUrl: row.pdf_url || "",
-    content: row.content || "",
-    contentEn: row.content_en || existing?.contentEn || row.content || "",
-    contentPt: row.content_pt || existing?.contentPt || row.content || "",
+    content: contentEn || row.content || "",
+    contentEn: contentEn || existing?.contentEn || row.content || "",
+    contentPt: contentPt || existing?.contentPt || row.content || "",
     displayOrder: row.display_order ?? 0,
     isPublished: row.is_published ?? true,
     updatedAt: row.updated_at ? row.updated_at.split("T")[0] : ""
@@ -172,9 +308,21 @@ export function mapDbThought(row) {
 }
 
 export function mapThoughtToDb(item) {
+  const titleToSave = (item.titleEn && item.titlePt && item.titleEn !== item.titlePt)
+    ? `${item.titleEn.trim()} ${BILINGUAL_SPLIT} ${item.titlePt.trim()}`
+    : (item.titleEn || item.title || "");
+
+  const aboutToSave = (item.aboutContextEn && item.aboutContextPt && item.aboutContextEn !== item.aboutContextPt)
+    ? `${item.aboutContextEn.trim()} ${BILINGUAL_SPLIT} ${item.aboutContextPt.trim()}`
+    : (item.aboutContextEn || item.aboutContext || "");
+
+  const contentToSave = (item.contentEn && item.contentPt && item.contentEn !== item.contentPt)
+    ? `${item.contentEn.trim()}\n\n${BILINGUAL_SPLIT}\n\n${item.contentPt.trim()}`
+    : (item.contentEn || item.content || "");
+
   return {
     id: item.id,
-    title: item.titleEn || item.title,
+    title: titleToSave,
     category: item.category || "Pessoal",
     tags: Array.isArray(item.tags)
       ? item.tags
@@ -182,11 +330,11 @@ export function mapThoughtToDb(item) {
         ? item.tags.split(",").map((t) => t.trim()).filter(Boolean)
         : [],
     short_description: item.shortDescriptionEn || item.shortDescription || "",
-    about_context: item.aboutContextEn || item.aboutContext || "",
+    about_context: aboutToSave,
     content_type: item.contentType || "markdown",
     google_docs_url: item.googleDocsUrl || "",
     pdf_url: item.pdfUrl || "",
-    content: item.contentEn || item.content || "",
+    content: contentToSave,
     display_order: item.displayOrder ?? 0,
     is_published: item.isPublished !== false
   };
@@ -194,18 +342,56 @@ export function mapThoughtToDb(item) {
 
 export function mapDbExperience(row) {
   const existing = getStoredExperiences().find((e) => e.id === row.id);
+
+  let titleEn = row.title_en || existing?.titleEn || row.title || "";
+  let titlePt = row.title_pt || existing?.titlePt || row.title || "";
+  if (row.title && row.title.includes(BILINGUAL_SPLIT)) {
+    const parts = row.title.split(BILINGUAL_SPLIT);
+    titleEn = parts[0].trim();
+    titlePt = parts[1].trim();
+  }
+
+  let timeEn = row.time_en || existing?.timeEn || row.time || "";
+  let timePt = row.time_pt || existing?.timePt || row.time || "";
+  if (row.time && row.time.includes(BILINGUAL_SPLIT)) {
+    const parts = row.time.split(BILINGUAL_SPLIT);
+    timeEn = parts[0].trim();
+    timePt = parts[1].trim();
+  }
+
+  let bulletsEn = [];
+  let bulletsPt = [];
+  const rawBullets = Array.isArray(row.bullets) ? row.bullets : [];
+  for (const b of rawBullets) {
+    if (typeof b === "string" && b.includes(BILINGUAL_SPLIT)) {
+      const parts = b.split(BILINGUAL_SPLIT);
+      bulletsEn.push(parts[0].trim());
+      bulletsPt.push(parts[1].trim());
+    } else {
+      bulletsEn.push(b);
+      bulletsPt.push(b);
+    }
+  }
+
+  if (bulletsEn.length === 0) {
+    bulletsEn = existing?.bulletsEn || rawBullets;
+  }
+  if (bulletsPt.length === 0) {
+    bulletsPt = existing?.bulletsPt || rawBullets;
+  }
+
   return {
     id: row.id,
-    title: row.title,
-    titleEn: row.title_en || existing?.titleEn || row.title,
-    titlePt: row.title_pt || existing?.titlePt || row.title,
+    title: titleEn || row.title,
+    titleEn,
+    titlePt,
     company: row.company,
-    time: row.time,
-    timeEn: row.time_en || existing?.timeEn || row.time,
-    timePt: row.time_pt || existing?.timePt || row.time,
-    bullets: Array.isArray(row.bullets) ? row.bullets : [],
-    bulletsEn: row.bullets_en || existing?.bulletsEn || (Array.isArray(row.bullets) ? row.bullets : []),
-    bulletsPt: row.bullets_pt || existing?.bulletsPt || (Array.isArray(row.bullets) ? row.bullets : []),
+    time: timeEn || row.time,
+    timeEn,
+    timePt,
+    bullets: bulletsEn.length > 0 ? bulletsEn : rawBullets,
+    bulletsEn,
+    bulletsPt,
     displayOrder: row.display_order ?? 0,
     isPublished: row.is_published ?? true,
     updatedAt: row.updated_at ? row.updated_at.split("T")[0] : ""
@@ -213,16 +399,35 @@ export function mapDbExperience(row) {
 }
 
 export function mapExperienceToDb(item) {
+  const titleToSave = (item.titleEn && item.titlePt && item.titleEn !== item.titlePt)
+    ? `${item.titleEn.trim()} ${BILINGUAL_SPLIT} ${item.titlePt.trim()}`
+    : (item.titleEn || item.title || "");
+
+  const timeToSave = (item.timeEn && item.timePt && item.timeEn !== item.timePt)
+    ? `${item.timeEn.trim()} ${BILINGUAL_SPLIT} ${item.timePt.trim()}`
+    : (item.timeEn || item.time || "");
+
+  const bEn = Array.isArray(item.bulletsEn) ? item.bulletsEn : (Array.isArray(item.bullets) ? item.bullets : []);
+  const bPt = Array.isArray(item.bulletsPt) ? item.bulletsPt : (Array.isArray(item.bullets) ? item.bullets : []);
+
+  const mergedBullets = [];
+  const maxLen = Math.max(bEn.length, bPt.length);
+  for (let i = 0; i < maxLen; i++) {
+    const en = bEn[i] || "";
+    const pt = bPt[i] || "";
+    if (en && pt && en !== pt) {
+      mergedBullets.push(`${en} ${BILINGUAL_SPLIT} ${pt}`);
+    } else {
+      mergedBullets.push(en || pt);
+    }
+  }
+
   return {
     id: item.id,
-    title: item.titleEn || item.title,
+    title: titleToSave,
     company: item.company,
-    time: item.timeEn || item.time,
-    bullets: Array.isArray(item.bulletsEn && item.bulletsEn.length > 0 ? item.bulletsEn : item.bullets)
-      ? (item.bulletsEn && item.bulletsEn.length > 0 ? item.bulletsEn : item.bullets)
-      : typeof item.bullets === "string"
-        ? item.bullets.split("\n").map((b) => b.trim()).filter(Boolean)
-        : [],
+    time: timeToSave,
+    bullets: mergedBullets,
     display_order: item.displayOrder ?? 0,
     is_published: item.isPublished !== false
   };

@@ -46,8 +46,8 @@ for (let i = 0; i < args.length; i++) {
 }
 
 async function runSeed() {
-  console.log("🌱 Iniciando o Seed do Supabase pelo CLI...\n");
-  console.log(`📡 URL do Supabase: ${supabaseUrl}`);
+  console.log("[SEED] Iniciando o Seed do Supabase pelo CLI...\n");
+  console.log(`[SEED] URL do Supabase: ${supabaseUrl}`);
 
   const activeKey = serviceKey || supabaseKey;
   const client = createClient(supabaseUrl, activeKey, {
@@ -55,68 +55,68 @@ async function runSeed() {
   });
 
   if (adminEmail && adminPassword) {
-    console.log(`🔐 Autenticando como ${adminEmail}...`);
+    console.log(`[AUTH] Autenticando como ${adminEmail}...`);
     const { data: authData, error: authError } = await client.auth.signInWithPassword({
       email: adminEmail,
       password: adminPassword
     });
     if (authError) {
-      console.error(`❌ Erro na autenticação: ${authError.message}`);
+      console.error(`[AUTH] Erro na autenticacao: ${authError.message}`);
       process.exit(1);
     }
-    console.log(`✅ Autenticado com sucesso! ID: ${authData.user.id}\n`);
+    console.log(`[AUTH] Autenticado com sucesso! ID: ${authData.user.id}\n`);
   }
 
   // 1. Inserir Artigos
-  console.log("📑 Inserindo Artigos Técnicos...");
+  console.log("[SEED] Inserindo Artigos Tecnicos...");
   for (const art of DEFAULT_ARTICLES) {
     const payload = mapArticleToDb(art);
     const { error } = await client.from("articles").upsert(payload, { onConflict: "id" });
     if (error) {
-      console.warn(`  ⚠️ Artigo '${art.title}': ${error.message}`);
+      console.warn(`  [AVISO] Artigo '${art.title}': ${error.message}`);
     } else {
-      console.log(`  ✅ Artigo '${art.title}' inserido.`);
+      console.log(`  [OK] Artigo '${art.title}' inserido.`);
     }
   }
 
   // 2. Inserir Projetos (Works)
-  console.log("\n💻 Inserindo Projetos (Works)...");
+  console.log("\n[SEED] Inserindo Projetos (Works)...");
   for (const proj of DEFAULT_PROJECTS) {
     const payload = mapProjectToDbWork(proj);
     const { error } = await client.from("works").upsert(payload, { onConflict: "id" });
     if (error) {
-      console.warn(`  ⚠️ Projeto '${proj.title}': ${error.message}`);
+      console.warn(`  [AVISO] Projeto '${proj.title}': ${error.message}`);
     } else {
-      console.log(`  ✅ Projeto '${proj.title}' inserido.`);
+      console.log(`  [OK] Projeto '${proj.title}' inserido.`);
     }
   }
 
   // 3. Inserir Pensamentos
-  console.log("\n💭 Inserindo Pensamentos...");
+  console.log("\n[SEED] Inserindo Pensamentos...");
   for (const th of DEFAULT_THOUGHTS) {
     const payload = mapThoughtToDb(th);
     const { error } = await client.from("thoughts").upsert(payload, { onConflict: "id" });
     if (error) {
-      console.warn(`  ⚠️ Pensamento '${th.title}': ${error.message}`);
+      console.warn(`  [AVISO] Pensamento '${th.title}': ${error.message}`);
     } else {
-      console.log(`  ✅ Pensamento '${th.title}' inserido.`);
+      console.log(`  [OK] Pensamento '${th.title}' inserido.`);
     }
   }
 
-  // 4. Inserir Experiências
-  console.log("\n💼 Inserindo Experiências Profissionais...");
+  // 4. Inserir Experiencias
+  console.log("\n[SEED] Inserindo Experiencias Profissionais...");
   for (const exp of DEFAULT_EXPERIENCES) {
     const payload = mapExperienceToDb(exp);
     const { error } = await client.from("experiences").upsert(payload, { onConflict: "id" });
     if (error) {
-      console.warn(`  ⚠️ Experiência '${exp.company} - ${exp.title}': ${error.message}`);
+      console.warn(`  [AVISO] Experiencia '${exp.company} - ${exp.title}': ${error.message}`);
     } else {
-      console.log(`  ✅ Experiência '${exp.company}' inserida.`);
+      console.log(`  [OK] Experiencia '${exp.company}' inserida.`);
     }
   }
 
   // 5. Inserir CV Config
-  console.log("\n📄 Inserindo Configurações de Currículo (CV)...");
+  console.log("\n[SEED] Inserindo Configuracoes de Curriculo (CV)...");
   const { error: cvError } = await client.from("cv_configs").upsert({
     id: "production",
     google_docs_url: DEFAULT_CV_CONFIG.googleDocsUrl,
@@ -124,26 +124,26 @@ async function runSeed() {
     updated_at: new Date().toISOString()
   }, { onConflict: "id" });
   if (cvError) {
-    console.warn(`  ⚠️ CV Config: ${cvError.message}`);
+    console.warn(`  [AVISO] CV Config: ${cvError.message}`);
   } else {
-    console.log("  ✅ CV Config sincronizado.");
+    console.log("  [OK] CV Config sincronizado.");
   }
 
   // 6. Inserir Agente Config
-  console.log("\n🤖 Inserindo Configurações do Agente de IA...");
+  console.log("\n[SEED] Inserindo Configuracoes do Agente de IA...");
   const { error: agentError } = await client.from("agent_configs").upsert({
     id: "production",
     model_name: "Qwen 2.5 Coder 32B-Instruct",
-    system_prompt: "Você é o assistente oficial do portfólio de Matheus de Castro.",
+    system_prompt: "Voce e o assistente oficial do portfolio de Matheus de Castro.",
     updated_at: new Date().toISOString()
   }, { onConflict: "id" });
   if (agentError) {
-    console.warn(`  ⚠️ Agent Config: ${agentError.message}`);
+    console.warn(`  [AVISO] Agent Config: ${agentError.message}`);
   } else {
-    console.log("  ✅ Agent Config sincronizado.");
+    console.log("  [OK] Agent Config sincronizado.");
   }
 
-  console.log("\n🎉 Seed finalizado!");
+  console.log("\n[SEED] Seed finalizado com sucesso!");
 }
 
 runSeed().catch((err) => {
