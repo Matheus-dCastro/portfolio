@@ -45,19 +45,28 @@ export function isAuthorizedAdmin(user) {
 // ==========================================
 
 export function mapDbWorkToProject(row) {
+  const existing = getStoredProjects().find((p) => p.id === row.id);
   return {
     id: row.id,
     title: row.title,
+    titleEn: row.title_en || existing?.titleEn || row.title,
+    titlePt: row.title_pt || existing?.titlePt || row.title,
     category: row.category,
     tags: Array.isArray(row.tags) ? row.tags : [],
     shortDescription: row.short_description || "",
+    shortDescriptionEn: row.short_description_en || existing?.shortDescriptionEn || row.short_description || "",
+    shortDescriptionPt: row.short_description_pt || existing?.shortDescriptionPt || row.short_description || "",
     aboutContext: row.about_context || "",
+    aboutContextEn: row.about_context_en || existing?.aboutContextEn || row.about_context || "",
+    aboutContextPt: row.about_context_pt || existing?.aboutContextPt || row.about_context || "",
     github: row.github_url || "",
     demo: row.demo_url || "",
     contentType: row.content_type || "markdown",
     googleDocsUrl: row.google_docs_url || "",
     pdfUrl: row.pdf_url || "",
     content: row.content || "",
+    contentEn: row.content_en || existing?.contentEn || row.content || "",
+    contentPt: row.content_pt || existing?.contentPt || row.content || "",
     relatedArticleId: row.related_article_id || "",
     displayOrder: row.display_order ?? 0,
     isPublished: row.is_published ?? true,
@@ -68,21 +77,21 @@ export function mapDbWorkToProject(row) {
 export function mapProjectToDbWork(item) {
   return {
     id: item.id,
-    title: item.title,
+    title: item.titleEn || item.title,
     category: item.category || "Profissional",
     tags: Array.isArray(item.tags)
       ? item.tags
       : typeof item.tags === "string"
         ? item.tags.split(",").map((t) => t.trim()).filter(Boolean)
         : [],
-    short_description: item.shortDescription || "",
-    about_context: item.aboutContext || "",
+    short_description: item.shortDescriptionEn || item.shortDescription || "",
+    about_context: item.aboutContextEn || item.aboutContext || "",
     github_url: item.github || "",
     demo_url: item.demo || "",
     content_type: item.contentType || "markdown",
     google_docs_url: item.googleDocsUrl || "",
     pdf_url: item.pdfUrl || "",
-    content: item.content || "",
+    content: item.contentEn || item.content || "",
     related_article_id: item.relatedArticleId ? item.relatedArticleId : null,
     display_order: item.displayOrder ?? 0,
     is_published: item.isPublished !== false
@@ -90,17 +99,26 @@ export function mapProjectToDbWork(item) {
 }
 
 export function mapDbArticle(row) {
+  const existing = getStoredArticles().find((a) => a.id === row.id);
   return {
     id: row.id,
     title: row.title,
+    titleEn: row.title_en || existing?.titleEn || row.title,
+    titlePt: row.title_pt || existing?.titlePt || row.title,
     category: row.category || "Acadêmico",
     tags: Array.isArray(row.tags) ? row.tags : [],
     shortDescription: row.short_description || "",
+    shortDescriptionEn: row.short_description_en || existing?.shortDescriptionEn || row.short_description || "",
+    shortDescriptionPt: row.short_description_pt || existing?.shortDescriptionPt || row.short_description || "",
     aboutContext: row.about_context || "",
+    aboutContextEn: row.about_context_en || existing?.aboutContextEn || row.about_context || "",
+    aboutContextPt: row.about_context_pt || existing?.aboutContextPt || row.about_context || "",
     contentType: row.content_type || "markdown",
     googleDocsUrl: row.google_docs_url || "",
     pdfUrl: row.pdf_url || "",
     content: row.content || "",
+    contentEn: row.content_en || existing?.contentEn || row.content || "",
+    contentPt: row.content_pt || existing?.contentPt || row.content || "",
     relatedProjectId: row.related_work_id || "",
     displayOrder: row.display_order ?? 0,
     isPublished: row.is_published ?? true,
@@ -111,19 +129,19 @@ export function mapDbArticle(row) {
 export function mapArticleToDb(item) {
   return {
     id: item.id,
-    title: item.title,
+    title: item.titleEn || item.title,
     category: item.category || "Acadêmico",
     tags: Array.isArray(item.tags)
       ? item.tags
       : typeof item.tags === "string"
         ? item.tags.split(",").map((t) => t.trim()).filter(Boolean)
         : [],
-    short_description: item.shortDescription || "",
-    about_context: item.aboutContext || "",
+    short_description: item.shortDescriptionEn || item.shortDescription || "",
+    about_context: item.aboutContextEn || item.aboutContext || "",
     content_type: item.contentType || "markdown",
     google_docs_url: item.googleDocsUrl || "",
     pdf_url: item.pdfUrl || "",
-    content: item.content || "",
+    content: item.contentEn || item.content || "",
     related_work_id: item.relatedProjectId ? item.relatedProjectId : null,
     display_order: item.displayOrder ?? 0,
     is_published: item.isPublished !== false
@@ -131,9 +149,12 @@ export function mapArticleToDb(item) {
 }
 
 export function mapDbThought(row) {
+  const existing = getStoredThoughts().find((t) => t.id === row.id);
   return {
     id: row.id,
     title: row.title,
+    titleEn: row.title_en || existing?.titleEn || row.title,
+    titlePt: row.title_pt || existing?.titlePt || row.title,
     category: row.category || "Pessoal",
     tags: Array.isArray(row.tags) ? row.tags : [],
     shortDescription: row.short_description || "",
@@ -142,6 +163,8 @@ export function mapDbThought(row) {
     googleDocsUrl: row.google_docs_url || "",
     pdfUrl: row.pdf_url || "",
     content: row.content || "",
+    contentEn: row.content_en || existing?.contentEn || row.content || "",
+    contentPt: row.content_pt || existing?.contentPt || row.content || "",
     displayOrder: row.display_order ?? 0,
     isPublished: row.is_published ?? true,
     updatedAt: row.updated_at ? row.updated_at.split("T")[0] : ""
@@ -151,31 +174,38 @@ export function mapDbThought(row) {
 export function mapThoughtToDb(item) {
   return {
     id: item.id,
-    title: item.title,
+    title: item.titleEn || item.title,
     category: item.category || "Pessoal",
     tags: Array.isArray(item.tags)
       ? item.tags
       : typeof item.tags === "string"
         ? item.tags.split(",").map((t) => t.trim()).filter(Boolean)
         : [],
-    short_description: item.shortDescription || "",
-    about_context: item.aboutContext || "",
+    short_description: item.shortDescriptionEn || item.shortDescription || "",
+    about_context: item.aboutContextEn || item.aboutContext || "",
     content_type: item.contentType || "markdown",
     google_docs_url: item.googleDocsUrl || "",
     pdf_url: item.pdfUrl || "",
-    content: item.content || "",
+    content: item.contentEn || item.content || "",
     display_order: item.displayOrder ?? 0,
     is_published: item.isPublished !== false
   };
 }
 
 export function mapDbExperience(row) {
+  const existing = getStoredExperiences().find((e) => e.id === row.id);
   return {
     id: row.id,
     title: row.title,
+    titleEn: row.title_en || existing?.titleEn || row.title,
+    titlePt: row.title_pt || existing?.titlePt || row.title,
     company: row.company,
     time: row.time,
+    timeEn: row.time_en || existing?.timeEn || row.time,
+    timePt: row.time_pt || existing?.timePt || row.time,
     bullets: Array.isArray(row.bullets) ? row.bullets : [],
+    bulletsEn: row.bullets_en || existing?.bulletsEn || (Array.isArray(row.bullets) ? row.bullets : []),
+    bulletsPt: row.bullets_pt || existing?.bulletsPt || (Array.isArray(row.bullets) ? row.bullets : []),
     displayOrder: row.display_order ?? 0,
     isPublished: row.is_published ?? true,
     updatedAt: row.updated_at ? row.updated_at.split("T")[0] : ""
@@ -185,11 +215,11 @@ export function mapDbExperience(row) {
 export function mapExperienceToDb(item) {
   return {
     id: item.id,
-    title: item.title,
+    title: item.titleEn || item.title,
     company: item.company,
-    time: item.time,
-    bullets: Array.isArray(item.bullets)
-      ? item.bullets
+    time: item.timeEn || item.time,
+    bullets: Array.isArray(item.bulletsEn && item.bulletsEn.length > 0 ? item.bulletsEn : item.bullets)
+      ? (item.bulletsEn && item.bulletsEn.length > 0 ? item.bulletsEn : item.bullets)
       : typeof item.bullets === "string"
         ? item.bullets.split("\n").map((b) => b.trim()).filter(Boolean)
         : [],
@@ -199,11 +229,16 @@ export function mapExperienceToDb(item) {
 }
 
 export function mapDbDrawing(row) {
+  const existing = getStoredDrawings().find((d) => d.id === row.id);
   return {
     id: row.id,
     title: row.title,
+    titleEn: row.title_en || existing?.titleEn || row.title,
+    titlePt: row.title_pt || existing?.titlePt || row.title,
     src: row.src,
     description: row.description || "",
+    descriptionEn: row.description_en || existing?.descriptionEn || row.description || "",
+    descriptionPt: row.description_pt || existing?.descriptionPt || row.description || "",
     displayOrder: row.display_order ?? 0,
     isPublished: row.is_published ?? true,
     updatedAt: row.updated_at ? row.updated_at.split("T")[0] : ""
@@ -213,9 +248,9 @@ export function mapDbDrawing(row) {
 export function mapDrawingToDb(item) {
   return {
     id: item.id,
-    title: item.title,
+    title: item.titleEn || item.title,
     src: item.src,
-    description: item.description || "",
+    description: item.descriptionEn || item.description || "",
     display_order: item.displayOrder ?? 0,
     is_published: item.isPublished !== false
   };

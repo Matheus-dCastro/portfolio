@@ -79,25 +79,41 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isMetaOpen, setIsMetaOpen] = useState(false);
 
+  // Language for editing in Admin
+  const [activeEditorLang, setActiveEditorLang] = useState("en"); // 'en' | 'pt'
+
   // Form states
   const [title, setTitle] = useState(() => initialItem?.title || "");
+  const [titleEn, setTitleEn] = useState(() => initialItem?.titleEn || initialItem?.title || "");
+  const [titlePt, setTitlePt] = useState(() => initialItem?.titlePt || initialItem?.title || "");
   const [category, setCategory] = useState(() => initialItem?.category || "Profissional");
   const [tags, setTags] = useState(() => (Array.isArray(initialItem?.tags) ? initialItem.tags.join(", ") : initialItem?.tags || ""));
   const [shortDescription, setShortDescription] = useState(() => initialItem?.shortDescription || "");
+  const [shortDescriptionEn, setShortDescriptionEn] = useState(() => initialItem?.shortDescriptionEn || initialItem?.shortDescription || "");
+  const [shortDescriptionPt, setShortDescriptionPt] = useState(() => initialItem?.shortDescriptionPt || initialItem?.shortDescription || "");
   const [aboutContext, setAboutContext] = useState(() => initialItem?.aboutContext || "");
+  const [aboutContextEn, setAboutContextEn] = useState(() => initialItem?.aboutContextEn || initialItem?.aboutContext || "");
+  const [aboutContextPt, setAboutContextPt] = useState(() => initialItem?.aboutContextPt || initialItem?.aboutContext || "");
   const [githubUrl, setGithubUrl] = useState(() => initialItem?.github || "");
   const [demoUrl, setDemoUrl] = useState(() => initialItem?.demo || "");
   const [contentType, setContentType] = useState(() => initialItem?.contentType || "markdown");
   const [googleDocsUrl, setGoogleDocsUrl] = useState(() => initialItem?.googleDocsUrl || "");
   const [pdfUrl, setPdfUrl] = useState(() => initialItem?.pdfUrl || "");
   const [markdownContent, setMarkdownContent] = useState(() => initialItem?.content || "");
+  const [markdownContentEn, setMarkdownContentEn] = useState(() => initialItem?.contentEn || initialItem?.content || "");
+  const [markdownContentPt, setMarkdownContentPt] = useState(() => initialItem?.contentPt || initialItem?.content || "");
   const [relatedArticleId, setRelatedArticleId] = useState(() => initialItem?.relatedArticleId || "");
   const [relatedProjectId, setRelatedProjectId] = useState(() => initialItem?.relatedProjectId || "");
 
   // Experience states
+  const [expPreviewLang, setExpPreviewLang] = useState("en");
   const [company, setCompany] = useState(() => initialItem?.company || "");
   const [timePeriod, setTimePeriod] = useState(() => initialItem?.time || "");
+  const [timePeriodEn, setTimePeriodEn] = useState(() => initialItem?.timeEn || initialItem?.time || "");
+  const [timePeriodPt, setTimePeriodPt] = useState(() => initialItem?.timePt || initialItem?.time || "");
   const [bulletsText, setBulletsText] = useState(() => (Array.isArray(initialItem?.bullets) ? initialItem.bullets.join("\n") : ""));
+  const [bulletsTextEn, setBulletsTextEn] = useState(() => (Array.isArray(initialItem?.bulletsEn) ? initialItem.bulletsEn.join("\n") : (Array.isArray(initialItem?.bullets) ? initialItem.bullets.join("\n") : "")));
+  const [bulletsTextPt, setBulletsTextPt] = useState(() => (Array.isArray(initialItem?.bulletsPt) ? initialItem.bulletsPt.join("\n") : (Array.isArray(initialItem?.bullets) ? initialItem.bullets.join("\n") : "")));
 
   // AI Agent States
   const [agentPrompt, setAgentPrompt] = useState(() => {
@@ -121,8 +137,12 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
 
   // Drawings states
   const [drawingTitle, setDrawingTitle] = useState("");
+  const [drawingTitleEn, setDrawingTitleEn] = useState("");
+  const [drawingTitlePt, setDrawingTitlePt] = useState("");
   const [drawingSrc, setDrawingSrc] = useState("");
   const [drawingDescription, setDrawingDescription] = useState("");
+  const [drawingDescriptionEn, setDrawingDescriptionEn] = useState("");
+  const [drawingDescriptionPt, setDrawingDescriptionPt] = useState("");
   const [drawingIsPublished, setDrawingIsPublished] = useState(true);
   const [isUploadingDrawing, setIsUploadingDrawing] = useState(false);
   const [isDraggingDrawing, setIsDraggingDrawing] = useState(false);
@@ -190,48 +210,76 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
   const loadItemIntoForm = (item) => {
     setSelectedId(item.id);
     setTitle(item.title || "");
+    setTitleEn(item.titleEn || item.title || "");
+    setTitlePt(item.titlePt || item.title || "");
     setCategory(item.category || "Profissional");
     setTags(Array.isArray(item.tags) ? item.tags.join(", ") : item.tags || "");
     setShortDescription(item.shortDescription || "");
+    setShortDescriptionEn(item.shortDescriptionEn || item.shortDescription || "");
+    setShortDescriptionPt(item.shortDescriptionPt || item.shortDescription || "");
     setAboutContext(item.aboutContext || "");
+    setAboutContextEn(item.aboutContextEn || item.aboutContext || "");
+    setAboutContextPt(item.aboutContextPt || item.aboutContext || "");
     setGithubUrl(item.github || "");
     setDemoUrl(item.demo || "");
     setContentType(item.contentType || "markdown");
     setGoogleDocsUrl(item.googleDocsUrl || "");
     setPdfUrl(item.pdfUrl || "");
     setMarkdownContent(item.content || "");
+    setMarkdownContentEn(item.contentEn || item.content || "");
+    setMarkdownContentPt(item.contentPt || item.content || "");
     setRelatedArticleId(item.relatedArticleId || "");
     setRelatedProjectId(item.relatedProjectId || "");
     setCompany(item.company || "");
     setTimePeriod(item.time || "");
+    setTimePeriodEn(item.timeEn || item.time || "");
+    setTimePeriodPt(item.timePt || item.time || "");
     setBulletsText(Array.isArray(item.bullets) ? item.bullets.join("\n") : item.bullets || "");
+    setBulletsTextEn(Array.isArray(item.bulletsEn) ? item.bulletsEn.join("\n") : (Array.isArray(item.bullets) ? item.bullets.join("\n") : ""));
+    setBulletsTextPt(Array.isArray(item.bulletsPt) ? item.bulletsPt.join("\n") : (Array.isArray(item.bullets) ? item.bullets.join("\n") : ""));
   };
 
   const clearForm = () => {
     setSelectedId(null);
     setTitle("");
+    setTitleEn("");
+    setTitlePt("");
     setCategory(activeTab === "articles" ? "Acadêmico" : "Profissional");
     setTags("");
     setShortDescription("");
+    setShortDescriptionEn("");
+    setShortDescriptionPt("");
     setAboutContext("");
+    setAboutContextEn("");
+    setAboutContextPt("");
     setGithubUrl("");
     setDemoUrl("");
     setContentType(activeTab === "articles" ? "google-docs" : "markdown");
     setGoogleDocsUrl("");
     setPdfUrl("");
     setMarkdownContent("");
+    setMarkdownContentEn("");
+    setMarkdownContentPt("");
     setRelatedArticleId("");
     setRelatedProjectId("");
     setCompany("");
     setTimePeriod("");
+    setTimePeriodEn("");
+    setTimePeriodPt("");
     setBulletsText("");
+    setBulletsTextEn("");
+    setBulletsTextPt("");
   };
 
   const loadDrawingIntoForm = (item) => {
     setSelectedId(item.id);
     setDrawingTitle(item.title || "");
+    setDrawingTitleEn(item.titleEn || item.title || "");
+    setDrawingTitlePt(item.titlePt || item.title || "");
     setDrawingSrc(item.src || "");
     setDrawingDescription(item.description || "");
+    setDrawingDescriptionEn(item.descriptionEn || item.description || "");
+    setDrawingDescriptionPt(item.descriptionPt || item.description || "");
     setDrawingIsPublished(item.isPublished !== false);
     setDrawingDisplayOrder(item.displayOrder ?? 0);
     setDrawingUploadFeedback(null);
@@ -240,8 +288,12 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
   const clearDrawingForm = () => {
     setSelectedId(null);
     setDrawingTitle("");
+    setDrawingTitleEn("");
+    setDrawingTitlePt("");
     setDrawingSrc("");
     setDrawingDescription("");
+    setDrawingDescriptionEn("");
+    setDrawingDescriptionPt("");
     setDrawingIsPublished(true);
     setDrawingDisplayOrder(items.length);
     setDrawingUploadFeedback(null);
@@ -460,7 +512,8 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
 
   const handleSaveDrawing = async (e) => {
     if (e) e.preventDefault();
-    if (!drawingTitle.trim()) {
+    const resolvedTitle = drawingTitleEn.trim() || drawingTitlePt.trim() || drawingTitle.trim();
+    if (!resolvedTitle) {
       alert("Por favor, preencha o título do desenho.");
       return;
     }
@@ -473,9 +526,13 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
 
     const drawingItem = {
       id: selectedId || generateUniqueId(),
-      title: drawingTitle.trim(),
+      title: resolvedTitle,
+      titleEn: drawingTitleEn.trim() || resolvedTitle,
+      titlePt: drawingTitlePt.trim() || resolvedTitle,
       src: drawingSrc.trim(),
-      description: drawingDescription.trim(),
+      description: drawingDescriptionEn.trim() || drawingDescriptionPt.trim() || drawingDescription.trim(),
+      descriptionEn: drawingDescriptionEn.trim() || drawingDescription.trim(),
+      descriptionPt: drawingDescriptionPt.trim() || drawingDescription.trim(),
       displayOrder: targetOrder,
       isPublished: drawingIsPublished !== false,
       updatedAt: new Date().toISOString().split("T")[0]
@@ -525,22 +582,32 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
   const handleApplyTemplate = (templateId) => {
     const tpl = DOCUMENT_TEMPLATES.find((t) => t.id === templateId);
     if (!tpl) return;
+    const currentActiveContent = activeEditorLang === "en" ? markdownContentEn : markdownContentPt;
     if (
-      markdownContent &&
-      markdownContent.length > 50 &&
+      currentActiveContent &&
+      currentActiveContent.length > 50 &&
       !window.confirm(
         `Deseja carregar o modelo "${tpl.name}"? O conteúdo atual do editor será substituído.`
       )
     ) {
       return;
     }
-    setTitle(tpl.name.replace(/^[^\s]+\s/, ""));
+    const cleanTplTitle = tpl.name.replace(/^[^\s]+\s/, "");
+    setTitle(cleanTplTitle);
+    setTitleEn(cleanTplTitle);
+    setTitlePt(cleanTplTitle);
     setCategory(tpl.category);
     setTags(tpl.defaultTags);
     setShortDescription(tpl.defaultSummary);
+    setShortDescriptionEn(tpl.defaultSummary);
+    setShortDescriptionPt(tpl.defaultSummary);
     setAboutContext(tpl.defaultSummary);
+    setAboutContextEn(tpl.defaultSummary);
+    setAboutContextPt(tpl.defaultSummary);
     setContentType("markdown");
     setMarkdownContent(tpl.content);
+    setMarkdownContentEn(tpl.content);
+    setMarkdownContentPt(tpl.content);
     setSelectedTemplate("");
     showToast(`Modelo "${tpl.name}" carregado com sucesso!`);
   };
@@ -632,7 +699,7 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
         e.preventDefault();
         if (checklistMatch[3].trim() === "") {
           const newText = text.substring(0, lineStart) + text.substring(start);
-          setMarkdownContent(newText);
+          updateCurrentMarkdown(newText);
           setTimeout(() => {
             textarea.selectionStart = textarea.selectionEnd = lineStart;
           }, 0);
@@ -647,7 +714,7 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
         e.preventDefault();
         if (bulletMatch[3].trim() === "") {
           const newText = text.substring(0, lineStart) + text.substring(start);
-          setMarkdownContent(newText);
+          updateCurrentMarkdown(newText);
           setTimeout(() => {
             textarea.selectionStart = textarea.selectionEnd = lineStart;
           }, 0);
@@ -662,7 +729,7 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
         e.preventDefault();
         if (numberMatch[3].trim() === "") {
           const newText = text.substring(0, lineStart) + text.substring(start);
-          setMarkdownContent(newText);
+          updateCurrentMarkdown(newText);
           setTimeout(() => {
             textarea.selectionStart = textarea.selectionEnd = lineStart;
           }, 0);
@@ -676,6 +743,16 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
     }
   };
 
+  const updateCurrentMarkdown = (newText) => {
+    if (activeEditorLang === "en") {
+      setMarkdownContentEn(newText);
+      setMarkdownContent(newText);
+    } else {
+      setMarkdownContentPt(newText);
+      if (!markdownContentEn) setMarkdownContent(newText);
+    }
+  };
+
   const replaceSelection = (insertion, cursorStart, cursorEnd) => {
     const textarea = textareaRef.current;
     if (!textarea) return;
@@ -684,7 +761,7 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
     const text = textarea.value;
 
     const newText = text.substring(0, start) + insertion + text.substring(end);
-    setMarkdownContent(newText);
+    updateCurrentMarkdown(newText);
 
     setTimeout(() => {
       textarea.focus();
@@ -703,7 +780,7 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
 
     const insertion = prefix + (selected || placeholder) + suffix;
     const newText = text.substring(0, start) + insertion + text.substring(end);
-    setMarkdownContent(newText);
+    updateCurrentMarkdown(newText);
 
     setTimeout(() => {
       textarea.focus();
@@ -820,18 +897,29 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
 
   // Save Item
   const handleSaveItem = async () => {
-    if (!title.trim()) {
+    const resolvedTitle = titleEn.trim() || titlePt.trim() || title.trim();
+    if (!resolvedTitle) {
       alert(activeTab === "experiences" ? "Por favor, preencha o cargo ou formação." : "Por favor, preencha o título do item.");
       return;
     }
 
     if (activeTab === "experiences") {
+      const bulletsArrayEn = bulletsTextEn.split("\n").map((b) => b.trim()).filter(Boolean);
+      const bulletsArrayPt = bulletsTextPt.split("\n").map((b) => b.trim()).filter(Boolean);
+      const fallbackBullets = bulletsArrayEn.length > 0 ? bulletsArrayEn : bulletsArrayPt;
+
       const expItem = {
         id: selectedId || generateUniqueId(),
-        title,
+        title: resolvedTitle,
+        titleEn: titleEn.trim() || resolvedTitle,
+        titlePt: titlePt.trim() || resolvedTitle,
         company: company || "Empresa / Instituição",
-        time: timePeriod || "Período",
-        bullets: bulletsText.split("\n").map((b) => b.trim()).filter(Boolean),
+        time: timePeriodEn.trim() || timePeriodPt.trim() || timePeriod || "Período",
+        timeEn: timePeriodEn.trim() || timePeriod || "Period",
+        timePt: timePeriodPt.trim() || timePeriod || "Período",
+        bullets: fallbackBullets,
+        bulletsEn: bulletsArrayEn.length > 0 ? bulletsArrayEn : fallbackBullets,
+        bulletsPt: bulletsArrayPt.length > 0 ? bulletsArrayPt : fallbackBullets,
         displayOrder: items.findIndex((it) => it.id === selectedId) >= 0 ? items.find((it) => it.id === selectedId).displayOrder : items.length,
         isPublished: true,
         updatedAt: new Date().toISOString().split("T")[0]
@@ -859,19 +947,31 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
       .map((t) => t.trim())
       .filter(Boolean);
 
+    const resolvedShortDesc = shortDescriptionEn.trim() || shortDescriptionPt.trim() || shortDescription.trim();
+    const resolvedAbout = aboutContextEn.trim() || aboutContextPt.trim() || aboutContext.trim() || resolvedShortDesc;
+    const resolvedContent = markdownContentEn || markdownContentPt || markdownContent;
+
     const updatedItem = {
       id: selectedId || generateUniqueId(),
-      title,
+      title: resolvedTitle,
+      titleEn: titleEn.trim() || resolvedTitle,
+      titlePt: titlePt.trim() || resolvedTitle,
       category,
       tags: tagsArray,
-      shortDescription,
-      aboutContext: aboutContext || shortDescription,
+      shortDescription: resolvedShortDesc,
+      shortDescriptionEn: shortDescriptionEn.trim() || resolvedShortDesc,
+      shortDescriptionPt: shortDescriptionPt.trim() || resolvedShortDesc,
+      aboutContext: resolvedAbout,
+      aboutContextEn: aboutContextEn.trim() || resolvedAbout,
+      aboutContextPt: aboutContextPt.trim() || resolvedAbout,
       github: githubUrl,
       demo: demoUrl,
       contentType,
       googleDocsUrl,
       pdfUrl,
-      content: markdownContent,
+      content: resolvedContent,
+      contentEn: markdownContentEn || resolvedContent,
+      contentPt: markdownContentPt || resolvedContent,
       relatedArticleId: activeTab === "projects" ? relatedArticleId : undefined,
       relatedProjectId: activeTab === "articles" ? relatedProjectId : undefined,
       updatedAt: new Date().toISOString().split("T")[0]
@@ -957,24 +1057,33 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
   };
 
   // Word Status calculations
-  const wordCount = markdownContent.trim() ? markdownContent.trim().split(/\s+/).length : 0;
-  const charCount = markdownContent.length;
+  const activeMarkdown = activeEditorLang === "en" ? (markdownContentEn || markdownContent) : (markdownContentPt || markdownContent);
+  const wordCount = activeMarkdown.trim() ? activeMarkdown.trim().split(/\s+/).length : 0;
+  const charCount = activeMarkdown.length;
   const readTimeMin = Math.max(1, Math.ceil(wordCount / 180));
   const embedGoogleDocsUrl = convertGoogleDocsToEmbedUrl(googleDocsUrl);
 
   const currentItemObject = {
     id: selectedId,
-    title,
+    title: titleEn || titlePt || title,
+    titleEn: titleEn || title,
+    titlePt: titlePt || title,
     category,
     tags: tags.split(",").map((t) => t.trim()).filter(Boolean),
-    shortDescription,
-    aboutContext,
+    shortDescription: shortDescriptionEn || shortDescriptionPt || shortDescription,
+    shortDescriptionEn: shortDescriptionEn || shortDescription,
+    shortDescriptionPt: shortDescriptionPt || shortDescription,
+    aboutContext: aboutContextEn || aboutContextPt || shortDescriptionEn || shortDescriptionPt || aboutContext,
+    aboutContextEn: aboutContextEn || shortDescriptionEn || aboutContext,
+    aboutContextPt: aboutContextPt || shortDescriptionPt || aboutContext,
     github: githubUrl,
     demo: demoUrl,
     contentType,
     googleDocsUrl,
     pdfUrl,
-    content: markdownContent,
+    content: markdownContentEn || markdownContentPt || markdownContent,
+    contentEn: markdownContentEn || markdownContent,
+    contentPt: markdownContentPt || markdownContent,
     relatedArticleId: activeTab === "projects" ? relatedArticleId : undefined,
     relatedProjectId: activeTab === "articles" ? relatedProjectId : undefined,
     updatedAt: "Recém Editado"
@@ -1662,32 +1771,72 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
 
                   <form onSubmit={handleSaveDrawing}>
                     <div className="drawings-form-group">
-                      <label htmlFor="drawing-title-input">
-                        <strong>Título da Obra *</strong>
+                      <label>
+                        <strong>Título da Obra (EN &amp; PT) *</strong>
                       </label>
-                      <input
-                        id="drawing-title-input"
-                        type="text"
-                        className="drawings-input"
-                        placeholder="Ex: Jack Sparrow em tela A4, Aquaman, GOT..."
-                        value={drawingTitle}
-                        onChange={(e) => setDrawingTitle(e.target.value)}
-                        required
-                      />
+                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+                        <div>
+                          <span style={{ fontSize: "11px", color: "#a78bfa", fontWeight: "600", display: "block", marginBottom: "4px" }}>EN (Inglês)</span>
+                          <input
+                            type="text"
+                            className="drawings-input"
+                            placeholder="Artwork title in English..."
+                            value={drawingTitleEn}
+                            onChange={(e) => {
+                              setDrawingTitleEn(e.target.value);
+                              setDrawingTitle(e.target.value);
+                            }}
+                            required
+                          />
+                        </div>
+                        <div>
+                          <span style={{ fontSize: "11px", color: "#38bdf8", fontWeight: "600", display: "block", marginBottom: "4px" }}>PT (Português)</span>
+                          <input
+                            type="text"
+                            className="drawings-input"
+                            placeholder="Título da obra em Português..."
+                            value={drawingTitlePt}
+                            onChange={(e) => {
+                              setDrawingTitlePt(e.target.value);
+                              if (!drawingTitleEn) setDrawingTitle(e.target.value);
+                            }}
+                          />
+                        </div>
+                      </div>
                     </div>
 
                     <div className="drawings-form-group">
-                      <label htmlFor="drawing-desc-input">
-                        <strong>Técnica / Detalhes (Legenda)</strong>
+                      <label>
+                        <strong>Técnica / Detalhes - Legenda (EN &amp; PT)</strong>
                       </label>
-                      <input
-                        id="drawing-desc-input"
-                        type="text"
-                        className="drawings-input"
-                        placeholder="Ex: Arte realista em grafite sobre papel Canson A4..."
-                        value={drawingDescription}
-                        onChange={(e) => setDrawingDescription(e.target.value)}
-                      />
+                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+                        <div>
+                          <span style={{ fontSize: "11px", color: "#a78bfa", fontWeight: "600", display: "block", marginBottom: "4px" }}>EN (Inglês)</span>
+                          <input
+                            type="text"
+                            className="drawings-input"
+                            placeholder="Technique / details in English..."
+                            value={drawingDescriptionEn}
+                            onChange={(e) => {
+                              setDrawingDescriptionEn(e.target.value);
+                              setDrawingDescription(e.target.value);
+                            }}
+                          />
+                        </div>
+                        <div>
+                          <span style={{ fontSize: "11px", color: "#38bdf8", fontWeight: "600", display: "block", marginBottom: "4px" }}>PT (Português)</span>
+                          <input
+                            type="text"
+                            className="drawings-input"
+                            placeholder="Técnica / detalhes em Português..."
+                            value={drawingDescriptionPt}
+                            onChange={(e) => {
+                              setDrawingDescriptionPt(e.target.value);
+                              if (!drawingDescriptionEn) setDrawingDescription(e.target.value);
+                            }}
+                          />
+                        </div>
+                      </div>
                       <small className="drawings-hint">
                         Exibido como legenda ao abrir o desenho no modo ampliado (lightbox).
                       </small>
@@ -1822,12 +1971,46 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
 
                 {/* Live Preview Column */}
                 <div className="drawings-preview-card">
-                  <div className="drawings-card-title">
-                    Prévia Idêntica ao Portfólio (/hobbies)
+                  <div className="drawings-card-title" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <span>Prévia (/hobbies)</span>
+                    <div style={{ display: "inline-flex", gap: "4px" }}>
+                      <button
+                        type="button"
+                        style={{
+                          background: activeEditorLang === "en" ? "#8b5cf6" : "#21262d",
+                          color: "#fff",
+                          border: "none",
+                          padding: "2px 8px",
+                          borderRadius: "4px",
+                          fontSize: "11px",
+                          fontWeight: "600",
+                          cursor: "pointer"
+                        }}
+                        onClick={() => setActiveEditorLang("en")}
+                      >
+                        EN
+                      </button>
+                      <button
+                        type="button"
+                        style={{
+                          background: activeEditorLang === "pt" ? "#8b5cf6" : "#21262d",
+                          color: "#fff",
+                          border: "none",
+                          padding: "2px 8px",
+                          borderRadius: "4px",
+                          fontSize: "11px",
+                          fontWeight: "600",
+                          cursor: "pointer"
+                        }}
+                        onClick={() => setActiveEditorLang("pt")}
+                      >
+                        PT
+                      </button>
+                    </div>
                   </div>
                   <div className="drawings-preview-inner">
                     <p className="drawings-preview-explanation">
-                      Veja abaixo como sua arte se comportará na galeria masonry e no modal ampliado:
+                      Exibição no site no idioma selecionado ({activeEditorLang.toUpperCase()}):
                     </p>
 
                     {/* Simulation of ArtGallery card */}
@@ -1836,11 +2019,11 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
                         <div className="art-item-simulation">
                           <img
                             src={drawingSrc}
-                            alt={drawingTitle || "Sem título"}
+                            alt={(activeEditorLang === "en" ? (drawingTitleEn || drawingTitle) : (drawingTitlePt || drawingTitle)) || "Sem título"}
                             className="preview-img-tag"
                           />
                           <div className="art-overlay-simulation">
-                            <span>{drawingTitle || "Título da Obra"}</span>
+                            <span>{(activeEditorLang === "en" ? (drawingTitleEn || drawingTitle) : (drawingTitlePt || drawingTitle)) || "Título da Obra"}</span>
                           </div>
                         </div>
                       ) : (
@@ -1855,14 +2038,16 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
                     {/* Simulation of Lightbox details */}
                     <div className="drawing-preview-lightbox-details">
                       <div className="preview-lightbox-header">
-                        <span className="lightbox-badge">Prévia da Legenda</span>
+                        <span className="lightbox-badge">Prévia da Legenda ({activeEditorLang.toUpperCase()})</span>
                         <span className="lightbox-dimensions">
                           {drawingIsPublished ? "Visível no site" : "Rascunho privado"}
                         </span>
                       </div>
-                      <h3 className="preview-lightbox-title">{drawingTitle || "Título da Obra"}</h3>
+                      <h3 className="preview-lightbox-title">
+                        {(activeEditorLang === "en" ? (drawingTitleEn || drawingTitle) : (drawingTitlePt || drawingTitle)) || "Título da Obra"}
+                      </h3>
                       <p className="preview-lightbox-desc">
-                        {drawingDescription || "Técnica e detalhes não informados."}
+                        {(activeEditorLang === "en" ? (drawingDescriptionEn || drawingDescription) : (drawingDescriptionPt || drawingDescription)) || "Técnica e detalhes não informados."}
                       </p>
                       {drawingSrc && (
                         <div className="preview-url-tag">
@@ -2006,82 +2191,184 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
 
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "18px", marginBottom: "18px" }}>
                     <div>
-                      <label style={{ display: "block", marginBottom: "8px", fontSize: "13px", fontWeight: "600", color: "#8b949e" }}>
-                        Cargo ou Formação:
+                      <label style={{ display: "block", marginBottom: "8px", fontSize: "13px", fontWeight: "600", color: "#a78bfa" }}>
+                        Cargo ou Formação em Inglês (EN):
                       </label>
                       <input
                         type="text"
                         style={{ width: "100%", fontSize: "15px", padding: "12px", borderRadius: "8px", background: "#0d1117", border: "1px solid #30363d", color: "#fff" }}
-                        placeholder="Ex: IT Intern, Backend Developer, Bacharelado em BTI..."
-                        value={title}
-                        onChange={(e) => setTitle(e.target.value)}
+                        placeholder="Ex: IT Intern, Backend Developer, BTI Degree..."
+                        value={titleEn}
+                        onChange={(e) => {
+                          setTitleEn(e.target.value);
+                          setTitle(e.target.value);
+                        }}
                       />
                     </div>
 
+                    <div>
+                      <label style={{ display: "block", marginBottom: "8px", fontSize: "13px", fontWeight: "600", color: "#38bdf8" }}>
+                        Cargo ou Formação em Português (PT):
+                      </label>
+                      <input
+                        type="text"
+                        style={{ width: "100%", fontSize: "15px", padding: "12px", borderRadius: "8px", background: "#0d1117", border: "1px solid #30363d", color: "#fff" }}
+                        placeholder="Ex: Estagiário de TI, Desenvolvedor Backend, Bacharelado em BTI..."
+                        value={titlePt}
+                        onChange={(e) => {
+                          setTitlePt(e.target.value);
+                          if (!titleEn) setTitle(e.target.value);
+                        }}
+                      />
+                    </div>
+                  </div>
+
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "18px", marginBottom: "18px" }}>
                     <div>
                       <label style={{ display: "block", marginBottom: "8px", fontSize: "13px", fontWeight: "600", color: "#8b949e" }}>
                         Empresa / Órgão / Instituição:
                       </label>
                       <input
                         type="text"
-                        style={{ width: "100%", fontSize: "15px", padding: "12px", borderRadius: "8px", background: "#0d1117", border: "1px solid #30363d", color: "#fff" }}
+                        style={{ width: "100%", fontSize: "14px", padding: "12px", borderRadius: "8px", background: "#0d1117", border: "1px solid #30363d", color: "#fff" }}
                         placeholder="Ex: Detran, Cachina Soluções, UFRN..."
                         value={company}
                         onChange={(e) => setCompany(e.target.value)}
                       />
                     </div>
+
+                    <div>
+                      <label style={{ display: "block", marginBottom: "8px", fontSize: "13px", fontWeight: "600", color: "#a78bfa" }}>
+                        Período em Inglês (EN):
+                      </label>
+                      <input
+                        type="text"
+                        style={{ width: "100%", fontSize: "14px", padding: "12px", borderRadius: "8px", background: "#0d1117", border: "1px solid #30363d", color: "#fff" }}
+                        placeholder="Ex: June 2026 - Present"
+                        value={timePeriodEn}
+                        onChange={(e) => {
+                          setTimePeriodEn(e.target.value);
+                          setTimePeriod(e.target.value);
+                        }}
+                      />
+                    </div>
+
+                    <div>
+                      <label style={{ display: "block", marginBottom: "8px", fontSize: "13px", fontWeight: "600", color: "#38bdf8" }}>
+                        Período em Português (PT):
+                      </label>
+                      <input
+                        type="text"
+                        style={{ width: "100%", fontSize: "14px", padding: "12px", borderRadius: "8px", background: "#0d1117", border: "1px solid #30363d", color: "#fff" }}
+                        placeholder="Ex: Junho 2026 - Presente"
+                        value={timePeriodPt}
+                        onChange={(e) => {
+                          setTimePeriodPt(e.target.value);
+                          if (!timePeriodEn) setTimePeriod(e.target.value);
+                        }}
+                      />
+                    </div>
                   </div>
 
-                  <div style={{ marginBottom: "18px" }}>
-                    <label style={{ display: "block", marginBottom: "8px", fontSize: "13px", fontWeight: "600", color: "#8b949e" }}>
-                      Período / Linha do Tempo:
-                    </label>
-                    <input
-                      type="text"
-                      style={{ width: "100%", fontSize: "14px", padding: "12px", borderRadius: "8px", background: "#0d1117", border: "1px solid #30363d", color: "#fff" }}
-                      placeholder="Ex: Junho 2026 - Atualmente ou 2024.1 - Presente"
-                      value={timePeriod}
-                      onChange={(e) => setTimePeriod(e.target.value)}
-                    />
-                  </div>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "18px", marginBottom: "20px" }}>
+                    <div>
+                      <label style={{ display: "block", marginBottom: "8px", fontSize: "13px", fontWeight: "600", color: "#a78bfa" }}>
+                        Atividades &amp; Conquistas em Inglês (EN, 1 por linha):
+                      </label>
+                      <textarea
+                        rows="6"
+                        style={{ width: "100%", fontSize: "13px", padding: "14px", borderRadius: "8px", background: "#0d1117", border: "1px solid #30363d", color: "#fff", lineHeight: "1.6", resize: "vertical" }}
+                        placeholder="Ex:&#10;Backend system engineering in Python&#10;Workflow automations with n8n..."
+                        value={bulletsTextEn}
+                        onChange={(e) => {
+                          setBulletsTextEn(e.target.value);
+                          setBulletsText(e.target.value);
+                        }}
+                      />
+                    </div>
 
-                  <div style={{ marginBottom: "20px" }}>
-                    <label style={{ display: "block", marginBottom: "8px", fontSize: "13px", fontWeight: "600", color: "#8b949e" }}>
-                      Atividades & Conquistas (digite 1 por linha):
-                    </label>
-                    <textarea
-                      rows="6"
-                      style={{ width: "100%", fontSize: "14px", padding: "14px", borderRadius: "8px", background: "#0d1117", border: "1px solid #30363d", color: "#fff", lineHeight: "1.6", resize: "vertical" }}
-                      placeholder="Ex:&#10;Desenvolvimento e otimização de arquiteturas de backend em Python&#10;Automação de processos com n8n&#10;Gestão de servidores Linux Ubuntu..."
-                      value={bulletsText}
-                      onChange={(e) => setBulletsText(e.target.value)}
-                    />
-                    <small style={{ color: "#8b949e", fontSize: "12px", display: "block", marginTop: "6px" }}>
-                       Cada linha quebrada será renderizada como um ponto na lista de experiência do portfólio.
-                    </small>
+                    <div>
+                      <label style={{ display: "block", marginBottom: "8px", fontSize: "13px", fontWeight: "600", color: "#38bdf8" }}>
+                        Atividades &amp; Conquistas em Português (PT, 1 por linha):
+                      </label>
+                      <textarea
+                        rows="6"
+                        style={{ width: "100%", fontSize: "13px", padding: "14px", borderRadius: "8px", background: "#0d1117", border: "1px solid #30363d", color: "#fff", lineHeight: "1.6", resize: "vertical" }}
+                        placeholder="Ex:&#10;Engenharia de sistemas de backend em Python&#10;Automações de fluxos de trabalho com n8n..."
+                        value={bulletsTextPt}
+                        onChange={(e) => {
+                          setBulletsTextPt(e.target.value);
+                          if (!bulletsTextEn) setBulletsText(e.target.value);
+                        }}
+                      />
+                    </div>
                   </div>
+                  <small style={{ color: "#8b949e", fontSize: "12px", display: "block" }}>
+                    Cada linha quebrada será renderizada como um ponto na lista de experiência do portfólio no idioma correspondente.
+                  </small>
                 </div>
 
                 {/* Live Preview Card */}
                 <div style={{ background: "#0d1117", border: "1px solid rgba(139, 92, 246, 0.4)", borderRadius: "12px", padding: "24px", boxShadow: "0 8px 30px rgba(139, 92, 246, 0.1)" }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
                     <span style={{ color: "#a78bfa", fontWeight: "700", fontSize: "14px", textTransform: "uppercase", letterSpacing: "1px" }}>
-                       Prévia Idêntica ao Site Oficial
+                      Prévia Idêntica ao Site Oficial
                     </span>
-                    <span style={{ fontSize: "12px", color: "#8b949e" }}>Seção &quot;Experiência&quot;</span>
+                    <div style={{ display: "inline-flex", gap: "6px" }}>
+                      <button
+                        type="button"
+                        style={{
+                          background: expPreviewLang === "en" ? "#8b5cf6" : "#21262d",
+                          color: "#fff",
+                          border: "none",
+                          padding: "4px 10px",
+                          borderRadius: "4px",
+                          fontSize: "12px",
+                          fontWeight: "600",
+                          cursor: "pointer"
+                        }}
+                        onClick={() => setExpPreviewLang("en")}
+                      >
+                        EN
+                      </button>
+                      <button
+                        type="button"
+                        style={{
+                          background: expPreviewLang === "pt" ? "#8b5cf6" : "#21262d",
+                          color: "#fff",
+                          border: "none",
+                          padding: "4px 10px",
+                          borderRadius: "4px",
+                          fontSize: "12px",
+                          fontWeight: "600",
+                          cursor: "pointer"
+                        }}
+                        onClick={() => setExpPreviewLang("pt")}
+                      >
+                        PT
+                      </button>
+                    </div>
                   </div>
 
                   <div className="exp-display-card">
                     <div className="exp-card-body">
                       <h3>
-                        {title || "Cargo ou Título"} |{" "}
+                        {(expPreviewLang === "en" ? (titleEn || title) : (titlePt || title)) || "Cargo ou Título"} |{" "}
                         <span className="company-highlight">{company || "Empresa"}</span>
                       </h3>
-                      <p className="exp-timeline">{timePeriod || "Período / Ano"}</p>
+                      <p className="exp-timeline">
+                        {(expPreviewLang === "en" ? (timePeriodEn || timePeriod) : (timePeriodPt || timePeriod)) || "Período / Ano"}
+                      </p>
                       <div className="card-inner-divider"></div>
                       <ul className="exp-bullet-list">
-                        {(bulletsText.split("\n").map((b) => b.trim()).filter(Boolean).length > 0
-                          ? bulletsText.split("\n").map((b) => b.trim()).filter(Boolean)
+                        {((expPreviewLang === "en" ? (bulletsTextEn || bulletsText) : (bulletsTextPt || bulletsText))
+                          .split("\n")
+                          .map((b) => b.trim())
+                          .filter(Boolean).length > 0
+                          ? (expPreviewLang === "en" ? (bulletsTextEn || bulletsText) : (bulletsTextPt || bulletsText))
+                              .split("\n")
+                              .map((b) => b.trim())
+                              .filter(Boolean)
                           : ["Sua atividade ou responsabilidade aparecerá aqui..."]
                         ).map((bullet, idx) => (
                           <li key={idx}>{bullet}</li>
@@ -2107,12 +2394,44 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
                   </button>
                 )}
 
+                <div className="admin-lang-toggle-bar">
+                  <button
+                    type="button"
+                    className={`admin-lang-btn ${activeEditorLang === "en" ? "active" : ""}`}
+                    onClick={() => setActiveEditorLang("en")}
+                    title="Editar textos em Inglês (EN)"
+                  >
+                    EN
+                  </button>
+                  <button
+                    type="button"
+                    className={`admin-lang-btn ${activeEditorLang === "pt" ? "active" : ""}`}
+                    onClick={() => setActiveEditorLang("pt")}
+                    title="Editar textos em Português (PT)"
+                  >
+                    PT
+                  </button>
+                </div>
+
                 <input
                   type="text"
                   className="document-title-input"
-                  placeholder="Título do Projeto ou Artigo..."
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
+                  placeholder={
+                    activeEditorLang === "en"
+                      ? "Title in English (EN)..."
+                      : "Título em Português (PT)..."
+                  }
+                  value={activeEditorLang === "en" ? titleEn : titlePt}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (activeEditorLang === "en") {
+                      setTitleEn(val);
+                      setTitle(val);
+                    } else {
+                      setTitlePt(val);
+                      if (!titleEn) setTitle(val);
+                    }
+                  }}
                 />
 
                 <div className="primary-actions-group">
@@ -2365,18 +2684,145 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
                     </div>
                   )}
 
-                  <div className="meta-synopsis-row">
-                    <label>Sinopse / Contexto IA (Resumo destacado na página):</label>
-                    <textarea
-                      rows="2"
-                      placeholder="Breve resumo objetivo que os visitantes e o agente Alomyr usam para contextualizar o projeto..."
-                      value={shortDescription}
-                      onChange={(e) => setShortDescription(e.target.value)}
-                    ></textarea>
+                  <div className="meta-bilingual-card">
+                    <div style={{ fontSize: "12px", fontWeight: "700", color: "#a78bfa", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: "12px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <span>Textos Bilíngues (EN &amp; PT)</span>
+                      <span style={{ fontSize: "11px", color: "#8b949e", textTransform: "none", fontWeight: "normal" }}>Defina as versões para cada idioma</span>
+                    </div>
+
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "14px", marginBottom: "12px" }}>
+                      <div>
+                        <label style={{ display: "block", fontSize: "12px", fontWeight: "600", color: "#a78bfa", marginBottom: "6px" }}>
+                          Título em Inglês (EN):
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="Ex: AgentMetrics: Autonomous AI Agent Telemetry"
+                          value={titleEn}
+                          onChange={(e) => {
+                            setTitleEn(e.target.value);
+                            setTitle(e.target.value);
+                          }}
+                          style={{ width: "100%", padding: "8px 12px", background: "#0d1117", border: "1px solid #30363d", borderRadius: "6px", color: "#fff", fontSize: "13px" }}
+                        />
+                      </div>
+                      <div>
+                        <label style={{ display: "block", fontSize: "12px", fontWeight: "600", color: "#38bdf8", marginBottom: "6px" }}>
+                          Título em Português (PT):
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="Ex: AgentMetrics: Telemetria de Agentes Autônomos de IA"
+                          value={titlePt}
+                          onChange={(e) => {
+                            setTitlePt(e.target.value);
+                            if (!titleEn) setTitle(e.target.value);
+                          }}
+                          style={{ width: "100%", padding: "8px 12px", background: "#0d1117", border: "1px solid #30363d", borderRadius: "6px", color: "#fff", fontSize: "13px" }}
+                        />
+                      </div>
+                    </div>
+
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "14px" }}>
+                      <div>
+                        <label style={{ display: "block", fontSize: "12px", fontWeight: "600", color: "#a78bfa", marginBottom: "6px" }}>
+                          Sinopse / Contexto IA em Inglês (EN):
+                        </label>
+                        <textarea
+                          rows="3"
+                          placeholder="Short description displayed when site is in English..."
+                          value={shortDescriptionEn}
+                          onChange={(e) => {
+                            setShortDescriptionEn(e.target.value);
+                            setShortDescription(e.target.value);
+                          }}
+                          style={{ width: "100%", padding: "8px 12px", background: "#0d1117", border: "1px solid #30363d", borderRadius: "6px", color: "#fff", fontSize: "13px", resize: "vertical" }}
+                        />
+                      </div>
+                      <div>
+                        <label style={{ display: "block", fontSize: "12px", fontWeight: "600", color: "#38bdf8", marginBottom: "6px" }}>
+                          Sinopse / Contexto IA em Português (PT):
+                        </label>
+                        <textarea
+                          rows="3"
+                          placeholder="Breve resumo objetivo exibido quando o site estiver em Português..."
+                          value={shortDescriptionPt}
+                          onChange={(e) => {
+                            setShortDescriptionPt(e.target.value);
+                            if (!shortDescriptionEn) setShortDescription(e.target.value);
+                          }}
+                          style={{ width: "100%", padding: "8px 12px", background: "#0d1117", border: "1px solid #30363d", borderRadius: "6px", color: "#fff", fontSize: "13px", resize: "vertical" }}
+                        />
+                      </div>
+                    </div>
                   </div>
                 </div>
               )}
             </section>
+
+            {/* Editor Language Selector Bar */}
+            <div className="editor-lang-indicator-bar">
+              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                <span style={{ color: "#8b949e", fontWeight: "600" }}>Idioma do Conteúdo:</span>
+                <div className="admin-lang-toggle-bar" style={{ margin: 0 }}>
+                  <button
+                    type="button"
+                    className={`admin-lang-btn ${activeEditorLang === "en" ? "active" : ""}`}
+                    onClick={() => setActiveEditorLang("en")}
+                  >
+                    Inglês (EN)
+                  </button>
+                  <button
+                    type="button"
+                    className={`admin-lang-btn ${activeEditorLang === "pt" ? "active" : ""}`}
+                    onClick={() => setActiveEditorLang("pt")}
+                  >
+                    Português (PT)
+                  </button>
+                </div>
+                <span style={{ color: activeEditorLang === "en" ? "#a78bfa" : "#38bdf8", fontSize: "12px", fontWeight: "500" }}>
+                  {activeEditorLang === "en"
+                    ? "Editando texto que será exibido aos visitantes em English"
+                    : "Editando texto que será exibido aos visitantes em Português"}
+                </span>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => {
+                  if (activeEditorLang === "en") {
+                    if (!markdownContentPt) {
+                      showToast("A versão em Português está vazia.");
+                      return;
+                    }
+                    if (markdownContentEn && !window.confirm("Substituir o conteúdo atual em Inglês pelo conteúdo em Português?")) return;
+                    setMarkdownContentEn(markdownContentPt);
+                    setMarkdownContent(markdownContentPt);
+                    showToast("Conteúdo copiado de Português para Inglês!");
+                  } else {
+                    if (!markdownContentEn) {
+                      showToast("A versão em Inglês está vazia.");
+                      return;
+                    }
+                    if (markdownContentPt && !window.confirm("Substituir o conteúdo atual em Português pelo conteúdo em Inglês?")) return;
+                    setMarkdownContentPt(markdownContentEn);
+                    showToast("Conteúdo copiado de Inglês para Português!");
+                  }
+                }}
+                style={{
+                  background: "#161b22",
+                  border: "1px solid #30363d",
+                  color: "#c9d1d9",
+                  borderRadius: "6px",
+                  padding: "4px 10px",
+                  fontSize: "12px",
+                  cursor: "pointer"
+                }}
+                title="Copiar texto do outro idioma como base para tradução"
+              >
+                Copiar do outro idioma
+              </button>
+            </div>
 
             {/* Word-like WYSIWYG Toolbar */}
             <section className="word-toolbar">
@@ -2571,10 +3017,14 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
                   <textarea
                     ref={textareaRef}
                     className="markdown-textarea"
-                    value={markdownContent}
-                    onChange={(e) => setMarkdownContent(e.target.value)}
+                    value={activeEditorLang === "en" ? markdownContentEn : markdownContentPt}
+                    onChange={(e) => updateCurrentMarkdown(e.target.value)}
                     onKeyDown={handleKeyDown}
-                    placeholder="Escreva em Markdown ou utilize os atalhos de teclado..."
+                    placeholder={
+                      activeEditorLang === "en"
+                        ? "Write in Markdown (EN) or use keyboard shortcuts..."
+                        : "Escreva em Markdown (PT) ou utilize os atalhos de teclado..."
+                    }
                     spellCheck="false"
                   ></textarea>
                 </div>
@@ -2624,8 +3074,16 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
                     </div>
                   ) : (
                     <div className="rendered-markdown-content">
-                      <div className="preview-label-tag">Obsidian Live Preview</div>
-                      <SimpleMarkdownRenderer content={markdownContent} />
+                      <div className="preview-label-tag">
+                        Live Preview ({activeEditorLang === "en" ? "EN - English" : "PT - Português"})
+                      </div>
+                      <SimpleMarkdownRenderer
+                        content={
+                          activeEditorLang === "en"
+                            ? (markdownContentEn || markdownContent)
+                            : (markdownContentPt || markdownContent)
+                        }
+                      />
                     </div>
                   )}
                 </div>

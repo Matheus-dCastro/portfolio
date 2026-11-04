@@ -303,3 +303,21 @@ Este documento reúne e padroniza todos os textos oficiais do site em Inglês (*
   - PT: `Alomyr pensando...`
 - **Prompt do Sistema:**
   > "Você é o Alomyr, o Assistente Oficial de Inteligência Artificial do portfólio de Matheus de Castro..."
+
+---
+
+## 16. Painel Administrativo Bilíngue (/4dm1n)
+
+- **Suporte a Cadastro Bilíngue (Dual-Language Input):**
+  - **Projetos, Artigos e Pensamentos:**
+    - Título em Inglês (`titleEn`) e Título em Português (`titlePt`).
+    - Sinopse / Contexto IA em Inglês (`shortDescriptionEn`) e em Português (`shortDescriptionPt`).
+    - Conteúdo Markdown em Inglês (`contentEn`) e em Português (`contentPt`), com seletor de idioma na barra do editor e botão para copiar texto de um idioma para o outro.
+  - **Experiências Profissionais:**
+    - Cargo ou Formação em Inglês (`titleEn`) e em Português (`titlePt`).
+    - Período / Linha do Tempo em Inglês (`timePeriodEn`) e em Português (`timePeriodPt`).
+    - Atividades e Conquistas em Inglês (`bulletsEn`) e em Português (`bulletsPt`), com alternador de prévia ao vivo (EN | PT).
+  - **Galeria de Artes e Desenhos:**
+    - Título da Obra em Inglês (`titleEn`) e em Português (`titlePt`).
+    - Legenda / Técnica em Inglês (`descriptionEn`) e em Português (`descriptionPt`), com prévia nos dois idiomas.
+

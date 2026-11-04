@@ -2827,3 +2827,55 @@
   font-size: 0.75rem;
   color: #58a6ff;
 }
+
+/* Admin Bilingual Controls */
+.admin-lang-toggle-bar {
+  display: inline-flex;
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 8px;
+  padding: 2px;
+  gap: 2px;
+  margin-right: 12px;
+  flex-shrink: 0;
+}
+
+.admin-lang-btn {
+  background: transparent;
+  border: none;
+  color: #8b949e;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.admin-lang-btn:hover {
+  color: #f0f6fc;
+}
+
+.admin-lang-btn.active {
+  background: #8b5cf6;
+  color: #ffffff;
+  box-shadow: 0 0 10px rgba(139, 92, 246, 0.4);
+}
+
+.editor-lang-indicator-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 18px;
+  background: #0d1117;
+  border-bottom: 1px solid #21262d;
+  font-size: 0.8rem;
+}
+
+.meta-bilingual-card {
+  background: rgba(139, 92, 246, 0.05);
+  border: 1px solid rgba(139, 92, 246, 0.25);
+  border-radius: 8px;
+  padding: 16px;
+  margin-top: 16px;
+}
