@@ -267,7 +267,7 @@ Este documento reúne e padroniza todos os textos oficiais do site em Inglês (*
 - **Eyebrow:** `GALLERY` \| `GALERIA`
 - **Título:** `My Drawings` \| `Meus Desenhos`
 - **Contador:** `{N} Artworks` \| `{N} Obras`
-- **Dica de Zoom:** `🔍 Expand` \| `🔍 Expandir`
+- **Dica de Zoom:** `Expand` \| `Expandir`
 
 ---
 
@@ -275,7 +275,7 @@ Este documento reúne e padroniza todos os textos oficiais do site em Inglês (*
 
 - **Tag:** `Reflections & Philosophy` \| `Reflexões & Filosofia`
 - **Título:** `Thoughts & Insights` \| `Pensamentos & Insights`
-- **Ações:** `🌐 Read on Google Docs ↗` \| `📄 Open PDF ↗`
+- **Ações:** `Read on Google Docs ↗` \| `Open PDF ↗`
 
 ---
 
@@ -293,7 +293,7 @@ Este documento reúne e padroniza todos os textos oficiais do site em Inglês (*
 - **Botão Flutuante:**
   - EN: `Ask Alomyr (AI)`
   - PT: `Pergunte ao Alomyr (IA)`
-- **Cabeçalho:** `Alomyr ✦`
+- **Cabeçalho:** `Alomyr`
 - **Subtítulo:** `AI Assistant • Groq` \| `Assistente IA • Groq`
 - **Mensagem Inicial de Boas-Vindas:**
   - EN: "Hello! I am Alomyr, the official AI Assistant for Matheus de Castro. How can I assist you with information about his AI projects, backend architecture, or resume?"

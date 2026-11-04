@@ -36,16 +36,16 @@ export const DEFAULT_PROJECTS = [
 
 Uma solução robusta de telemetria e observabilidade desenvolvida para monitorar agentes baseados em LLMs em ambientes de produção.
 
-## 🎯 Problema & Visão Geral
+## Problema & Visão Geral
 À medida que agentes de inteligência artificial são integrados a rotinas corporativas, torna-se crítico rastrear o consumo de tokens, os tempos de inferência e a assertividade das respostas. O AgentMetrics resolve isso com uma arquitetura assíncrona orientada a eventos.
 
-## 🛠️ Arquitetura e Tecnologias
+## Arquitetura e Tecnologias
 - **FastAPI (Python 3.11):** Backend de alta performance com endpoints assíncronos (\`async/await\`).
 - **PostgreSQL & TimescaleDB:** Armazenamento otimizado para séries temporais de métricas.
 - **Docker & Docker Compose:** Conteinerização de todos os serviços para reprodutibilidade.
 - **Pydantic v2:** Validação estrita de contratos de dados em tempo de execução.
 
-## 📊 Métricas Monitoradas
+## Métricas Monitoradas
 1. **Time to First Token (TTFT):** Latência inicial percebida pelo usuário.
 2. **Taxa de Alucinação / Conformidade:** Avaliação heurística e por juiz sintético.
 3. **Consumo de Memória e VRAM:** Uso de recursos computacionais durante inferências locais e remotas.
@@ -98,14 +98,14 @@ docker-compose up --build
 
 Projeto de Aprendizado de Máquina Supervisionado focado na segmentação precisa de patologias em imagens de diagnóstico por imagem.
 
-## 🔬 Metodologia e Fundamentação
+## Metodologia e Fundamentação
 A segmentação semântica no domínio médico requer alta sensibilidade e especificidade. Utilizamos uma rede neural convolucional com conexões de salto (*skip connections*) baseada na consagrada arquitetura U-Net.
 
 ### Pipeline de Dados
 - **Pré-processamento:** Normalização de histograma, corte de ROI (*Region of Interest*) e ampliação de dados (*Data Augmentation*) geométrica e elástica.
 - **Funções de Perda:** Combinação ponderada de *Dice Loss* com *Binary Cross-Entropy* para contornar o severo desbalanceamento de classes pixel a pixel.
 
-## 📈 Resultados Obtidos
+## Resultados Obtidos
 | Métrica | Valor Médio | Desvio Padrão |
 | :--- | :--- | :--- |
 | **Dice Score (F1)** | **0.894** | ± 0.021 |
@@ -115,7 +115,7 @@ A segmentação semântica no domínio médico requer alta sensibilidade e espec
 
 > "A combinação de Dice Loss com penalização de borda reduziu artefatos em contornos anatômicos complexos em mais de 18%."
 
-## 💻 Tecnologias
+## Tecnologias
 - Python 3.10
 - PyTorch & Torchvision
 - Albumentations para Data Augmentation
@@ -145,14 +145,14 @@ A segmentação semântica no domínio médico requer alta sensibilidade e espec
 
 Tema com estética cyberpunk refinada, focado em alta legibilidade sem fadiga visual para sessões noturnas de código.
 
-## 🎨 Filosofia de Design
+## Filosofia de Design
 Inspirado na precisão do traço do hiper-realismo e no contraste dinâmico de interfaces neons, o Obsidian Neon equilibra tons escuros profundos (#030306 e #08080c) com acentos violetas luminosos e ciano elétrico.
 
 - **Tokens Semânticos Claros:** Diferenciação visual imediata entre tipos primitivos, palavras-chave de controle de fluxo e chamadas de métodos.
 - **Contraste WCAG AAA:** Mais de 7:1 de proporção de contraste em todo o código fonte.
 - **Suporte Multilinguagem:** Otimizado para Python, C++, Rust, TypeScript, Java e Markdown.
 
-## 📥 Instalação
+## Instalação
 No VS Code, abra a paleta de comandos (\`Ctrl+P\` ou \`Cmd+P\`) e execute:
 \`\`\`bash
 ext install Alomyr.obsidian-neon-110
@@ -182,7 +182,7 @@ ext install Alomyr.obsidian-neon-110
 
 Projeto corporativo abrangendo a arquitetura de apresentação institucional, automação de processos e gestão de infraestrutura em nuvem.
 
-## 💼 Escopo do Trabalho
+## Escopo do Trabalho
 - Implementação de fluxos de integração contínua e automação com **n8n**.
 - Configuração e sustentação de servidores dedicados Linux (Ubuntu Server).
 - Criação da interface web institucional com carregamento ultra rápido e SEO otimizado.
@@ -212,7 +212,7 @@ Projeto corporativo abrangendo a arquitetura de apresentação institucional, au
 
 Ferramenta CLI para gerenciamento ágil de tarefas e auditoria de atividades com banco de dados PostgreSQL.
 
-## 🏛️ Padrão Arquitetural
+## Padrão Arquitetural
 Adotou-se o modelo MVC (Model-View-Controller):
 - **Model:** Entidades de domínio mapeadas com validação e conexões seguras ao banco de dados relacional.
 - **View:** Interface de linha de comando com menus interativos e saída tabulada colorida.

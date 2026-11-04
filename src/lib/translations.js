@@ -215,8 +215,8 @@ export const translations = {
     "hero.subtitle": "Técnico em TI — IFRN. Graduando em Tecnologia da Informação (BTI) na UFRN, com foco de estudos em Machine Learning e desenvolvimento backend.",
     "hero.see_projects": "Ver Meus Projetos",
     "hero.download_cv": "Baixar CV / Docs",
-    "hero.card_art": "ARTE",
-    "hero.card_coder": "CODER É",
+    "hero.card_art": "ART",
+    "hero.card_coder": "CODER IS",
 
     // CV Modal
     "cv_modal.title": "Currículo de Matheus de Castro",
