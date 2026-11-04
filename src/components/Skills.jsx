@@ -1,10 +1,14 @@
+import { useLanguage } from "../context/useLanguage";
+
 function Skills() {
+  const { t } = useLanguage();
+
   return (
     <>
       <div className="section-divider-line"></div>
-      <p className="section-tag">Stack & Tools</p>
+      <p className="section-tag">{t("skills.tag")}</p>
       <h2>
-        My <span>Skills</span>
+        {t("skills.title_prefix")}<span>{t("skills.title_highlight")}</span>
       </h2>
       <div className="skills-grid">
         <div className="skill-item">
@@ -101,9 +105,9 @@ function Skills() {
       </div>
 
       <div className="frameworks-wrapper" style={{ marginTop: "60px" }}>
-        <p className="section-tag">Frameworks & Libraries</p>
+        <p className="section-tag">{t("skills.frameworks_tag")}</p>
         <h2>
-          Frameworks I <span>Work With</span>
+          {t("skills.frameworks_title_prefix")}<span>{t("skills.frameworks_title_highlight")}</span>
         </h2>
         <div className="skills-grid">
           <div className="skill-item">

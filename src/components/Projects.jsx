@@ -1,32 +1,10 @@
 import { useState, useEffect } from "react";
 import { getStoredProjects } from "../data/projectsData";
 import { fetchWorks } from "../lib/supabaseService";
+import { useLanguage } from "../context/useLanguage";
 
-const WORK_CATEGORIES = [
-  {
-    id: "Profissional",
-    title: "Profissional & Corporativo",
-    icon: "",
-    badgeClass: "cat-profissional",
-    description: "Sistemas corporativos, arquiteturas escaláveis e soluções em produção desenvolvidas para empresas e clientes."
-  },
-  {
-    id: "Pessoal",
-    title: "Projetos Pessoais & Inovações",
-    icon: "",
-    badgeClass: "cat-pessoal",
-    description: "Projetos autorais, ferramentas de produtividade, design systems e extensões públicas."
-  },
-  {
-    id: "Acadêmico",
-    title: "Acadêmico & Pesquisa Científica",
-    icon: "",
-    badgeClass: "cat-academico",
-    description: "Pesquisas na UFRN/IFRN em Machine Learning, Deep Learning, Visão Computacional e algoritmos complexos."
-  }
-];
-
-function Projects({ onOpenProject }) {
+export default function Projects({ onOpenProject }) {
+  const { t, lang } = useLanguage();
   const [projects, setProjects] = useState(() => getStoredProjects());
   const [activeCategory, setActiveCategory] = useState("all");
 
@@ -42,21 +20,45 @@ function Projects({ onOpenProject }) {
     };
   }, []);
 
+  const workCategories = [
+    {
+      id: "Profissional",
+      title: t("projects.cat_prof_title"),
+      icon: "",
+      badgeClass: "cat-profissional",
+      description: t("projects.cat_prof_desc")
+    },
+    {
+      id: "Pessoal",
+      title: t("projects.cat_pessoal_title"),
+      icon: "",
+      badgeClass: "cat-pessoal",
+      description: t("projects.cat_pessoal_desc")
+    },
+    {
+      id: "Acadêmico",
+      title: t("projects.cat_academico_title"),
+      icon: "",
+      badgeClass: "cat-academico",
+      description: t("projects.cat_academico_desc")
+    }
+  ];
+
   const profCount = projects.filter((p) => (p.category || "Profissional") === "Profissional").length;
   const pessoalCount = projects.filter((p) => p.category === "Pessoal").length;
   const academicoCount = projects.filter((p) => p.category === "Acadêmico").length;
 
   const visibleCategories =
     activeCategory === "all"
-      ? WORK_CATEGORIES
-      : WORK_CATEGORIES.filter((cat) => cat.id === activeCategory);
+      ? workCategories
+      : workCategories.filter((cat) => cat.id === activeCategory);
 
   return (
     <>
       <div className="section-divider-line"></div>
-      <p className="section-tag">Selected Portfolio</p>
+      <p className="section-tag">{t("projects.tag")}</p>
       <h2>
-        Selected <span>Works</span>
+        {t("projects.title_prefix")}<span>{t("projects.title_highlight")}</span>
       </h2>
 
       {/* 3 Sessions Filter Bar */}
@@ -67,7 +69,7 @@ function Projects({ onOpenProject }) {
             className={`category-filter-btn ${activeCategory === "all" ? "active" : ""}`}
             onClick={() => setActiveCategory("all")}
           >
-            Todos ({projects.length})
+            {t("projects.filter_all")} ({projects.length})
           </button>
           {profCount > 0 && (
             <button
@@ -75,7 +77,7 @@ function Projects({ onOpenProject }) {
               className={`category-filter-btn ${activeCategory === "Profissional" ? "active" : ""}`}
               onClick={() => setActiveCategory("Profissional")}
             >
-              Profissional ({profCount})
+              {t("projects.filter_prof")} ({profCount})
             </button>
           )}
           {pessoalCount > 0 && (
@@ -84,7 +86,7 @@ function Projects({ onOpenProject }) {
               className={`category-filter-btn ${activeCategory === "Pessoal" ? "active" : ""}`}
               onClick={() => setActiveCategory("Pessoal")}
             >
-               Pessoal ({pessoalCount})
+              {t("projects.filter_pessoal")} ({pessoalCount})
             </button>
           )}
           {academicoCount > 0 && (
@@ -93,13 +95,13 @@ function Projects({ onOpenProject }) {
               className={`category-filter-btn ${activeCategory === "Acadêmico" ? "active" : ""}`}
               onClick={() => setActiveCategory("Acadêmico")}
             >
-               Acadêmico ({academicoCount})
+              {t("projects.filter_academico")} ({academicoCount})
             </button>
           )}
         </div>
       )}
 
-      {/* Render the 3 category sessions (shown all together when 'all', or filtered individually) */}
+      {/* Render category sessions */}
       <div className="works-sessions-container">
         {visibleCategories.map((cat) => {
           const catProjects = projects.filter(
@@ -128,74 +130,81 @@ function Projects({ onOpenProject }) {
               </div>
 
               <div className="grid">
-                {catProjects.map((project) => (
-                  <div key={project.id} className="project-card">
-                    <div className="project-header">
-                      {project.tags?.map((tag, tIdx) => (
-                        <span
-                          key={tIdx}
-                          className={`tag ${tIdx === 1 ? "font-bold" : ""}`}
-                        >
-                          {tag}
-                        </span>
-                      ))}
-                      {project.contentType === "google-docs" && (
-                        <span className="tag font-bold gdocs-badge">Google Docs</span>
-                      )}
-                      {project.contentType === "pdf" && (
-                        <span className="tag font-bold pdf-badge">PDF</span>
-                      )}
-                      {project.relatedArticleId && (
-                        <span className="tag font-bold related-tag" title="Possui artigo técnico associado">
-                          📑 Artigo
-                        </span>
-                      )}
-                    </div>
+                {catProjects.map((project) => {
+                  const title = lang === "en" ? (project.titleEn || project.title) : (project.titlePt || project.title);
+                  const desc = lang === "en"
+                    ? (project.shortDescriptionEn || project.shortDescription || project.aboutContextEn || project.aboutContext)
+                    : (project.shortDescriptionPt || project.shortDescription || project.aboutContextPt || project.aboutContext);
 
-                    <h3>{project.title}</h3>
-                    <p>{project.shortDescription || project.aboutContext}</p>
+                  return (
+                    <div key={project.id} className="project-card">
+                      <div className="project-header">
+                        {project.tags?.map((tag, tIdx) => (
+                          <span
+                            key={tIdx}
+                            className={`tag ${tIdx === 1 ? "font-bold" : ""}`}
+                          >
+                            {tag}
+                          </span>
+                        ))}
+                        {project.contentType === "google-docs" && (
+                          <span className="tag font-bold gdocs-badge">Google Docs</span>
+                        )}
+                        {project.contentType === "pdf" && (
+                          <span className="tag font-bold pdf-badge">PDF</span>
+                        )}
+                        {project.relatedArticleId && (
+                          <span className="tag font-bold related-tag" title="Associated technical article">
+                            {t("projects.badge_article")}
+                          </span>
+                        )}
+                      </div>
 
-                    <div className="project-links">
-                      {onOpenProject && (
-                        <button
-                          type="button"
-                          className="link-arrow highlight"
-                          onClick={() => onOpenProject(project)}
-                          style={{
-                            background: "none",
-                            border: "none",
-                            fontFamily: "inherit",
-                            fontSize: "inherit",
-                            cursor: "pointer",
-                            padding: 0
-                          }}
-                        >
-                          Saber mais <span>→</span>
-                        </button>
-                      )}
-                      {project.github && (
-                        <a
-                          href={project.github}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="link-arrow"
-                        >
-                          View GitHub <span>→</span>
-                        </a>
-                      )}
-                      {project.demo && (
-                        <a
-                          href={project.demo}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="link-arrow"
-                        >
-                          Live Demo <span>→</span>
-                        </a>
-                      )}
+                      <h3>{title}</h3>
+                      <p>{desc}</p>
+
+                      <div className="project-links">
+                        {onOpenProject && (
+                          <button
+                            type="button"
+                            className="link-arrow highlight"
+                            onClick={() => onOpenProject(project)}
+                            style={{
+                              background: "none",
+                              border: "none",
+                              fontFamily: "inherit",
+                              fontSize: "inherit",
+                              cursor: "pointer",
+                              padding: 0
+                            }}
+                          >
+                            {t("projects.learn_more")} <span>→</span>
+                          </button>
+                        )}
+                        {project.github && (
+                          <a
+                            href={project.github}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="link-arrow"
+                          >
+                            {t("projects.view_github")} <span>→</span>
+                          </a>
+                        )}
+                        {project.demo && (
+                          <a
+                            href={project.demo}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="link-arrow"
+                          >
+                            {t("projects.live_demo")} <span>→</span>
+                          </a>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           );
@@ -204,5 +213,3 @@ function Projects({ onOpenProject }) {
     </>
   );
 }
-
-export default Projects;

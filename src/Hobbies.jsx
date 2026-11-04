@@ -7,6 +7,7 @@ import Rodape from "./components/Rodape";
 import ArtGallery from "./components/ArtGallery";
 import { getStoredThoughts, getStoredDrawings } from "./data/projectsData";
 import { fetchThoughts, fetchDrawings } from "./lib/supabaseService";
+import { useLanguage } from "./context/useLanguage";
 
 // Capas
 import capa1 from "./assets/img/1CF53B24-759E-48D5-B0C5-9CA7349A544E.webp";
@@ -17,6 +18,7 @@ import capa5 from "./assets/img/Gama-4.webp";
 import capa6 from "./assets/img/IMG_3091.webp";
 
 function Hobbies({ onBackToHome }) {
+  const { t, lang } = useLanguage();
   const [thoughts, setThoughts] = useState(() => getStoredThoughts());
   const [drawings, setDrawings] = useState(() => getStoredDrawings());
 
@@ -48,9 +50,6 @@ function Hobbies({ onBackToHome }) {
     return () => window.clearTimeout(timer);
   }, []);
 
-  const mensagem =
-    "Quando não estou programando, estou explorando o lado criativo da vida. 'A arte existe porque a vida não basta', Ferreira Gullar Mas pela vidaser insuficiente é que criamos arte, Matheus de Castro";
-
   const dados = {
     nome: "Matheus",
     sobrenome: "de Castro",
@@ -68,13 +67,14 @@ function Hobbies({ onBackToHome }) {
     portfolio_link: "https://matheusdecastro.com/",
     vscode_extension_link: "https://marketplace.visualstudio.com/items?itemName=Alomyr.obsidian-neon-110",
   };
+
   return (
-    <>
+    <div className="portfolio-app-root">
       <HeadSite lobo={logoWolf} isHobbies={true} onBackToHome={onBackToHome} />
       <main>
         <section id="interests">
           <Intereceses
-            mensagem={mensagem}
+            mensagem={t("hobbies.intro")}
             capa1={capa1}
             capa2={capa2}
             capa3={capa3}
@@ -88,56 +88,61 @@ function Hobbies({ onBackToHome }) {
         </section>
         <section id="thoughts" className="hobbies-thoughts-section">
           <div className="section-divider-line"></div>
-          <p className="section-tag">Reflexões & Filosofia</p>
+          <p className="section-tag">{t("thoughts.tag")}</p>
           <h2>
-            Pensamentos <span>& Insights</span>
+            {t("thoughts.title_prefix")}<span>{t("thoughts.title_highlight")}</span>
           </h2>
-        
+
           <div className="thoughts-mini-grid">
-            {thoughts.map((t) => (
-              <article key={t.id} className="thought-mini-card">
-                <div className="thought-card-top">
-                  <h4>{t.title}</h4>
-                  {t.updatedAt && <span className="thought-date">{t.updatedAt}</span>}
-                </div>
-                <div className="thought-body-text">
-                  <p>{t.content}</p>
-                </div>
-                {t.googleDocsUrl && (
-                  <div className="thought-actions">
-                    <a
-                      href={t.googleDocsUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="thought-doc-link"
-                    >
-                      <span>🌐</span> Ler no Google Docs ↗
-                    </a>
+            {thoughts.map((item) => {
+              const itemTitle = lang === "en" ? (item.titleEn || item.title) : (item.titlePt || item.title);
+              const itemContent = lang === "en" ? (item.contentEn || item.content) : (item.contentPt || item.content);
+
+              return (
+                <article key={item.id} className="thought-mini-card">
+                  <div className="thought-card-top">
+                    <h4>{itemTitle}</h4>
+                    {item.updatedAt && <span className="thought-date">{item.updatedAt}</span>}
                   </div>
-                )}
-                {t.pdfUrl && !t.googleDocsUrl && (
-                  <div className="thought-actions">
-                    <a
-                      href={t.pdfUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="thought-doc-link"
-                    >
-                      <span>📄</span> Abrir PDF ↗
-                    </a>
+                  <div className="thought-body-text">
+                    <p>{itemContent}</p>
                   </div>
-                )}
-                {t.tags && t.tags.length > 0 && (
-                  <div className="thought-tags">
-                    {t.tags.map((tag, idx) => (
-                      <span key={idx} className="thought-tag">
-                        #{tag}
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </article>
-            ))}
+                  {item.googleDocsUrl && (
+                    <div className="thought-actions">
+                      <a
+                        href={item.googleDocsUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="thought-doc-link"
+                      >
+                        {t("thoughts.read_gdocs")}
+                      </a>
+                    </div>
+                  )}
+                  {item.pdfUrl && !item.googleDocsUrl && (
+                    <div className="thought-actions">
+                      <a
+                        href={item.pdfUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="thought-doc-link"
+                      >
+                        {t("thoughts.open_pdf")}
+                      </a>
+                    </div>
+                  )}
+                  {item.tags && item.tags.length > 0 && (
+                    <div className="thought-tags">
+                      {item.tags.map((tag, idx) => (
+                        <span key={idx} className="thought-tag">
+                          #{tag}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </article>
+              );
+            })}
           </div>
         </section>
       </main>
@@ -159,7 +164,7 @@ function Hobbies({ onBackToHome }) {
           linkedin_link={Contatos.linkedin_link}
         />
       </footer>
-    </>
+    </div>
   );
 }
 

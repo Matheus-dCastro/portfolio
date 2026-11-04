@@ -9,13 +9,13 @@ import {
 } from "../lib/supabaseService";
 import "./LoginDraft.css";
 
-export default function LoginDraft({ onBackToHome, onNavigateToAdmin }) {
+export default function LoginDraft({ onNavigateToAdmin }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [notice, setNotice] = useState("");
   const [errorNotice, setErrorNotice] = useState("");
   const [loading, setLoading] = useState(false);
-  const [isSignUpMode, setIsSignUpMode] = useState(false);
+  const [isSignUpMode] = useState(false);
 
   useEffect(() => {
     // Se o usuário já estiver logado (ex: retorno do GitHub OAuth)
@@ -131,7 +131,7 @@ export default function LoginDraft({ onBackToHome, onNavigateToAdmin }) {
               className="github-input"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="matheus.vsf.castro.25@gmail.com"
+              placeholder="login"
               autoComplete="username"
               required
             />
@@ -140,13 +140,7 @@ export default function LoginDraft({ onBackToHome, onNavigateToAdmin }) {
           <div className="form-group">
             <div className="label-with-link">
               <label htmlFor="password">Password</label>
-              <button
-                type="button"
-                onClick={() => setIsSignUpMode(!isSignUpMode)}
-                style={{ background: "none", border: "none", color: "#58a6ff", cursor: "pointer", fontSize: "12px" }}
-              >
-                {isSignUpMode ? "Já possui conta? Entrar" : "Criar primeiro acesso admin?"}
-              </button>
+            
             </div>
             <input
               type="password"
@@ -183,26 +177,7 @@ export default function LoginDraft({ onBackToHome, onNavigateToAdmin }) {
         </button>
       </div>
 
-      {/* Secondary Preview Access Box */}
-      <div className="github-sub-card">
-        <p>Acesso restrito para gestão de projetos, artigos e ordens.</p>
-        <button
-          type="button"
-          className="btn-quick-admin"
-          onClick={() => {
-            if (onNavigateToAdmin) onNavigateToAdmin();
-            else window.location.href = "/4dm1n";
-          }}
-        >
-          ⚡ Acessar Painel 4dm1n →
-        </button>
-      </div>
-
-      <div className="github-login-footer">
-        <button type="button" className="footer-home-link" onClick={onBackToHome}>
-          ← Retornar ao site público
-        </button>
-      </div>
+    
     </div>
   );
 }

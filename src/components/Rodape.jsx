@@ -1,12 +1,16 @@
+import { useLanguage } from "../context/useLanguage";
+
 function Rodape({ ano, github_link, linkedin_link }) {
+  const { t } = useLanguage();
+
   return (
     <>
-      <p>© {ano} Matheus de Castro. Built with code & coffee.</p>
+      <p>© {ano} {t("footer.rights")}</p>
       <div className="footer-links">
-        <a href={github_link} target="_blank">
+        <a href={github_link} target="_blank" rel="noopener noreferrer">
           GitHub
         </a>
-        <a href={linkedin_link} target="_blank">
+        <a href={linkedin_link} target="_blank" rel="noopener noreferrer">
           LinkedIn
         </a>
       </div>

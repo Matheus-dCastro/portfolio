@@ -1,0 +1,388 @@
+// src/lib/translations.js
+// Standardized texts for the entire site in English (primary) and Portuguese (zero emojis)
+
+export const translations = {
+  en: {
+    // Navigation / Header
+    "nav.home": "Home",
+    "nav.works": "Works",
+    "nav.experience": "Experience",
+    "nav.skills": "Skills",
+    "nav.about": "About",
+    "nav.connect": "Connect",
+    "nav.interests": "Interests",
+    "nav.arts": "Arts",
+    "nav.thoughts": "Thoughts",
+    "nav.lang_toggle_aria": "Switch language to Portuguese",
+
+    // Hero / Perfil
+    "hero.roles": [
+      "Matheus de Castro",
+  
+    ],
+    "hero.subtitle": "IT Technician — IFRN. Undergraduate student in Information Technology (BTI) at UFRN, focusing studies on Machine Learning and backend architecture.",
+    "hero.see_projects": "See My Projects",
+    "hero.download_cv": "Download CV / Docs",
+    "hero.card_art": "ART",
+    "hero.card_coder": "CODER IS",
+
+    // CV Modal
+    "cv_modal.title": "Matheus de Castro's Resume",
+    "cv_modal.subtitle": "Choose the format you wish to view or download:",
+    "cv_modal.gdocs_badge": "Interactive Web Version",
+    "cv_modal.gdocs_title": "Open in Google Docs",
+    "cv_modal.gdocs_desc": "Instant preview, always updated with the latest experiences and projects.",
+    "cv_modal.pdf_badge": "Official PDF Document",
+    "cv_modal.pdf_title": "Download PDF File",
+    "cv_modal.pdf_desc": "Classic format ideal for printing, archiving, or job applications.",
+    "cv_modal.footer_hint": "Both formats contain full, reviewed content.",
+
+    // Skills
+    "skills.tag": "Stack & Tools",
+    "skills.title_prefix": "My ",
+    "skills.title_highlight": "Skills",
+    "skills.frameworks_tag": "Frameworks & Libraries",
+    "skills.frameworks_title_prefix": "Frameworks I ",
+    "skills.frameworks_title_highlight": "Work With",
+
+    // Experience
+    "experience.title": "Experience",
+    "experience.pagination_of": "of",
+
+    // Showcase Tabs (Home)
+    "showcase.tab_projects": "Selected Works",
+    "showcase.tab_articles": "Technical Articles",
+
+    // Selected Works / Projects
+    "projects.tag": "Selected Portfolio",
+    "projects.title_prefix": "Selected ",
+    "projects.title_highlight": "Works",
+    "projects.filter_all": "All",
+    "projects.filter_prof": "Professional",
+    "projects.filter_pessoal": "Personal",
+    "projects.filter_academico": "Academic",
+    "projects.cat_prof_title": "Professional & Corporate",
+    "projects.cat_prof_desc": "Corporate systems, scalable architectures, and production-grade solutions engineered for enterprises and clients.",
+    "projects.cat_pessoal_title": "Personal Projects & Innovations",
+    "projects.cat_pessoal_desc": "Original projects, developer productivity tools, design systems, and public extensions.",
+    "projects.cat_academico_title": "Academic & Scientific Research",
+    "projects.cat_academico_desc": "Academic research at UFRN/IFRN in Machine Learning, Deep Learning, Computer Vision, and complex algorithms.",
+    "projects.learn_more": "Learn more",
+    "projects.view_github": "View GitHub",
+    "projects.live_demo": "Live Demo",
+    "projects.badge_article": "Article",
+
+    // Technical Articles
+    "articles.tag": "Publications & Research",
+    "articles.title_prefix": "Technical ",
+    "articles.title_highlight": "Articles",
+    "articles.lead_text": "In-depth analyses on Deep Learning, system architecture with FastAPI, Linux automation, and intersections between art and engineering.",
+    "articles.filter_all": "All",
+    "articles.read_time": "min read",
+    "articles.read_full": "Read Full Article →",
+    "articles.badge_project": "Project",
+    "articles.no_summary": "No summary available.",
+
+    // About Me
+    "about.tag": "Introduction",
+    "about.title_prefix": "About ",
+    "about.title_highlight": "Me",
+    "about.p1": "I am an Information Technology (BTI) student at UFRN, specializing in building robust back-end architectures and processing intelligent pipelines. I bridge the mathematical rigor of <strong>Machine Learning Engineering</strong> with the clean aesthetic execution of software architecture.",
+    "about.p2": "With practical experience in automated workflows and relational data structures, I scale code with the same millimetric precision I apply to hyperrealism drawings. Studying to become a machine learning engineer.",
+    "about.action_btn": "Explore Me (Hobbies & Arts) →",
+
+    // Contacts
+    "contacts.tag": "Get in touch",
+    "contacts.title_prefix": "My ",
+    "contacts.title_highlight": "Contacts",
+    "contacts.toast": "Email copied to clipboard!",
+
+    // Footer
+    "footer.rights": "Matheus de Castro. Built with code & coffee.",
+
+    // Hobbies & Beyond Code
+    "hobbies.eyebrow": "BEYOND THE CODE",
+    "hobbies.title_prefix": "My ",
+    "hobbies.title_highlight": "Hobbies",
+    "hobbies.title_suffix": " & Studies",
+    "hobbies.intro": "When I am not coding, I am exploring the creative side of life. 'Art exists because life is not enough' — Ferreira Gullar. But it is because life is not enough that we create art. — Matheus de Castro",
+    "hobbies.card_art_title": "Drawings",
+    "hobbies.card_art_desc": "Exploring anatomy and hyperrealism.",
+    "hobbies.card_gaming_title": "Campaign & Narratives",
+    "hobbies.card_gaming_desc": "Arcade games and story campaigns.",
+    "hobbies.card_future_title": "AI & ML",
+    "hobbies.card_future_desc": "Data Science and Machine Learning Engineering.",
+    "hobbies.card_reading_title": "Sci-Fi & Tech",
+    "hobbies.card_reading_desc": "Broadening technological perspective.",
+    "hobbies.card_fitness_title": "Fitness & Strength",
+    "hobbies.card_fitness_desc": "Physical health as the foundation for cognitive performance.",
+    "hobbies.card_coffee_title": "Code & Coffee",
+    "hobbies.card_coffee_desc": "Converting caffeine into algorithms and graphite strokes. The science behind the perfect brew fuels my late-night creation sessions.",
+
+    // Art Gallery
+    "gallery.eyebrow": "GALLERY",
+    "gallery.title_prefix": "My ",
+    "gallery.title_highlight": "Drawings",
+    "gallery.counter_single": "Artwork",
+    "gallery.counter_plural": "Artworks",
+    "gallery.expand": "Expand",
+    "gallery.click_to_zoom": "Click to expand:",
+
+    // Thoughts
+    "thoughts.tag": "Reflections & Philosophy",
+    "thoughts.title_prefix": "Thoughts ",
+    "thoughts.title_highlight": "& Insights",
+    "thoughts.read_gdocs": "Read on Google Docs ↗",
+    "thoughts.open_pdf": "Open PDF ↗",
+
+    // Links Page
+    "links.title_prefix": "My ",
+    "links.title_highlight": "Links",
+    "links.subtitle": "Connect with me across my platforms",
+    "links.portfolio": "Portfolio",
+
+    // ViewDraft (Detail Page)
+    "view.loading": "Loading project information...",
+    "view.back_to_projects": "← Back to Projects",
+    "view.github_repo": "GitHub Repository",
+    "view.live_demo": "Live Demo",
+    "view.gdocs": "Google Docs",
+    "view.pdf_doc": "PDF Document",
+    "view.read_time": "min read",
+    "view.context_label": "Context & Executive Summary:",
+    "view.default_context": "Technical vision developed with focus on performance, scalable architecture, and clean code.",
+    "view.attached_article_tag": "Attached Technical Article",
+    "view.read_attached_article": "Read Attached Article →",
+    "view.attached_project_tag": "Attached Practical Project",
+    "view.view_attached_project": "View Project in Portfolio →",
+    "view.view_as": "View as:",
+    "view.tab_markdown": "Documentation & README",
+    "view.tab_gdocs": "Interactive Google Docs",
+    "view.tab_pdf": "Embedded PDF Document",
+    "view.gdocs_synced": "Document synchronized directly with Google Docs",
+    "view.open_gdocs": "Open in Google Docs ↗",
+    "view.pdf_viewer_label": "PDF Document Viewer",
+    "view.download_open_tab": "Download / Open in New Tab ↗",
+    "view.applied_tech": "Technologies & Applied Tools",
+    "view.prev_project": "← Previous Project",
+    "view.next_project": "Next Project →",
+    "view.cta_title": "Interested in this project?",
+    "view.cta_desc": "Explore the full source code on GitHub or get in touch for collaborations, Machine Learning research, or software development.",
+    "view.cta_github": "View Repository on GitHub",
+    "view.cta_home": "Back to Home",
+    "view.no_content": "No detailed documentation was included for this project.",
+
+    // AI Agent - Alomyr
+    "agent.name": "Alomyr",
+    "agent.title": "Alomyr",
+    "agent.subtitle": "AI Assistant • Groq",
+    "agent.trigger_btn": "Ask Alomyr (AI)",
+    "agent.trigger_title": "Open Matheus de Castro's AI Assistant (Alomyr)",
+    "agent.close_title": "Close chat",
+    "agent.user_tag": "You",
+    "agent.agent_tag": "Alomyr",
+    "agent.thinking": "Alomyr is thinking...",
+    "agent.suggestions_title": "Quick suggestions:",
+    "agent.input_placeholder": "Ask about projects, backend, AI, resume...",
+    "agent.send_title": "Send message",
+    "agent.welcome_message": "Hello! I am Alomyr, the official AI Assistant for Matheus de Castro. How can I assist you with information about his AI projects, backend architecture, or resume?",
+    "agent.quick_prompts": [
+      "What are Matheus's main projects?",
+      "What is his academic background?",
+      "Experience with Computer Vision / U-Net?",
+      "How to view or download his Resume?"
+    ]
+  },
+
+  pt: {
+    // Navigation / Header
+    "nav.home": "Início",
+    "nav.works": "Projetos",
+    "nav.experience": "Experiência",
+    "nav.skills": "Skills",
+    "nav.about": "Sobre",
+    "nav.connect": "Conecte-se",
+    "nav.interests": "Interesses",
+    "nav.arts": "Artes",
+    "nav.thoughts": "Pensamentos",
+    "nav.lang_toggle_aria": "Mudar idioma para Inglês",
+
+    // Hero / Perfil
+    "hero.roles": [
+      "Matheus de Castro",
+
+    ],
+    "hero.subtitle": "Técnico em TI — IFRN. Graduando em Tecnologia da Informação (BTI) na UFRN, com foco de estudos em Machine Learning e desenvolvimento backend.",
+    "hero.see_projects": "Ver Meus Projetos",
+    "hero.download_cv": "Baixar CV / Docs",
+    "hero.card_art": "ARTE",
+    "hero.card_coder": "CODER É",
+
+    // CV Modal
+    "cv_modal.title": "Currículo de Matheus de Castro",
+    "cv_modal.subtitle": "Escolha o formato que deseja visualizar ou baixar:",
+    "cv_modal.gdocs_badge": "Versão Web Interativa",
+    "cv_modal.gdocs_title": "Abrir no Google Docs",
+    "cv_modal.gdocs_desc": "Visualização instantânea, sempre atualizada com as últimas experiências e projetos.",
+    "cv_modal.pdf_badge": "Documento Oficial PDF",
+    "cv_modal.pdf_title": "Baixar Arquivo PDF",
+    "cv_modal.pdf_desc": "Formato clássico ideal para impressão, arquivamento ou anexar em processos seletivos.",
+    "cv_modal.footer_hint": "Ambos os formatos possuem o conteúdo completo e revisado.",
+
+    // Skills
+    "skills.tag": "Stack & Ferramentas",
+    "skills.title_prefix": "Minhas ",
+    "skills.title_highlight": "Habilidades",
+    "skills.frameworks_tag": "Frameworks & Bibliotecas",
+    "skills.frameworks_title_prefix": "Frameworks que ",
+    "skills.frameworks_title_highlight": "Utilizo",
+
+    // Experience
+    "experience.title": "Experiência",
+    "experience.pagination_of": "de",
+
+    // Showcase Tabs (Home)
+    "showcase.tab_projects": "Projetos Selecionados",
+    "showcase.tab_articles": "Artigos Técnicos",
+
+    // Selected Works / Projects
+    "projects.tag": "Portfólio Selecionado",
+    "projects.title_prefix": "Projetos ",
+    "projects.title_highlight": "Selecionados",
+    "projects.filter_all": "Todos",
+    "projects.filter_prof": "Profissional",
+    "projects.filter_pessoal": "Pessoal",
+    "projects.filter_academico": "Acadêmico",
+    "projects.cat_prof_title": "Profissional & Corporativo",
+    "projects.cat_prof_desc": "Sistemas corporativos, arquiteturas escaláveis e soluções em produção desenvolvidas para empresas e clientes.",
+    "projects.cat_pessoal_title": "Projetos Pessoais & Inovações",
+    "projects.cat_pessoal_desc": "Projetos autorais, ferramentas de produtividade, design systems e extensões públicas.",
+    "projects.cat_academico_title": "Acadêmico & Pesquisa Científica",
+    "projects.cat_academico_desc": "Pesquisas na UFRN/IFRN em Machine Learning, Deep Learning, Visão Computacional e algoritmos complexos.",
+    "projects.learn_more": "Saber mais",
+    "projects.view_github": "Ver GitHub",
+    "projects.live_demo": "Demonstração",
+    "projects.badge_article": "Artigo",
+
+    // Technical Articles
+    "articles.tag": "Publicações & Estudos",
+    "articles.title_prefix": "Artigos ",
+    "articles.title_highlight": "Técnicos",
+    "articles.lead_text": "Análises aprofundadas sobre Deep Learning, arquitetura de sistemas com FastAPI, automação com Linux e intersecções entre arte e engenharia.",
+    "articles.filter_all": "Todos",
+    "articles.read_time": "min de leitura",
+    "articles.read_full": "Ler Artigo Completo →",
+    "articles.badge_project": "Projeto",
+    "articles.no_summary": "Sem resumo disponível.",
+
+    // About Me
+    "about.tag": "Introdução",
+    "about.title_prefix": "Sobre ",
+    "about.title_highlight": "Mim",
+    "about.p1": "Sou estudante de Tecnologia da Informação (BTI) na UFRN, especializado na construção de arquiteturas backend robustas e no processamento de pipelines inteligentes. Uno o rigor matemático da <strong>Engenharia de Machine Learning</strong> com a execução estética e limpa da arquitetura de software.",
+    "about.p2": "Com experiência prática em fluxos automatizados e estruturas de dados relacionais, escalo código com a mesma precisão milimétrica que aplico a desenhos hiper-realistas. Estudando para me tornar um engenheiro de machine learning.",
+    "about.action_btn": "Conheça Mais (Hobbies & Artes) →",
+
+    // Contacts
+    "contacts.tag": "Entre em contato",
+    "contacts.title_prefix": "Meus ",
+    "contacts.title_highlight": "Contatos",
+    "contacts.toast": "O email foi copiado!",
+
+    // Footer
+    "footer.rights": "Matheus de Castro. Criado com código & café.",
+
+    // Hobbies & Beyond Code
+    "hobbies.eyebrow": "ALÉM DO CÓDIGO",
+    "hobbies.title_prefix": "Meus ",
+    "hobbies.title_highlight": "Hobbies",
+    "hobbies.title_suffix": " & Estudos",
+    "hobbies.intro": "Quando não estou programando, estou explorando o lado criativo da vida. 'A arte existe porque a vida não basta' — Ferreira Gullar. Mas pela vida ser insuficiente é que criamos arte. — Matheus de Castro",
+    "hobbies.card_art_title": "Desenhos",
+    "hobbies.card_art_desc": "Explorando anatomia e hiper-realismo.",
+    "hobbies.card_gaming_title": "Campanhas e Narrativas",
+    "hobbies.card_gaming_desc": "Jogos arcades e Campanhas.",
+    "hobbies.card_future_title": "IA & ML",
+    "hobbies.card_future_desc": "Ciência de Dados e Engenharia de Machine Learning.",
+    "hobbies.card_reading_title": "Sci-Fi & Tecnologia",
+    "hobbies.card_reading_desc": "Expansão de visão tecnológica.",
+    "hobbies.card_fitness_title": "Fitness & Força",
+    "hobbies.card_fitness_desc": "Saúde física como pilar para a performance cognitiva.",
+    "hobbies.card_coffee_title": "Código & Café",
+    "hobbies.card_coffee_desc": "Convertendo cafeína em algoritmos e traços. A ciência por trás do grão perfeito é o combustível que move minhas madrugadas de criação.",
+
+    // Art Gallery
+    "gallery.eyebrow": "GALERIA",
+    "gallery.title_prefix": "Meus ",
+    "gallery.title_highlight": "Desenhos",
+    "gallery.counter_single": "Obra",
+    "gallery.counter_plural": "Obras",
+    "gallery.expand": "Expandir",
+    "gallery.click_to_zoom": "Clique para ampliar:",
+
+    // Thoughts
+    "thoughts.tag": "Reflexões & Filosofia",
+    "thoughts.title_prefix": "Pensamentos ",
+    "thoughts.title_highlight": "& Insights",
+    "thoughts.read_gdocs": "Ler no Google Docs ↗",
+    "thoughts.open_pdf": "Abrir PDF ↗",
+
+    // Links Page
+    "links.title_prefix": "Meus ",
+    "links.title_highlight": "Links",
+    "links.subtitle": "Conecte-se comigo através das minhas redes",
+    "links.portfolio": "Portfólio",
+
+    // ViewDraft (Detail Page)
+    "view.loading": "Carregando informações do projeto...",
+    "view.back_to_projects": "← Voltar aos Projetos",
+    "view.github_repo": "Repositório GitHub",
+    "view.live_demo": "Live Demo",
+    "view.gdocs": "Google Docs",
+    "view.pdf_doc": "Documento PDF",
+    "view.read_time": "min de leitura",
+    "view.context_label": "Contexto & Resumo Executivo:",
+    "view.default_context": "Visão técnica desenvolvida com foco em performance, arquitetura escalável e código limpo.",
+    "view.attached_article_tag": "Artigo Técnico Anexo",
+    "view.read_attached_article": "Ler Artigo Anexo →",
+    "view.attached_project_tag": "Projeto Prático Anexo",
+    "view.view_attached_project": "Ver Projeto no Portfólio →",
+    "view.view_as": "Visualizar como:",
+    "view.tab_markdown": "Documentação & README",
+    "view.tab_gdocs": "Google Docs Interativo",
+    "view.tab_pdf": "Documento PDF Integrado",
+    "view.gdocs_synced": "Documento sincronizado diretamente com o Google Docs",
+    "view.open_gdocs": "Abrir no Google Docs ↗",
+    "view.pdf_viewer_label": "Visualizador de Documento PDF",
+    "view.download_open_tab": "Baixar / Abrir em Nova Aba ↗",
+    "view.applied_tech": "Tecnologias & Ferramentas Aplicadas",
+    "view.prev_project": "← Projeto Anterior",
+    "view.next_project": "Próximo Projeto →",
+    "view.cta_title": "Gostou deste projeto?",
+    "view.cta_desc": "Explore o código fonte completo no GitHub ou entre em contato para colaborações, pesquisas em Machine Learning ou desenvolvimento de software.",
+    "view.cta_github": "Ver Repositório no GitHub",
+    "view.cta_home": "Voltar ao Início",
+    "view.no_content": "Nenhuma documentação detalhada foi incluída para este projeto.",
+
+    // AI Agent - Alomyr
+    "agent.name": "Alomyr",
+    "agent.title": "Alomyr",
+    "agent.subtitle": "AI Assistant • Groq",
+    "agent.trigger_btn": "Ask Alomyr (AI)",
+    "agent.trigger_title": "Abrir Assistente de IA de Matheus de Castro (Alomyr)",
+    "agent.close_title": "Fechar chat",
+    "agent.user_tag": "Você",
+    "agent.agent_tag": "Alomyr",
+    "agent.thinking": "Alomyr pensando...",
+    "agent.suggestions_title": "Sugestões rápidas:",
+    "agent.input_placeholder": "Pergunte sobre projetos, backend, IA, currículo...",
+    "agent.send_title": "Enviar mensagem",
+    "agent.welcome_message": "Olá! Sou o Alomyr, o Assistente de Inteligência Artificial oficial de Matheus de Castro. Como posso te orientar sobre os projetos de IA, backend ou currículo?",
+    "agent.quick_prompts": [
+      "Quais são os principais projetos?",
+      "Qual a formação acadêmica do Matheus?",
+      "Experiência com Visão Computacional / U-Net?",
+      "Como visualizar ou baixar o Currículo?"
+    ]
+  }
+};

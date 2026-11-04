@@ -15,10 +15,16 @@ export const DEFAULT_PROJECTS = [
   {
     id: "agentmetrics",
     title: "AgentMetrics",
+    titleEn: "AgentMetrics",
+    titlePt: "AgentMetrics",
     category: "Profissional",
     tags: ["FastAPI", "Data & ML", "Python", "Docker"],
-    shortDescription: "API de telemetria inteligente desenvolvida para monitorar o consumo de recursos e metrificar o desempenho de agentes de IA em tempo real.",
-    aboutContext: "Sistema de monitoramento e telemetria para LLMs e agentes autônomos. Coleta métricas de latência, consumo de tokens, custo por requisição e vazão de inferência em clusters de IA.",
+    shortDescription: "Intelligent telemetry API built to monitor resource consumption and benchmark AI agent performance in real-time.",
+    shortDescriptionEn: "Intelligent telemetry API built to monitor resource consumption and benchmark AI agent performance in real-time.",
+    shortDescriptionPt: "API de telemetria inteligente desenvolvida para monitorar o consumo de recursos e metrificar o desempenho de agentes de IA em tempo real.",
+    aboutContext: "Monitoring and telemetry system for LLMs and autonomous agents. Collects latency metrics, token consumption, cost per request, and inference throughput in AI clusters.",
+    aboutContextEn: "Monitoring and telemetry system for LLMs and autonomous agents. Collects latency metrics, token consumption, cost per request, and inference throughput in AI clusters.",
+    aboutContextPt: "Sistema de monitoramento e telemetria para LLMs e agentes autônomos. Coleta métricas de latência, consumo de tokens, custo por requisição e vazão de inferência em clusters de IA.",
     github: "https://github.com/Matheus-dCastro/AgentMetrics",
     demo: "",
     relatedArticleId: "art-1",
@@ -71,10 +77,16 @@ docker-compose up --build
   {
     id: "medical-segmentation",
     title: "Medical Image Segmentation",
+    titleEn: "Medical Image Segmentation",
+    titlePt: "Segmentação de Imagens Médicas",
     category: "Acadêmico",
     tags: ["Deep Learning", "Python", "PyTorch", "U-Net"],
-    shortDescription: "Pipeline de Deep Learning supervisionado para segmentação pixel a pixel de estruturas e lesões em imagens médicas utilizando arquitetura U-Net.",
-    aboutContext: "Pesquisa acadêmica e aplicação prática de redes convolucionais e arquitetura U-Net para segmentação semântica de exames de tomografia e ressonância magnética.",
+    shortDescription: "Supervised Deep Learning pipeline for pixel-level semantic segmentation of medical imaging structures using U-Net architecture.",
+    shortDescriptionEn: "Supervised Deep Learning pipeline for pixel-level semantic segmentation of medical imaging structures using U-Net architecture.",
+    shortDescriptionPt: "Pipeline de Deep Learning supervisionado para segmentação pixel a pixel de estruturas e lesões em imagens médicas utilizando arquitetura U-Net.",
+    aboutContext: "Academic research and practical implementation of convolutional networks and U-Net architecture for semantic segmentation of CT and MRI scans.",
+    aboutContextEn: "Academic research and practical implementation of convolutional networks and U-Net architecture for semantic segmentation of CT and MRI scans.",
+    aboutContextPt: "Pesquisa acadêmica e aplicação prática de redes convolucionais e arquitetura U-Net para segmentação semântica de exames de tomografia e ressonância magnética.",
     github: "https://github.com/Matheus-dCastro/Projeto-de-AM-Supervisionado",
     demo: "",
     relatedArticleId: "art-2",
@@ -113,10 +125,16 @@ A segmentação semântica no domínio médico requer alta sensibilidade e espec
   {
     id: "obsidian-neon-theme",
     title: "Obsidian Neon Theme",
+    titleEn: "Obsidian Neon Theme",
+    titlePt: "Obsidian Neon Theme",
     category: "Pessoal",
     tags: ["VS Code Theme", "UI & Design", "JSON", "Design System"],
-    shortDescription: "Tema e suíte visual para VS Code com paletas neon de alto contraste, ícones customizados e realce de sintaxe semântico refinado.",
-    aboutContext: "Extensão publicada no Visual Studio Code Marketplace projetada com ergonomia visual para programadores que passam longas horas codificando em ambientes de baixa luminosidade.",
+    shortDescription: "High-contrast neon theme and visual design system for VS Code featuring refined semantic syntax highlighting.",
+    shortDescriptionEn: "High-contrast neon theme and visual design system for VS Code featuring refined semantic syntax highlighting.",
+    shortDescriptionPt: "Tema e suíte visual para VS Code com paletas neon de alto contraste, ícones customizados e realce de sintaxe semântico refinado.",
+    aboutContext: "Visual Studio Code Marketplace published extension designed with visual ergonomics for developers coding in low-light environments.",
+    aboutContextEn: "Visual Studio Code Marketplace published extension designed with visual ergonomics for developers coding in low-light environments.",
+    aboutContextPt: "Extensão publicada no Visual Studio Code Marketplace projetada com ergonomia visual para programadores que passam longas horas codificando em ambientes de baixa luminosidade.",
     github: "https://github.com/Matheus-dCastro/obsidian-neon-thema",
     demo: "https://marketplace.visualstudio.com/items?itemName=Alomyr.obsidian-neon-110",
     contentType: "markdown",
@@ -144,10 +162,16 @@ ext install Alomyr.obsidian-neon-110
   {
     id: "cachina-solucoes",
     title: "Cachina Soluções",
+    titleEn: "Cachina Solutions",
+    titlePt: "Cachina Soluções",
     category: "Profissional",
     tags: ["Automation & Web", "n8n", "Linux", "Bash"],
-    shortDescription: "Desenvolvimento e hospedagem do ecossistema de interfaces e apresentação estratégica corporativa.",
-    aboutContext: "Plataforma corporativa e automação de processos inteligentes implementada para a empresa Cachina Soluções.",
+    shortDescription: "Development and infrastructure hosting for corporate digital ecosystems and strategic workflow automation.",
+    shortDescriptionEn: "Development and infrastructure hosting for corporate digital ecosystems and strategic workflow automation.",
+    shortDescriptionPt: "Desenvolvimento e hospedagem do ecossistema de interfaces e apresentação estratégica corporativa.",
+    aboutContext: "Corporate platform and intelligent workflow automation implemented for Cachina Soluções.",
+    aboutContextEn: "Corporate platform and intelligent workflow automation implemented for Cachina Soluções.",
+    aboutContextPt: "Plataforma corporativa e automação de processos inteligentes implementada para a empresa Cachina Soluções.",
     github: "https://github.com/Matheus-dCastro/Site-Cachina-2026",
     demo: "https://cachina.com.br/",
     contentType: "markdown",
@@ -168,10 +192,16 @@ Projeto corporativo abrangendo a arquitetura de apresentação institucional, au
   {
     id: "task-system-cli",
     title: "Task System CLI",
+    titleEn: "Task System CLI",
+    titlePt: "Task System CLI",
     category: "Pessoal",
     tags: ["Python & SQL", "PostgreSQL", "MVC", "CLI"],
-    shortDescription: "Arquitetura MVC completa com persistência em PostgreSQL para controle eficiente de fluxos de trabalho via terminal.",
-    aboutContext: "Aplicativo CLI desenvolvido em Python seguindo rigorosamente os padrões de projeto MVC com persistência relacional.",
+    shortDescription: "Complete MVC architecture with PostgreSQL persistence for high-efficiency terminal-based task workflows.",
+    shortDescriptionEn: "Complete MVC architecture with PostgreSQL persistence for high-efficiency terminal-based task workflows.",
+    shortDescriptionPt: "Arquitetura MVC completa com persistência em PostgreSQL para controle eficiente de fluxos de trabalho via terminal.",
+    aboutContext: "Python CLI application strictly implementing Model-View-Controller design patterns with relational persistence.",
+    aboutContextEn: "Python CLI application strictly implementing Model-View-Controller design patterns with relational persistence.",
+    aboutContextPt: "Aplicativo CLI desenvolvido em Python seguindo rigorosamente os padrões de projeto MVC com persistência relacional.",
     github: "https://github.com/Matheus-dCastro/Sistema-de-Controle-em-Py3",
     demo: "",
     contentType: "markdown",
@@ -192,10 +222,16 @@ Adotou-se o modelo MVC (Model-View-Controller):
   {
     id: "timemaster",
     title: "TimeMaster",
+    titleEn: "TimeMaster",
+    titlePt: "TimeMaster",
     category: "Acadêmico",
     tags: ["Java", "OOP", "LP2", "Design Patterns"],
-    shortDescription: "Sistema modular backend para gerenciamento de compromissos e agendamentos complexos desenvolvido em LP2.",
-    aboutContext: "Projeto acadêmico de Linguagem de Programação 2 explorando programação orientada a objetos pura, padrões de projeto e tratamento robusto de exceções.",
+    shortDescription: "Modular Java backend system for complex appointment scheduling and calendar conflict resolution.",
+    shortDescriptionEn: "Modular Java backend system for complex appointment scheduling and calendar conflict resolution.",
+    shortDescriptionPt: "Sistema modular backend para gerenciamento de compromissos e agendamentos complexos desenvolvido em LP2.",
+    aboutContext: "Academic Programming Language 2 project exploring pure object-oriented design, design patterns, and robust exception handling.",
+    aboutContextEn: "Academic Programming Language 2 project exploring pure object-oriented design, design patterns, and robust exception handling.",
+    aboutContextPt: "Projeto acadêmico de Linguagem de Programação 2 explorando programação orientada a objetos pura, padrões de projeto e tratamento robusto de exceções.",
     github: "https://github.com/Matheus-dCastro/Sistema-de-Agenda-de-Compromissos.git",
     demo: "",
     contentType: "markdown",
@@ -210,10 +246,16 @@ Arquitetura modular em Java com classes imutáveis para cálculo de intervalos d
   {
     id: "zombie-dice",
     title: "Zombie Dice",
+    titleEn: "Zombie Dice",
+    titlePt: "Zombie Dice",
     category: "Acadêmico",
     tags: ["C++", "OOP", "State Machine", "CLI Game"],
-    shortDescription: "Implementação orientada a objetos e máquina de estados para execução de jogo de dados lógico via terminal CLI.",
-    aboutContext: "Jogo de estratégia probabilística implementado em C++ com gerenciamento manual de memória e máquina de estados finitos.",
+    shortDescription: "Object-oriented implementation and finite state machine for a terminal-based dice strategy game.",
+    shortDescriptionEn: "Object-oriented implementation and finite state machine for a terminal-based dice strategy game.",
+    shortDescriptionPt: "Implementação orientada a objetos e máquina de estados para execução de jogo de dados lógico via terminal CLI.",
+    aboutContext: "Probabilistic strategy game implemented in modern C++ with manual memory management and state machine design.",
+    aboutContextEn: "Probabilistic strategy game implemented in modern C++ with manual memory management and state machine design.",
+    aboutContextPt: "Jogo de estratégia probabilística implementado em C++ com gerenciamento manual de memória e máquina de estados finitos.",
     github: "https://github.com/Matheus-dCastro/trabalho-06-projeto-zombie-dice-Turma-DIM0176---PROGRAMA-O-I---T02-2025.1-.git",
     demo: "",
     contentType: "markdown",
@@ -227,11 +269,17 @@ Implementação completa das regras do jogo com simulação estatística de prob
   },
   {
     id: "projeto-snaze",
-    title: "Projeto snaze",
+    title: "Snaze Project",
+    titleEn: "Snaze Project",
+    titlePt: "Projeto Snaze",
     category: "Acadêmico",
     tags: ["Game in CPP", "C++", "Algorithms", "Pathfinding"],
-    shortDescription: "Simulação computacional onde o programa guia uma serpente inteligente através de um labirinto até o alimento com algoritmos de busca.",
-    aboutContext: "Trabalho acadêmico de Programação I envolvendo representação de grafos, matrizes espparsas e busca em largura (BFS).",
+    shortDescription: "Autonomous pathfinding simulation guiding an intelligent snake through dynamic mazes using graph search algorithms.",
+    shortDescriptionEn: "Autonomous pathfinding simulation guiding an intelligent snake through dynamic mazes using graph search algorithms.",
+    shortDescriptionPt: "Simulação computacional onde o programa guia uma serpente inteligente através de um labirinto até o alimento com algoritmos de busca.",
+    aboutContext: "Programming I academic project featuring graph representations, sparse matrices, and Breadth-First Search (BFS).",
+    aboutContextEn: "Programming I academic project featuring graph representations, sparse matrices, and Breadth-First Search (BFS).",
+    aboutContextPt: "Trabalho acadêmico de Programação I envolvendo representação de grafos, matrizes espparsas e busca em largura (BFS).",
     github: "https://github.com/Matheus-dCastro/trabalho-07-projeto-snaze--Turma-DIM0176---PROGRAMA-O-I---T02-2025.1-.git",
     demo: "",
     contentType: "markdown",
@@ -245,11 +293,17 @@ Algoritmo de navegação autônoma em labirintos dinâmicos utilizando estrutura
   },
   {
     id: "password-generator",
-    title: "password generator",
+    title: "Password Generator",
+    titleEn: "Password Generator",
+    titlePt: "Password Generator",
     category: "Pessoal",
     tags: ["CPP", "Security", "Entropy", "CLI"],
-    shortDescription: "Gerador determinístico e estocástico de senhas de alta entropia com validação de complexidade e tamanho configurável.",
-    aboutContext: "Ferramenta de segurança em C++ focada em geração segura de chaves criptográficas e senhas resistentes a ataques de dicionário.",
+    shortDescription: "Deterministic and stochastic high-entropy password generator with configurable complexity validation.",
+    shortDescriptionEn: "Deterministic and stochastic high-entropy password generator with configurable complexity validation.",
+    shortDescriptionPt: "Gerador determinístico e estocástico de senhas de alta entropia com validação de complexidade e tamanho configurável.",
+    aboutContext: "C++ security tool focused on secure cryptographic key generation and dictionary-attack resistant passwords.",
+    aboutContextEn: "C++ security tool focused on secure cryptographic key generation and dictionary-attack resistant passwords.",
+    aboutContextPt: "Ferramenta de segurança em C++ focada em geração segura de chaves criptográficas e senhas resistentes a ataques de dicionário.",
     github: "https://github.com/Matheus-dCastro/trabalho-03-projeto-passgen-Turma-DIM0176---PROGRAMA-O-I---T02-2025.1-",
     demo: "",
     contentType: "markdown",
@@ -268,16 +322,34 @@ export const DEFAULT_ARTICLES = [];
 export const DEFAULT_THOUGHTS = [
   {
     id: "th-1",
-    title: "A Intersecção entre Hiper-realismo no Desenho e Engenharia de Software",
+    title: "The Intersection Between Hyperrealism in Drawing and Software Engineering",
+    titleEn: "The Intersection Between Hyperrealism in Drawing and Software Engineering",
+    titlePt: "A Intersecção entre Hiper-realismo no Desenho e Engenharia de Software",
     category: "Pessoal",
     tags: ["Reflexão", "Design", "Arte", "Código"],
-    shortDescription: "Como a paciência e a observação micrométrica do desenho a grafite moldam a precisão na escrita de código limpo.",
-    aboutContext: "Ensaio pessoal sobre foco, paciência e atenção aos mínimos detalhes.",
+    shortDescription: "How the patience and micrometric observation of graphite drawing shape precision in writing clean code.",
+    shortDescriptionEn: "How the patience and micrometric observation of graphite drawing shape precision in writing clean code.",
+    shortDescriptionPt: "Como a paciência e a observação micrométrica do desenho a grafite moldam a precisão na escrita de código limpo.",
+    aboutContext: "Personal essay on focus, patience, and meticulous attention to detail.",
+    aboutContextEn: "Personal essay on focus, patience, and meticulous attention to detail.",
+    aboutContextPt: "Ensaio pessoal sobre foco, paciência e atenção aos mínimos detalhes.",
     contentType: "markdown",
     googleDocsUrl: "",
     pdfUrl: "",
     updatedAt: "2026-01-05",
-    content: `# A Intersecção entre Hiper-realismo no Desenho e Engenharia de Software
+    content: `# The Intersection Between Hyperrealism in Drawing and Software Engineering
+
+In hyperrealism, you don't merely draw an eye; you draw every gradient of light reflected on the iris, every micro-texture of the skin, and every subtle ambient occlusion shadow.
+
+In software engineering and the training of neural networks, the principle is identical: excellence never arises from luck, but from the cumulative sum of consistent, millimetric refinements.
+`,
+    contentEn: `# The Intersection Between Hyperrealism in Drawing and Software Engineering
+
+In hyperrealism, you don't merely draw an eye; you draw every gradient of light reflected on the iris, every micro-texture of the skin, and every subtle ambient occlusion shadow.
+
+In software engineering and the training of neural networks, the principle is identical: excellence never arises from luck, but from the cumulative sum of consistent, millimetric refinements.
+`,
+    contentPt: `# A Intersecção entre Hiper-realismo no Desenho e Engenharia de Software
 
 No hiper-realismo, você não desenha um olho; você desenha cada gradiente de luz refletido na íris, cada micro-textura da pele e cada sombra de oclusão.
 
@@ -296,10 +368,26 @@ export const DEFAULT_EXPERIENCES = [
   {
     id: "exp-detran",
     title: "IT Intern",
+    titleEn: "IT Intern",
+    titlePt: "Estagiário de TI",
     company: "Detran",
-    time: "Junho 2026 - Atualmente",
+    time: "June 2026 - Present",
+    timeEn: "June 2026 - Present",
+    timePt: "Junho 2026 - Atualmente",
     displayOrder: 0,
     bullets: [
+      "Design, develop, and implement software systems to meet agency requirements;",
+      "Applying modern programming techniques and agile project management practices;",
+      "Conduct system requirements analysis and specifications;",
+      "Develop mobile application initiatives."
+    ],
+    bulletsEn: [
+      "Design, develop, and implement software systems to meet agency requirements;",
+      "Applying modern programming techniques and agile project management practices;",
+      "Conduct system requirements analysis and specifications;",
+      "Develop mobile application initiatives."
+    ],
+    bulletsPt: [
       "Projetar, desenvolver e implementar softwares para atender as necessidades do Órgão;",
       "Utilizando técnicas de programação e gestão de projetos;",
       "Desenvolver análise de requisitos;",
@@ -309,10 +397,26 @@ export const DEFAULT_EXPERIENCES = [
   {
     id: "exp-cachina",
     title: "IT Intern",
+    titleEn: "IT Intern",
+    titlePt: "Estagiário de TI",
     company: "Cachina Soluções",
-    time: "Março 2026 - Julho 2026",
+    time: "March 2026 - July 2026",
+    timeEn: "March 2026 - July 2026",
+    timePt: "Março 2026 - Julho 2026",
     displayOrder: 1,
     bullets: [
+      "Backend architecture development and optimization;",
+      "Intelligent workflow automation using n8n integrated into digital ecosystems;",
+      "Agile Linux server management (Ubuntu Server) and technical documentation of operational procedures;",
+      "Core technologies: Python, SQL, n8n, Linux, Bash, and Git."
+    ],
+    bulletsEn: [
+      "Backend architecture development and optimization;",
+      "Intelligent workflow automation using n8n integrated into digital ecosystems;",
+      "Agile Linux server management (Ubuntu Server) and technical documentation of operational procedures;",
+      "Core technologies: Python, SQL, n8n, Linux, Bash, and Git."
+    ],
+    bulletsPt: [
       "Desenvolvimento e otimização de arquiteturas de backend;",
       "Automação de fluxos de trabalho inteligentes utilizando n8n integrados a ecossistemas digitais;",
       "Gerenciamento ágil de servidores Linux (Ubuntu Server) e documentação técnica de processos operacionais;",
@@ -321,23 +425,51 @@ export const DEFAULT_EXPERIENCES = [
   },
   {
     id: "exp-ufrn",
-    title: "Bacharelado em Tecnologia da Informação (BTI)",
+    title: "Bachelor of Science in Information Technology (BTI)",
+    titleEn: "Bachelor of Science in Information Technology (BTI)",
+    titlePt: "Bacharelado em Tecnologia da Informação (BTI)",
     company: "UFRN - Campus Natal",
-    time: "2024.1 - Presente",
+    time: "2024.1 - Present",
+    timeEn: "2024.1 - Present",
+    timePt: "2024.1 - Presente",
     displayOrder: 2,
     bullets: [
-      "Cursando o 6º período",
-      "Sólida base acadêmica em algoritmos, estruturas de dados avançadas, estatística e álgebra linear aplicadas.",
+      "Currently in 6th semester;",
+      "Strong academic foundation in algorithms, advanced data structures, applied statistics, and linear algebra;",
+      "Active focus in MLOps, Deep Learning, Reinforcement Learning, and High Performance Computing."
+    ],
+    bulletsEn: [
+      "Currently in 6th semester;",
+      "Strong academic foundation in algorithms, advanced data structures, applied statistics, and linear algebra;",
+      "Active focus in MLOps, Deep Learning, Reinforcement Learning, and High Performance Computing."
+    ],
+    bulletsPt: [
+      "Cursando o 6º período;",
+      "Sólida base acadêmica em algoritmos, estruturas de dados avançadas, estatística e álgebra linear aplicadas;",
       "Foco em andamento nas áreas de MLOps, Deep Learning, Aprendizado por Reforço e Computação de Alto Desempenho."
     ]
   },
   {
     id: "exp-ifrn",
     title: "IT Technician Training",
+    titleEn: "IT Technician Training",
+    titlePt: "Formação Técnica em TI",
     company: "IFRN Campus Lajes",
     time: "2019 - 2022",
+    timeEn: "2019 - 2022",
+    timePt: "2019 - 2022",
     displayOrder: 3,
     bullets: [
+      "Integrated vocational education focused on Web Development;",
+      "Solid algorithmic problem-solving and relational database fundamentals;",
+      "Hands-on lab experience with assembly, maintenance, and deployment of local operational architectures."
+    ],
+    bulletsEn: [
+      "Integrated vocational education focused on Web Development;",
+      "Solid algorithmic problem-solving and relational database fundamentals;",
+      "Hands-on lab experience with assembly, maintenance, and deployment of local operational architectures."
+    ],
+    bulletsPt: [
       "Formação técnica integrada estruturada com foco em Desenvolvimento web;",
       "Desenvolvimento de lógica algorítmica sólida e fundamentos de bancos de dados relacionais;",
       "Práticas de laboratório envolvendo montagem, manutenção e implantação de arquiteturas operacionais locais."
@@ -346,15 +478,15 @@ export const DEFAULT_EXPERIENCES = [
 ];
 
 export const DEFAULT_DRAWINGS = [
-  { id: "draw-1", title: "Aquaman", src: arte1, displayOrder: 0, description: "Arte realista em grafite" },
-  { id: "draw-2", title: "HP", src: arte2, displayOrder: 1, description: "Arte realista em grafite" },
-  { id: "draw-3", title: "Wanda Maximoff", src: arte3, displayOrder: 2, description: "Arte realista em grafite" },
-  { id: "draw-4", title: "The joker of joaquin phoenix", src: arte4, displayOrder: 3, description: "Arte realista em grafite" },
-  { id: "draw-5", title: "GOT", src: arte5, displayOrder: 4, description: "Arte realista em grafite" },
-  { id: "draw-6", title: "Jack Sparrow em tela A4", src: arte6, displayOrder: 5, description: "Grafite sobre tela A4" },
-  { id: "draw-7", title: "black widow", src: arte7, displayOrder: 6, description: "Arte realista em grafite" },
-  { id: "draw-8", title: "GOT", src: arte8, displayOrder: 7, description: "Arte realista em grafite" },
-  { id: "draw-9", title: "geralt de rívia the witcher 3 em Tela A2", src: arte9, displayOrder: 8, description: "Grafite em Tela A2" }
+  { id: "draw-1", title: "Aquaman", src: arte1, displayOrder: 0, description: "Realistic graphite artwork", descriptionEn: "Realistic graphite artwork", descriptionPt: "Arte realista em grafite" },
+  { id: "draw-2", title: "HP", src: arte2, displayOrder: 1, description: "Realistic graphite artwork", descriptionEn: "Realistic graphite artwork", descriptionPt: "Arte realista em grafite" },
+  { id: "draw-3", title: "Wanda Maximoff", src: arte3, displayOrder: 2, description: "Realistic graphite artwork", descriptionEn: "Realistic graphite artwork", descriptionPt: "Arte realista em grafite" },
+  { id: "draw-4", title: "The Joker (Joaquin Phoenix)", src: arte4, displayOrder: 3, description: "Realistic graphite artwork", descriptionEn: "Realistic graphite artwork", descriptionPt: "Arte realista em grafite" },
+  { id: "draw-5", title: "Game of Thrones", src: arte5, displayOrder: 4, description: "Realistic graphite artwork", descriptionEn: "Realistic graphite artwork", descriptionPt: "Arte realista em grafite" },
+  { id: "draw-6", title: "Jack Sparrow on A4 canvas", src: arte6, displayOrder: 5, description: "Graphite on A4 canvas", descriptionEn: "Graphite on A4 canvas", descriptionPt: "Grafite sobre tela A4" },
+  { id: "draw-7", title: "Black Widow", src: arte7, displayOrder: 6, description: "Realistic graphite artwork", descriptionEn: "Realistic graphite artwork", descriptionPt: "Arte realista em grafite" },
+  { id: "draw-8", title: "Game of Thrones", src: arte8, displayOrder: 7, description: "Realistic graphite artwork", descriptionEn: "Realistic graphite artwork", descriptionPt: "Arte realista em grafite" },
+  { id: "draw-9", title: "Geralt of Rivia (The Witcher 3)", src: arte9, displayOrder: 8, description: "Graphite on A2 canvas", descriptionEn: "Graphite on A2 canvas", descriptionPt: "Grafite em Tela A2" }
 ];
 
 const STORAGE_KEYS = {

@@ -1081,7 +1081,7 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
               className={`cat-btn agent-tab ${activeTab === "agent" ? "active" : ""}`}
               onClick={() => handleTabChange("agent")}
             >
-              Assistente IA (Qwen)
+              Assistente IA (Alomyr)
             </button>
           </div>
         </div>
@@ -1203,24 +1203,24 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
               <div className="chat-sim-header">
                 <div className="bot-status-indicator">
                   <span className="status-dot"></span>
-                  <strong>Simulador do Chatbot (Groq • Qwen Real)</strong>
+                  <strong>Simulador do Chatbot (Alomyr • Groq Real)</strong>
                 </div>
                 <span className="bot-pill" style={{ background: "rgba(52, 211, 153, 0.15)", color: "#34d399", borderColor: "rgba(52, 211, 153, 0.3)" }}>
-                  ⚡ Qwen 2.5/3.8 Online
+                  Alomyr Online
                 </span>
               </div>
 
               <div className="chat-sim-messages">
                 {chatMessages.map((msg, mIdx) => (
                   <div key={mIdx} className={`chat-bubble ${msg.sender}`}>
-                    <span className="bubble-sender">{msg.sender === "user" ? "Visitante" : "Assistente Qwen"}</span>
+                    <span className="bubble-sender">{msg.sender === "user" ? "Visitante" : "Alomyr"}</span>
                     <p style={{ margin: 0, whiteSpace: "pre-wrap" }}>{msg.text}</p>
                   </div>
                 ))}
                 {isChatLoading && (
                   <div className="chat-bubble bot" style={{ opacity: 0.85, fontStyle: "italic", display: "flex", alignItems: "center", gap: "8px" }}>
                     <span className="typing-dot"></span>
-                    <span>Qwen processando via Groq API...</span>
+                    <span>Alomyr processando via Groq API...</span>
                   </div>
                 )}
               </div>
@@ -1490,7 +1490,7 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
           {/* SIDEBAR: Drawings Explorer */}
           <aside className={`admin-sidebar-explorer ${!isSidebarOpen ? "collapsed" : ""}`}>
             <div className="explorer-header">
-              <h3>🎨 Meus Desenhos ({items.length})</h3>
+              <h3>Meus Desenhos ({items.length})</h3>
               <div className="explorer-header-actions">
                 <button
                   type="button"
@@ -1628,7 +1628,7 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
               <div className="drawings-top-header">
                 <div>
                   <h2>
-                    <span>🎨</span> Gestão de Desenhos &amp; Galeria
+                    <span></span> Gestão de Desenhos &amp; Galeria
                   </h2>
                   <p className="drawings-subtitle">
                     Adicione, edite e organize os desenhos e artes exibidos em /hobbies. Suporta upload de imagens para Supabase Storage e URLs diretas.
@@ -1940,12 +1940,12 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
                       <div className="item-card-footer">
                         <span className="item-format-tag">
                           {activeTab === "experiences"
-                            ? "💼 Experiência"
+                            ? " Experiência"
                             : item.contentType === "google-docs"
-                            ? "🌐 Google Docs"
+                            ? " Google Docs"
                             : item.contentType === "pdf"
-                            ? "📄 PDF"
-                            : "✍️ Markdown"}
+                            ? " PDF"
+                            : " Markdown"}
                         </span>
                         <button
                           className="delete-item-btn"
@@ -2369,7 +2369,7 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
                     <label>Sinopse / Contexto IA (Resumo destacado na página):</label>
                     <textarea
                       rows="2"
-                      placeholder="Breve resumo objetivo que os visitantes e o agente Qwen usam para contextualizar o projeto..."
+                      placeholder="Breve resumo objetivo que os visitantes e o agente Alomyr usam para contextualizar o projeto..."
                       value={shortDescription}
                       onChange={(e) => setShortDescription(e.target.value)}
                     ></textarea>

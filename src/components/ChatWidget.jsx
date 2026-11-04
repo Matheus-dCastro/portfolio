@@ -1,25 +1,30 @@
 // src/components/ChatWidget.jsx
 import { useState, useRef, useEffect } from "react";
 import { sendChatMessage } from "../lib/llmService";
+import { useLanguage } from "../context/useLanguage";
 import "./ChatWidget.css";
 
-const QUICK_PROMPTS = [
-  "Quais são os principais projetos?",
-  "Qual a formação acadêmica do Matheus?",
-  "Experiência com Visão Computacional / U-Net?",
-  "Como visualizar ou baixar o Currículo?"
-];
-
 export default function ChatWidget() {
+  const { t, lang } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
   const [inputText, setInputText] = useState("");
   const [isTyping, setIsTyping] = useState(false);
-  const [messages, setChatMessages] = useState([
-    {
-      sender: "bot",
-      text: "Olá! Sou o Assistente de Inteligência Artificial oficial de Matheus de Castro (Qwen). Como posso te orientar sobre os projetos de IA, backend ou currículo?"
-    }
-  ]);
+  const [messages, setChatMessages] = useState([]);
+
+  // Initialize or update initial message when language changes if no conversation took place yet
+  useEffect(() => {
+    setChatMessages((prev) => {
+      if (prev.length <= 1) {
+        return [
+          {
+            sender: "bot",
+            text: t("agent.welcome_message")
+          }
+        ];
+      }
+      return prev;
+    });
+  }, [lang, t]);
 
   const messagesEndRef = useRef(null);
 
@@ -57,13 +62,22 @@ export default function ChatWidget() {
         ...prev,
         {
           sender: "bot",
-          text: `Desculpe, ocorreu uma instabilidade: ${err.message}`
+          text: lang === "en"
+            ? `Sorry, a temporary issue occurred: ${err.message}`
+            : `Desculpe, ocorreu uma instabilidade: ${err.message}`
         }
       ]);
     } finally {
       setIsTyping(false);
     }
   };
+
+  const quickPrompts = t("agent.quick_prompts") || [
+    "What are Matheus's main projects?",
+    "What is his academic background?",
+    "Experience with Computer Vision / U-Net?",
+    "How to view or download his Resume?"
+  ];
 
   return (
     <>
@@ -73,10 +87,10 @@ export default function ChatWidget() {
           type="button"
           className="chat-widget-floating-btn"
           onClick={() => setIsOpen(true)}
-          title="Abrir Assistente de IA de Matheus de Castro"
+          title={t("agent.trigger_title")}
         >
           <span className="chat-widget-pulse-dot"></span>
-          <span>⚡ Pergunte à IA (Qwen)</span>
+          <span>{t("agent.trigger_btn")}</span>
         </button>
       )}
 
@@ -86,14 +100,14 @@ export default function ChatWidget() {
           {/* Header */}
           <div className="chat-widget-header">
             <div className="chat-widget-header-info">
-              <div className="chat-widget-avatar">🤖</div>
+              <div className="chat-widget-avatar"><span>A</span></div>
               <div>
                 <h4 className="chat-widget-title">
-                  Assistente IA <span>✦</span>
+                  Alomyr <span>✦</span>
                 </h4>
                 <p className="chat-widget-subtitle">
                   <span className="chat-widget-pulse-dot" style={{ width: 6, height: 6 }}></span>
-                  Groq • Qwen
+                  {t("agent.subtitle")}
                 </p>
               </div>
             </div>
@@ -101,7 +115,7 @@ export default function ChatWidget() {
               type="button"
               className="chat-widget-close-btn"
               onClick={() => setIsOpen(false)}
-              title="Fechar chat"
+              title={t("agent.close_title")}
             >
               ✕
             </button>
@@ -112,7 +126,7 @@ export default function ChatWidget() {
             {messages.map((msg, idx) => (
               <div key={idx} className={`chat-widget-bubble ${msg.sender}`}>
                 <span className="chat-widget-sender-tag">
-                  {msg.sender === "user" ? "Você" : "Assistente Qwen"}
+                  {msg.sender === "user" ? t("agent.user_tag") : "Alomyr"}
                 </span>
                 <p style={{ margin: 0 }}>{msg.text}</p>
               </div>
@@ -123,16 +137,16 @@ export default function ChatWidget() {
                 <span className="typing-dot"></span>
                 <span className="typing-dot"></span>
                 <span className="typing-dot"></span>
-                <span style={{ marginLeft: "4px" }}>Qwen pensando...</span>
+                <span style={{ marginLeft: "4px" }}>{t("agent.thinking")}</span>
               </div>
             )}
 
             {/* Suggestions Chips when conversation has just started */}
             {messages.length === 1 && !isTyping && (
               <div className="chat-widget-suggestions">
-                <span>Sugestões rápidas:</span>
+                <span>{t("agent.suggestions_title")}</span>
                 <div className="chat-widget-chips">
-                  {QUICK_PROMPTS.map((prompt, pIdx) => (
+                  {quickPrompts.map((prompt, pIdx) => (
                     <button
                       key={pIdx}
                       type="button"
@@ -161,7 +175,7 @@ export default function ChatWidget() {
               <input
                 type="text"
                 className="chat-widget-input"
-                placeholder="Pergunte sobre projetos, backend, IA..."
+                placeholder={t("agent.input_placeholder")}
                 value={inputText}
                 onChange={(e) => setInputText(e.target.value)}
                 disabled={isTyping}
@@ -170,7 +184,7 @@ export default function ChatWidget() {
                 type="submit"
                 className="chat-widget-send-btn"
                 disabled={!inputText.trim() || isTyping}
-                title="Enviar mensagem"
+                title={t("agent.send_title")}
               >
                 ➤
               </button>

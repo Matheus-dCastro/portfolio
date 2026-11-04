@@ -1,10 +1,10 @@
 import { useState } from "react";
+import { useLanguage } from "../context/useLanguage";
 
 function Experience({ expData }) {
-  // Corrigido: Recebendo com chaves {}
+  const { t, lang } = useLanguage();
   const [currentExpIndex, setCurrentExpIndex] = useState(0);
 
-  // Proteção para não quebrar o código se a lista de dados sumir ou falhar
   if (!expData || expData.length === 0) return null;
 
   const changeExp = (direction) => {
@@ -15,12 +15,15 @@ function Experience({ expData }) {
   };
 
   const activeData = expData[currentExpIndex];
+  const title = lang === "en" ? (activeData.titleEn || activeData.title) : (activeData.titlePt || activeData.title);
+  const time = lang === "en" ? (activeData.timeEn || activeData.time) : (activeData.timePt || activeData.time);
+  const bullets = (lang === "en" ? (activeData.bulletsEn || activeData.bullets) : (activeData.bulletsPt || activeData.bullets)) || [];
 
   return (
     <>
       <div className="section-divider-line"></div>
 
-      <h2>Experiência</h2>
+      <h2>{t("experience.title")}</h2>
 
       <div className="experience-grid">
         <div className="exp-tabs-column">
@@ -39,13 +42,13 @@ function Experience({ expData }) {
           </div>
 
           <div className="exp-pagination">
-            <button className="pag-arrow" onClick={() => changeExp(-1)}>
+            <button className="pag-arrow" onClick={() => changeExp(-1)} aria-label="Previous experience">
               &lt;
             </button>
             <span className="pag-text">
-              {currentExpIndex + 1} de {expData.length}
+              {currentExpIndex + 1} {t("experience.pagination_of")} {expData.length}
             </span>
-            <button className="pag-arrow" onClick={() => changeExp(1)}>
+            <button className="pag-arrow" onClick={() => changeExp(1)} aria-label="Next experience">
               &gt;
             </button>
           </div>
@@ -55,13 +58,13 @@ function Experience({ expData }) {
           <div className="exp-display-card">
             <div className="exp-card-body">
               <h3>
-                {activeData.title} |{" "}
+                {title} |{" "}
                 <span className="company-highlight">{activeData.company}</span>
               </h3>
-              <p className="exp-timeline">{activeData.time}</p>
+              <p className="exp-timeline">{time}</p>
               <div className="card-inner-divider"></div>
               <ul className="exp-bullet-list">
-                {activeData.bullets.map((bullet, idx) => (
+                {bullets.map((bullet, idx) => (
                   <li key={idx}>{bullet}</li>
                 ))}
               </ul>

@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
 import { getStoredArticles } from "../data/projectsData";
 import { fetchArticles } from "../lib/supabaseService";
+import { useLanguage } from "../context/useLanguage";
 
 export default function Articles({ onOpenArticle }) {
+  const { t, lang } = useLanguage();
   const [articles, setArticles] = useState(() => getStoredArticles());
   const [activeFilter, setActiveFilter] = useState("all");
 
@@ -27,16 +29,21 @@ export default function Articles({ onOpenArticle }) {
     return null;
   }
 
+  const categoryLabels = {
+    Acadêmico: lang === "en" ? "Academic" : "Acadêmico",
+    Profissional: lang === "en" ? "Professional" : "Profissional",
+    Pessoal: lang === "en" ? "Personal" : "Pessoal"
+  };
+
   return (
     <>
       <div className="section-divider-line"></div>
-      <p className="section-tag">Publicações & Estudos</p>
+      <p className="section-tag">{t("articles.tag")}</p>
       <h2>
-        Artigos <span>Técnicos</span>
+        {t("articles.title_prefix")}<span>{t("articles.title_highlight")}</span>
       </h2>
       <p className="section-lead-text">
-        Análises aprofundadas sobre Deep Learning, arquitetura de sistemas com FastAPI, 
-        automação com Linux e intersecções entre arte e engenharia.
+        {t("articles.lead_text")}
       </p>
 
       {/* Filter categories */}
@@ -46,7 +53,7 @@ export default function Articles({ onOpenArticle }) {
           className={`category-filter-btn ${activeFilter === "all" ? "active" : ""}`}
           onClick={() => setActiveFilter("all")}
         >
-          Todos ({articles.length})
+          {t("articles.filter_all")} ({articles.length})
         </button>
         {["Acadêmico", "Profissional", "Pessoal"].map((cat) => {
           const count = articles.filter((a) => (a.category || "Acadêmico") === cat).length;
@@ -58,8 +65,7 @@ export default function Articles({ onOpenArticle }) {
               className={`category-filter-btn ${activeFilter === cat ? "active" : ""}`}
               onClick={() => setActiveFilter(cat)}
             >
-              {cat === "Acadêmico" ? " " : cat === "Profissional" ? " " : " "}
-              {cat} ({count})
+              {categoryLabels[cat] || cat} ({count})
             </button>
           );
         })}
@@ -69,6 +75,10 @@ export default function Articles({ onOpenArticle }) {
         {filteredArticles.map((article) => {
           const wordCount = article.content ? article.content.trim().split(/\s+/).length : 0;
           const readTime = Math.max(1, Math.ceil(wordCount / 180));
+          const title = lang === "en" ? (article.titleEn || article.title) : (article.titlePt || article.title);
+          const desc = lang === "en"
+            ? (article.shortDescriptionEn || article.shortDescription || article.aboutContextEn || article.aboutContext || t("articles.no_summary"))
+            : (article.shortDescriptionPt || article.shortDescription || article.aboutContextPt || article.aboutContext || t("articles.no_summary"));
 
           return (
             <div key={article.id} className="project-card article-card">
@@ -82,29 +92,29 @@ export default function Articles({ onOpenArticle }) {
                   </span>
                 ))}
                 {article.contentType === "google-docs" && (
-                  <span className="gdocs-badge" title="Disponível via Google Docs">
-                    🌐 Docs
+                  <span className="gdocs-badge" title="Google Docs">
+                    Docs
                   </span>
                 )}
                 {article.contentType === "pdf" && (
-                  <span className="pdf-badge" title="Disponível via PDF">
+                  <span className="pdf-badge" title="PDF">
                     PDF
                   </span>
                 )}
                 {article.relatedProjectId && (
-                  <span className="related-badge" title="Possui projeto prático associado">
-                    💻 Projeto
+                  <span className="related-badge" title="Associated project">
+                    {t("articles.badge_project")}
                   </span>
                 )}
               </div>
 
-              <h3>{article.title}</h3>
-              <p>{article.shortDescription || article.aboutContext || "Sem resumo disponível."}</p>
+              <h3>{title}</h3>
+              <p>{desc}</p>
 
               <div className="article-meta-row">
-                <span className="article-read-pill">⏱ ~{readTime} min de leitura</span>
+                <span className="article-read-pill">~{readTime} {t("articles.read_time")}</span>
                 {article.updatedAt && (
-                  <span className="article-date-pill">📅 {article.updatedAt}</span>
+                  <span className="article-date-pill">{article.updatedAt}</span>
                 )}
               </div>
 
@@ -114,7 +124,7 @@ export default function Articles({ onOpenArticle }) {
                   className="btn-learn-more"
                   onClick={() => onOpenArticle && onOpenArticle(article)}
                 >
-                  Ler Artigo Completo →
+                  {t("articles.read_full")}
                 </button>
               </div>
             </div>

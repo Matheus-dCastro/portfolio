@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { getStoredProjects, getStoredArticles, convertGoogleDocsToEmbedUrl } from "../data/projectsData";
+import { useLanguage } from "../context/useLanguage";
+import LanguageSwitcher from "./LanguageSwitcher";
 import "./ViewDraft.css";
 
 function getInitialProject(propProject) {
@@ -17,6 +19,7 @@ function getInitialProject(propProject) {
 }
 
 export default function ViewDraft({ project: propProject, onBackToHome, onSelectProject }) {
+  const { t, lang } = useLanguage();
   const [internalProject, setInternalProject] = useState(() => getInitialProject(propProject));
   const [activeContentTab, setActiveContentTab] = useState("auto"); // 'auto' | 'readme' | 'gdocs' | 'pdf'
 
@@ -25,9 +28,9 @@ export default function ViewDraft({ project: propProject, onBackToHome, onSelect
   if (!project) {
     return (
       <div className="view-loading-screen">
-        <p>Carregando informações do projeto...</p>
+        <p>{t("view.loading")}</p>
         <button className="back-button" onClick={onBackToHome}>
-          ← Voltar aos Projetos
+          {t("view.back_to_projects")}
         </button>
       </div>
     );
@@ -41,9 +44,15 @@ export default function ViewDraft({ project: propProject, onBackToHome, onSelect
       ? allProjects[currentIndex + 1]
       : null;
 
+  const projectTitle = lang === "en" ? (project.titleEn || project.title) : (project.titlePt || project.title);
+  const projectDesc = lang === "en"
+    ? (project.shortDescriptionEn || project.shortDescription || project.aboutContextEn || project.aboutContext || t("view.default_context"))
+    : (project.shortDescriptionPt || project.shortDescription || project.aboutContextPt || project.aboutContext || t("view.default_context"));
+  const projectContent = lang === "en" ? (project.contentEn || project.content) : (project.contentPt || project.content);
+
   const hasGDocs = Boolean(project.googleDocsUrl);
   const hasPdf = Boolean(project.pdfUrl);
-  const hasMarkdown = Boolean(project.content);
+  const hasMarkdown = Boolean(projectContent);
 
   // Determine current active format
   const currentFormat =
@@ -57,7 +66,7 @@ export default function ViewDraft({ project: propProject, onBackToHome, onSelect
 
   const embedGDocsUrl = convertGoogleDocsToEmbedUrl(project.googleDocsUrl);
 
-  const wordCount = project.content ? project.content.trim().split(/\s+/).length : 0;
+  const wordCount = projectContent ? projectContent.trim().split(/\s+/).length : 0;
   const readingTime = Math.max(1, Math.ceil(wordCount / 180));
 
   const linkedArticle = project.relatedArticleId
@@ -72,7 +81,7 @@ export default function ViewDraft({ project: propProject, onBackToHome, onSelect
       {/* Top Header Bar - Integrated with system */}
       <nav className="view-top-header">
         <button className="back-to-projects-btn" onClick={onBackToHome}>
-          <span className="arrow">←</span> Voltar aos Projetos
+          <span className="arrow">←</span> {t("view.back_to_projects")}
         </button>
 
         <div className="header-actions-group">
@@ -83,7 +92,7 @@ export default function ViewDraft({ project: propProject, onBackToHome, onSelect
               rel="noopener noreferrer"
               className="action-btn github-action"
             >
-              <span>GitHub Repositório</span>
+              <span>{t("view.github_repo")}</span>
               <span className="external-arrow">↗</span>
             </a>
           )}
@@ -94,7 +103,7 @@ export default function ViewDraft({ project: propProject, onBackToHome, onSelect
               rel="noopener noreferrer"
               className="action-btn demo-action"
             >
-              <span>Live Demo</span>
+              <span>{t("view.live_demo")}</span>
               <span className="external-arrow">↗</span>
             </a>
           )}
@@ -105,7 +114,7 @@ export default function ViewDraft({ project: propProject, onBackToHome, onSelect
               rel="noopener noreferrer"
               className="action-btn gdocs-action"
             >
-              <span>Google Docs</span>
+              <span>{t("view.gdocs")}</span>
               <span className="external-arrow">↗</span>
             </a>
           )}
@@ -116,10 +125,11 @@ export default function ViewDraft({ project: propProject, onBackToHome, onSelect
               rel="noopener noreferrer"
               className="action-btn pdf-action"
             >
-              <span>Documento PDF</span>
+              <span>{t("view.pdf_doc")}</span>
               <span className="external-arrow">↗</span>
             </a>
           )}
+          <LanguageSwitcher />
         </div>
       </nav>
 
@@ -134,7 +144,13 @@ export default function ViewDraft({ project: propProject, onBackToHome, onSelect
                 .normalize("NFD")
                 .replace(/[\u0300-\u036f]/g, "")}`}
             >
-              {project.category || "Projeto"}
+              {project.category === "Profissional"
+                ? (lang === "en" ? "Professional" : "Profissional")
+                : project.category === "Pessoal"
+                ? (lang === "en" ? "Personal" : "Pessoal")
+                : project.category === "Acadêmico"
+                ? (lang === "en" ? "Academic" : "Acadêmico")
+                : (project.category || "Project")}
             </span>
 
             {project.tags?.map((tag, idx) => (
@@ -144,58 +160,68 @@ export default function ViewDraft({ project: propProject, onBackToHome, onSelect
             ))}
 
             <span className="read-time-pill">
-              ⏱ ~{readingTime} min de leitura
+              ~{readingTime} {t("view.read_time")}
             </span>
           </div>
 
-          <h1 className="article-main-title">{project.title}</h1>
+          <h1 className="article-main-title">{projectTitle}</h1>
 
           {/* AI Context / Synopsis Callout */}
           <div className="ai-context-callout">
             <div className="callout-header">
-              <span className="callout-icon">✨</span>
-              <span className="callout-label">Contexto & Resumo Executivo:</span>
+              <span className="callout-icon"></span>
+              <span className="callout-label">{t("view.context_label")}</span>
             </div>
             <p className="callout-body">
-              {project.aboutContext ||
-                project.shortDescription ||
-                "Visão técnica desenvolvida com foco em performance, arquitetura escalável e código limpo."}
+              {projectDesc}
             </p>
           </div>
 
           {/* Attached / Linked Item Banner (Bidirectional Project <-> Article) */}
           {linkedArticle && (
             <div className="linked-item-banner">
-              <div className="linked-banner-icon">📑</div>
+              <div className="linked-banner-icon"></div>
               <div className="linked-banner-info">
-                <span className="linked-banner-tag">Artigo Técnico Anexo</span>
-                <h4 className="linked-banner-title">{linkedArticle.title}</h4>
-                <p className="linked-banner-desc">{linkedArticle.shortDescription}</p>
+                <span className="linked-banner-tag">{t("view.attached_article_tag")}</span>
+                <h4 className="linked-banner-title">
+                  {lang === "en" ? (linkedArticle.titleEn || linkedArticle.title) : (linkedArticle.titlePt || linkedArticle.title)}
+                </h4>
+                <p className="linked-banner-desc">
+                  {lang === "en"
+                    ? (linkedArticle.shortDescriptionEn || linkedArticle.shortDescription)
+                    : (linkedArticle.shortDescriptionPt || linkedArticle.shortDescription)}
+                </p>
               </div>
               <button
                 type="button"
                 className="btn-open-linked"
                 onClick={() => onSelectProject && onSelectProject(linkedArticle)}
               >
-                Ler Artigo Anexo →
+                {t("view.read_attached_article")}
               </button>
             </div>
           )}
 
           {linkedProject && (
             <div className="linked-item-banner">
-              <div className="linked-banner-icon">💻</div>
+              <div className="linked-banner-icon"></div>
               <div className="linked-banner-info">
-                <span className="linked-banner-tag">Projeto Prático Anexo</span>
-                <h4 className="linked-banner-title">{linkedProject.title}</h4>
-                <p className="linked-banner-desc">{linkedProject.shortDescription}</p>
+                <span className="linked-banner-tag">{t("view.attached_project_tag")}</span>
+                <h4 className="linked-banner-title">
+                  {lang === "en" ? (linkedProject.titleEn || linkedProject.title) : (linkedProject.titlePt || linkedProject.title)}
+                </h4>
+                <p className="linked-banner-desc">
+                  {lang === "en"
+                    ? (linkedProject.shortDescriptionEn || linkedProject.shortDescription)
+                    : (linkedProject.shortDescriptionPt || linkedProject.shortDescription)}
+                </p>
               </div>
               <button
                 type="button"
                 className="btn-open-linked"
                 onClick={() => onSelectProject && onSelectProject(linkedProject)}
               >
-                Ver Projeto no Portfólio →
+                {t("view.view_attached_project")}
               </button>
             </div>
           )}
@@ -204,7 +230,7 @@ export default function ViewDraft({ project: propProject, onBackToHome, onSelect
         {/* Content Type Selector (if multiple formats available) */}
         {(hasGDocs || hasPdf) && (
           <div className="content-format-switcher">
-            <span className="switcher-title">Visualizar como:</span>
+            <span className="switcher-title">{t("view.view_as")}</span>
             <div className="switcher-buttons">
               {hasMarkdown && (
                 <button
@@ -212,7 +238,7 @@ export default function ViewDraft({ project: propProject, onBackToHome, onSelect
                   className={`format-tab-btn ${currentFormat === "markdown" ? "active" : ""}`}
                   onClick={() => setActiveContentTab("markdown")}
                 >
-                  📝 Documentação & README
+                  {t("view.tab_markdown")}
                 </button>
               )}
               {hasGDocs && (
@@ -221,7 +247,7 @@ export default function ViewDraft({ project: propProject, onBackToHome, onSelect
                   className={`format-tab-btn ${currentFormat === "gdocs" ? "active" : ""}`}
                   onClick={() => setActiveContentTab("gdocs")}
                 >
-                  Google Docs Interativo
+                  {t("view.tab_gdocs")}
                 </button>
               )}
               {hasPdf && (
@@ -230,7 +256,7 @@ export default function ViewDraft({ project: propProject, onBackToHome, onSelect
                   className={`format-tab-btn ${currentFormat === "pdf" ? "active" : ""}`}
                   onClick={() => setActiveContentTab("pdf")}
                 >
-                  Documento PDF Integrado
+                  {t("view.tab_pdf")}
                 </button>
               )}
             </div>
@@ -243,14 +269,14 @@ export default function ViewDraft({ project: propProject, onBackToHome, onSelect
           {currentFormat === "gdocs" && embedGDocsUrl && (
             <div className="gdocs-reader-wrapper">
               <div className="reader-info-bar">
-                <span>Documento sincronizado diretamente com o Google Docs</span>
+                <span>{t("view.gdocs_synced")}</span>
                 <a
                   href={project.googleDocsUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="open-fullscreen-link"
                 >
-                  Abrir no Google Docs ↗
+                  {t("view.open_gdocs")}
                 </a>
               </div>
               <iframe
@@ -267,14 +293,14 @@ export default function ViewDraft({ project: propProject, onBackToHome, onSelect
           {currentFormat === "pdf" && project.pdfUrl && (
             <div className="pdf-reader-wrapper">
               <div className="reader-info-bar">
-                <span> Visualizador de Documento PDF</span>
+                <span>{t("view.pdf_viewer_label")}</span>
                 <a
                   href={project.pdfUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="open-fullscreen-link"
                 >
-                  Baixar / Abrir em Nova Aba ↗
+                  {t("view.download_open_tab")}
                 </a>
               </div>
               <iframe
@@ -289,7 +315,7 @@ export default function ViewDraft({ project: propProject, onBackToHome, onSelect
           {/* Format 3: Rich Markdown */}
           {currentFormat === "markdown" && (
             <div className="markdown-reader-container">
-              <RenderRichMarkdown content={project.content} />
+              <RenderRichMarkdown content={projectContent} />
             </div>
           )}
         </div>
@@ -297,7 +323,7 @@ export default function ViewDraft({ project: propProject, onBackToHome, onSelect
         {/* Tech Stack Visual Pills Section */}
         {project.tags && project.tags.length > 0 && (
           <section className="tech-stack-section">
-            <h3 className="section-subtitle">Tecnologias & Ferramentas Aplicadas</h3>
+            <h3 className="section-subtitle">{t("view.applied_tech")}</h3>
             <div className="tags-grid">
               {project.tags.map((tag, tIdx) => (
                 <div key={tIdx} className="tech-card-pill">
@@ -322,8 +348,10 @@ export default function ViewDraft({ project: propProject, onBackToHome, onSelect
                   window.scrollTo({ top: 0, behavior: "smooth" });
                 }}
               >
-                <span className="nav-direction">← Projeto Anterior</span>
-                <h4 className="nav-title">{prevProject.title}</h4>
+                <span className="nav-direction">{t("view.prev_project")}</span>
+                <h4 className="nav-title">
+                  {lang === "en" ? (prevProject.titleEn || prevProject.title) : (prevProject.titlePt || prevProject.title)}
+                </h4>
               </button>
             )}
           </div>
@@ -339,8 +367,10 @@ export default function ViewDraft({ project: propProject, onBackToHome, onSelect
                   window.scrollTo({ top: 0, behavior: "smooth" });
                 }}
               >
-                <span className="nav-direction">Próximo Projeto →</span>
-                <h4 className="nav-title">{nextProject.title}</h4>
+                <span className="nav-direction">{t("view.next_project")}</span>
+                <h4 className="nav-title">
+                  {lang === "en" ? (nextProject.titleEn || nextProject.title) : (nextProject.titlePt || nextProject.title)}
+                </h4>
               </button>
             )}
           </div>
@@ -348,11 +378,8 @@ export default function ViewDraft({ project: propProject, onBackToHome, onSelect
 
         {/* Call to action footer */}
         <footer className="article-end-cta">
-          <h3>Gostou deste projeto?</h3>
-          <p>
-            Explore o código fonte completo no GitHub ou entre em contato para colaborações,
-            pesquisas em Machine Learning ou desenvolvimento de software.
-          </p>
+          <h3>{t("view.cta_title")}</h3>
+          <p>{t("view.cta_desc")}</p>
           <div className="cta-links">
             {project.github && (
               <a
@@ -361,11 +388,11 @@ export default function ViewDraft({ project: propProject, onBackToHome, onSelect
                 rel="noopener noreferrer"
                 className="btn-cta primary"
               >
-                Ver Repositório no GitHub <span>→</span>
+                {t("view.cta_github")} <span>→</span>
               </a>
             )}
             <button className="btn-cta secondary" onClick={onBackToHome}>
-              Voltar ao Início
+              {t("view.cta_home")}
             </button>
           </div>
         </footer>
@@ -376,8 +403,9 @@ export default function ViewDraft({ project: propProject, onBackToHome, onSelect
 
 // Markdown parser & renderer
 function RenderRichMarkdown({ content }) {
+  const { t } = useLanguage();
   if (!content) {
-    return <p className="empty-content">Nenhuma documentação detalhada foi incluída para este projeto.</p>;
+    return <p className="empty-content">{t("view.no_content")}</p>;
   }
 
   const lines = content.split("\n");

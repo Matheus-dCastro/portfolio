@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback } from "react";
+import { useLanguage } from "../context/useLanguage";
 
 export default function ArtGallery({ artDrawings = [] }) {
+  const { t, lang } = useLanguage();
   const [selectedArtIndex, setSelectedArtIndex] = useState(null);
 
   const selectedArt =
@@ -58,44 +60,50 @@ export default function ArtGallery({ artDrawings = [] }) {
       <section id="art-gallery">
         <div className="art-gallery-header">
           <div>
-            <p className="gallery-eyebrow">GALLERY</p>
+            <p className="gallery-eyebrow">{t("gallery.eyebrow")}</p>
             <h2 style={{ marginBottom: 0 }}>
-              My <span>Drawings</span>
+              {t("gallery.title_prefix")}<span>{t("gallery.title_highlight")}</span>
             </h2>
           </div>
           {artDrawings.length > 0 && (
             <div className="gallery-counter-badge">
-              <span>🎨</span> {artDrawings.length} {artDrawings.length === 1 ? "Obra" : "Obras"}
+              {artDrawings.length}{" "}
+              {artDrawings.length === 1 ? t("gallery.counter_single") : t("gallery.counter_plural")}
             </div>
           )}
         </div>
 
         <div className="masonry-gallery">
-          {artDrawings.map((art, index) => (
-            <div
-              className="art-item"
-              key={art.id || `${art.title}-${index}`}
-              onClick={() => openArt(index)}
-              title={`Clique para ampliar: ${art.title}`}
-            >
-              <div className="art-image-container">
-                <img
-                  src={art.src}
-                  alt={art.title}
-                  loading="lazy"
-                />
-                <div className="art-zoom-hint">
-                  <span>🔍 Expandir</span>
+          {artDrawings.map((art, index) => {
+            const title = lang === "en" ? (art.titleEn || art.title) : (art.titlePt || art.title);
+            const desc = lang === "en" ? (art.descriptionEn || art.description) : (art.descriptionPt || art.description);
+
+            return (
+              <div
+                className="art-item"
+                key={art.id || `${art.title}-${index}`}
+                onClick={() => openArt(index)}
+                title={`${t("gallery.click_to_zoom")} ${title}`}
+              >
+                <div className="art-image-container">
+                  <img
+                    src={art.src}
+                    alt={title}
+                    loading="lazy"
+                  />
+                  <div className="art-zoom-hint">
+                    <span>{t("gallery.expand")}</span>
+                  </div>
+                </div>
+                <div className="art-overlay">
+                  <span className="art-overlay-title">{title}</span>
+                  {desc && (
+                    <span className="art-overlay-desc">{desc}</span>
+                  )}
                 </div>
               </div>
-              <div className="art-overlay">
-                <span className="art-overlay-title">{art.title}</span>
-                {art.description && (
-                  <span className="art-overlay-desc">{art.description}</span>
-                )}
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </section>
 
@@ -119,7 +127,7 @@ export default function ArtGallery({ artDrawings = [] }) {
                 type="button"
                 className="close-lightbox-btn"
                 onClick={closeLightbox}
-                title="Fechar (Esc)"
+                title="Esc"
               >
                 ✕
               </button>
@@ -131,7 +139,7 @@ export default function ArtGallery({ artDrawings = [] }) {
                 type="button"
                 className="lightbox-nav prev"
                 onClick={showPrev}
-                title="Anterior (Seta Esquerda)"
+                title="‹"
               >
                 ‹
               </button>
@@ -144,7 +152,7 @@ export default function ArtGallery({ artDrawings = [] }) {
                 type="button"
                 className="lightbox-nav next"
                 onClick={showNext}
-                title="Próxima (Seta Direita)"
+                title="›"
               >
                 ›
               </button>
@@ -152,9 +160,13 @@ export default function ArtGallery({ artDrawings = [] }) {
 
             {/* Bottom Caption */}
             <div className="lightbox-caption-card">
-              <h3 className="lightbox-caption-title">{selectedArt.title}</h3>
-              {selectedArt.description && (
-                <p className="lightbox-caption-text">{selectedArt.description}</p>
+              <h3 className="lightbox-caption-title">
+                {lang === "en" ? (selectedArt.titleEn || selectedArt.title) : (selectedArt.titlePt || selectedArt.title)}
+              </h3>
+              {(selectedArt.descriptionEn || selectedArt.description) && (
+                <p className="lightbox-caption-text">
+                  {lang === "en" ? (selectedArt.descriptionEn || selectedArt.description) : (selectedArt.descriptionPt || selectedArt.description)}
+                </p>
               )}
             </div>
           </div>

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useLanguage } from "../context/useLanguage";
 
 function Contacts({
   instagram,
@@ -9,6 +10,7 @@ function Contacts({
   linkedin,
   linkedin_link,
 }) {
+  const { t } = useLanguage();
   const [showToast, setShowToast] = useState(false);
 
   const handleEmailClick = (e) => {
@@ -23,9 +25,9 @@ function Contacts({
   return (
     <>
       <div className="section-divider-line"></div>
-      <p className="section-tag">Get in touch</p>
+      <p className="section-tag">{t("contacts.tag")}</p>
       <h2>
-        My <span>Contacts</span>
+        {t("contacts.title_prefix")}<span>{t("contacts.title_highlight")}</span>
       </h2>
       <div className="contact-grid">
         <a href={`mailto:${email}`} className="contact-item" onClick={handleEmailClick}>
@@ -131,7 +133,7 @@ function Contacts({
       
       {showToast && (
         <div className="toast-notification">
-          O email foi copiado
+          {t("contacts.toast")}
         </div>
       )}
     </>

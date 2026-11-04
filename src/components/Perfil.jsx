@@ -1,14 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { getStoredCvConfig } from "../data/projectsData";
 import { fetchCvConfig } from "../lib/supabaseService";
-
-const FRASES = [
-  "Matheus de Castro",
-  // "Backend Developer",
-  // "Machine Learning Student",
-];
+import { useLanguage } from "../context/useLanguage";
 
 function Perfil({ nomeCompleto, description, foto, cv }) {
+  const { t } = useLanguage();
   const [textoAtual, setTextoAtual] = useState("");
   const [phraseIndex, setPhraseIndex] = useState(0);
   const [charIndex, setCharIndex] = useState(0);
@@ -16,6 +12,11 @@ function Perfil({ nomeCompleto, description, foto, cv }) {
   const [typeSpeed, setTypeSpeed] = useState(150);
   const [showCvModal, setShowCvModal] = useState(false);
   const [cvConfig, setCvConfig] = useState(() => getStoredCvConfig());
+
+  const frases = useMemo(
+    () => t("hero.roles") || ["Matheus de Castro", "Backend Developer", "Machine Learning Student"],
+    [t]
+  );
 
   useEffect(() => {
     fetchCvConfig().then((cfg) => {
@@ -31,7 +32,7 @@ function Perfil({ nomeCompleto, description, foto, cv }) {
   };
 
   useEffect(() => {
-    const currentPhrase = FRASES[phraseIndex];
+    const currentPhrase = frases[phraseIndex % frases.length] || "Matheus de Castro";
 
     const handleTyping = () => {
       if (!isDeleting) {
@@ -50,7 +51,7 @@ function Perfil({ nomeCompleto, description, foto, cv }) {
 
         if (charIndex - 1 === 0) {
           setIsDeleting(false);
-          setPhraseIndex((prev) => (prev + 1) % FRASES.length);
+          setPhraseIndex((prev) => (prev + 1) % frases.length);
           setTypeSpeed(500);
         }
       }
@@ -59,7 +60,9 @@ function Perfil({ nomeCompleto, description, foto, cv }) {
     const timer = setTimeout(handleTyping, typeSpeed);
 
     return () => clearTimeout(timer);
-  }, [charIndex, isDeleting, phraseIndex, typeSpeed]);
+  }, [charIndex, isDeleting, phraseIndex, typeSpeed, frases]);
+
+  const heroSubtitle = description || t("hero.subtitle");
 
   return (
     <section className="hero">
@@ -76,27 +79,27 @@ function Perfil({ nomeCompleto, description, foto, cv }) {
           )}
         </h1>
 
-        <p className="hero-subtitle">{description}</p>
+        <p className="hero-subtitle">{heroSubtitle}</p>
 
         <div className="btn-group">
           <a href="#projects" className="btn">
-            See My Projects
+            {t("hero.see_projects")}
           </a>
           <button
             type="button"
             className="btn btn-outline"
             onClick={handleOpenCvModal}
-            title="Escolha entre a versão Web no Google Docs ou arquivo PDF"
+            title={t("cv_modal.subtitle")}
           >
-            Download CV / Docs
+            {t("hero.download_cv")}
           </button>
         </div>
       </div>
 
       <div className="card-container">
         <div className="split-card">
-          <div className="side design">ART</div>
-          <div className="side coder">CODER IS</div>
+          <div className="side design">{t("hero.card_art")}</div>
+          <div className="side coder">{t("hero.card_coder")}</div>
         </div>
       </div>
 
@@ -108,8 +111,8 @@ function Perfil({ nomeCompleto, description, foto, cv }) {
               <div className="cv-modal-title-group">
                 <span className="cv-modal-icon"></span>
                 <div>
-                  <h3>Currículo de Matheus de Castro</h3>
-                  <p>Escolha o formato que deseja visualizar ou baixar:</p>
+                  <h3>{t("cv_modal.title")}</h3>
+                  <p>{t("cv_modal.subtitle")}</p>
                 </div>
               </div>
               <button className="btn-close-cv-modal" onClick={() => setShowCvModal(false)}>✕</button>
@@ -125,9 +128,9 @@ function Perfil({ nomeCompleto, description, foto, cv }) {
                 onClick={() => setShowCvModal(false)}
               >
                 <div className="cv-option-text">
-                  <div className="cv-option-badge">Versão Web Interativa</div>
-                  <h4>Abrir no Google Docs</h4>
-                  <p>Visualização instantânea, sempre atualizada com as últimas experiências e projetos.</p>
+                  <div className="cv-option-badge">{t("cv_modal.gdocs_badge")}</div>
+                  <h4>{t("cv_modal.gdocs_title")}</h4>
+                  <p>{t("cv_modal.gdocs_desc")}</p>
                 </div>
                 <span className="cv-option-arrow">↗</span>
               </a>
@@ -142,16 +145,16 @@ function Perfil({ nomeCompleto, description, foto, cv }) {
                 onClick={() => setShowCvModal(false)}
               >
                 <div className="cv-option-text">
-                  <div className="cv-option-badge">Documento Oficial PDF</div>
-                  <h4>Baixar Arquivo PDF</h4>
-                  <p>Formato clássico ideal para impressão, arquivamento ou anexar em processos seletivos.</p>
+                  <div className="cv-option-badge">{t("cv_modal.pdf_badge")}</div>
+                  <h4>{t("cv_modal.pdf_title")}</h4>
+                  <p>{t("cv_modal.pdf_desc")}</p>
                 </div>
                 <span className="cv-option-arrow">↓</span>
               </a>
             </div>
 
             <div className="cv-modal-footer">
-              <span className="cv-footer-hint">Ambos os formatos possuem o conteúdo completo e revisado.</span>
+              <span className="cv-footer-hint">{t("cv_modal.footer_hint")}</span>
             </div>
           </div>
         </div>

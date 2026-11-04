@@ -4,8 +4,10 @@ import Rodape from "./components/Rodape";
 import fotoAlomyr from "./assets/img/alomyr.jpeg";
 import logoWolf from "./assets/img/wolf(2).png";
 import "./style.css";
+import { useLanguage } from "./context/useLanguage";
 
 function Links({ onBackToHome }) {
+  const { t, lang } = useLanguage();
   const [showToast, setShowToast] = useState(false);
 
   const handleEmailClick = (e, email) => {
@@ -23,8 +25,7 @@ function Links({ onBackToHome }) {
     ano: "2026",
   };
   const imageWolf = logoWolf;
-  const descriptionPerfil =
-    "IT Technician — IFRN. Undergraduate student in Information Technology (BTI) at UFRN.";
+  const descriptionPerfil = t("hero.subtitle");
   const fotoPerfil = fotoAlomyr;
   const Contatos = {
     instagram: "@MatheusdCastro._",
@@ -54,9 +55,9 @@ function Links({ onBackToHome }) {
           <div className="links-profile">
             <img src={fotoPerfil} alt="Perfil" className="profile-pic links-pic" />
             <h2>
-              Meus <span>Links</span>
+              {t("links.title_prefix")}<span>{t("links.title_highlight")}</span>
             </h2>
-            <p className="links-subtitle">Conecte-se comigo através das minhas redes</p>
+            <p className="links-subtitle">{t("links.subtitle")}</p>
           </div>
 
           <div className="links-container">
@@ -77,7 +78,7 @@ function Links({ onBackToHome }) {
                   <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
                 </svg>
               </div>
-              <span className="link-text">Portfólio</span>
+              <span className="link-text">{t("links.portfolio")}</span>
             </a>
 
             <a href={Contatos.linkedin_link} target="_blank" rel="noreferrer" className="link-item">
@@ -98,28 +99,16 @@ function Links({ onBackToHome }) {
                   <polyline points="22,6 12,13 2,6"></polyline>
                 </svg>
               </div>
-              <span className="link-text">E-mail</span>
-            </a>
-
-            <a href={Contatos.instagram_link} target="_blank" rel="noreferrer" className="link-item">
-              <div className="link-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
-                  <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
-                  <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
-                </svg>
-              </div>
-              <span className="link-text">Instagram</span>
+              <span className="link-text">Email</span>
             </a>
 
             <a href={Contatos.vscode_extension_link} target="_blank" rel="noreferrer" className="link-item">
               <div className="link-icon">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <polyline points="16 18 22 12 16 6"></polyline>
-                  <polyline points="8 6 2 12 8 18"></polyline>
+                  <path d="M4 17l6 4 10-9-10-9-6 4 6 5-6 5z"></path>
                 </svg>
               </div>
-              <span className="link-text">Extensão VSCode</span>
+              <span className="link-text">{lang === "en" ? "VS Code Extension" : "Extensão VS Code"}</span>
             </a>
           </div>
         </section>
@@ -135,7 +124,7 @@ function Links({ onBackToHome }) {
       
       {showToast && (
         <div className="toast-notification">
-          O email foi copiado
+          {t("contacts.toast")}
         </div>
       )}
     </>
