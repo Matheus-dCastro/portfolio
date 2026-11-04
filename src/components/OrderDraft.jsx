@@ -239,7 +239,14 @@ export default function OrderDraft({ onBackToHome, onOpenProjectDetail, onNaviga
       {/* Header Bar - Integrated with system */}
       <nav className="order-top-bar">
         <div className="order-brand">
-          <div className="order-logo-badge">✦</div>
+          <div className="order-logo-badge">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <rect x="3" y="3" width="7" height="7"></rect>
+              <rect x="14" y="3" width="7" height="7"></rect>
+              <rect x="14" y="14" width="7" height="7"></rect>
+              <rect x="3" y="14" width="7" height="7"></rect>
+            </svg>
+          </div>
           <div>
             <h1>Organizador de Vitrine por Tipo</h1>
             <p className="order-subtitle">

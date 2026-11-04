@@ -22,14 +22,14 @@ export default function LoginDraft({ onNavigateToAdmin }) {
     getCurrentUser().then((user) => {
       if (user) {
         if (isAuthorizedAdmin(user)) {
-          setNotice("✅ Sessão ativa de Matheus de Castro detectada. Redirecionando...");
+          setNotice("Sessão ativa de Matheus de Castro detectada. Redirecionando...");
           setTimeout(() => {
             if (onNavigateToAdmin) onNavigateToAdmin();
             else window.location.href = "/4dm1n";
           }, 500);
         } else {
           logoutUser();
-          setErrorNotice("⛔ Acesso Negado: Apenas a conta de Matheus de Castro (Matheus-dCastro) possui autorização.");
+          setErrorNotice("Acesso Negado: Apenas a conta de Matheus de Castro (Matheus-dCastro) possui autorização.");
         }
       }
     });
@@ -61,10 +61,10 @@ export default function LoginDraft({ onNavigateToAdmin }) {
         
         if (!isAuthorizedAdmin(data?.user)) {
           await logoutUser();
-          throw new Error("⛔ Acesso Negado: Este email não está autorizado como administrador.");
+          throw new Error("Acesso Negado: Este email não está autorizado como administrador.");
         }
 
-        setNotice("✅ Autenticado como Matheus de Castro! Redirecionando para o painel 4dm1n...");
+        setNotice("Autenticado como Matheus de Castro! Redirecionando para o painel 4dm1n...");
         setTimeout(() => {
           if (onNavigateToAdmin) onNavigateToAdmin();
           else window.location.href = "/4dm1n";
@@ -116,7 +116,7 @@ export default function LoginDraft({ onNavigateToAdmin }) {
 
       {errorNotice && (
         <div className="login-preview-notice" style={{ borderColor: "#f85149", color: "#f85149" }}>
-          <span>⚠️ {errorNotice}</span>
+          <span>{errorNotice}</span>
         </div>
       )}
 

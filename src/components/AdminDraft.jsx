@@ -49,14 +49,14 @@ const generateUniqueId = () => `item-${Date.now()}`;
 
 export const DEFAULT_AGENT_SYSTEM_PROMPT = `Você é o Assistente de Inteligência Artificial oficial do portfólio de Matheus de Castro.
 
-## 🎯 SEU PAPEL E OBJETIVO
+## SEU PAPEL E OBJETIVO
 Seu objetivo é orientar visitantes, recrutadores, pesquisadores e parceiros técnicos, apresentando com clareza as qualificações, projetos, publicações e competências técnicas de Matheus de Castro nas áreas de:
 - Machine Learning Engineering & Deep Learning (PyTorch, Visão Computacional, U-Net)
 - Arquitetura de Backend & Engenharia de Software (Python, FastAPI, PostgreSQL, Docker)
 - Automação de Fluxos de Trabalho Inteligentes (n8n, Linux Ubuntu Server, Bash)
 - Formação Acadêmica: Bacharelado em Tecnologia da Informação (BTI) na UFRN e Técnico em TI pelo IFRN.
 
-## 🛡️ DIRETRIZES RÍGIDAS DE COMPORTAMENTO
+## DIRETRIZES RÍGIDAS DE COMPORTAMENTO
 1. ESCOPO FECHADO: Responda APENAS sobre a trajetória acadêmica, profissional, projetos e artigos de Matheus de Castro.
 2. RECUSA DE ESCOPO: Se o usuário pedir para gerar códigos aleatórios, receitas, redações ou tópicos não relacionados ao portfólio, responda cordialmente:
    "Como assistente oficial do portfólio de Matheus de Castro, meu escopo é limitado a dúvidas sobre seus projetos de IA, backend e currículo. Posso te apresentar projetos como o AgentMetrics ou a segmentação U-Net!"
@@ -291,8 +291,8 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
     const res = await persistCvConfig(newConfig);
     showToast(
       res.cloud
-        ? "☁️ Configurações do Currículo sincronizadas no Supabase!"
-        : "💾 Configurações do Currículo salvas localmente (offline)!"
+        ? "Configurações do Currículo sincronizadas no Supabase!"
+        : "Configurações do Currículo salvas localmente (offline)!"
     );
   };
 
@@ -329,7 +329,7 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
         type: "success",
         message: `Novo PDF "${file.name}" enviado com sucesso ao Supabase Storage e vinculado!`
       });
-      showToast("☁️ Novo PDF do CV enviado com sucesso para o Supabase Storage!");
+      showToast("Novo PDF do CV enviado com sucesso para o Supabase Storage!");
     } catch (err) {
       console.error("Falha ao subir CV PDF:", err);
       setCvUploadFeedback({
@@ -395,7 +395,7 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
         type: "success",
         message: `Imagem "${file.name}" carregada com sucesso!`
       });
-      showToast(res.cloud ? "☁️ Imagem enviada ao Supabase Storage!" : "💾 Imagem carregada (offline)!");
+      showToast(res.cloud ? "Imagem enviada ao Supabase Storage!" : "Imagem carregada (offline)!");
     } catch (err) {
       console.error("Falha ao subir imagem do desenho:", err);
       setDrawingUploadFeedback({
@@ -453,8 +453,8 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
     const res = await persistBatchOrder("drawings", reordered);
     showToast(
       res.cloud
-        ? "☁️ Ordem dos desenhos atualizada no Supabase!"
-        : "💾 Ordem dos desenhos atualizada localmente!"
+        ? "Ordem dos desenhos atualizada no Supabase!"
+        : "Ordem dos desenhos atualizada localmente!"
     );
   };
 
@@ -502,8 +502,8 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
     await persistBatchOrder("drawings", normalized);
     showToast(
       res.cloud
-        ? "☁️ Desenho salvo e ordem sincronizada no Supabase!"
-        : "💾 Desenho salvo localmente (offline)!"
+        ? "Desenho salvo e ordem sincronizada no Supabase!"
+        : "Desenho salvo localmente (offline)!"
     );
   };
 
@@ -848,8 +848,8 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
       const res = await persistExperience(expItem);
       showToast(
         res.cloud
-          ? "☁️ Experiência profissional salva no Supabase!"
-          : "💾 Experiência salva localmente (offline)!"
+          ? "Experiência profissional salva no Supabase!"
+          : "Experiência salva localmente (offline)!"
       );
       return;
     }
@@ -893,22 +893,22 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
       const res = await persistWork(updatedItem);
       showToast(
         res.cloud
-          ? "☁️ Projeto salvo e sincronizado no Supabase!"
-          : "💾 Projeto salvo localmente (offline)!"
+          ? "Projeto salvo e sincronizado no Supabase!"
+          : "Projeto salvo localmente (offline)!"
       );
     } else if (activeTab === "articles") {
       const res = await persistArticle(updatedItem);
       showToast(
         res.cloud
-          ? "☁️ Artigo técnico salvo no Supabase!"
-          : "💾 Artigo técnico salvo localmente (offline)!"
+          ? "Artigo técnico salvo no Supabase!"
+          : "Artigo técnico salvo localmente (offline)!"
       );
     } else {
       const res = await persistThought(updatedItem);
       showToast(
         res.cloud
-          ? "☁️ Pensamento salvo no Supabase!"
-          : "💾 Pensamento salvo localmente (offline)!"
+          ? "Pensamento salvo no Supabase!"
+          : "Pensamento salvo localmente (offline)!"
       );
     }
   };
@@ -918,8 +918,8 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
     const res = await persistAgentConfig(agentPrompt);
     showToast(
       res.cloud
-        ? "🤖 System Prompt salvo e sincronizado no Supabase!"
-        : "💾 Prompt do Agente salvo localmente!"
+        ? "System Prompt salvo e sincronizado no Supabase!"
+        : "Prompt do Agente salvo localmente!"
     );
   };
 
@@ -993,11 +993,11 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
       <nav className="admin-top-nav">
         <div className="nav-left">
           <div className="admin-badge" title="Status de persistência do banco">
-            {isSupabaseConfigured ? "🟢 Supabase Cloud" : "🟡 Modo Offline"}
+            {isSupabaseConfigured ? "Supabase Cloud" : "Modo Offline"}
           </div>
           {currentUser ? (
             <div style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "12px", color: "#8b949e", background: "#161b22", padding: "4px 10px", borderRadius: "6px", border: "1px solid #30363d" }}>
-              <span>👤 {currentUser.email}</span>
+              <span>{currentUser.email}</span>
               <button
                 type="button"
                 onClick={handleLogout}
@@ -1130,21 +1130,21 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
 
               <div className="architecture-specs-grid">
                 <div className="spec-card">
-                  <span className="spec-icon">☁️</span>
+                  <span className="spec-icon"></span>
                   <div>
                     <strong>Onde será hospedado</strong>
                     <p>Supabase Edge Functions (Deno Runtime com deploy na borda)</p>
                   </div>
                 </div>
                 <div className="spec-card">
-                  <span className="spec-icon">🛡️</span>
+                  <span className="spec-icon"></span>
                   <div>
                     <strong>Segurança de Chaves</strong>
                     <p>Secret <code>QWEN_API_KEY</code> isolado nos Secrets do Supabase</p>
                   </div>
                 </div>
                 <div className="spec-card">
-                  <span className="spec-icon">📡</span>
+                  <span className="spec-icon"></span>
                   <div>
                     <strong>Consumo de Informações</strong>
                     <p>Injeção direta do JSON de projetos, artigos e experiências no payload de contexto</p>
@@ -1155,7 +1155,7 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
 
             <div className="agent-card-section prompt-editor-section">
               <div className="agent-section-header">
-                <h3>📝 System Prompt do Agente (Rígido)</h3>
+                <h3>System Prompt do Agente (Rígido)</h3>
                 <div className="prompt-actions">
                   <button
                     type="button"
@@ -1183,7 +1183,7 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
                     className="btn-save-prompt"
                     onClick={handleSaveAgentPrompt}
                   >
-                    💾 Salvar Prompt
+                    Salvar Prompt
                   </button>
                 </div>
               </div>
@@ -1246,7 +1246,7 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
             <div className="cv-card-section">
               <div className="cv-section-header">
                 <div>
-                  <h2>📄 Gestão do Currículo (Dual-Mode)</h2>
+                  <h2>Gestão do Currículo (Dual-Mode)</h2>
                   <p className="cv-section-subtitle">
                     Configure os links do seu currículo. O visitante poderá escolher entre a versão interativa no <strong>Google Docs</strong> ou baixar o <strong>PDF Oficial</strong> diretamente pelo modal do Hero.
                   </p>
@@ -1259,7 +1259,7 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
               <form onSubmit={handleSaveCv} className="cv-form">
                 <div className="cv-form-group">
                   <label htmlFor="cv-docs-url">
-                    <span className="label-icon">🌐</span>
+                    <span className="label-icon"></span>
                     <strong>Versão Web Interativa (Google Docs)</strong>
                     <span className="cv-input-badge docs-badge">Sempre Atualizado</span>
                   </label>
@@ -1289,13 +1289,13 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
                     )}
                   </div>
                   <small className="cv-hint-note">
-                    💡 <em>Como obter:</em> No Google Docs &gt; Compartilhar &gt; Acesso Geral: &quot;Qualquer pessoa com o link&quot; (Leitor) &gt; Copiar link.
+                    <em>Como obter:</em> No Google Docs &gt; Compartilhar &gt; Acesso Geral: &quot;Qualquer pessoa com o link&quot; (Leitor) &gt; Copiar link.
                   </small>
                 </div>
 
                 <div className="cv-form-group">
                   <label htmlFor="cv-pdf-url">
-                    <span className="label-icon">📄</span>
+                    <span className="label-icon"></span>
                     <strong>Documento Oficial (Arquivo PDF)</strong>
                     <span className="cv-input-badge pdf-badge">Upload Direto / Supabase</span>
                   </label>
@@ -1327,7 +1327,7 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
                         </div>
                       ) : (
                         <>
-                          <div className="cv-dropzone-icon">📥</div>
+                          <div className="cv-dropzone-icon"></div>
                           <div className="cv-dropzone-text">
                             <strong>Arraste seu novo PDF aqui</strong> ou <u>clique para navegar</u>
                           </div>
@@ -1339,7 +1339,7 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
 
                   {cvUploadFeedback && (
                     <div className={`cv-upload-feedback-box ${cvUploadFeedback.type}`}>
-                      <span>{cvUploadFeedback.type === "success" ? "✅" : "⚠️"} {cvUploadFeedback.message}</span>
+                      <span>{cvUploadFeedback.message}</span>
                     </div>
                   )}
 
@@ -1366,13 +1366,13 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
                     )}
                   </div>
                   <small className="cv-hint-note">
-                    💡 <em>Link ativo:</em> Qualquer novo upload substitui o link anterior automaticamente no banco de dados e no portfólio.
+                    <em>Link ativo:</em> Qualquer novo upload substitui o link anterior automaticamente no banco de dados e no portfólio.
                   </small>
                 </div>
 
                 <div className="cv-form-group">
                   <label htmlFor="cv-updated-at">
-                    <span className="label-icon">📅</span>
+                    <span className="label-icon"></span>
                     <strong>Data da Última Atualização</strong>
                   </label>
                   <input
@@ -1389,7 +1389,7 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
 
                 <div className="cv-form-actions">
                   <button type="submit" className="btn-save-cv-primary">
-                    💾 Salvar Configurações do CV
+                    Salvar Configurações do CV
                   </button>
                   <button type="button" onClick={handleResetCv} className="btn-reset-cv-secondary">
                     ↺ Restaurar Padrões
@@ -1399,11 +1399,11 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
             </div>
 
             <div className="cv-info-card">
-              <h3>ℹ️ Fluxo de Experiência do Visitante</h3>
+              <h3>Fluxo de Experiência do Visitante</h3>
               <ul className="cv-flow-list">
                 <li>
                   <span className="step-num">1</span>
-                  <span>O visitante clica no botão <strong>&quot;📄 Download CV / Docs&quot;</strong> na tela inicial.</span>
+                  <span>O visitante clica no botão <strong>&quot;Download CV / Docs&quot;</strong> na tela inicial.</span>
                 </li>
                 <li>
                   <span className="step-num">2</span>
@@ -1473,7 +1473,7 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
 
                   <div className="cv-modal-footer">
                     <div className="cv-footer-hint">
-                      ℹ️ Atualizado em: <strong>{cvUpdatedAt || "Recente"}</strong> • Dual-Mode Docs &amp; PDF
+                      Atualizado em: <strong>{cvUpdatedAt || "Recente"}</strong> • Dual-Mode Docs &amp; PDF
                     </div>
                   </div>
                 </div>
@@ -1548,7 +1548,7 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
                             }}
                           />
                         ) : (
-                          <div className="drawing-card-thumb-placeholder">🖼️</div>
+                          <div className="drawing-card-thumb-placeholder"></div>
                         )}
                       </div>
                       <div className="drawing-card-info">
@@ -1600,7 +1600,7 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
                         }}
                         title="Excluir desenho da galeria"
                       >
-                        🗑
+                        ✕
                       </button>
                     </div>
                   );
@@ -1616,7 +1616,7 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
                 className="btn-reorder-link"
                 style={{ textDecoration: "none", display: "flex", alignItems: "center", justifyContent: "center", gap: "6px" }}
               >
-                👁️ Ver Galeria no Site ↗
+                Ver Galeria no Site ↗
               </a>
             </div>
           </aside>
@@ -1647,7 +1647,7 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
                     onClick={handleSaveDrawing}
                     className="btn-save-drawing-primary"
                   >
-                    💾 Salvar Desenho
+                    Salvar Desenho
                   </button>
                 </div>
               </div>
@@ -1657,7 +1657,7 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
                 {/* Form Column */}
                 <div className="drawings-form-card">
                   <div className="drawings-card-title">
-                    <span>✏️</span> Informações da Arte
+                    Informações da Arte
                   </div>
 
                   <form onSubmit={handleSaveDrawing}>
@@ -1689,7 +1689,7 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
                         onChange={(e) => setDrawingDescription(e.target.value)}
                       />
                       <small className="drawings-hint">
-                        💡 Exibido como legenda ao abrir o desenho no modo ampliado (lightbox).
+                        Exibido como legenda ao abrir o desenho no modo ampliado (lightbox).
                       </small>
                     </div>
 
@@ -1746,7 +1746,7 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
                           </div>
                         ) : (
                           <div className="dropzone-status">
-                            <span className="dropzone-icon">🖼️</span>
+                            <span className="dropzone-icon"></span>
                             <p className="dropzone-text">
                               <strong>Arraste e solte uma imagem aqui</strong> ou clique para selecionar
                             </p>
@@ -1759,7 +1759,7 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
 
                       {drawingUploadFeedback && (
                         <div className={`drawing-upload-msg ${drawingUploadFeedback.type}`}>
-                          {drawingUploadFeedback.type === "success" ? "✅" : "⚠️"} {drawingUploadFeedback.message}
+                          {drawingUploadFeedback.message}
                         </div>
                       )}
                     </div>
@@ -1805,7 +1805,7 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
 
                     <div className="drawings-form-actions">
                       <button type="submit" className="btn-save-drawing-primary">
-                        💾 Salvar Alterações
+                        Salvar Alterações
                       </button>
                       {selectedId && (
                         <button
@@ -1813,7 +1813,7 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
                           onClick={() => handleDeleteDrawing(selectedId)}
                           className="btn-delete-drawing-danger"
                         >
-                          🗑 Excluir Desenho
+                          Excluir Desenho
                         </button>
                       )}
                     </div>
@@ -1823,7 +1823,7 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
                 {/* Live Preview Column */}
                 <div className="drawings-preview-card">
                   <div className="drawings-card-title">
-                    <span>👁️</span> Prévia Idêntica ao Portfólio (/hobbies)
+                    Prévia Idêntica ao Portfólio (/hobbies)
                   </div>
                   <div className="drawings-preview-inner">
                     <p className="drawings-preview-explanation">
@@ -1845,7 +1845,7 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
                         </div>
                       ) : (
                         <div className="preview-empty-image">
-                          <span>🖼️</span>
+                          <span></span>
                           <p>Nenhuma imagem selecionada ainda.</p>
                           <small>Faça upload acima ou digite uma URL para visualizar a prévia.</small>
                         </div>
@@ -1857,7 +1857,7 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
                       <div className="preview-lightbox-header">
                         <span className="lightbox-badge">Prévia da Legenda</span>
                         <span className="lightbox-dimensions">
-                          {drawingIsPublished ? "🟢 Visível no site" : "🟡 Rascunho privado"}
+                          {drawingIsPublished ? "Visível no site" : "Rascunho privado"}
                         </span>
                       </div>
                       <h3 className="preview-lightbox-title">{drawingTitle || "Título da Obra"}</h3>
@@ -1955,7 +1955,7 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
                           }}
                           title="Excluir item"
                         >
-                          🗑
+                          ✕
                         </button>
                       </div>
                     </div>
@@ -1972,7 +1972,7 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
                   else window.location.href = "/draft-order";
                 }}
               >
-                🗂️ Organizar Ordem dos Cards
+                Organizar Ordem dos Cards
               </button>
             </div>
           </aside>
@@ -1984,7 +1984,7 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
                 <div style={{ background: "#161b22", border: "1px solid #30363d", borderRadius: "12px", padding: "24px", marginBottom: "28px", boxShadow: "0 4px 20px rgba(0,0,0,0.3)" }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
                     <h2 style={{ margin: 0, color: "#f0f6fc", fontSize: "20px", display: "flex", alignItems: "center", gap: "10px" }}>
-                      <span>💼</span> {selectedId ? "Editar Experiência Profissional" : "Nova Experiência"}
+                      {selectedId ? "Editar Experiência Profissional" : "Nova Experiência"}
                     </h2>
                     <div style={{ display: "flex", gap: "10px" }}>
                       <button
@@ -1999,7 +1999,7 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
                         onClick={handleSaveItem}
                         style={{ padding: "8px 18px", background: "#238636", color: "#fff", border: "none", borderRadius: "6px", fontWeight: "600", cursor: "pointer", fontSize: "14px", display: "flex", alignItems: "center", gap: "6px" }}
                       >
-                        💾 Salvar Experiência
+                        Salvar Experiência
                       </button>
                     </div>
                   </div>
@@ -2124,7 +2124,7 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
                       onClick={() => setShowRelationModal(true)}
                       title="Clique para anexar um artigo técnico a este projeto"
                     >
-                      🔗 {relatedArticleId ? `Artigo Anexo: ${getStoredArticles().find((a) => a.id === relatedArticleId)?.title.slice(0, 16) || "Vinculado"}...` : "Anexar Artigo"}
+                      {relatedArticleId ? `Artigo Anexo: ${getStoredArticles().find((a) => a.id === relatedArticleId)?.title.slice(0, 16) || "Vinculado"}...` : "Anexar Artigo"}
                     </button>
                   )}
 
@@ -2135,7 +2135,7 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
                       onClick={() => setShowRelationModal(true)}
                       title="Clique para anexar um projeto prático a este artigo"
                     >
-                      🔗 {relatedProjectId ? `Projeto Anexo: ${getStoredProjects().find((p) => p.id === relatedProjectId)?.title.slice(0, 16) || "Vinculado"}...` : "Anexar Projeto"}
+                      {relatedProjectId ? `Projeto Anexo: ${getStoredProjects().find((p) => p.id === relatedProjectId)?.title.slice(0, 16) || "Vinculado"}...` : "Anexar Projeto"}
                     </button>
                   )}
 
@@ -2145,7 +2145,7 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
                     onClick={() => setIsMetaOpen(!isMetaOpen)}
                     title="Configurar Categoria, Tags, Links, Google Docs/PDF e Sinopse"
                   >
-                    ⚙️ Propriedades {isMetaOpen ? "▲" : "▼"}
+                    Propriedades {isMetaOpen ? "▲" : "▼"}
                   </button>
 
                   <div className="template-picker">
@@ -2156,7 +2156,7 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
                         if (e.target.value) handleApplyTemplate(e.target.value);
                       }}
                     >
-                      <option value="">📋 Modelos...</option>
+                      <option value="">Modelos...</option>
                       {DOCUMENT_TEMPLATES.map((tpl) => (
                         <option key={tpl.id} value={tpl.id}>
                           {tpl.name}
@@ -2166,7 +2166,7 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
                   </div>
 
                   <button className="btn-save-document" onClick={handleSaveItem}>
-                    💾 Salvar
+                    Salvar
                   </button>
                 </div>
               </div>
@@ -2181,27 +2181,27 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
                         className={`source-btn ${contentType === "markdown" ? "active" : ""}`}
                         onClick={() => setContentType("markdown")}
                       >
-                        ✍️ Markdown & README
+                        Markdown & README
                       </button>
                       <button
                         type="button"
                         className={`source-btn ${contentType === "google-docs" ? "active" : ""}`}
                         onClick={() => setContentType("google-docs")}
                       >
-                        🌐 Google Docs Integrado
+                        Google Docs Integrado
                       </button>
                       <button
                         type="button"
                         className={`source-btn ${contentType === "pdf" ? "active" : ""}`}
                         onClick={() => setContentType("pdf")}
                       >
-                        📄 Documento PDF
+                        Documento PDF
                       </button>
                     </div>
 
                     {contentType === "google-docs" && (
                       <span className="source-hint">
-                        ✨ Artigos editados no Google Docs atualizam automaticamente no site!
+                        Artigos editados no Google Docs atualizam automaticamente no site!
                       </span>
                     )}
                   </div>
@@ -2209,7 +2209,7 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
                   {contentType === "google-docs" && (
                     <div className="external-source-card gdocs-source-card">
                       <div className="source-card-header">
-                        <strong>🌐 Link do Google Docs</strong>
+                        <strong>Link do Google Docs</strong>
                         <span className="card-subtext">Cole o link público de compartilhamento ou publicação</span>
                       </div>
                       <div className="source-input-row">
@@ -2236,7 +2236,7 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
                   {contentType === "pdf" && (
                     <div className="external-source-card pdf-source-card">
                       <div className="source-card-header">
-                        <strong>📄 Documento PDF (URL ou Arquivo)</strong>
+                        <strong>Documento PDF (URL ou Arquivo)</strong>
                         <span className="card-subtext">Insira o link direto ou caminho do arquivo PDF</span>
                       </div>
                       <div className="source-input-row">
@@ -2307,7 +2307,7 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
                   {/* Two-way attachment: Project <-> Article */}
                   {activeTab === "projects" && (
                     <div className="meta-attachment-row">
-                      <label>🔗 Anexar Artigo Técnico ao Projeto:</label>
+                      <label>Anexar Artigo Técnico ao Projeto:</label>
                       <div className="attachment-select-wrap">
                         <select
                           value={relatedArticleId}
@@ -2317,7 +2317,7 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
                           <option value="">Nenhum artigo vinculado</option>
                           {getStoredArticles().map((art) => (
                             <option key={art.id} value={art.id}>
-                              📑 {art.title}
+                              {art.title}
                             </option>
                           ))}
                         </select>
@@ -2337,7 +2337,7 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
 
                   {activeTab === "articles" && (
                     <div className="meta-attachment-row">
-                      <label>🔗 Anexar Projeto Prático ao Artigo:</label>
+                      <label>Anexar Projeto Prático ao Artigo:</label>
                       <div className="attachment-select-wrap">
                         <select
                           value={relatedProjectId}
@@ -2347,7 +2347,7 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
                           <option value="">Nenhum projeto vinculado</option>
                           {getStoredProjects().map((p) => (
                             <option key={p.id} value={p.id}>
-                              💻 {p.title}
+                              {p.title}
                             </option>
                           ))}
                         </select>
@@ -2469,7 +2469,7 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
                   title="Tarefa"
                   onClick={() => applyToolbarFormat("task-list")}
                 >
-                  ☑ Tarefa
+                  Tarefa
                 </button>
               </div>
 
@@ -2482,7 +2482,7 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
                   title="Citação"
                   onClick={() => applyToolbarFormat("quote")}
                 >
-                  ❝ Citação
+                  Citação
                 </button>
                 <button
                   type="button"
@@ -2490,7 +2490,7 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
                   title="Código"
                   onClick={() => applyToolbarFormat("code-block")}
                 >
-                  💻 Código
+                  Código
                 </button>
                 <button
                   type="button"
@@ -2498,7 +2498,7 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
                   title="Tabela"
                   onClick={() => applyToolbarFormat("table")}
                 >
-                  🗂️ Tabela
+                  Tabela
                 </button>
                 <button
                   type="button"
@@ -2514,7 +2514,7 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
                   title="Link"
                   onClick={() => applyToolbarFormat("link")}
                 >
-                  🔗 Link
+                  Link
                 </button>
                 <button
                   type="button"
@@ -2522,7 +2522,7 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
                   title="Imagem"
                   onClick={() => applyToolbarFormat("image")}
                 >
-                  🖼️ Imagem
+                  Imagem
                 </button>
               </div>
 
@@ -2535,7 +2535,7 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
                   onClick={() => setViewMode("editor")}
                   title="Apenas Editor"
                 >
-                  ✍️ Editor
+                  Editor
                 </button>
                 <button
                   type="button"
@@ -2543,7 +2543,7 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
                   onClick={() => setViewMode("split")}
                   title="Visualização Dividida"
                 >
-                  ⚖️ Dividido
+                  Dividido
                 </button>
                 <button
                   type="button"
@@ -2551,7 +2551,7 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
                   onClick={() => setViewMode("preview")}
                   title="Prévia Formatada"
                 >
-                  📖 Prévia
+                  Prévia
                 </button>
                 <button
                   type="button"
@@ -2559,7 +2559,7 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
                   onClick={() => setShowShortcutsModal(true)}
                   title="Atalhos"
                 >
-                  ⌨️ Atalhos
+                  Atalhos
                 </button>
               </div>
             </section>
@@ -2585,7 +2585,7 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
                   {contentType === "google-docs" && embedGoogleDocsUrl ? (
                     <div className="gdocs-live-frame-container">
                       <div className="live-frame-header">
-                        <span>🌐 Pré-visualização do Google Docs:</span>
+                        <span>Pré-visualização do Google Docs:</span>
                         <a
                           href={googleDocsUrl}
                           target="_blank"
@@ -2605,7 +2605,7 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
                   ) : contentType === "pdf" && pdfUrl ? (
                     <div className="pdf-live-frame-container">
                       <div className="live-frame-header">
-                        <span>📄 Pré-visualização do PDF:</span>
+                        <span>Pré-visualização do PDF:</span>
                         <a
                           href={pdfUrl}
                           target="_blank"
@@ -2661,7 +2661,7 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
         <div className="shortcuts-modal-overlay" onClick={() => setShowShortcutsModal(false)}>
           <div className="shortcuts-modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
-              <h3>⌨️ Atalhos de Teclado (Obsidian & Word Style)</h3>
+              <h3>Atalhos de Teclado (Obsidian & Word Style)</h3>
               <button className="btn-close-modal" onClick={() => setShowShortcutsModal(false)}>✕</button>
             </div>
             <div className="shortcuts-table">
@@ -2702,8 +2702,8 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
             <div className="modal-header">
               <h3>
                 {activeTab === "projects"
-                  ? `🔗 Anexar Artigo Técnico ao Projeto: "${title}"`
-                  : `🔗 Anexar Projeto Prático ao Artigo: "${title}"`}
+                  ? `Anexar Artigo Técnico ao Projeto: "${title}"`
+                  : `Anexar Projeto Prático ao Artigo: "${title}"`}
               </h3>
               <button className="btn-close-modal" onClick={() => setShowRelationModal(false)}>✕</button>
             </div>
@@ -2725,7 +2725,7 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
                     }}
                   >
                     <div className="relation-card-info">
-                      <strong>🚫 Nenhum artigo anexado</strong>
+                      <strong>Nenhum artigo anexado</strong>
                       <span>Este projeto não exibirá chamada para artigo técnico.</span>
                     </div>
                     {!relatedArticleId && <span className="relation-active-tag">Ativo</span>}
@@ -2741,11 +2741,11 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
                       }}
                     >
                       <div className="relation-card-info">
-                        <strong>📑 {art.title}</strong>
+                        <strong>{art.title}</strong>
                         <span>{art.shortDescription || art.aboutContext || "Sem descrição"}</span>
                       </div>
                       {relatedArticleId === art.id ? (
-                        <span className="relation-active-tag">✅ Vinculado</span>
+                        <span className="relation-active-tag">Vinculado</span>
                       ) : (
                         <button type="button" className="btn-select-relation">Vincular</button>
                       )}
@@ -2762,7 +2762,7 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
                     }}
                   >
                     <div className="relation-card-info">
-                      <strong>🚫 Nenhum projeto anexado</strong>
+                      <strong>Nenhum projeto anexado</strong>
                       <span>Este artigo não exibirá chamada para projeto prático.</span>
                     </div>
                     {!relatedProjectId && <span className="relation-active-tag">Ativo</span>}
@@ -2778,11 +2778,11 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
                       }}
                     >
                       <div className="relation-card-info">
-                        <strong>💻 {p.title}</strong>
+                        <strong>{p.title}</strong>
                         <span>{p.shortDescription || p.aboutContext || "Sem descrição"}</span>
                       </div>
                       {relatedProjectId === p.id ? (
-                        <span className="relation-active-tag">✅ Vinculado</span>
+                        <span className="relation-active-tag">Vinculado</span>
                       ) : (
                         <button type="button" className="btn-select-relation">Vincular</button>
                       )}

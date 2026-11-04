@@ -103,7 +103,7 @@ export default function ChatWidget() {
               <div className="chat-widget-avatar"><span>A</span></div>
               <div>
                 <h4 className="chat-widget-title">
-                  Alomyr <span>✦</span>
+                  Alomyr
                 </h4>
                 <p className="chat-widget-subtitle">
                   <span className="chat-widget-pulse-dot" style={{ width: 6, height: 6 }}></span>
@@ -185,8 +185,12 @@ export default function ChatWidget() {
                 className="chat-widget-send-btn"
                 disabled={!inputText.trim() || isTyping}
                 title={t("agent.send_title")}
+                aria-label="Send"
               >
-                ➤
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="22" y1="2" x2="11" y2="13"></line>
+                  <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                </svg>
               </button>
             </form>
           </div>
