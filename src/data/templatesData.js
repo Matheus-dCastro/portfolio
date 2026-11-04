@@ -4,14 +4,14 @@
 export const DOCUMENT_TEMPLATES = [
   {
     id: "ml-project",
-    name: "🧠 Projeto de Machine Learning / IA",
+    name: "Projeto de Machine Learning / IA",
     description: "Estrutura completa com formulação do problema, arquitetura de rede neural, pipeline de dados, métricas e avaliação.",
     category: "Acadêmico",
     defaultTags: "Deep Learning, Python, PyTorch, MLOps",
     defaultSummary: "Solução de inteligência artificial com pipeline ponta a ponta, desde a ingestão de dados até métricas quantitativas de inferência.",
     content: `# [Nome do Modelo / Projeto de IA]
 
-## 🎯 1. Visão Geral & Problema
+## 1. Visão Geral & Problema
 Descreva sucintamente o problema de negócio ou científico que este modelo busca resolver.
 - **Domínio:** [Ex: Visão Computacional / Processamento de Linguagem Natural]
 - **Objetivo Principal:** [Ex: Reduzir falsos positivos em 20%]
@@ -20,14 +20,14 @@ Descreva sucintamente o problema de negócio ou científico que este modelo busc
 
 ---
 
-## 🔬 2. Dataset & Pré-processamento
+## 2. Dataset & Pré-processamento
 - **Fonte de Dados:** [Nome da base ou URL do dataset]
 - **Volume:** [Quantidade de amostras, classes e proporção de treino/validação/teste]
 - **Tratamento:** Normalização, filtragem de ruído e ampliação (*Data Augmentation*).
 
 ---
 
-## 🏗️ 3. Arquitetura da Rede Neural
+## 3. Arquitetura da Rede Neural
 \`\`\`text
 [Input] -> [Encoder / Backbone] -> [Bottleneck] -> [Decoder com Skip Connections] -> [Output]
 \`\`\`
@@ -37,7 +37,7 @@ Descreva sucintamente o problema de negócio ou científico que este modelo busc
 
 ---
 
-## 📊 4. Resultados & Métricas Experimentais
+## 4. Resultados & Métricas Experimentais
 | Métrica | Benchmark / Baseline | Nosso Modelo | Ganho (%) |
 | :--- | :--- | :--- | :--- |
 | **Acurácia / F1-Score** | 82.4% | **91.8%** | +11.4% |
@@ -48,7 +48,7 @@ Descreva sucintamente o problema de negócio ou científico que este modelo busc
 
 ---
 
-##  5. Como Reproduzir e Executar
+## 5. Como Reproduzir e Executar
 \`\`\`bash
 # 1. Instale as dependências
 pip install -r requirements.txt
@@ -60,21 +60,21 @@ python run_inference.py --weights checkpoint_best.pth --input data/sample.png
   },
   {
     id: "backend-api",
-    name: "⚡ Projeto Backend & Engenharia de Software",
+    name: "Projeto Backend & Engenharia de Software",
     description: "Modelo focado em arquitetura de microsserviços, contratos de API, modelagem de banco de dados e boas práticas.",
     category: "Profissional",
     defaultTags: "FastAPI, PostgreSQL, Docker, Clean Architecture",
     defaultSummary: "Arquitetura backend resiliente orientada a serviços com validação rígida de tipos e persistência relacional transacional.",
     content: `# [Nome do Serviço ou Backend API]
 
-## 📌 1. Visão Geral do Sistema
+## 1. Visão Geral do Sistema
 Explique o papel deste serviço no ecossistema global de software.
 - **Protocolos:** RESTful HTTP/JSON e WebSockets assíncronos.
 - **Segurança:** Autenticação via JWT, limitação de taxa (*Rate Limiting*) e sanitização de requisições.
 
 ---
 
-## 🏛️ 2. Arquitetura de Software
+## 2. Arquitetura de Software
 Adota princípios da *Clean Architecture*:
 1. **Domain:** Entidades puras de negócio independentes de frameworks.
 2. **Use Cases:** Regras de orquestração de operações de dados.
@@ -83,7 +83,7 @@ Adota princípios da *Clean Architecture*:
 
 ---
 
-## 🗄️ 3. Modelo de Dados (PostgreSQL)
+## 3. Modelo de Dados (PostgreSQL)
 \`\`\`sql
 CREATE TABLE IF NOT EXISTS users (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -94,14 +94,14 @@ CREATE TABLE IF NOT EXISTS users (
 
 ---
 
-## 📡 4. Principais Endpoints da API
+## 4. Principais Endpoints da API
 - \`POST /api/v1/auth/token\` — Emissão e renovação de tokens JWT.
 - \`GET /api/v1/resources\` — Listagem paginada com suporte a filtros e ordenação dinâmica.
 - \`POST /api/v1/resources\` — Criação atômica de novo recurso validado.
 
 ---
 
-## 📦 5. Instalação e Execução
+## 5. Instalação e Execução
 \`\`\`bash
 # Configurar variáveis de ambiente
 cp .env.example .env
@@ -158,12 +158,12 @@ O estudo estabelece um novo patamar de eficiência para aplicações futuras no 
   },
   {
     id: "github-readme",
-    name: " README Completo de Repositório (Open Source)",
+    name: "README Completo de Repositório (Open Source)",
     description: "Modelo padrão da indústria para GitHub com badges, preview, funcionalidades, stack e instruções de contribuição.",
     category: "Profissional",
     defaultTags: "GitHub, Open Source, Documentação, README",
     defaultSummary: "README estruturado e persuasivo para valorizar o projeto e guiar desenvolvedores e recrutadores no GitHub.",
-    content: `# 🌟 [Nome do Projeto]
+    content: `# [Nome do Projeto]
 
 <p align="center">
   <img src="https://img.shields.io/badge/Status-Ativo-success?style=for-the-badge" alt="Status" />
@@ -175,15 +175,15 @@ O estudo estabelece um novo patamar de eficiência para aplicações futuras no 
 
 ---
 
-## 💡 Principais Funcionalidades
-- ⚡ **Alta Velocidade:** Processamento assíncrono projetado para mínima sobrecarga.
-- 🛡️ **Segurança por Padrão:** Sanitização rigorosa e validação de esquemas.
-- 🧩 **Design Modular:** Fácil extensão via plugins ou novos adaptadores.
-- 📊 **Métricas Transparentes:** Logs estruturados e métricas prontas para Prometheus.
+## Principais Funcionalidades
+- **Alta Velocidade:** Processamento assíncrono projetado para mínima sobrecarga.
+- **Segurança por Padrão:** Sanitização rigorosa e validação de esquemas.
+- **Design Modular:** Fácil extensão via plugins ou novos adaptadores.
+- **Métricas Transparentes:** Logs estruturados e métricas prontas para Prometheus.
 
 ---
 
-## 🛠️ Tecnologias Utilizadas
+## Tecnologias Utilizadas
 - **Linguagem Principal:** Python / C++ / TypeScript
 - **Framework:** FastAPI / PyTorch / React
 - **Banco de Dados:** PostgreSQL
@@ -191,7 +191,7 @@ O estudo estabelece um novo patamar de eficiência para aplicações futuras no 
 
 ---
 
-## ⚡ Início Rápido
+## Início Rápido
 \`\`\`bash
 # Clone este repositório
 git clone https://github.com/Matheus-dCastro/[nome-do-repo].git
@@ -205,7 +205,7 @@ npm install # ou pip install -r requirements.txt
 
 ---
 
-## 🤝 Como Contribuir
+## Como Contribuir
 Contribuições são muito bem-vindas!
 1. Faça um Fork do projeto.
 2. Crie uma branch para sua feature (\`git checkout -b feature/minha-feature\`).
@@ -214,13 +214,13 @@ Contribuições são muito bem-vindas!
 
 ---
 
-## 📜 Licença
+## Licença
 Distribuído sob a licença MIT. Consulte \`LICENSE\` para maiores detalhes.
 `
   },
   {
     id: "quick-tutorial",
-    name: "💡 Artigo de Tutorial Prático / How-to",
+    name: "Artigo de Tutorial Prático / How-to",
     description: "Passo a passo didático com blocos de código comentados, alertas e dicas de resolução de problemas comuns.",
     category: "Pessoal",
     defaultTags: "Tutorial, Dicas, Engenharia, Guia",
@@ -231,14 +231,14 @@ Neste guia direto ao ponto, você aprenderá exatamente como configurar e otimiz
 
 ---
 
-## 📋 Pré-requisitos
+## Pré-requisitos
 Antes de começar, certifique-se de ter instalado:
 - Ambiente configurado com a versão estável.
 - Conhecimentos básicos de terminal e Git.
 
 ---
 
-##  Passo 1: Configuração Inicial
+## Passo 1: Configuração Inicial
 O primeiro passo consiste em inicializar o ambiente isolado:
 \`\`\`bash
 mkdir meu-projeto && cd meu-projeto
@@ -247,7 +247,7 @@ git init
 
 ---
 
-## ⚙️ Passo 2: Implementando a Lógica Central
+## Passo 2: Implementando a Lógica Central
 Observe a função a seguir, projetada com tratamento de exceções:
 
 \`\`\`python
@@ -259,17 +259,17 @@ def process_data_stream(stream):
         yield chunk.transform()
 \`\`\`
 
-> 💡 **Dica de Performance:** Utilize geradores (\`yield\`) sempre que manipular grandes volumes para evitar saturação de memória RAM.
+> **Dica de Performance:** Utilize geradores (\`yield\`) sempre que manipular grandes volumes para evitar saturação de memória RAM.
 
 ---
 
-## 🎯 Conclusão
+## Conclusão
 Com esses passos, sua implementação está pronta para operar com estabilidade e previsibilidade.
 `
   },
   {
     id: "study-thought",
-    name: "💭 Nota de Estudo & Pensamento (Obsidian Style)",
+    name: "Nota de Estudo & Pensamento (Obsidian Style)",
     description: "Modelo minimalista e ágil para catalogar pensamentos profundos, resumos conceituais e conexões interdisciplinares.",
     category: "Pessoal",
     defaultTags: "Pensamento, Filosofia, Arquitetura, Aprendizado",

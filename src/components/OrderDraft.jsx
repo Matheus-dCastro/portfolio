@@ -258,7 +258,7 @@ export default function OrderDraft({ onBackToHome, onOpenProjectDetail, onNaviga
             }}
             title="Ir para o editor de conteúdo e assistente IA"
           >
-            ✍️ Editor & Agente
+            Editor & Agente
           </button>
           <button
             type="button"
@@ -266,7 +266,7 @@ export default function OrderDraft({ onBackToHome, onOpenProjectDetail, onNaviga
             onClick={() => setPreviewMode(!previewMode)}
             title="Alternar entre modo de edição e visualização final sem controles"
           >
-            {previewMode ? "✏️ Modo Organização" : "👁️ Modo Vitrine Final"}
+            {previewMode ? "Modo Organização" : "Modo Vitrine Final"}
           </button>
           <button className="reset-order-btn" onClick={handleResetOrder}>
             ↺ Restaurar Padrão
@@ -287,19 +287,19 @@ export default function OrderDraft({ onBackToHome, onOpenProjectDetail, onNaviga
             className={`order-tab-btn ${activeTab === "projects" ? "active" : ""}`}
             onClick={() => handleTabChange("projects")}
           >
-            <span>💻</span> Projetos ({items.length})
+            Projetos ({items.length})
           </button>
           <button
             className={`order-tab-btn ${activeTab === "articles" ? "active" : ""}`}
             onClick={() => handleTabChange("articles")}
           >
-            <span>📑</span> Artigos Técnicos
+            Artigos Técnicos
           </button>
           <button
             className={`order-tab-btn ${activeTab === "thoughts" ? "active" : ""}`}
             onClick={() => handleTabChange("thoughts")}
           >
-            <span>💭</span> Pensamentos & Insights
+            Pensamentos & Insights
           </button>
         </div>
 
@@ -331,7 +331,7 @@ export default function OrderDraft({ onBackToHome, onOpenProjectDetail, onNaviga
       {/* Guide Banner */}
       {!previewMode && (
         <div className="order-hint-banner">
-          <div className="hint-icon">💡</div>
+          <div className="hint-icon"></div>
           <div className="hint-text">
             <strong>Organização Separada por Sessões:</strong> Os itens estão agora
             agrupados nas 3 sessões (<strong>Profissional</strong>, <strong>Pessoal</strong> e <strong>Acadêmico</strong>).

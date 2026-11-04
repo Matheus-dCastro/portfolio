@@ -14,14 +14,14 @@ export const FALLBACK_MODEL = "openai/gpt-oss-120b";
 
 export const DEFAULT_SYSTEM_PROMPT = `Você é o Alomyr, o Assistente Oficial de Inteligência Artificial do portfólio de Matheus de Castro (You are Alomyr, the official AI Assistant of Matheus de Castro's portfolio).
 
-## 🎯 SEU PAPEL E OBJETIVO / YOUR ROLE AND GOAL
+## SEU PAPEL E OBJETIVO / YOUR ROLE AND GOAL
 Seu objetivo é orientar visitantes, recrutadores, pesquisadores e parceiros técnicos, apresentando com clareza as qualificações, projetos, publicações e competências técnicas de Matheus de Castro nas áreas de:
 - Machine Learning Engineering & Deep Learning (PyTorch, Computer Vision, U-Net, Data Analysis)
 - Arquitetura de Backend & Engenharia de Software (Python, FastAPI, PostgreSQL, Docker, RESTful APIs)
 - Automação de Fluxos de Trabalho Inteligentes & DevOps (n8n, Linux Ubuntu Server, Bash, CI/CD)
 - Formação Acadêmica: Bacharelado em Tecnologia da Informação (BTI) na UFRN e Técnico em TI pelo IFRN.
 
-## 🛡️ DIRETRIZES DE COMPORTAMENTO
+## DIRETRIZES DE COMPORTAMENTO
 1. IDENTIDADE: Seu nome é Alomyr. Apresente-se sempre como Alomyr.
 2. IDIOMA / LANGUAGE: Responda fluente e naturalmente no idioma utilizado pelo usuário (inglês ou português).
 3. ESCOPO FECHADO: Responda APENAS sobre a trajetória acadêmica, profissional, projetos, artigos e competências de Matheus de Castro.
@@ -43,7 +43,7 @@ export function buildPortfolioContext() {
   let context = "\n\n### BASE DE CONHECIMENTO OFICIAL DE MATHEUS DE CASTRO:\n\n";
 
   // Perfil e Formação
-  context += "#### 👤 PERFIL & FORMAÇÃO:\n";
+  context += "#### PERFIL & FORMAÇÃO:\n";
   context += "- Nome: Matheus de Castro\n";
   context += "- Formação: Bacharelando em Tecnologia da Informação (BTI) na UFRN (Universidade Federal do Rio Grande do Norte) e Técnico em TI pelo IFRN.\n";
   context += "- Foco: Machine Learning, Deep Learning (PyTorch), Backend Python (FastAPI/PostgreSQL) e Automações Linux/n8n.\n";
@@ -53,7 +53,7 @@ export function buildPortfolioContext() {
 
   // Experiências
   if (experiences.length > 0) {
-    context += "#### 💼 EXPERIÊNCIAS PROFISSIONAIS:\n";
+    context += "#### EXPERIÊNCIAS PROFISSIONAIS:\n";
     experiences.forEach((exp) => {
       context += `- ${exp.title} na ${exp.company} (${exp.time}):\n`;
       if (Array.isArray(exp.bullets)) {
@@ -67,7 +67,7 @@ export function buildPortfolioContext() {
 
   // Projetos
   if (projects.length > 0) {
-    context += "#### 💻 PROJETOS NO PORTFÓLIO:\n";
+    context += "#### PROJETOS NO PORTFÓLIO:\n";
     projects.forEach((proj) => {
       context += `- Projeto "${proj.title}" [${proj.category}]:\n`;
       context += `  * Resumo: ${proj.shortDescription || proj.aboutContext || "Sem resumo"}\n`;
@@ -82,7 +82,7 @@ export function buildPortfolioContext() {
 
   // Artigos
   if (articles.length > 0) {
-    context += "#### 📑 ARTIGOS & PUBLICAÇÕES:\n";
+    context += "#### ARTIGOS & PUBLICAÇÕES:\n";
     articles.forEach((art) => {
       context += `- Artigo "${art.title}" [${art.category}]:\n`;
       context += `  * Resumo: ${art.shortDescription || art.aboutContext || "Sem resumo"}\n`;
@@ -93,7 +93,7 @@ export function buildPortfolioContext() {
   }
 
   // Currículo
-  context += "#### 📄 CURRÍCULO (DUAL-MODE):\n";
+  context += "#### CURRÍCULO (DUAL-MODE):\n";
   context += `- Versão Interativa Google Docs: ${cvConfig.googleDocsUrl || "Disponível no site"}\n`;
   context += `- Documento Oficial PDF: ${cvConfig.pdfUrl || "Disponível para download no Hero"}\n`;
   context += `- Data de atualização: ${cvConfig.updatedAt || "Recente"}\n`;

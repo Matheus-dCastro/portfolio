@@ -175,7 +175,7 @@ export const translations = {
     // AI Agent - Alomyr
     "agent.name": "Alomyr",
     "agent.title": "Alomyr",
-    "agent.subtitle": "AI Assistant • Groq",
+    "agent.subtitle": "AI Assistant",
     "agent.trigger_btn": "Ask Alomyr (AI)",
     "agent.trigger_title": "Open Matheus de Castro's AI Assistant (Alomyr)",
     "agent.close_title": "Close chat",
@@ -367,8 +367,8 @@ export const translations = {
     // AI Agent - Alomyr
     "agent.name": "Alomyr",
     "agent.title": "Alomyr",
-    "agent.subtitle": "AI Assistant • Groq",
-    "agent.trigger_btn": "Ask Alomyr (AI)",
+    "agent.subtitle": "AI Assistant",
+    "agent.trigger_btn": "Pergunte ao Alomyr (AI)",
     "agent.trigger_title": "Abrir Assistente de IA de Matheus de Castro (Alomyr)",
     "agent.close_title": "Fechar chat",
     "agent.user_tag": "Você",
