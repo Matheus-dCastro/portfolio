@@ -584,3 +584,12 @@ Na engenharia de software e no treinamento de redes neurais, o princípio é id�
 ',
     updated_at = timezone('utc'::text, now())
 WHERE id = 'th-1';
+
+-- 4. ATUALIZAÇÃO DA TABELA 'cv_configs'
+UPDATE public.cv_configs
+SET
+    google_docs_url = 'https://docs.google.com/document/d/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms/edit?usp=sharing <!-- BILINGUAL_SPLIT --> https://docs.google.com/document/d/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms/edit?usp=sharing',
+    pdf_url = '/Matheus Vinicius Silva Freire de Castro.pdf <!-- BILINGUAL_SPLIT --> /Matheus Vinicius Silva Freire de Castro.pdf',
+    updated_at = timezone('utc'::text, now())
+WHERE id = 'production';
+

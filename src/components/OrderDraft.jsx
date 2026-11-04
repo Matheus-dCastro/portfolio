@@ -319,7 +319,7 @@ export default function OrderDraft({ onBackToHome, onOpenProjectDetail, onNaviga
           />
           {searchQuery && (
             <button className="clear-search-btn" onClick={() => setSearchQuery("")}>
-              ✕
+              &times;
             </button>
           )}
         </div>
@@ -412,7 +412,7 @@ export default function OrderDraft({ onBackToHome, onOpenProjectDetail, onNaviga
                         <div className="card-position-badge">
                           <span className="position-number">#{catIdx + 1} na Sessão</span>
                           {catIdx === 0 && (
-                            <span className="featured-tag">★ Destaque</span>
+                            <span className="featured-tag">Destaque</span>
                           )}
                         </div>
 

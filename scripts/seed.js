@@ -117,10 +117,18 @@ async function runSeed() {
 
   // 5. Inserir CV Config
   console.log("\n[SEED] Inserindo Configuracoes de Curriculo (CV)...");
+  const docsToSave = (DEFAULT_CV_CONFIG.googleDocsUrlEn && DEFAULT_CV_CONFIG.googleDocsUrlPt && DEFAULT_CV_CONFIG.googleDocsUrlEn !== DEFAULT_CV_CONFIG.googleDocsUrlPt)
+    ? `${DEFAULT_CV_CONFIG.googleDocsUrlEn.trim()} <!-- BILINGUAL_SPLIT --> ${DEFAULT_CV_CONFIG.googleDocsUrlPt.trim()}`
+    : (DEFAULT_CV_CONFIG.googleDocsUrlEn || DEFAULT_CV_CONFIG.googleDocsUrl || "");
+
+  const pdfToSave = (DEFAULT_CV_CONFIG.pdfUrlEn && DEFAULT_CV_CONFIG.pdfUrlPt && DEFAULT_CV_CONFIG.pdfUrlEn !== DEFAULT_CV_CONFIG.pdfUrlPt)
+    ? `${DEFAULT_CV_CONFIG.pdfUrlEn.trim()} <!-- BILINGUAL_SPLIT --> ${DEFAULT_CV_CONFIG.pdfUrlPt.trim()}`
+    : (DEFAULT_CV_CONFIG.pdfUrlEn || DEFAULT_CV_CONFIG.pdfUrl || "");
+
   const { error: cvError } = await client.from("cv_configs").upsert({
     id: "production",
-    google_docs_url: DEFAULT_CV_CONFIG.googleDocsUrl,
-    pdf_url: DEFAULT_CV_CONFIG.pdfUrl,
+    google_docs_url: docsToSave,
+    pdf_url: pdfToSave,
     updated_at: new Date().toISOString()
   }, { onConflict: "id" });
   if (cvError) {

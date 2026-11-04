@@ -615,10 +615,32 @@ export async function fetchCvConfig() {
         .maybeSingle();
 
       if (!error && data) {
+        let docsEn = data.google_docs_url || "";
+        let docsPt = data.google_docs_url || "";
+        if (data.google_docs_url && data.google_docs_url.includes(BILINGUAL_SPLIT)) {
+          const parts = data.google_docs_url.split(BILINGUAL_SPLIT);
+          docsEn = parts[0].trim();
+          docsPt = parts[1].trim();
+        }
+
+        let pdfEn = data.pdf_url || "";
+        let pdfPt = data.pdf_url || "";
+        if (data.pdf_url && data.pdf_url.includes(BILINGUAL_SPLIT)) {
+          const parts = data.pdf_url.split(BILINGUAL_SPLIT);
+          pdfEn = parts[0].trim();
+          pdfPt = parts[1].trim();
+        }
+
+        const existing = getStoredCvConfig();
         const config = {
-          googleDocsUrl: data.google_docs_url || "",
-          pdfUrl: data.pdf_url || "",
-          updatedAt: data.updated_at ? data.updated_at.split("T")[0] : ""
+          ...existing,
+          googleDocsUrl: docsEn || existing.googleDocsUrl,
+          googleDocsUrlEn: docsEn || existing.googleDocsUrlEn || existing.googleDocsUrl,
+          googleDocsUrlPt: docsPt || existing.googleDocsUrlPt || existing.googleDocsUrl,
+          pdfUrl: pdfEn || existing.pdfUrl,
+          pdfUrlEn: pdfEn || existing.pdfUrlEn || existing.pdfUrl,
+          pdfUrlPt: pdfPt || existing.pdfUrlPt || existing.pdfUrl,
+          updatedAt: data.updated_at ? data.updated_at.split("T")[0] : existing.updatedAt
         };
         saveCvConfig(config);
         return config;
@@ -865,11 +887,19 @@ export async function persistCvConfig(config) {
 
   if (isSupabaseConfigured && supabase) {
     try {
+      const docsToSave = (config.googleDocsUrlEn && config.googleDocsUrlPt && config.googleDocsUrlEn !== config.googleDocsUrlPt)
+        ? `${config.googleDocsUrlEn.trim()} ${BILINGUAL_SPLIT} ${config.googleDocsUrlPt.trim()}`
+        : (config.googleDocsUrlEn || config.googleDocsUrl || "");
+
+      const pdfToSave = (config.pdfUrlEn && config.pdfUrlPt && config.pdfUrlEn !== config.pdfUrlPt)
+        ? `${config.pdfUrlEn.trim()} ${BILINGUAL_SPLIT} ${config.pdfUrlPt.trim()}`
+        : (config.pdfUrlEn || config.pdfUrl || "");
+
       const { error } = await supabase.from("cv_configs").upsert(
         {
           id: "production",
-          google_docs_url: config.googleDocsUrl,
-          pdf_url: config.pdfUrl,
+          google_docs_url: docsToSave,
+          pdf_url: pdfToSave,
           updated_at: new Date().toISOString()
         },
         { onConflict: "id" }
@@ -886,19 +916,21 @@ export async function persistCvConfig(config) {
 
 /**
  * Faz upload do arquivo PDF do CV diretamente para o bucket "documents" do Supabase Storage.
- * Atualiza automaticamente a tabela cv_configs com a URL pública gerada.
+ * Atualiza automaticamente a tabela cv_configs com a URL pública gerada para o idioma correspondente.
  */
-export async function uploadCvPdf(file) {
+export async function uploadCvPdf(file, lang = "en") {
   if (!file) throw new Error("Nenhum arquivo fornecido.");
   const isPdf = file.name?.toLowerCase().endsWith(".pdf") || file.type === "application/pdf";
   if (!isPdf) {
     throw new Error("Formato inválido. Apenas arquivos PDF (.pdf) são permitidos para o Currículo.");
   }
 
+  const cleanLang = (lang === "pt" ? "pt" : "en");
+
   if (isSupabaseConfigured && supabase) {
     const timestamp = Date.now();
-    const cleanName = (file.name || "curriculo.pdf").replace(/[^a-zA-Z0-9._-]/g, "_");
-    const filePath = `cv/${timestamp}-${cleanName}`;
+    const cleanName = (file.name || `curriculo_${cleanLang}.pdf`).replace(/[^a-zA-Z0-9._-]/g, "_");
+    const filePath = `cv/${timestamp}-${cleanLang}-${cleanName}`;
 
     const { error: uploadError } = await supabase.storage
       .from("documents")
@@ -926,21 +958,23 @@ export async function uploadCvPdf(file) {
     const updatedConfig = {
       ...currentConfig,
       pdfUrl: publicUrl,
+      [cleanLang === "pt" ? "pdfUrlPt" : "pdfUrlEn"]: publicUrl,
       updatedAt: new Date().toISOString().split("T")[0]
     };
 
     await persistCvConfig(updatedConfig);
-    return { success: true, publicUrl, config: updatedConfig, cloud: true };
+    return { success: true, publicUrl, config: updatedConfig, cloud: true, lang: cleanLang };
   } else {
     const localUrl = URL.createObjectURL(file);
     const currentConfig = getStoredCvConfig();
     const updatedConfig = {
       ...currentConfig,
       pdfUrl: localUrl,
+      [cleanLang === "pt" ? "pdfUrlPt" : "pdfUrlEn"]: localUrl,
       updatedAt: new Date().toISOString().split("T")[0]
     };
     saveCvConfig(updatedConfig);
-    return { success: true, publicUrl: localUrl, config: updatedConfig, cloud: false };
+    return { success: true, publicUrl: localUrl, config: updatedConfig, cloud: false, lang: cleanLang };
   }
 }
 

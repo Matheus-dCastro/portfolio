@@ -126,14 +126,22 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
     { sender: "bot", text: "Olá! Sou o assistente de IA do Matheus. Como posso ajudar com os projetos ou currículo?" }
   ]);
 
-  // CV Dual-Mode States (Google Docs & PDF)
-  const [cvGoogleDocsUrl, setCvGoogleDocsUrl] = useState(() => getStoredCvConfig().googleDocsUrl);
-  const [cvPdfUrl, setCvPdfUrl] = useState(() => getStoredCvConfig().pdfUrl);
+  // CV Dual-Mode Bilingual States (Google Docs & PDF for EN and PT)
+  const [cvActiveLang, setCvActiveLang] = useState("en"); // 'en' | 'pt'
+  const [cvGoogleDocsUrlEn, setCvGoogleDocsUrlEn] = useState(() => getStoredCvConfig().googleDocsUrlEn || getStoredCvConfig().googleDocsUrl || "");
+  const [cvGoogleDocsUrlPt, setCvGoogleDocsUrlPt] = useState(() => getStoredCvConfig().googleDocsUrlPt || getStoredCvConfig().googleDocsUrl || "");
+  const [cvPdfUrlEn, setCvPdfUrlEn] = useState(() => getStoredCvConfig().pdfUrlEn || getStoredCvConfig().pdfUrl || "");
+  const [cvPdfUrlPt, setCvPdfUrlPt] = useState(() => getStoredCvConfig().pdfUrlPt || getStoredCvConfig().pdfUrl || "");
   const [cvUpdatedAt, setCvUpdatedAt] = useState(() => getStoredCvConfig().updatedAt || new Date().toISOString().split("T")[0]);
-  const [isUploadingCvPdf, setIsUploadingCvPdf] = useState(false);
-  const [isDraggingCvPdf, setIsDraggingCvPdf] = useState(false);
-  const [cvUploadFeedback, setCvUploadFeedback] = useState(null);
-  const cvFileInputRef = useRef(null);
+  const [isUploadingCvPdfEn, setIsUploadingCvPdfEn] = useState(false);
+  const [isUploadingCvPdfPt, setIsUploadingCvPdfPt] = useState(false);
+  const [isDraggingCvPdfEn, setIsDraggingCvPdfEn] = useState(false);
+  const [isDraggingCvPdfPt, setIsDraggingCvPdfPt] = useState(false);
+  const [cvUploadFeedbackEn, setCvUploadFeedbackEn] = useState(null);
+  const [cvUploadFeedbackPt, setCvUploadFeedbackPt] = useState(null);
+  const [cvPreviewLang, setCvPreviewLang] = useState("en");
+  const cvFileInputEnRef = useRef(null);
+  const cvFileInputPtRef = useRef(null);
 
   // Drawings states
   const [drawingTitle, setDrawingTitle] = useState("");
@@ -182,8 +190,10 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
     } else if (activeTab === "cv") {
       fetchCvConfig().then((cfg) => {
         if (cfg) {
-          setCvGoogleDocsUrl(cfg.googleDocsUrl || "");
-          setCvPdfUrl(cfg.pdfUrl || "");
+          setCvGoogleDocsUrlEn(cfg.googleDocsUrlEn || cfg.googleDocsUrl || "");
+          setCvGoogleDocsUrlPt(cfg.googleDocsUrlPt || cfg.googleDocsUrl || "");
+          setCvPdfUrlEn(cfg.pdfUrlEn || cfg.pdfUrl || "");
+          setCvPdfUrlPt(cfg.pdfUrlPt || cfg.pdfUrl || "");
           setCvUpdatedAt(cfg.updatedAt || "");
         }
       });
@@ -333,36 +343,49 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
 
   const handleSaveCv = async (e) => {
     if (e) e.preventDefault();
-    const cleanDocs = cvGoogleDocsUrl.trim();
-    const cleanPdf = cvPdfUrl.trim();
+    const cleanDocsEn = cvGoogleDocsUrlEn.trim();
+    const cleanDocsPt = cvGoogleDocsUrlPt.trim();
+    const cleanPdfEn = cvPdfUrlEn.trim();
+    const cleanPdfPt = cvPdfUrlPt.trim();
     const newConfig = {
-      googleDocsUrl: cleanDocs,
-      pdfUrl: cleanPdf,
+      googleDocsUrlEn: cleanDocsEn,
+      googleDocsUrlPt: cleanDocsPt,
+      googleDocsUrl: cleanDocsEn || cleanDocsPt,
+      pdfUrlEn: cleanPdfEn,
+      pdfUrlPt: cleanPdfPt,
+      pdfUrl: cleanPdfEn || cleanPdfPt,
       updatedAt: cvUpdatedAt || new Date().toISOString().split("T")[0]
     };
     const res = await persistCvConfig(newConfig);
     showToast(
       res.cloud
-        ? "Configurações do Currículo sincronizadas no Supabase!"
-        : "Configurações do Currículo salvas localmente (offline)!"
+        ? "Configurações bilíngues do Currículo sincronizadas no Supabase!"
+        : "Configurações bilíngues do Currículo salvas localmente (offline)!"
     );
   };
 
   const handleResetCv = () => {
     if (window.confirm("Deseja restaurar as configurações padrão do currículo?")) {
       saveCvConfig(DEFAULT_CV_CONFIG);
-      setCvGoogleDocsUrl(DEFAULT_CV_CONFIG.googleDocsUrl);
-      setCvPdfUrl(DEFAULT_CV_CONFIG.pdfUrl);
+      setCvGoogleDocsUrlEn(DEFAULT_CV_CONFIG.googleDocsUrlEn);
+      setCvGoogleDocsUrlPt(DEFAULT_CV_CONFIG.googleDocsUrlPt);
+      setCvPdfUrlEn(DEFAULT_CV_CONFIG.pdfUrlEn);
+      setCvPdfUrlPt(DEFAULT_CV_CONFIG.pdfUrlPt);
       setCvUpdatedAt(DEFAULT_CV_CONFIG.updatedAt);
       showToast("Configurações do currículo restauradas para o padrão.");
     }
   };
 
-  const handleProcessCvFile = async (file) => {
+  const handleProcessCvFile = async (file, targetLang = cvActiveLang) => {
     if (!file) return;
     const isPdf = file.name?.toLowerCase().endsWith(".pdf") || file.type === "application/pdf";
+    const isEn = targetLang === "en";
+    const setFeedback = isEn ? setCvUploadFeedbackEn : setCvUploadFeedbackPt;
+    const setUploading = isEn ? setIsUploadingCvPdfEn : setIsUploadingCvPdfPt;
+    const setPdfUrl = isEn ? setCvPdfUrlEn : setCvPdfUrlPt;
+
     if (!isPdf) {
-      setCvUploadFeedback({
+      setFeedback({
         type: "error",
         message: "Apenas arquivos em formato PDF (.pdf) são permitidos para o Currículo."
       });
@@ -370,55 +393,58 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
     }
 
     try {
-      setIsUploadingCvPdf(true);
-      setCvUploadFeedback(null);
-      const res = await uploadCvPdf(file);
-      setCvPdfUrl(res.publicUrl);
+      setUploading(true);
+      setFeedback(null);
+      const res = await uploadCvPdf(file, targetLang);
+      setPdfUrl(res.publicUrl);
       if (res.config?.updatedAt) {
         setCvUpdatedAt(res.config.updatedAt);
       }
-      setCvUploadFeedback({
+      setFeedback({
         type: "success",
-        message: `Novo PDF "${file.name}" enviado com sucesso ao Supabase Storage e vinculado!`
+        message: `Novo PDF em ${isEn ? "Inglês" : "Português"} "${file.name}" enviado com sucesso!`
       });
-      showToast("Novo PDF do CV enviado com sucesso para o Supabase Storage!");
+      showToast(`Novo PDF do CV (${isEn ? "EN" : "PT"}) enviado com sucesso!`);
     } catch (err) {
       console.error("Falha ao subir CV PDF:", err);
-      setCvUploadFeedback({
+      setFeedback({
         type: "error",
         message: err.message || "Erro ao enviar o PDF para o Supabase Storage."
       });
     } finally {
-      setIsUploadingCvPdf(false);
+      setUploading(false);
     }
   };
 
-  const handleCvDragOver = (e) => {
+  const handleCvDragOver = (e, targetLang = "en") => {
     e.preventDefault();
     e.stopPropagation();
-    setIsDraggingCvPdf(true);
+    if (targetLang === "en") setIsDraggingCvPdfEn(true);
+    else setIsDraggingCvPdfPt(true);
   };
 
-  const handleCvDragLeave = (e) => {
+  const handleCvDragLeave = (e, targetLang = "en") => {
     e.preventDefault();
     e.stopPropagation();
-    setIsDraggingCvPdf(false);
+    if (targetLang === "en") setIsDraggingCvPdfEn(false);
+    else setIsDraggingCvPdfPt(false);
   };
 
-  const handleCvDrop = (e) => {
+  const handleCvDrop = (e, targetLang = "en") => {
     e.preventDefault();
     e.stopPropagation();
-    setIsDraggingCvPdf(false);
+    if (targetLang === "en") setIsDraggingCvPdfEn(false);
+    else setIsDraggingCvPdfPt(false);
     const files = e.dataTransfer?.files;
     if (files && files.length > 0) {
-      handleProcessCvFile(files[0]);
+      handleProcessCvFile(files[0], targetLang);
     }
   };
 
-  const handleCvFileInputChange = (e) => {
+  const handleCvFileInputChange = (e, targetLang = "en") => {
     const files = e.target.files;
     if (files && files.length > 0) {
-      handleProcessCvFile(files[0]);
+      handleProcessCvFile(files[0], targetLang);
     }
   };
 
@@ -1355,129 +1381,252 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
             <div className="cv-card-section">
               <div className="cv-section-header">
                 <div>
-                  <h2>Gestão do Currículo (Dual-Mode)</h2>
+                  <h2>Gestão do Currículo Bilíngue (EN / PT)</h2>
                   <p className="cv-section-subtitle">
-                    Configure os links do seu currículo. O visitante poderá escolher entre a versão interativa no <strong>Google Docs</strong> ou baixar o <strong>PDF Oficial</strong> diretamente pelo modal do Hero.
+                    Configure os links e envie os PDFs do seu currículo em <strong>Inglês</strong> e em <strong>Português</strong>. O visitante será direcionado diretamente ao formato correspondente ao idioma ativo no site.
                   </p>
                 </div>
                 <div className="cv-status-badge">
-                  <span className="cv-status-dot"></span> Ativo no Portfólio
+                  <span className="cv-status-dot"></span> Suporte Bilíngue Ativo
                 </div>
               </div>
 
+              {/* Language Switcher for CV Editor */}
+              <div className="admin-lang-switcher" style={{ marginBottom: "20px" }}>
+                <button
+                  type="button"
+                  className={`admin-lang-btn ${cvActiveLang === "en" ? "active" : ""}`}
+                  onClick={() => setCvActiveLang("en")}
+                >
+                  EN (English Resume)
+                </button>
+                <button
+                  type="button"
+                  className={`admin-lang-btn ${cvActiveLang === "pt" ? "active" : ""}`}
+                  onClick={() => setCvActiveLang("pt")}
+                >
+                  PT (Currículo em Português)
+                </button>
+              </div>
+
               <form onSubmit={handleSaveCv} className="cv-form">
-                <div className="cv-form-group">
-                  <label htmlFor="cv-docs-url">
-                    <span className="label-icon"></span>
-                    <strong>Versão Web Interativa (Google Docs)</strong>
-                    <span className="cv-input-badge docs-badge">Sempre Atualizado</span>
-                  </label>
-                  <p className="cv-field-hint">
-                    Link público do seu currículo no Google Docs. Permite que recrutadores leiam imediatamente no navegador sem precisar baixar nada.
-                  </p>
-                  <div className="cv-input-with-action">
-                    <input
-                      id="cv-docs-url"
-                      type="url"
-                      className="cv-input"
-                      placeholder="https://docs.google.com/document/d/.../edit?usp=sharing"
-                      value={cvGoogleDocsUrl}
-                      onChange={(e) => setCvGoogleDocsUrl(e.target.value)}
-                      required
-                    />
-                    {cvGoogleDocsUrl && (
-                      <a
-                        href={cvGoogleDocsUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="cv-action-test-btn docs-btn"
-                        title="Abrir no Google Docs em nova aba"
+                {cvActiveLang === "en" ? (
+                  <>
+                    <div className="cv-form-group">
+                      <label htmlFor="cv-docs-url-en">
+                        <span className="label-icon"></span>
+                        <strong>Versão Web Interativa em Inglês (Google Docs)</strong>
+                        <span className="cv-input-badge docs-badge">EN - International</span>
+                      </label>
+                      <p className="cv-field-hint">
+                        Link público do seu currículo em inglês no Google Docs. Ideal para recrutadores internacionais.
+                      </p>
+                      <div className="cv-input-with-action">
+                        <input
+                          id="cv-docs-url-en"
+                          type="url"
+                          className="cv-input"
+                          placeholder="https://docs.google.com/document/d/.../edit?usp=sharing"
+                          value={cvGoogleDocsUrlEn}
+                          onChange={(e) => setCvGoogleDocsUrlEn(e.target.value)}
+                          required
+                        />
+                        {cvGoogleDocsUrlEn && (
+                          <a
+                            href={cvGoogleDocsUrlEn}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="cv-action-test-btn docs-btn"
+                            title="Abrir no Google Docs em nova aba"
+                          >
+                            Abrir Docs (EN) ↗
+                          </a>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="cv-form-group">
+                      <label htmlFor="cv-pdf-url-en">
+                        <span className="label-icon"></span>
+                        <strong>Documento Oficial em Inglês (Arquivo PDF)</strong>
+                        <span className="cv-input-badge pdf-badge">Upload Direto (EN)</span>
+                      </label>
+                      <p className="cv-field-hint">
+                        Arraste o PDF do currículo em inglês para fazer upload direto no Supabase Storage.
+                      </p>
+
+                      <div
+                        className={`cv-pdf-dropzone ${isDraggingCvPdfEn ? "dragging" : ""} ${isUploadingCvPdfEn ? "uploading" : ""}`}
+                        onDragOver={(e) => handleCvDragOver(e, "en")}
+                        onDragLeave={(e) => handleCvDragLeave(e, "en")}
+                        onDrop={(e) => handleCvDrop(e, "en")}
+                        onClick={() => !isUploadingCvPdfEn && cvFileInputEnRef.current?.click()}
+                        title="Clique ou arraste um PDF em inglês aqui"
                       >
-                        Abrir Docs ↗
-                      </a>
-                    )}
-                  </div>
-                  <small className="cv-hint-note">
-                    <em>Como obter:</em> No Google Docs &gt; Compartilhar &gt; Acesso Geral: &quot;Qualquer pessoa com o link&quot; (Leitor) &gt; Copiar link.
-                  </small>
-                </div>
-
-                <div className="cv-form-group">
-                  <label htmlFor="cv-pdf-url">
-                    <span className="label-icon"></span>
-                    <strong>Documento Oficial (Arquivo PDF)</strong>
-                    <span className="cv-input-badge pdf-badge">Upload Direto / Supabase</span>
-                  </label>
-                  <p className="cv-field-hint">
-                    Arraste o novo PDF do seu currículo para substituir o antigo. O arquivo será enviado direto ao Supabase Storage e vinculado instantaneamente.
-                  </p>
-
-                  {/* Drag and Drop Zone Exclusiva para PDF */}
-                  <div
-                    className={`cv-pdf-dropzone ${isDraggingCvPdf ? "dragging" : ""} ${isUploadingCvPdf ? "uploading" : ""}`}
-                    onDragOver={handleCvDragOver}
-                    onDragLeave={handleCvDragLeave}
-                    onDrop={handleCvDrop}
-                    onClick={() => !isUploadingCvPdf && cvFileInputRef.current?.click()}
-                    title="Clique ou arraste um PDF aqui"
-                  >
-                    <input
-                      ref={cvFileInputRef}
-                      type="file"
-                      accept=".pdf,application/pdf"
-                      style={{ display: "none" }}
-                      onChange={handleCvFileInputChange}
-                    />
-                    <div className="cv-dropzone-inner">
-                      {isUploadingCvPdf ? (
-                        <div className="cv-dropzone-status">
-                          <div className="cv-dropzone-spinner"></div>
-                          <span>Enviando novo PDF para o Supabase Storage...</span>
+                        <input
+                          ref={cvFileInputEnRef}
+                          type="file"
+                          accept=".pdf,application/pdf"
+                          style={{ display: "none" }}
+                          onChange={(e) => handleCvFileInputChange(e, "en")}
+                        />
+                        <div className="cv-dropzone-inner">
+                          {isUploadingCvPdfEn ? (
+                            <div className="cv-dropzone-status">
+                              <div className="cv-dropzone-spinner"></div>
+                              <span>Enviando PDF em Inglês para o Supabase...</span>
+                            </div>
+                          ) : (
+                            <>
+                              <div className="cv-dropzone-icon"></div>
+                              <div className="cv-dropzone-text">
+                                <strong>Arraste o PDF em Inglês aqui</strong> ou <u>clique para navegar</u>
+                              </div>
+                              <span className="cv-dropzone-badge">Somente arquivos .pdf • Versão Internacional</span>
+                            </>
+                          )}
                         </div>
-                      ) : (
-                        <>
-                          <div className="cv-dropzone-icon"></div>
-                          <div className="cv-dropzone-text">
-                            <strong>Arraste seu novo PDF aqui</strong> ou <u>clique para navegar</u>
-                          </div>
-                          <span className="cv-dropzone-badge">Somente arquivos .pdf • Substituição direta na nuvem</span>
-                        </>
+                      </div>
+
+                      {cvUploadFeedbackEn && (
+                        <div className={`cv-upload-feedback-box ${cvUploadFeedbackEn.type}`}>
+                          <span>{cvUploadFeedbackEn.message}</span>
+                        </div>
                       )}
-                    </div>
-                  </div>
 
-                  {cvUploadFeedback && (
-                    <div className={`cv-upload-feedback-box ${cvUploadFeedback.type}`}>
-                      <span>{cvUploadFeedback.message}</span>
+                      <div className="cv-input-with-action" style={{ marginTop: "12px" }}>
+                        <input
+                          id="cv-pdf-url-en"
+                          type="text"
+                          className="cv-input"
+                          placeholder="URL do PDF em Inglês"
+                          value={cvPdfUrlEn}
+                          onChange={(e) => setCvPdfUrlEn(e.target.value)}
+                          required
+                        />
+                        {cvPdfUrlEn && (
+                          <a
+                            href={cvPdfUrlEn}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="cv-action-test-btn pdf-btn"
+                            title="Testar visualização do PDF (EN)"
+                          >
+                            Abrir PDF (EN) ↗
+                          </a>
+                        )}
+                      </div>
                     </div>
-                  )}
+                  </>
+                ) : (
+                  <>
+                    <div className="cv-form-group">
+                      <label htmlFor="cv-docs-url-pt">
+                        <span className="label-icon"></span>
+                        <strong>Versão Web Interativa em Português (Google Docs)</strong>
+                        <span className="cv-input-badge docs-badge">PT - Nacional</span>
+                      </label>
+                      <p className="cv-field-hint">
+                        Link público do seu currículo em português no Google Docs. Ideal para recrutadores no Brasil.
+                      </p>
+                      <div className="cv-input-with-action">
+                        <input
+                          id="cv-docs-url-pt"
+                          type="url"
+                          className="cv-input"
+                          placeholder="https://docs.google.com/document/d/.../edit?usp=sharing"
+                          value={cvGoogleDocsUrlPt}
+                          onChange={(e) => setCvGoogleDocsUrlPt(e.target.value)}
+                          required
+                        />
+                        {cvGoogleDocsUrlPt && (
+                          <a
+                            href={cvGoogleDocsUrlPt}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="cv-action-test-btn docs-btn"
+                            title="Abrir no Google Docs em nova aba"
+                          >
+                            Abrir Docs (PT) ↗
+                          </a>
+                        )}
+                      </div>
+                    </div>
 
-                  <div className="cv-input-with-action" style={{ marginTop: "12px" }}>
-                    <input
-                      id="cv-pdf-url"
-                      type="text"
-                      className="cv-input"
-                      placeholder="URL do PDF no Supabase Storage ou caminho local"
-                      value={cvPdfUrl}
-                      onChange={(e) => setCvPdfUrl(e.target.value)}
-                      required
-                    />
-                    {cvPdfUrl && (
-                      <a
-                        href={cvPdfUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="cv-action-test-btn pdf-btn"
-                        title="Testar visualização ou download do PDF"
+                    <div className="cv-form-group">
+                      <label htmlFor="cv-pdf-url-pt">
+                        <span className="label-icon"></span>
+                        <strong>Documento Oficial em Português (Arquivo PDF)</strong>
+                        <span className="cv-input-badge pdf-badge">Upload Direto (PT)</span>
+                      </label>
+                      <p className="cv-field-hint">
+                        Arraste o PDF do currículo em português para fazer upload direto no Supabase Storage.
+                      </p>
+
+                      <div
+                        className={`cv-pdf-dropzone ${isDraggingCvPdfPt ? "dragging" : ""} ${isUploadingCvPdfPt ? "uploading" : ""}`}
+                        onDragOver={(e) => handleCvDragOver(e, "pt")}
+                        onDragLeave={(e) => handleCvDragLeave(e, "pt")}
+                        onDrop={(e) => handleCvDrop(e, "pt")}
+                        onClick={() => !isUploadingCvPdfPt && cvFileInputPtRef.current?.click()}
+                        title="Clique ou arraste um PDF em português aqui"
                       >
-                        Abrir PDF ↗
-                      </a>
-                    )}
-                  </div>
-                  <small className="cv-hint-note">
-                    <em>Link ativo:</em> Qualquer novo upload substitui o link anterior automaticamente no banco de dados e no portfólio.
-                  </small>
-                </div>
+                        <input
+                          ref={cvFileInputPtRef}
+                          type="file"
+                          accept=".pdf,application/pdf"
+                          style={{ display: "none" }}
+                          onChange={(e) => handleCvFileInputChange(e, "pt")}
+                        />
+                        <div className="cv-dropzone-inner">
+                          {isUploadingCvPdfPt ? (
+                            <div className="cv-dropzone-status">
+                              <div className="cv-dropzone-spinner"></div>
+                              <span>Enviando PDF em Português para o Supabase...</span>
+                            </div>
+                          ) : (
+                            <>
+                              <div className="cv-dropzone-icon"></div>
+                              <div className="cv-dropzone-text">
+                                <strong>Arraste o PDF em Português aqui</strong> ou <u>clique para navegar</u>
+                              </div>
+                              <span className="cv-dropzone-badge">Somente arquivos .pdf • Versão Nacional</span>
+                            </>
+                          )}
+                        </div>
+                      </div>
+
+                      {cvUploadFeedbackPt && (
+                        <div className={`cv-upload-feedback-box ${cvUploadFeedbackPt.type}`}>
+                          <span>{cvUploadFeedbackPt.message}</span>
+                        </div>
+                      )}
+
+                      <div className="cv-input-with-action" style={{ marginTop: "12px" }}>
+                        <input
+                          id="cv-pdf-url-pt"
+                          type="text"
+                          className="cv-input"
+                          placeholder="URL do PDF em Português"
+                          value={cvPdfUrlPt}
+                          onChange={(e) => setCvPdfUrlPt(e.target.value)}
+                          required
+                        />
+                        {cvPdfUrlPt && (
+                          <a
+                            href={cvPdfUrlPt}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="cv-action-test-btn pdf-btn"
+                            title="Testar visualização do PDF (PT)"
+                          >
+                            Abrir PDF (PT) ↗
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                  </>
+                )}
 
                 <div className="cv-form-group">
                   <label htmlFor="cv-updated-at">
@@ -1492,39 +1641,35 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
                     onChange={(e) => setCvUpdatedAt(e.target.value)}
                   />
                   <small className="cv-hint-note">
-                    Exibida no rodapé do modal para garantir ao recrutador que o currículo está atualizado.
+                    Exibida no rodapé do modal para garantir ao visitante que as duas versões estão atualizadas.
                   </small>
                 </div>
 
                 <div className="cv-form-actions">
                   <button type="submit" className="btn-save-cv-primary">
-                    Salvar Configurações do CV
+                    Salvar Configurações Bilíngues do CV
                   </button>
                   <button type="button" onClick={handleResetCv} className="btn-reset-cv-secondary">
-                    ↺ Restaurar Padrões
+                    Restaurar Padrões
                   </button>
                 </div>
               </form>
             </div>
 
             <div className="cv-info-card">
-              <h3>Fluxo de Experiência do Visitante</h3>
+              <h3>Fluxo de Redirecionamento Automático</h3>
               <ul className="cv-flow-list">
                 <li>
                   <span className="step-num">1</span>
-                  <span>O visitante clica no botão <strong>&quot;Download CV / Docs&quot;</strong> na tela inicial.</span>
+                  <span>Se o site estiver em <strong>Português (PT)</strong>, o modal abre automaticamente com os links do Docs e PDF em português.</span>
                 </li>
                 <li>
                   <span className="step-num">2</span>
-                  <span>Surge o popup moderno perguntando: <em>&quot;Versão Web Interativa (Google Docs)&quot;</em> ou <em>&quot;Documento Oficial PDF&quot;</em>.</span>
+                  <span>Se o site for alternado para <strong>Inglês (EN)</strong>, o modal atualiza instantaneamente para a versão internacional.</span>
                 </li>
                 <li>
                   <span className="step-num">3</span>
-                  <span>Ao clicar em <strong>Google Docs</strong>, visualiza na hora sem download prévio.</span>
-                </li>
-                <li>
-                  <span className="step-num">4</span>
-                  <span>Ao clicar em <strong>PDF</strong>, faz download direto ou abre para impressão.</span>
+                  <span>O visitante também pode alternar entre <strong>EN</strong> e <strong>PT</strong> diretamente dentro do próprio modal.</span>
                 </li>
               </ul>
             </div>
@@ -1534,8 +1679,23 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
           <div className="cv-dash-right">
             <div className="cv-preview-container">
               <div className="cv-preview-bar">
-                <span className="preview-label"> Prévia Interativa do Modal</span>
-                <span className="preview-sublabel">Como o visitante vê</span>
+                <span className="preview-label">Prévia Interativa do Modal</span>
+                <div className="cv-modal-lang-toggle" style={{ marginLeft: "auto" }}>
+                  <button
+                    type="button"
+                    className={`cv-lang-chip ${cvPreviewLang === "en" ? "active" : ""}`}
+                    onClick={() => setCvPreviewLang("en")}
+                  >
+                    EN
+                  </button>
+                  <button
+                    type="button"
+                    className={`cv-lang-chip ${cvPreviewLang === "pt" ? "active" : ""}`}
+                    onClick={() => setCvPreviewLang("pt")}
+                  >
+                    PT
+                  </button>
+                </div>
               </div>
 
               <div className="cv-modal-preview-shell">
@@ -1544,37 +1704,41 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
                     <div className="cv-modal-title-group">
                       <span className="cv-modal-icon"></span>
                       <div>
-                        <h3>Currículo de Matheus de Castro</h3>
-                        <p>Escolha o formato que deseja visualizar ou baixar:</p>
+                        <h3>{cvPreviewLang === "en" ? "Matheus de Castro's Resume" : "Currículo de Matheus de Castro"}</h3>
+                        <p>{cvPreviewLang === "en" ? "Choose the format you wish to view or download:" : "Escolha o formato que deseja visualizar ou baixar:"}</p>
                       </div>
                     </div>
                   </div>
 
                   <div className="cv-modal-options">
                     <a
-                      href={cvGoogleDocsUrl}
+                      href={cvPreviewLang === "en" ? (cvGoogleDocsUrlEn || cvGoogleDocsUrlPt) : (cvGoogleDocsUrlPt || cvGoogleDocsUrlEn)}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="cv-option-card gdocs-card"
                     >
                       <div className="cv-option-text">
-                        <div className="cv-option-badge">Versão Web Interativa</div>
-                        <h4>Abrir no Google Docs</h4>
-                        <p>Visualização instantânea, sempre atualizada com as últimas experiências e projetos.</p>
+                        <div className="cv-option-badge">
+                          {cvPreviewLang === "en" ? "Interactive Web Version (EN)" : "Versão Web Interativa (PT)"}
+                        </div>
+                        <h4>{cvPreviewLang === "en" ? "Open in Google Docs" : "Abrir no Google Docs"}</h4>
+                        <p>{cvPreviewLang === "en" ? "Instant preview, always updated with the latest experiences and projects." : "Visualização instantânea, sempre atualizada com as últimas experiências e projetos."}</p>
                       </div>
                       <span className="cv-option-arrow">↗</span>
                     </a>
 
                     <a
-                      href={cvPdfUrl}
+                      href={cvPreviewLang === "en" ? (cvPdfUrlEn || cvPdfUrlPt) : (cvPdfUrlPt || cvPdfUrlEn)}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="cv-option-card pdf-card"
                     >
                       <div className="cv-option-text">
-                        <div className="cv-option-badge">Documento Oficial PDF</div>
-                        <h4>Baixar Arquivo PDF</h4>
-                        <p>Formato clássico ideal para impressão, arquivamento ou anexar em processos seletivos.</p>
+                        <div className="cv-option-badge">
+                          {cvPreviewLang === "en" ? "Official PDF Document (EN)" : "Documento Oficial PDF (PT)"}
+                        </div>
+                        <h4>{cvPreviewLang === "en" ? "Download PDF File" : "Baixar Arquivo PDF"}</h4>
+                        <p>{cvPreviewLang === "en" ? "Classic format ideal for printing, archiving, or job applications." : "Formato clássico ideal para impressão, arquivamento ou anexar em processos seletivos."}</p>
                       </div>
                       <span className="cv-option-arrow">↓</span>
                     </a>
@@ -1582,14 +1746,14 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
 
                   <div className="cv-modal-footer">
                     <div className="cv-footer-hint">
-                      Atualizado em: <strong>{cvUpdatedAt || "Recente"}</strong> • Dual-Mode Docs &amp; PDF
+                      Atualizado em: <strong>{cvUpdatedAt || "Recente"}</strong> • Dual-Mode Docs &amp; PDF ({cvPreviewLang.toUpperCase()})
                     </div>
                   </div>
                 </div>
               </div>
 
               <div className="cv-preview-footer-note">
-                <em>Você pode clicar nos cards acima para testar seus links exatamente como o visitante!</em>
+                <em>Você pode alternar os botões EN e PT acima para testar as duas versões exatamente como o visitante!</em>
               </div>
             </div>
           </div>
@@ -1709,7 +1873,7 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
                         }}
                         title="Excluir desenho da galeria"
                       >
-                        ✕
+                        &times;
                       </button>
                     </div>
                   );
@@ -2140,7 +2304,7 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
                           }}
                           title="Excluir item"
                         >
-                          ✕
+                          &times;
                         </button>
                       </div>
                     </div>
@@ -2647,7 +2811,7 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
                             onClick={() => setRelatedArticleId("")}
                             title="Remover anexo de artigo"
                           >
-                            ✕ Desanexar
+                            Remover
                           </button>
                         )}
                       </div>
@@ -2677,7 +2841,7 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
                             onClick={() => setRelatedProjectId("")}
                             title="Remover anexo de projeto"
                           >
-                            ✕ Desanexar
+                            Remover
                           </button>
                         )}
                       </div>
@@ -3120,7 +3284,7 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
           <div className="shortcuts-modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h3>Atalhos de Teclado (Obsidian & Word Style)</h3>
-              <button className="btn-close-modal" onClick={() => setShowShortcutsModal(false)}>✕</button>
+              <button type="button" className="btn-close-modal" onClick={() => setShowShortcutsModal(false)}>&times;</button>
             </div>
             <div className="shortcuts-table">
               <div className="shortcut-row">
@@ -3163,7 +3327,7 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
                   ? `Anexar Artigo Técnico ao Projeto: "${title}"`
                   : `Anexar Projeto Prático ao Artigo: "${title}"`}
               </h3>
-              <button className="btn-close-modal" onClick={() => setShowRelationModal(false)}>✕</button>
+              <button type="button" className="btn-close-modal" onClick={() => setShowRelationModal(false)}>&times;</button>
             </div>
 
             <div className="relation-modal-body">

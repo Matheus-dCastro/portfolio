@@ -117,7 +117,7 @@ export default function ChatWidget() {
               onClick={() => setIsOpen(false)}
               title={t("agent.close_title")}
             >
-              ✕
+              &times;
             </button>
           </div>
 

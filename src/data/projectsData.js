@@ -787,8 +787,15 @@ Na engenharia de software e no treinamento de redes neurais, o princípio é id�
 ];
 
 export const DEFAULT_CV_CONFIG = {
-  pdfUrl: "/Matheus Vinicius Silva Freire de Castro.pdf",
+  // Versao em Ingles (EN - International Resume)
+  googleDocsUrlEn: "https://docs.google.com/document/d/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms/edit?usp=sharing",
+  pdfUrlEn: "/Matheus Vinicius Silva Freire de Castro.pdf",
+  // Versao em Portugues (PT - Curriculo Nacional)
+  googleDocsUrlPt: "https://docs.google.com/document/d/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms/edit?usp=sharing",
+  pdfUrlPt: "/Matheus Vinicius Silva Freire de Castro.pdf",
+  // Fallbacks de compatibilidade retroativa
   googleDocsUrl: "https://docs.google.com/document/d/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms/edit?usp=sharing",
+  pdfUrl: "/Matheus Vinicius Silva Freire de Castro.pdf",
   updatedAt: "2026-03-15"
 };
 
@@ -1075,7 +1082,14 @@ export function getStoredCvConfig() {
     if (raw) {
       const parsed = JSON.parse(raw);
       if (parsed && typeof parsed === "object") {
-        return { ...DEFAULT_CV_CONFIG, ...parsed };
+        return {
+          ...DEFAULT_CV_CONFIG,
+          ...parsed,
+          googleDocsUrlEn: parsed.googleDocsUrlEn || parsed.googleDocsUrl || DEFAULT_CV_CONFIG.googleDocsUrlEn,
+          googleDocsUrlPt: parsed.googleDocsUrlPt || parsed.googleDocsUrl || DEFAULT_CV_CONFIG.googleDocsUrlPt,
+          pdfUrlEn: parsed.pdfUrlEn || parsed.pdfUrl || DEFAULT_CV_CONFIG.pdfUrlEn,
+          pdfUrlPt: parsed.pdfUrlPt || parsed.pdfUrl || DEFAULT_CV_CONFIG.pdfUrlPt
+        };
       }
     }
   } catch (e) {

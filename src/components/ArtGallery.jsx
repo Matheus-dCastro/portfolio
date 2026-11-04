@@ -129,7 +129,7 @@ export default function ArtGallery({ artDrawings = [] }) {
                 onClick={closeLightbox}
                 title="Esc"
               >
-                ✕
+                &times;
               </button>
             </div>
 

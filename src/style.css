@@ -956,6 +956,43 @@ h2 span {
   margin: 0;
 }
 
+.cv-modal-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.cv-modal-lang-toggle {
+  display: inline-flex;
+  background: #11111a;
+  border: 1px solid #232336;
+  border-radius: 20px;
+  padding: 2px;
+  gap: 2px;
+}
+
+.cv-lang-chip {
+  background: transparent;
+  border: none;
+  color: #9ca3af;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cv-lang-chip:hover {
+  color: #ffffff;
+}
+
+.cv-lang-chip.active {
+  background: #7928ca;
+  color: #ffffff;
+  box-shadow: 0 0 10px rgba(121, 40, 202, 0.45);
+}
+
 .btn-close-cv-modal {
   background: transparent;
   border: none;

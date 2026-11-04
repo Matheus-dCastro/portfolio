@@ -4,7 +4,7 @@ import { fetchCvConfig } from "../lib/supabaseService";
 import { useLanguage } from "../context/useLanguage";
 
 function Perfil({ nomeCompleto, description, foto, cv }) {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const [textoAtual, setTextoAtual] = useState("");
   const [phraseIndex, setPhraseIndex] = useState(0);
   const [charIndex, setCharIndex] = useState(0);
@@ -12,6 +12,10 @@ function Perfil({ nomeCompleto, description, foto, cv }) {
   const [typeSpeed, setTypeSpeed] = useState(150);
   const [showCvModal, setShowCvModal] = useState(false);
   const [cvConfig, setCvConfig] = useState(() => getStoredCvConfig());
+  const [userSelectedLang, setUserSelectedLang] = useState(null);
+
+  // Idioma ativo no modal: se o usuário alternou no modal, usa a escolha; senão, segue o idioma global do site
+  const modalLang = userSelectedLang || lang;
 
   const frases = useMemo(
     () => t("hero.roles") || ["Matheus de Castro", "Backend Developer", "Machine Learning Student"],
@@ -28,6 +32,7 @@ function Perfil({ nomeCompleto, description, foto, cv }) {
     fetchCvConfig().then((cfg) => {
       if (cfg) setCvConfig(cfg);
     });
+    setUserSelectedLang(null);
     setShowCvModal(true);
   };
 
@@ -104,61 +109,108 @@ function Perfil({ nomeCompleto, description, foto, cv }) {
       </div>
 
       {/* CV Download / View Modal */}
-      {showCvModal && (
-        <div className="cv-modal-overlay" onClick={() => setShowCvModal(false)}>
-          <div className="cv-modal-content" onClick={(e) => e.stopPropagation()}>
-            <div className="cv-modal-header">
-              <div className="cv-modal-title-group">
-                <span className="cv-modal-icon"></span>
-                <div>
-                  <h3>{t("cv_modal.title")}</h3>
-                  <p>{t("cv_modal.subtitle")}</p>
+      {showCvModal && (() => {
+        const isEn = modalLang === "en";
+        const activeGoogleDocs = isEn
+          ? (cvConfig.googleDocsUrlEn || cvConfig.googleDocsUrl)
+          : (cvConfig.googleDocsUrlPt || cvConfig.googleDocsUrl);
+
+        const activePdf = isEn
+          ? (cvConfig.pdfUrlEn || cvConfig.pdfUrl || cv)
+          : (cvConfig.pdfUrlPt || cvConfig.pdfUrl || cv);
+
+        const downloadFileName = isEn
+          ? "Matheus_de_Castro_Resume_EN.pdf"
+          : "Matheus_de_Castro_Curriculo_PT.pdf";
+
+        const docsBadge = isEn ? "Interactive Web Version (EN)" : "Versão Web Interativa (PT)";
+        const pdfBadge = isEn ? "Official PDF Document (EN)" : "Documento Oficial PDF (PT)";
+
+        return (
+          <div className="cv-modal-overlay" onClick={() => setShowCvModal(false)}>
+            <div className="cv-modal-content" onClick={(e) => e.stopPropagation()}>
+              <div className="cv-modal-header">
+                <div className="cv-modal-title-group">
+                  <span className="cv-modal-icon"></span>
+                  <div>
+                    <h3>{t("cv_modal.title")}</h3>
+                    <p>{t("cv_modal.subtitle")}</p>
+                  </div>
+                </div>
+                <div className="cv-modal-header-actions">
+                  <div className="cv-modal-lang-toggle" role="group" aria-label="CV Language">
+                    <button
+                      type="button"
+                      className={`cv-lang-chip ${isEn ? "active" : ""}`}
+                      onClick={() => setUserSelectedLang("en")}
+                      title="English Resume"
+                    >
+                      EN
+                    </button>
+                    <button
+                      type="button"
+                      className={`cv-lang-chip ${!isEn ? "active" : ""}`}
+                      onClick={() => setUserSelectedLang("pt")}
+                      title="Currículo em Português"
+                    >
+                      PT
+                    </button>
+                  </div>
+                  <button
+                    type="button"
+                    className="btn-close-cv-modal"
+                    onClick={() => setShowCvModal(false)}
+                    aria-label="Close"
+                  >
+                    &times;
+                  </button>
                 </div>
               </div>
-              <button className="btn-close-cv-modal" onClick={() => setShowCvModal(false)}>✕</button>
-            </div>
 
-            <div className="cv-modal-options">
-              {/* Option 1: Google Docs Web Version */}
-              <a
-                href={cvConfig.googleDocsUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="cv-option-card gdocs-card"
-                onClick={() => setShowCvModal(false)}
-              >
-                <div className="cv-option-text">
-                  <div className="cv-option-badge">{t("cv_modal.gdocs_badge")}</div>
-                  <h4>{t("cv_modal.gdocs_title")}</h4>
-                  <p>{t("cv_modal.gdocs_desc")}</p>
-                </div>
-                <span className="cv-option-arrow">↗</span>
-              </a>
+              <div className="cv-modal-options">
+                {/* Option 1: Google Docs Web Version */}
+                <a
+                  href={activeGoogleDocs}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="cv-option-card gdocs-card"
+                  onClick={() => setShowCvModal(false)}
+                >
+                  <div className="cv-option-text">
+                    <div className="cv-option-badge">{docsBadge}</div>
+                    <h4>{t("cv_modal.gdocs_title")}</h4>
+                    <p>{t("cv_modal.gdocs_desc")}</p>
+                  </div>
+                  <span className="cv-option-arrow">↗</span>
+                </a>
 
-              {/* Option 2: PDF Download */}
-              <a
-                href={cvConfig.pdfUrl || cv}
-                target="_blank"
-                rel="noopener noreferrer"
-                download="Matheus_de_Castro_Curriculo.pdf"
-                className="cv-option-card pdf-card"
-                onClick={() => setShowCvModal(false)}
-              >
-                <div className="cv-option-text">
-                  <div className="cv-option-badge">{t("cv_modal.pdf_badge")}</div>
-                  <h4>{t("cv_modal.pdf_title")}</h4>
-                  <p>{t("cv_modal.pdf_desc")}</p>
-                </div>
-                <span className="cv-option-arrow">↓</span>
-              </a>
-            </div>
+                {/* Option 2: PDF Download */}
+                <a
+                  href={activePdf}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  download={downloadFileName}
+                  className="cv-option-card pdf-card"
+                  onClick={() => setShowCvModal(false)}
+                >
+                  <div className="cv-option-text">
+                    <div className="cv-option-badge">{pdfBadge}</div>
+                    <h4>{t("cv_modal.pdf_title")}</h4>
+                    <p>{t("cv_modal.pdf_desc")}</p>
+                  </div>
+                  <span className="cv-option-arrow">↓</span>
+                </a>
+              </div>
 
-            <div className="cv-modal-footer">
-              <span className="cv-footer-hint">{t("cv_modal.footer_hint")}</span>
+              <div className="cv-modal-footer">
+                <span className="cv-footer-hint">
+                  {t("cv_modal.footer_hint")} {cvConfig.updatedAt ? `• ${t("admin.updated_label")}: ${cvConfig.updatedAt}` : ""}
+                </span>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
     </section>
   );
 }
