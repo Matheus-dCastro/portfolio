@@ -7,7 +7,7 @@ import ViewDraft from "./components/ViewDraft";
 import OrderDraft from "./components/OrderDraft";
 import LoginDraft from "./components/LoginDraft";
 import ChatWidget from "./components/ChatWidget";
-import { getStoredProjects } from "./data/projectsData";
+import { getStoredProjects, getStoredArticles } from "./data/projectsData";
 import { getCurrentUser, onAuthChange, isAuthorizedAdmin } from "./lib/supabaseService";
 
 function App() {
@@ -15,7 +15,7 @@ function App() {
     const urlParams = new URLSearchParams(window.location.search);
     const projectId = urlParams.get("project") || urlParams.get("id");
     if (projectId) {
-      const all = getStoredProjects();
+      const all = [...getStoredProjects(), ...getStoredArticles()];
       return all.find((p) => p.id === projectId) || null;
     }
     return null;
@@ -87,7 +87,7 @@ function App() {
       const urlParams = new URLSearchParams(window.location.search);
       const projId = urlParams.get("project");
       if (projId) {
-        const all = getStoredProjects();
+        const all = [...getStoredProjects(), ...getStoredArticles()];
         const found = all.find((p) => p.id === projId);
         if (found) {
           setSelectedProject(found);
@@ -118,7 +118,7 @@ function App() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const handleBackToHome = () => {
+  const handleBackToHome = (targetSection = null) => {
     if (
       window.location.pathname.includes("/contacts") ||
       window.location.pathname.includes("/4dm1n") ||
@@ -129,13 +129,14 @@ function App() {
     } else {
       setCurrentPage("home");
       window.history.pushState({}, "", "/");
-      // If we came back from project-detail, smooth scroll to projects section
       setTimeout(() => {
-        const projEl = document.getElementById("projects");
-        if (projEl) {
-          projEl.scrollIntoView({ behavior: "smooth" });
+        const isArticle = selectedProject?.relatedProjectId || selectedProject?.id?.startsWith("art-");
+        const targetId = targetSection || (isArticle ? "articles" : "projects");
+        const targetEl = document.getElementById(targetId) || document.getElementById("projects");
+        if (targetEl) {
+          targetEl.scrollIntoView({ behavior: "smooth" });
         }
-      }, 50);
+      }, 60);
     }
   };
 

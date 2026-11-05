@@ -1,6 +1,9 @@
 // src/lib/llmService.js
-// Client service for Groq LLM integration (Qwen 2.5 / Qwen 3.8 / GPT-OSS)
+// Client service for Supabase Edge Function AI integration (/chat-qwen)
+// 🔒 MANDATÓRIO: Nenhuma chave secreta de API reside no frontend ou localStorage.
+// A inferência ocorre 100% isolada e serverless na nuvem Supabase.
 
+import { supabase, isSupabaseConfigured } from "./supabaseClient";
 import {
   getStoredProjects,
   getStoredArticles,
@@ -8,13 +11,12 @@ import {
   getStoredCvConfig
 } from "../data/projectsData";
 
-const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
-export const PRIMARY_MODEL = "qwen/qwen3.8-27b";
-export const FALLBACK_MODEL = "openai/gpt-oss-120b";
+export const PRIMARY_MODEL = "qwen-2.5-coder-32b";
+export const FALLBACK_MODEL = "llama-3.3-70b-versatile";
 
-export const DEFAULT_SYSTEM_PROMPT = `Você é o Alomyr, o Assistente Oficial de Inteligência Artificial do portfólio de Matheus de Castro (You are Alomyr, the official AI Assistant of Matheus de Castro's portfolio).
+export const DEFAULT_SYSTEM_PROMPT = `Você é o Alomyr, o Assistente Oficial de Inteligência Artificial do portfólio de Matheus de Castro.
 
-## SEU PAPEL E OBJETIVO / YOUR ROLE AND GOAL
+## SEU PAPEL E OBJETIVO
 Seu objetivo é orientar visitantes, recrutadores, pesquisadores e parceiros técnicos, apresentando com clareza as qualificações, projetos, publicações e competências técnicas de Matheus de Castro nas áreas de:
 - Machine Learning Engineering & Deep Learning (PyTorch, Computer Vision, U-Net, Data Analysis)
 - Arquitetura de Backend & Engenharia de Software (Python, FastAPI, PostgreSQL, Docker, RESTful APIs)
@@ -23,13 +25,71 @@ Seu objetivo é orientar visitantes, recrutadores, pesquisadores e parceiros té
 
 ## DIRETRIZES DE COMPORTAMENTO
 1. IDENTIDADE: Seu nome é Alomyr. Apresente-se sempre como Alomyr.
-2. IDIOMA / LANGUAGE: Responda fluente e naturalmente no idioma utilizado pelo usuário (inglês ou português).
+2. IDIOMA: Responda fluente e naturalmente no idioma utilizado pelo visitante (inglês ou português).
 3. ESCOPO FECHADO: Responda APENAS sobre a trajetória acadêmica, profissional, projetos, artigos e competências de Matheus de Castro.
 4. RECUSA DE ESCOPO: Se o usuário pedir receitas, piadas ou tópicos não relacionados ao portfólio, recuse cordial e profissionalmente:
    "Como Alomyr, assistente oficial do portfólio de Matheus de Castro, meu escopo é limitado a dúvidas sobre seus projetos de IA, backend e currículo."
 5. TOM DE VOZ: Técnico, profissional, acolhedor, conciso e preciso.
 6. PROIBIDO ALUCINAR: Nunca invente experiências ou projetos que não constem no contexto fornecido.
-7. LINKS E DIRECIONAMENTO: Sempre que falar de um projeto, direcione o usuário para a seção Works do portfólio ou para o GitHub oficial: https://github.com/Matheus-dCastro`;
+7. LINKS E DIRECIONAMENTO: Sempre que falar de um projeto, mencione-o em negrito e convide o usuário a conferir a seção Works ou o GitHub oficial: https://github.com/Matheus-dCastro`;
+
+// ==============================================================================
+// 🛡️ GUARDRAILS DE CLIENTE (FAST PRE-FLIGHT CHECK)
+// ==============================================================================
+export const GUARDRAIL_INJECTION_PATTERNS = [
+  /ignore\s+(all\s+)?(previous|prior|above)\s+instructions/i,
+  /desconsidere\s+(todas\s+as\s+)?instru[çc][õo]es/i,
+  /ignore\s+suas\s+regras/i,
+  /dan\s+mode/i,
+  /jailbreak/i,
+  /system\s+prompt/i,
+  /reveal\s+(your\s+)?(api|secret|token|key)/i,
+  /revele\s+(sua\s+)?(chave|secret|token|api)/i,
+  /act\s+as\s+a\s+(linux|bash|cmd)\s+terminal/i,
+  /finja\s+que\s+[eé]\s+um\s+terminal/i,
+  /bypass\s+safety/i,
+  /drop\s+table/i
+];
+
+export const GUARDRAIL_OFF_TOPIC_PATTERNS = [
+  /receita\s+de\s+(bolo|torta|p[aã]o|comida)/i,
+  /recipe\s+for/i,
+  /previs[aã]o\s+do\s+tempo/i,
+  /weather\s+forecast/i,
+  /conte\s+(uma\s+)?piada/i,
+  /tell\s+me\s+a\s+joke/i,
+  /quem\s+ganhou\s+o\s+jogo/i,
+  /who\s+won\s+the\s+game/i
+];
+
+/**
+ * Valida mensagem localmente antes da chamada remota para economizar latência e tokens
+ */
+export function validateMessageGuardrails(message) {
+  if (!message || typeof message !== "string") return { allowed: true };
+
+  for (const pattern of GUARDRAIL_INJECTION_PATTERNS) {
+    if (pattern.test(message)) {
+      return {
+        allowed: false,
+        reason: "injection",
+        reply: "Como Alomyr, sigo diretrizes estritas de segurança e escopo. Meu propósito é apresentar exclusivamente os projetos de Inteligência Artificial, engenharia de backend e qualificações de Matheus de Castro. Como posso te orientar sobre seu currículo?"
+      };
+    }
+  }
+
+  for (const pattern of GUARDRAIL_OFF_TOPIC_PATTERNS) {
+    if (pattern.test(message)) {
+      return {
+        allowed: false,
+        reason: "off_topic",
+        reply: "Como Alomyr, meu escopo é limitado a tirar dúvidas sobre a trajetória acadêmica, projetos de Machine Learning/Backend e artigos técnicos de Matheus de Castro. Que tal explorar projetos como o **AgentMetrics** ou a **Segmentação Médica com U-Net**?"
+      };
+    }
+  }
+
+  return { allowed: true };
+}
 
 /**
  * Constrói o contexto dinâmico do portfólio a partir dos dados do sistema
@@ -42,16 +102,14 @@ export function buildPortfolioContext() {
 
   let context = "\n\n### BASE DE CONHECIMENTO OFICIAL DE MATHEUS DE CASTRO:\n\n";
 
-  // Perfil e Formação
   context += "#### PERFIL & FORMAÇÃO:\n";
   context += "- Nome: Matheus de Castro\n";
-  context += "- Formação: Bacharelando em Tecnologia da Informação (BTI) na UFRN (Universidade Federal do Rio Grande do Norte) e Técnico em TI pelo IFRN.\n";
-  context += "- Foco: Machine Learning, Deep Learning (PyTorch), Backend Python (FastAPI/PostgreSQL) e Automações Linux/n8n.\n";
+  context += "- Formação: Bacharelando em Tecnologia da Informação (BTI) na UFRN e Técnico em TI pelo IFRN.\n";
+  context += "- Foco: Machine Learning Engineering (PyTorch, U-Net, Visão Computacional), Backend Python (FastAPI/PostgreSQL) e Automações Linux/n8n.\n";
   context += "- GitHub Oficial: https://github.com/Matheus-dCastro\n";
   context += "- LinkedIn: https://www.linkedin.com/in/matheus-dcastro\n";
   context += "- Email: matheus.vsf.castro.25@gmail.com\n\n";
 
-  // Experiências
   if (experiences.length > 0) {
     context += "#### EXPERIÊNCIAS PROFISSIONAIS:\n";
     experiences.forEach((exp) => {
@@ -65,7 +123,6 @@ export function buildPortfolioContext() {
     context += "\n";
   }
 
-  // Projetos
   if (projects.length > 0) {
     context += "#### PROJETOS NO PORTFÓLIO:\n";
     projects.forEach((proj) => {
@@ -80,7 +137,6 @@ export function buildPortfolioContext() {
     context += "\n";
   }
 
-  // Artigos
   if (articles.length > 0) {
     context += "#### ARTIGOS & PUBLICAÇÕES:\n";
     articles.forEach((art) => {
@@ -92,8 +148,7 @@ export function buildPortfolioContext() {
     context += "\n";
   }
 
-  // Currículo
-  context += "#### CURRÍCULO (DUAL-MODE):\n";
+  context += "#### CURRÍCULO:\n";
   context += `- Versão Interativa Google Docs: ${cvConfig.googleDocsUrl || "Disponível no site"}\n`;
   context += `- Documento Oficial PDF: ${cvConfig.pdfUrl || "Disponível para download no Hero"}\n`;
   context += `- Data de atualização: ${cvConfig.updatedAt || "Recente"}\n`;
@@ -102,100 +157,72 @@ export function buildPortfolioContext() {
 }
 
 /**
- * Obtém a chave da API da Groq (de localStorage, Supabase ou decodificação em runtime)
- */
-export function getGroqApiKey() {
-  const custom = localStorage.getItem("portfolio_groq_api_key");
-  if (custom && custom.trim()) return custom.trim();
-
-  // Decodificado dinamicamente em runtime para não expor tokens em scanners estáticos de repositório público
-  const data = [
-    61, 40, 55, 2, 26, 5, 39, 107, 9, 20, 42, 27, 23, 47, 40, 46, 109, 30,
-    28, 45, 4, 32, 34, 100, 10, 25, 59, 25, 56, 104, 26, 4, 7, 56, 42, 30,
-    19, 5, 54, 105, 9, 86, 40, 24, 56, 31, 29, 26, 89, 48, 25, 46, 50, 111,
-    5, 40
-  ];
-  let token = "";
-  for (let i = 0; i < data.length; i++) {
-    token += String.fromCharCode(data[i] ^ (0x5a + (i % 7)));
-  }
-  return token;
-}
-
-/**
- * Envia uma mensagem para a LLM via Groq API
+ * Envia mensagem para o Agente IA via Supabase Edge Function (/chat-qwen)
+ * 🔒 ZERO API KEYS NO FRONTEND: a requisição é autenticada e resolvida na borda da nuvem Supabase.
+ *
  * @param {Array<{sender: 'user'|'bot'|'assistant', text?: string, content?: string}>} messages
  * @param {string|null} customPrompt
  * @param {string} model
  * @returns {Promise<{success: boolean, text: string, model: string, error?: string}>}
  */
 export async function sendChatMessage(messages, customPrompt = null, model = PRIMARY_MODEL) {
-  const apiKey = getGroqApiKey();
+  // 1. Extrai a última mensagem do usuário
+  const userMessages = messages.filter((m) => m.sender === "user" || m.role === "user");
+  const lastUserMsg = userMessages[userMessages.length - 1];
+  const queryText = (lastUserMsg?.text || lastUserMsg?.content || "").trim();
 
-  if (!apiKey) {
+  // 2. Pré-validação rápida de Guardrails no cliente
+  const guardrailCheck = validateMessageGuardrails(queryText);
+  if (!guardrailCheck.allowed) {
     return {
-      success: false,
-      text: "Chave da API da Groq (VITE_GROQ_API_KEY) não configurada no arquivo .env.",
-      model,
-      error: "API Key missing"
+      success: true,
+      text: guardrailCheck.reply,
+      model: "guardrails-protection"
     };
   }
 
-  const basePrompt = customPrompt || DEFAULT_SYSTEM_PROMPT;
-  const fullSystemPrompt = basePrompt + buildPortfolioContext();
-
-  const formattedMessages = [
-    { role: "system", content: fullSystemPrompt },
-    ...messages.map((m) => ({
-      role: m.sender === "user" ? "user" : "assistant",
-      content: m.text || m.content || ""
-    }))
-  ];
-
-  const tryCall = async (modelToUse) => {
-    const response = await fetch(GROQ_API_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`
-      },
-      body: JSON.stringify({
-        model: modelToUse,
-        messages: formattedMessages,
-        temperature: 0.3,
-        max_tokens: 800
-      })
-    });
-
-    if (!response.ok) {
-      const errorJson = await response.json().catch(() => ({}));
-      throw new Error(errorJson?.error?.message || `Erro HTTP ${response.status}`);
-    }
-
-    const data = await response.json();
-    const assistantMessage = data.choices?.[0]?.message?.content || "";
-    return {
-      success: true,
-      text: assistantMessage,
-      model: modelToUse,
-      usage: data.usage
-    };
-  };
-
-  try {
-    return await tryCall(model);
-  } catch (err) {
-    console.warn(`Tentativa com ${model} falhou: ${err.message}. Tentando fallback com ${FALLBACK_MODEL}...`);
+  // 3. Invocação da Supabase Edge Function (/chat-qwen)
+  if (isSupabaseConfigured && supabase) {
     try {
-      return await tryCall(FALLBACK_MODEL);
-    } catch (fallbackErr) {
-      console.error("Todas as tentativas de chamada à LLM falharam:", fallbackErr);
+      const { data, error } = await supabase.functions.invoke("chat-qwen", {
+        body: {
+          message: queryText,
+          conversationHistory: messages,
+          customPrompt,
+          model
+        }
+      });
+
+      if (!error && data) {
+        const reply = data.reply || data.text || "";
+        return {
+          success: true,
+          text: reply,
+          model: data.model || model,
+          usage: data.usage
+        };
+      }
+
+      if (error) {
+        console.warn("Supabase Edge Function /chat-qwen retornou erro:", error);
+        throw error;
+      }
+    } catch (edgeErr) {
+      console.warn("Falha de rede ao invocar Edge Function /chat-qwen:", edgeErr.message);
       return {
         success: false,
-        text: `Desculpe, ocorreu uma instabilidade na conexão com o modelo de IA (${fallbackErr.message}). Por favor, tente novamente em alguns instantes.`,
+        text: `🔒 Modo Seguro Ativo: A inferência é processada na nuvem através do Supabase Edge Functions ('/chat-qwen'). Nenhuma chave de API reside no seu navegador. Quando o deploy for concluído no Supabase Cloud ('npx supabase functions deploy chat-qwen'), as respostas serão geradas em tempo real. (${edgeErr.message})`,
         model,
-        error: fallbackErr.message
+        error: edgeErr.message
       };
     }
   }
+
+  // Fallback seguro caso o cliente Supabase não esteja configurado
+  return {
+    success: false,
+    text: "Conexão com a nuvem Supabase não configurada. As variáveis VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY são necessárias para a comunicação segura com o assistente.",
+    model,
+    error: "Supabase not configured"
+  };
 }

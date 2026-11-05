@@ -190,6 +190,17 @@ export function mapDbArticle(row) {
     contentPt = row.content;
   }
 
+  let docsEn = row.google_docs_url_en || existing?.googleDocsUrlEn || "";
+  let docsPt = row.google_docs_url_pt || existing?.googleDocsUrlPt || "";
+  if (row.google_docs_url && row.google_docs_url.includes(BILINGUAL_SPLIT)) {
+    const parts = row.google_docs_url.split(BILINGUAL_SPLIT);
+    docsEn = parts[0].trim();
+    docsPt = parts[1].trim();
+  } else if (!docsEn && !docsPt && row.google_docs_url) {
+    docsEn = row.google_docs_url;
+    docsPt = row.google_docs_url;
+  }
+
   return {
     id: row.id,
     title: titleEn || row.title,
@@ -204,7 +215,9 @@ export function mapDbArticle(row) {
     aboutContextEn: aboutEn,
     aboutContextPt: aboutPt,
     contentType: row.content_type || "markdown",
-    googleDocsUrl: row.google_docs_url || "",
+    googleDocsUrl: docsEn || docsPt || row.google_docs_url || "",
+    googleDocsUrlEn: docsEn,
+    googleDocsUrlPt: docsPt,
     pdfUrl: row.pdf_url || "",
     content: contentEn || row.content || "",
     contentEn: contentEn || existing?.contentEn || row.content || "",
@@ -233,6 +246,10 @@ export function mapArticleToDb(item) {
     ? `${item.contentEn.trim()}\n\n${BILINGUAL_SPLIT}\n\n${item.contentPt.trim()}`
     : (item.contentEn || item.content || "");
 
+  const docsToSave = (item.googleDocsUrlEn && item.googleDocsUrlPt && item.googleDocsUrlEn !== item.googleDocsUrlPt)
+    ? `${item.googleDocsUrlEn.trim()} ${BILINGUAL_SPLIT} ${item.googleDocsUrlPt.trim()}`
+    : (item.googleDocsUrlEn || item.googleDocsUrlPt || item.googleDocsUrl || "");
+
   return {
     id: item.id,
     title: titleToSave,
@@ -245,7 +262,7 @@ export function mapArticleToDb(item) {
     short_description: shortDescToSave,
     about_context: aboutToSave,
     content_type: item.contentType || "markdown",
-    google_docs_url: item.googleDocsUrl || "",
+    google_docs_url: docsToSave,
     pdf_url: item.pdfUrl || "",
     content: contentToSave,
     related_work_id: item.relatedProjectId ? item.relatedProjectId : null,
@@ -1065,7 +1082,12 @@ export async function uploadDrawingImage(file) {
   });
 }
 
-export async function persistAgentConfig(systemPrompt, modelName = "Qwen 2.5 Coder 32B-Instruct") {
+export async function persistAgentConfig(
+  systemPrompt,
+  modelName = "qwen-2.5-coder-32b",
+  temperature = 0.3,
+  maxTokens = 800
+) {
   localStorage.setItem("portfolio_agent_system_prompt", systemPrompt);
 
   if (isSupabaseConfigured && supabase) {
@@ -1075,6 +1097,8 @@ export async function persistAgentConfig(systemPrompt, modelName = "Qwen 2.5 Cod
           id: "production",
           model_name: modelName,
           system_prompt: systemPrompt,
+          temperature: Number(temperature),
+          max_tokens: Number(maxTokens),
           updated_at: new Date().toISOString()
         },
         { onConflict: "id" }

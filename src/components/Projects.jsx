@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { getStoredProjects } from "../data/projectsData";
 import { fetchWorks } from "../lib/supabaseService";
 import { useLanguage } from "../context/useLanguage";
+import ShareButton from "./ShareButton";
 
 export default function Projects({ onOpenProject }) {
   const { t, lang } = useLanguage();
@@ -163,44 +164,52 @@ export default function Projects({ onOpenProject }) {
                       <h3>{title}</h3>
                       <p>{desc}</p>
 
-                      <div className="project-links">
-                        {onOpenProject && (
-                          <button
-                            type="button"
-                            className="link-arrow highlight"
-                            onClick={() => onOpenProject(project)}
-                            style={{
-                              background: "none",
-                              border: "none",
-                              fontFamily: "inherit",
-                              fontSize: "inherit",
-                              cursor: "pointer",
-                              padding: 0
-                            }}
-                          >
-                            {t("projects.learn_more")} <span>→</span>
-                          </button>
-                        )}
-                        {project.github && (
-                          <a
-                            href={project.github}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="link-arrow"
-                          >
-                            {t("projects.view_github")} <span>→</span>
-                          </a>
-                        )}
-                        {project.demo && (
-                          <a
-                            href={project.demo}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="link-arrow"
-                          >
-                            {t("projects.live_demo")} <span>→</span>
-                          </a>
-                        )}
+                      <div className="project-links" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "10px" }}>
+                        <div style={{ display: "flex", gap: "18px", alignItems: "center", flexWrap: "wrap" }}>
+                          {onOpenProject && (
+                            <button
+                              type="button"
+                              className="link-arrow highlight"
+                              onClick={() => onOpenProject(project)}
+                              style={{
+                                background: "none",
+                                border: "none",
+                                fontFamily: "inherit",
+                                fontSize: "inherit",
+                                cursor: "pointer",
+                                padding: 0
+                              }}
+                            >
+                              {t("projects.learn_more")} <span>→</span>
+                            </button>
+                          )}
+                          {project.github && (
+                            <a
+                              href={project.github}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="link-arrow"
+                            >
+                              {t("projects.view_github")} <span>→</span>
+                            </a>
+                          )}
+                          {project.demo && (
+                            <a
+                              href={project.demo}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="link-arrow"
+                            >
+                              {t("projects.live_demo")} <span>→</span>
+                            </a>
+                          )}
+                        </div>
+
+                        <ShareButton
+                          title={title}
+                          text={desc}
+                          url={`/?project=${encodeURIComponent(project.id)}`}
+                        />
                       </div>
                     </div>
                   );

@@ -2,20 +2,21 @@ import { useState } from "react";
 import { getStoredProjects, getStoredArticles, convertGoogleDocsToEmbedUrl } from "../data/projectsData";
 import { useLanguage } from "../context/useLanguage";
 import LanguageSwitcher from "./LanguageSwitcher";
+import ShareButton from "./ShareButton";
 import "./ViewDraft.css";
 
 function getInitialProject(propProject) {
   if (propProject) return propProject;
   const urlParams = new URLSearchParams(window.location.search);
   const projectId = urlParams.get("project") || urlParams.get("id");
-  const allProjects = getStoredProjects();
+  const allItems = [...getStoredProjects(), ...getStoredArticles()];
 
   if (projectId) {
-    const found = allProjects.find((p) => p.id === projectId);
+    const found = allItems.find((p) => p.id === projectId);
     if (found) return found;
   }
 
-  return allProjects.length > 0 ? allProjects[0] : null;
+  return allItems.length > 0 ? allItems[0] : null;
 }
 
 export default function ViewDraft({ project: propProject, onBackToHome, onSelectProject }) {
@@ -36,12 +37,18 @@ export default function ViewDraft({ project: propProject, onBackToHome, onSelect
     );
   }
 
-  const allProjects = getStoredProjects();
-  const currentIndex = allProjects.findIndex((p) => p.id === project.id);
-  const prevProject = currentIndex > 0 ? allProjects[currentIndex - 1] : null;
+  const isArticle = Boolean(
+    project.relatedProjectId ||
+    project.id?.startsWith("art-") ||
+    getStoredArticles().some((a) => a.id === project.id)
+  );
+
+  const activeCollection = isArticle ? getStoredArticles() : getStoredProjects();
+  const currentIndex = activeCollection.findIndex((p) => p.id === project.id);
+  const prevProject = currentIndex > 0 ? activeCollection[currentIndex - 1] : null;
   const nextProject =
-    currentIndex >= 0 && currentIndex < allProjects.length - 1
-      ? allProjects[currentIndex + 1]
+    currentIndex >= 0 && currentIndex < activeCollection.length - 1
+      ? activeCollection[currentIndex + 1]
       : null;
 
   const projectTitle = lang === "en" ? (project.titleEn || project.title) : (project.titlePt || project.title);
@@ -50,7 +57,11 @@ export default function ViewDraft({ project: propProject, onBackToHome, onSelect
     : (project.shortDescriptionPt || project.shortDescription || project.aboutContextPt || project.aboutContext || t("view.default_context"));
   const projectContent = lang === "en" ? (project.contentEn || project.content) : (project.contentPt || project.content);
 
-  const hasGDocs = Boolean(project.googleDocsUrl);
+  const activeGDocs = lang === "en"
+    ? (project.googleDocsUrlEn || project.googleDocsUrl)
+    : (project.googleDocsUrlPt || project.googleDocsUrl);
+
+  const hasGDocs = Boolean(activeGDocs || project.googleDocsUrl || project.googleDocsUrlPt || project.googleDocsUrlEn);
   const hasPdf = Boolean(project.pdfUrl);
   const hasMarkdown = Boolean(projectContent);
 
@@ -64,7 +75,7 @@ export default function ViewDraft({ project: propProject, onBackToHome, onSelect
       ? "pdf"
       : "markdown";
 
-  const embedGDocsUrl = convertGoogleDocsToEmbedUrl(project.googleDocsUrl);
+  const embedGDocsUrl = convertGoogleDocsToEmbedUrl(activeGDocs || project.googleDocsUrl);
 
   const wordCount = projectContent ? projectContent.trim().split(/\s+/).length : 0;
   const readingTime = Math.max(1, Math.ceil(wordCount / 180));
@@ -80,8 +91,8 @@ export default function ViewDraft({ project: propProject, onBackToHome, onSelect
     <div className="view-detail-page">
       {/* Top Header Bar - Integrated with system */}
       <nav className="view-top-header">
-        <button className="back-to-projects-btn" onClick={onBackToHome}>
-          <span className="arrow">←</span> {t("view.back_to_projects")}
+        <button className="back-to-projects-btn" onClick={() => onBackToHome && onBackToHome(isArticle ? "articles" : "projects")}>
+          <span className="arrow">←</span> {isArticle ? t("view.back_to_articles") : t("view.back_to_projects")}
         </button>
 
         <div className="header-actions-group">
@@ -107,9 +118,34 @@ export default function ViewDraft({ project: propProject, onBackToHome, onSelect
               <span className="external-arrow">↗</span>
             </a>
           )}
-          {hasGDocs && (
+          {/* Support bilingual Docs links if both are available */}
+          {project.googleDocsUrlPt && (
             <a
-              href={project.googleDocsUrl}
+              href={project.googleDocsUrlPt}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="action-btn gdocs-action"
+              title="Docs em Português"
+            >
+              <span>Docs (PT)</span>
+              <span className="external-arrow">↗</span>
+            </a>
+          )}
+          {project.googleDocsUrlEn && (
+            <a
+              href={project.googleDocsUrlEn}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="action-btn gdocs-action"
+              title="Docs in English"
+            >
+              <span>Docs (EN)</span>
+              <span className="external-arrow">↗</span>
+            </a>
+          )}
+          {!project.googleDocsUrlPt && !project.googleDocsUrlEn && hasGDocs && (
+            <a
+              href={activeGDocs || project.googleDocsUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="action-btn gdocs-action"
@@ -129,6 +165,14 @@ export default function ViewDraft({ project: propProject, onBackToHome, onSelect
               <span className="external-arrow">↗</span>
             </a>
           )}
+
+          <ShareButton
+            title={projectTitle}
+            text={projectDesc}
+            url={`/?project=${encodeURIComponent(project.id)}`}
+            className="action-btn share-action"
+          />
+
           <LanguageSwitcher />
         </div>
       </nav>

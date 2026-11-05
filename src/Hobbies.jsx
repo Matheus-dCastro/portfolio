@@ -8,6 +8,7 @@ import ArtGallery from "./components/ArtGallery";
 import { getStoredThoughts, getStoredDrawings } from "./data/projectsData";
 import { fetchThoughts, fetchDrawings } from "./lib/supabaseService";
 import { useLanguage } from "./context/useLanguage";
+import ShareButton from "./components/ShareButton";
 
 // Capas
 import capa1 from "./assets/img/1CF53B24-759E-48D5-B0C5-9CA7349A544E.webp";
@@ -99,7 +100,7 @@ function Hobbies({ onBackToHome }) {
               const itemContent = lang === "en" ? (item.contentEn || item.content) : (item.contentPt || item.content);
 
               return (
-                <article key={item.id} className="thought-mini-card">
+                <article key={item.id} id={`thought-${item.id}`} className="thought-mini-card">
                   <div className="thought-card-top">
                     <h4>{itemTitle}</h4>
                     {item.updatedAt && <span className="thought-date">{item.updatedAt}</span>}
@@ -107,30 +108,36 @@ function Hobbies({ onBackToHome }) {
                   <div className="thought-body-text">
                     <p>{itemContent}</p>
                   </div>
-                  {item.googleDocsUrl && (
-                    <div className="thought-actions">
-                      <a
-                        href={item.googleDocsUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="thought-doc-link"
-                      >
-                        {t("thoughts.read_gdocs")}
-                      </a>
+                  <div className="thought-bottom-bar">
+                    <div style={{ display: "flex", gap: "8px", alignItems: "center", flexWrap: "wrap" }}>
+                      {item.googleDocsUrl && (
+                        <a
+                          href={item.googleDocsUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="thought-doc-link"
+                        >
+                          {t("thoughts.read_gdocs")}
+                        </a>
+                      )}
+                      {item.pdfUrl && !item.googleDocsUrl && (
+                        <a
+                          href={item.pdfUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="thought-doc-link"
+                        >
+                          {t("thoughts.open_pdf")}
+                        </a>
+                      )}
                     </div>
-                  )}
-                  {item.pdfUrl && !item.googleDocsUrl && (
-                    <div className="thought-actions">
-                      <a
-                        href={item.pdfUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="thought-doc-link"
-                      >
-                        {t("thoughts.open_pdf")}
-                      </a>
-                    </div>
-                  )}
+
+                    <ShareButton
+                      title={itemTitle}
+                      text={itemContent}
+                      url={`/?page=hobbies#thought-${item.id}`}
+                    />
+                  </div>
                   {item.tags && item.tags.length > 0 && (
                     <div className="thought-tags">
                       {item.tags.map((tag, idx) => (

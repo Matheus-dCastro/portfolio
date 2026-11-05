@@ -79,9 +79,16 @@ export const translations = {
     "articles.lead_text": "In-depth analyses on Deep Learning, system architecture with FastAPI, Linux automation, and intersections between art and engineering.",
     "articles.filter_all": "All",
     "articles.read_time": "min read",
-    "articles.read_full": "Read Full Article →",
+    "articles.read_full": "Read Full Article",
+    "articles.view_details": "View Details",
+    "articles.open_docs_pt": "Read in PT (Docs)",
+    "articles.open_docs_en": "Read in EN (Docs)",
     "articles.badge_project": "Project",
     "articles.no_summary": "No summary available.",
+
+    // Common UI (Share & Actions)
+    "common.share": "Share",
+    "common.copied": "Link Copied!",
 
     // About Me
     "about.tag": "Introduction",
@@ -143,7 +150,8 @@ export const translations = {
 
     // ViewDraft (Detail Page)
     "view.loading": "Loading project information...",
-    "view.back_to_projects": "← Back to Projects",
+    "view.back_to_projects": "Back to Projects",
+    "view.back_to_articles": "Back to Articles",
     "view.github_repo": "GitHub Repository",
     "view.live_demo": "Live Demo",
     "view.gdocs": "Google Docs",
@@ -271,9 +279,16 @@ export const translations = {
     "articles.lead_text": "Análises aprofundadas sobre Deep Learning, arquitetura de sistemas com FastAPI, automação com Linux e intersecções entre arte e engenharia.",
     "articles.filter_all": "Todos",
     "articles.read_time": "min de leitura",
-    "articles.read_full": "Ler Artigo Completo →",
+    "articles.read_full": "Ler Artigo Completo",
+    "articles.view_details": "Visualizar Detalhes",
+    "articles.open_docs_pt": "Ler em PT (Docs)",
+    "articles.open_docs_en": "Ler em EN (Docs)",
     "articles.badge_project": "Projeto",
     "articles.no_summary": "Sem resumo disponível.",
+
+    // Common UI (Share & Actions)
+    "common.share": "Compartilhar",
+    "common.copied": "Link Copiado!",
 
     // About Me
     "about.tag": "Introdução",
@@ -335,7 +350,8 @@ export const translations = {
 
     // ViewDraft (Detail Page)
     "view.loading": "Carregando informações do projeto...",
-    "view.back_to_projects": "← Voltar aos Projetos",
+    "view.back_to_projects": "Voltar aos Projetos",
+    "view.back_to_articles": "Voltar aos Artigos",
     "view.github_repo": "Repositório GitHub",
     "view.live_demo": "Live Demo",
     "view.gdocs": "Google Docs",

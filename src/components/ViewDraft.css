@@ -138,6 +138,20 @@
   color: #ffffff;
 }
 
+.share-action {
+  background: rgba(139, 92, 246, 0.12);
+  border: 1px solid rgba(139, 92, 246, 0.35);
+  color: #c4b5fd;
+  cursor: pointer;
+}
+
+.share-action:hover {
+  background: rgba(139, 92, 246, 0.25);
+  border-color: #8b5cf6;
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
 .external-arrow {
   font-size: 0.85rem;
 }

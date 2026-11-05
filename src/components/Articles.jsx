@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { getStoredArticles } from "../data/projectsData";
 import { fetchArticles } from "../lib/supabaseService";
 import { useLanguage } from "../context/useLanguage";
+import ShareButton from "./ShareButton";
 
 export default function Articles({ onOpenArticle }) {
   const { t, lang } = useLanguage();
@@ -118,14 +119,78 @@ export default function Articles({ onOpenArticle }) {
                 )}
               </div>
 
-              <div className="project-footer">
-                <button
-                  type="button"
-                  className="btn-learn-more"
-                  onClick={() => onOpenArticle && onOpenArticle(article)}
-                >
-                  {t("articles.read_full")}
-                </button>
+              {/* Direct links for PT and EN articles if configured */}
+              {(article.googleDocsUrlPt || article.googleDocsUrlEn || article.googleDocsUrl || article.pdfUrl) && (
+                <div className="article-direct-links" style={{ marginTop: "10px" }}>
+                  {article.googleDocsUrlPt && (
+                    <a
+                      href={article.googleDocsUrlPt}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="article-lang-badge-btn pt"
+                      title={t("articles.open_docs_pt")}
+                    >
+                      Docs (PT) ↗
+                    </a>
+                  )}
+                  {article.googleDocsUrlEn && (
+                    <a
+                      href={article.googleDocsUrlEn}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="article-lang-badge-btn en"
+                      title={t("articles.open_docs_en")}
+                    >
+                      Docs (EN) ↗
+                    </a>
+                  )}
+                  {!article.googleDocsUrlPt && !article.googleDocsUrlEn && article.googleDocsUrl && (
+                    <a
+                      href={article.googleDocsUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="article-lang-badge-btn"
+                    >
+                      Docs ↗
+                    </a>
+                  )}
+                  {article.pdfUrl && (
+                    <a
+                      href={article.pdfUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="article-lang-badge-btn"
+                    >
+                      PDF ↗
+                    </a>
+                  )}
+                </div>
+              )}
+
+              <div className="article-actions-row">
+                {onOpenArticle && (
+                  <button
+                    type="button"
+                    className="link-arrow highlight"
+                    onClick={() => onOpenArticle(article)}
+                    style={{
+                      background: "none",
+                      border: "none",
+                      fontFamily: "inherit",
+                      fontSize: "inherit",
+                      cursor: "pointer",
+                      padding: 0
+                    }}
+                  >
+                    {t("articles.view_details") || t("articles.read_full")} <span>→</span>
+                  </button>
+                )}
+
+                <ShareButton
+                  title={title}
+                  text={desc}
+                  url={`/?project=${encodeURIComponent(article.id)}`}
+                />
               </div>
             </div>
           );

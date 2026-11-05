@@ -131,7 +131,15 @@ function Perfil({ nomeCompleto, description, foto, cv }) {
             <div className="cv-modal-content" onClick={(e) => e.stopPropagation()}>
               <div className="cv-modal-header">
                 <div className="cv-modal-title-group">
-                  <span className="cv-modal-icon"></span>
+                  <span className="cv-modal-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                      <polyline points="14 2 14 8 20 8"></polyline>
+                      <line x1="16" y1="13" x2="8" y2="13"></line>
+                      <line x1="16" y1="17" x2="8" y2="17"></line>
+                      <polyline points="10 9 9 9 8 9"></polyline>
+                    </svg>
+                  </span>
                   <div>
                     <h3>{t("cv_modal.title")}</h3>
                     <p>{t("cv_modal.subtitle")}</p>
@@ -176,6 +184,15 @@ function Perfil({ nomeCompleto, description, foto, cv }) {
                   className="cv-option-card gdocs-card"
                   onClick={() => setShowCvModal(false)}
                 >
+                  <span className="cv-option-icon gdocs-icon">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                      <polyline points="14 2 14 8 20 8"></polyline>
+                      <line x1="16" y1="13" x2="8" y2="13"></line>
+                      <line x1="16" y1="17" x2="8" y2="17"></line>
+                      <line x1="10" y1="9" x2="8" y2="9"></line>
+                    </svg>
+                  </span>
                   <div className="cv-option-text">
                     <div className="cv-option-badge">{docsBadge}</div>
                     <h4>{t("cv_modal.gdocs_title")}</h4>
@@ -193,6 +210,13 @@ function Perfil({ nomeCompleto, description, foto, cv }) {
                   className="cv-option-card pdf-card"
                   onClick={() => setShowCvModal(false)}
                 >
+                  <span className="cv-option-icon pdf-icon">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#f87171" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                      <polyline points="7 10 12 15 17 10"></polyline>
+                      <line x1="12" y1="15" x2="12" y2="3"></line>
+                    </svg>
+                  </span>
                   <div className="cv-option-text">
                     <div className="cv-option-badge">{pdfBadge}</div>
                     <h4>{t("cv_modal.pdf_title")}</h4>

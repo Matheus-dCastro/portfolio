@@ -4,6 +4,120 @@ import { sendChatMessage } from "../lib/llmService";
 import { useLanguage } from "../context/useLanguage";
 import "./ChatWidget.css";
 
+function FormattedMessage({ text }) {
+  if (!text) return null;
+
+  const lines = text.split("\n");
+
+  const formatInline = (str) => {
+    const parts = [];
+    let remaining = str;
+    let keyIdx = 0;
+
+    // Pattern matching [label](url), raw urls, **bold**, and `code`
+    const tokenRegex = /(\[([^\]]+)\]\((https?:\/\/[^\s)]+)\))|(https?:\/\/[^\s)]+)|(\*\*([^*]+)\*\*)|(`([^`]+)`)/g;
+    let match;
+    let lastIndex = 0;
+
+    while ((match = tokenRegex.exec(remaining)) !== null) {
+      if (match.index > lastIndex) {
+        parts.push(remaining.substring(lastIndex, match.index));
+      }
+
+      if (match[1]) {
+        parts.push(
+          <a
+            key={`link-${keyIdx++}`}
+            href={match[3]}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="chat-bubble-link"
+          >
+            {match[2]} ↗
+          </a>
+        );
+      } else if (match[4]) {
+        const rawUrl = match[4];
+        const displayLabel = rawUrl.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "");
+        parts.push(
+          <a
+            key={`url-${keyIdx++}`}
+            href={rawUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="chat-bubble-link"
+          >
+            {displayLabel} ↗
+          </a>
+        );
+      } else if (match[5]) {
+        parts.push(
+          <strong key={`bold-${keyIdx++}`} className="chat-bubble-strong">
+            {match[6]}
+          </strong>
+        );
+      } else if (match[7]) {
+        parts.push(
+          <code key={`code-${keyIdx++}`} className="chat-bubble-code">
+            {match[8]}
+          </code>
+        );
+      }
+
+      lastIndex = match.index + match[0].length;
+    }
+
+    if (lastIndex < remaining.length) {
+      parts.push(remaining.substring(lastIndex));
+    }
+
+    return parts;
+  };
+
+  const renderedBlocks = [];
+  let currentListItems = [];
+
+  const flushList = () => {
+    if (currentListItems.length > 0) {
+      renderedBlocks.push(
+        <ul key={`list-${renderedBlocks.length}`} className="chat-bubble-list">
+          {currentListItems.map((item, iIdx) => (
+            <li key={iIdx}>{item}</li>
+          ))}
+        </ul>
+      );
+      currentListItems = [];
+    }
+  };
+
+  lines.forEach((line, lineIdx) => {
+    const trimmed = line.trim();
+    if (!trimmed) {
+      flushList();
+      return;
+    }
+
+    const bulletMatch = trimmed.match(/^[-*•]\s+(.*)$/);
+    const numMatch = trimmed.match(/^\d+\.\s+(.*)$/);
+
+    if (bulletMatch || numMatch) {
+      const content = bulletMatch ? bulletMatch[1] : numMatch[1];
+      currentListItems.push(formatInline(content));
+    } else {
+      flushList();
+      renderedBlocks.push(
+        <p key={`p-${lineIdx}`} className="chat-bubble-paragraph">
+          {formatInline(trimmed)}
+        </p>
+      );
+    }
+  });
+
+  flushList();
+
+  return <div className="formatted-chat-content">{renderedBlocks}</div>;
+}
+
 export default function ChatWidget() {
   const { t, lang } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
@@ -128,7 +242,11 @@ export default function ChatWidget() {
                 <span className="chat-widget-sender-tag">
                   {msg.sender === "user" ? t("agent.user_tag") : "Alomyr"}
                 </span>
-                <p style={{ margin: 0 }}>{msg.text}</p>
+                {msg.sender === "bot" ? (
+                  <FormattedMessage text={msg.text} />
+                ) : (
+                  <p style={{ margin: 0 }}>{msg.text}</p>
+                )}
               </div>
             ))}
 
