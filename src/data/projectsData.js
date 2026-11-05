@@ -340,7 +340,7 @@ ext install Alomyr.obsidian-neon-110
     aboutContextEn: "Complete engineering and visual architecture of Matheus de Castro's personal website. Built with Vite, React, Supabase Cloud, serverless edge functions for secure inference, and custom cyber-minimal UI.",
     aboutContextPt: "Arquitetura técnica e visual completa do portfólio pessoal de Matheus de Castro. Construído com Vite, React, Supabase Cloud, edge functions serverless para inferência segura e UI cyber-minimalista.",
     github: "https://github.com/Matheus-dCastro/portfolio",
-    demo: "https://matheusdecastro.com/",
+    demo: "",
     relatedArticleId: "post-portfolio-ecosystem",
     contentType: "markdown",
     googleDocsUrl: "",
