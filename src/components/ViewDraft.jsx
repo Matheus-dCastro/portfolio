@@ -109,7 +109,12 @@ export default function ViewDraft({ project: propProject, onBackToHome, onSelect
     ? getStoredProjects().find((p) => p.id === project.relatedProjectId)
     : null;
   const linkedBlogPost = getStoredBlogPosts().find(
-    (b) => b.relatedProjectId === project.id || (project.relatedBlogPostId && b.id === project.relatedBlogPostId)
+    (b) =>
+      b.relatedProjectId === project.id ||
+      b.relatedArticleId === project.id ||
+      b.id === project.relatedArticleId ||
+      b.id === project.relatedBlogPostId ||
+      (project.relatedBlogPostId && b.id === project.relatedBlogPostId)
   );
 
   const isFromAdmin = typeof window !== "undefined" && window.location.search.includes("from=admin");
@@ -122,20 +127,20 @@ export default function ViewDraft({ project: propProject, onBackToHome, onSelect
 
   const contextualQuestions = isThought
     ? [
-        lang === "en" ? `What is the central insight of "${projectTitle}"?` : `Qual é a reflexão central do texto "${projectTitle}"?`,
-        lang === "en" ? `How does this relate to Matheus's technical vision?` : `Como este pensamento se relaciona com a visão técnica de Matheus?`,
-        lang === "en" ? `What inspired this reflection?` : `O que motivou e inspirou a reflexão "${projectTitle}"?`
+        lang === "en" ? "What is the central insight?" : "Qual é a reflexão central deste texto?",
+        lang === "en" ? "How does this connect to tech vision?" : "Como se relaciona com a visão técnica?",
+        lang === "en" ? "What inspired this reflection?" : "O que motivou e inspirou este ensaio?"
       ]
     : isArticle
     ? [
-        lang === "en" ? `What is the core thesis of "${projectTitle}"?` : `Qual é a tese principal e conclusões do artigo "${projectTitle}"?`,
-        lang === "en" ? `Which methodologies were explored in this article?` : `Quais metodologias foram abordadas no artigo "${projectTitle}"?`,
-        lang === "en" ? `Provide an executive summary of this article.` : `Faça um resumo executivo em tópicos do artigo "${projectTitle}".`
+        lang === "en" ? "What is the core thesis?" : "Qual é a tese principal deste artigo?",
+        lang === "en" ? "Which methodologies were used?" : "Quais metodologias foram abordadas?",
+        lang === "en" ? "Provide an executive summary." : "Faça um resumo executivo dos pontos-chave."
       ]
     : [
-        lang === "en" ? `How was "${projectTitle}" architected?` : `Como o projeto "${projectTitle}" foi arquitetado?`,
-        lang === "en" ? `What technologies and models were used?` : `Quais tecnologias e modelos foram utilizados em "${projectTitle}"?`,
-        lang === "en" ? `What practical results and metrics were achieved?` : `Quais resultados e métricas práticas foram alcançados em "${projectTitle}"?`
+        lang === "en" ? "How was this architected?" : "Como este projeto foi arquitetado?",
+        lang === "en" ? "What stack and models were used?" : "Quais tecnologias e modelos foram usados?",
+        lang === "en" ? "What practical metrics were achieved?" : "Quais resultados e métricas foram alcançados?"
       ];
 
   const handleAskAlomyr = (questionText) => {
@@ -539,7 +544,7 @@ export default function ViewDraft({ project: propProject, onBackToHome, onSelect
                   key={idx}
                   type="button"
                   className="alomyr-context-chip-btn"
-                  onClick={() => handleAskAlomyr(q)}
+                  onClick={() => handleAskAlomyr(`[Sobre o ${itemTypeName} "${projectTitle}"]: ${q}`)}
                 >
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: "4px" }}>
                     <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>

@@ -3,6 +3,7 @@
 
 import { supabase, isSupabaseConfigured } from "./supabaseClient.js";
 import {
+  DEFAULT_PROJECTS,
   getStoredProjects,
   saveProjects,
   getStoredArticles,
@@ -506,8 +507,13 @@ export async function fetchWorks(includeDrafts = false) {
       const { data, error } = await query;
       if (!error && Array.isArray(data)) {
         const mapped = data.map(mapDbWorkToProject);
-        saveProjects(mapped); // Mantém cache offline sincronizado
-        return mapped;
+        // Garante que projetos essenciais (como o projeto do próprio portfólio) apareçam mesmo se ainda não persistidos na nuvem
+        const remoteIds = new Set(mapped.map((p) => p.id));
+        const missingDefaults = DEFAULT_PROJECTS.filter((p) => !remoteIds.has(p.id));
+        const combined = [...mapped, ...missingDefaults];
+
+        saveProjects(combined); // Mantém cache offline sincronizado
+        return combined;
       }
       if (error) {
         console.warn("Supabase fetchWorks avisou:", error.message);

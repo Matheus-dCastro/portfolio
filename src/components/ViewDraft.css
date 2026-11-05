@@ -162,11 +162,12 @@
 
 /* Main Article Container */
 .view-main-article {
-  max-width: 900px;
+  max-width: 1040px;
   width: 100%;
   margin: 0 auto;
-  padding: 3rem 6% 6rem;
+  padding: 2.5rem 2rem 5rem;
   flex: 1;
+  box-sizing: border-box;
 }
 
 /* Article Header */
@@ -838,17 +839,17 @@
 .view-alomyr-contextual-section {
   width: 100%;
   max-width: 100%;
-  margin: 3.5rem 0 2rem;
+  margin: 2.5rem 0 2rem;
   box-sizing: border-box;
 }
 
 .alomyr-context-card {
-  background: linear-gradient(135deg, rgba(139, 92, 246, 0.08) 0%, rgba(15, 15, 23, 0.9) 100%);
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.08) 0%, rgba(15, 15, 23, 0.95) 100%);
   border: 1px solid rgba(139, 92, 246, 0.28);
-  border-radius: 20px;
-  padding: 2rem 2.25rem;
-  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.06);
-  backdrop-filter: blur(12px);
+  border-radius: 18px;
+  padding: 1.5rem 2rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(14px);
   transition: all 0.25s ease;
   width: 100%;
   box-sizing: border-box;
@@ -856,32 +857,32 @@
 
 .alomyr-context-card:hover {
   border-color: rgba(139, 92, 246, 0.45);
-  box-shadow: 0 16px 40px rgba(139, 92, 246, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  box-shadow: 0 14px 38px rgba(139, 92, 246, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
 .alomyr-context-header {
   display: flex;
-  gap: 1.25rem;
-  align-items: flex-start;
+  gap: 1.1rem;
+  align-items: center;
 }
 
 .alomyr-context-avatar {
-  width: 52px;
-  height: 52px;
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
   background: rgba(139, 92, 246, 0.15);
   border: 1px solid rgba(139, 92, 246, 0.35);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 18px rgba(139, 92, 246, 0.35);
+  box-shadow: 0 4px 16px rgba(139, 92, 246, 0.3);
   flex-shrink: 0;
   overflow: hidden;
 }
 
 .alomyr-banner-wolf-img {
-  width: 34px;
-  height: 34px;
+  width: 32px;
+  height: 32px;
   object-fit: contain;
 }
 
@@ -892,16 +893,16 @@
 .alomyr-context-badge {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  font-size: 0.72rem;
+  gap: 5px;
+  font-size: 0.7rem;
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: #c4b5fd;
-  background: rgba(139, 92, 246, 0.18);
-  padding: 3px 9px;
+  background: rgba(139, 92, 246, 0.16);
+  padding: 2px 8px;
   border-radius: 999px;
-  margin-bottom: 0.45rem;
+  margin-bottom: 0.3rem;
 }
 
 .alomyr-context-badge .badge-dot {
@@ -912,58 +913,59 @@
 }
 
 .alomyr-context-title {
-  font-size: 1.3rem;
+  font-size: 1.22rem;
   font-weight: 800;
   color: #ffffff;
-  margin: 0 0 0.35rem 0;
+  margin: 0 0 0.2rem 0;
   letter-spacing: -0.01em;
 }
 
 .alomyr-context-desc {
-  font-size: 0.88rem;
-  color: #9ca3af;
+  font-size: 0.85rem;
+  color: #94a3b8;
   margin: 0;
-  line-height: 1.5;
+  line-height: 1.4;
 }
 
 .alomyr-context-chips {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.65rem;
-  margin: 1.35rem 0;
+  gap: 0.5rem;
+  margin: 0.95rem 0 1rem;
 }
 
 .alomyr-context-chip-btn {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
-  background: rgba(255, 255, 255, 0.04);
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.035);
   border: 1px solid rgba(139, 92, 246, 0.22);
   border-radius: 999px;
-  padding: 8px 15px;
-  font-size: 0.82rem;
-  font-weight: 600;
+  padding: 6px 13px;
+  font-size: 0.79rem;
+  font-weight: 500;
   color: #e2e8f0;
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   text-align: left;
+  white-space: nowrap;
 }
 
 .alomyr-context-chip-btn:hover {
   background: rgba(139, 92, 246, 0.18);
   border-color: #8b5cf6;
   color: #ffffff;
-  transform: translateY(-2px);
+  transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(139, 92, 246, 0.25);
 }
 
 .alomyr-context-chip-btn .chip-spark {
-  font-size: 0.9rem;
+  font-size: 0.85rem;
 }
 
 .alomyr-context-form {
   display: flex;
-  gap: 0.75rem;
+  gap: 0.65rem;
   align-items: center;
   width: 100%;
 }
@@ -971,13 +973,13 @@
 .alomyr-context-input {
   flex: 1;
   min-width: 0;
-  height: 44px;
+  height: 42px;
   background: #09090f;
   border: 1px solid #272738;
-  border-radius: 12px;
-  padding: 0 16px;
+  border-radius: 10px;
+  padding: 0 14px;
   color: #ffffff;
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   outline: none;
   transition: all 0.2s ease;
   box-sizing: border-box;
@@ -991,7 +993,7 @@
 .alomyr-form-buttons {
   display: flex;
   align-items: center;
-  gap: 0.65rem;
+  gap: 0.55rem;
   flex-shrink: 0;
 }
 
@@ -1002,10 +1004,10 @@
   background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
   color: #ffffff;
   border: none;
-  border-radius: 12px;
-  height: 44px;
-  padding: 0 18px;
-  font-size: 0.86rem;
+  border-radius: 10px;
+  height: 42px;
+  padding: 0 16px;
+  font-size: 0.84rem;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -1026,10 +1028,10 @@
   background: transparent;
   border: 1px solid rgba(139, 92, 246, 0.35);
   color: #c4b5fd;
-  border-radius: 12px;
-  height: 44px;
-  padding: 0 16px;
-  font-size: 0.84rem;
+  border-radius: 10px;
+  height: 42px;
+  padding: 0 14px;
+  font-size: 0.82rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;

@@ -206,6 +206,7 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
   const [blogContentPt, setBlogContentPt] = useState("");
   const [blogContentEn, setBlogContentEn] = useState("");
   const [blogRelatedProjectId, setBlogRelatedProjectId] = useState("");
+  const [blogRelatedArticleId, setBlogRelatedArticleId] = useState("");
   const [blogAuthor, setBlogAuthor] = useState("Matheus de Castro");
   const [blogPublishedAt, setBlogPublishedAt] = useState(new Date().toISOString().split("T")[0]);
   const [blogReadTime, setBlogReadTime] = useState("5 min");
@@ -327,6 +328,7 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
     setBlogContentPt(post.contentPt || "");
     setBlogContentEn(post.contentEn || "");
     setBlogRelatedProjectId(post.relatedProjectId || "");
+    setBlogRelatedArticleId(post.relatedArticleId || "");
     setBlogAuthor(post.author || "Matheus de Castro");
     setBlogPublishedAt(post.publishedAt || new Date().toISOString().split("T")[0]);
     setBlogReadTime(post.readTime || "5 min");
@@ -348,6 +350,7 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
     setBlogContentPt("## Contexto e Desafio Técnico\n\nDescreva a arquitetura...");
     setBlogContentEn("## Overview & Technical Challenge\n\nDescribe the architecture...");
     setBlogRelatedProjectId("");
+    setBlogRelatedArticleId("");
     setBlogAuthor("Matheus de Castro");
     setBlogPublishedAt(new Date().toISOString().split("T")[0]);
     setBlogReadTime("5 min");
@@ -387,6 +390,7 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
       contentPt: blogContentPt,
       contentEn: blogContentEn,
       relatedProjectId: blogRelatedProjectId || null,
+      relatedArticleId: blogRelatedArticleId || null,
       author: blogAuthor.trim() || "Matheus de Castro",
       publishedAt: blogPublishedAt || new Date().toISOString().split("T")[0],
       readTime: blogReadTime.trim() || "5 min",
@@ -3654,26 +3658,50 @@ DIRETRIZ MÁXIMA DE CONCISÃO:
                     </div>
                   </div>
 
-                  <div style={{ background: "rgba(139, 92, 246, 0.08)", padding: "12px 14px", borderRadius: "10px", border: "1px solid rgba(139, 92, 246, 0.25)" }}>
-                    <label style={{ display: "block", marginBottom: "4px" }}>
-                      <strong style={{ color: "#c4b5fd", fontSize: "13px" }}>🔗 Vínculo Bidirecional com Projeto do Portfólio</strong>
-                    </label>
-                    <p style={{ fontSize: "11px", color: "#94a3b8", margin: "0 0 8px" }}>
-                      Ao vincular um projeto, botões mútuos aparecem no card da home e dentro da leitura deste post.
-                    </p>
-                    <select
-                      className="drawings-input"
-                      value={blogRelatedProjectId}
-                      onChange={(e) => setBlogRelatedProjectId(e.target.value)}
-                      style={{ background: "#0d1117" }}
-                    >
-                      <option value="">-- Nenhum projeto vinculado --</option>
-                      {getStoredProjects().map((proj) => (
-                        <option key={proj.id} value={proj.id}>
-                          {proj.titlePt || proj.titleEn || proj.title} ({proj.category})
-                        </option>
-                      ))}
-                    </select>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginTop: "14px" }}>
+                    <div style={{ background: "rgba(139, 92, 246, 0.08)", padding: "12px 14px", borderRadius: "10px", border: "1px solid rgba(139, 92, 246, 0.25)" }}>
+                      <label style={{ display: "block", marginBottom: "4px" }}>
+                        <strong style={{ color: "#c4b5fd", fontSize: "13px" }}>🔗 Vínculo com Projeto do Portfólio</strong>
+                      </label>
+                      <p style={{ fontSize: "11px", color: "#94a3b8", margin: "0 0 8px" }}>
+                        Vincula este post a um projeto prático.
+                      </p>
+                      <select
+                        className="drawings-input"
+                        value={blogRelatedProjectId}
+                        onChange={(e) => setBlogRelatedProjectId(e.target.value)}
+                        style={{ background: "#0d1117" }}
+                      >
+                        <option value="">-- Nenhum projeto vinculado --</option>
+                        {getStoredProjects().map((proj) => (
+                          <option key={proj.id} value={proj.id}>
+                            {proj.titlePt || proj.titleEn || proj.title} ({proj.category})
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div style={{ background: "rgba(6, 182, 212, 0.08)", padding: "12px 14px", borderRadius: "10px", border: "1px solid rgba(6, 182, 212, 0.25)" }}>
+                      <label style={{ display: "block", marginBottom: "4px" }}>
+                        <strong style={{ color: "#38bdf8", fontSize: "13px" }}>📄 Vínculo com Artigo Técnico</strong>
+                      </label>
+                      <p style={{ fontSize: "11px", color: "#94a3b8", margin: "0 0 8px" }}>
+                        Vincula este post a um artigo acadêmico / conceitual.
+                      </p>
+                      <select
+                        className="drawings-input"
+                        value={blogRelatedArticleId}
+                        onChange={(e) => setBlogRelatedArticleId(e.target.value)}
+                        style={{ background: "#0d1117" }}
+                      >
+                        <option value="">-- Nenhum artigo vinculado --</option>
+                        {getStoredArticles().map((art) => (
+                          <option key={art.id} value={art.id}>
+                            {art.titlePt || art.titleEn || art.title} ({art.category})
+                          </option>
+                        ))}
+                      </select>
+                    </div>
                   </div>
                 </div>
 

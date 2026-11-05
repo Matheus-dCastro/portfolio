@@ -14,7 +14,7 @@ import {
   getYoutubeEmbedUrl,
   BLOG_CHANNELS
 } from "../data/blogData";
-import { getStoredProjects } from "../data/projectsData";
+import { getStoredProjects, getStoredArticles } from "../data/projectsData";
 import "./BlogPage.css";
 
 export default function BlogPage({
@@ -152,6 +152,13 @@ export default function BlogPage({
     if (!activePost || !activePost.relatedProjectId) return null;
     const allProjects = getStoredProjects();
     return allProjects.find((p) => p.id === activePost.relatedProjectId) || null;
+  }, [activePost]);
+
+  // Related Technical Article if activePost has one
+  const relatedArticle = useMemo(() => {
+    if (!activePost || !activePost.relatedArticleId) return null;
+    const allArticles = getStoredArticles();
+    return allArticles.find((a) => a.id === activePost.relatedArticleId) || null;
   }, [activePost]);
 
   // Previous and Next posts in the same channel
@@ -406,6 +413,53 @@ export default function BlogPage({
             </div>
           )}
 
+          {/* STRONG BIDIRECTIONAL LINK: RELATED TECHNICAL ARTICLE */}
+          {relatedArticle && (
+            <div className="reader-related-project-box article-linked">
+              <div className="related-icon-glow" style={{ color: "#38bdf8", borderColor: "rgba(6, 182, 212, 0.4)", background: "rgba(6, 182, 212, 0.15)" }}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                  <polyline points="14 2 14 8 20 8"></polyline>
+                  <line x1="16" y1="13" x2="8" y2="13"></line>
+                  <line x1="16" y1="17" x2="8" y2="17"></line>
+                </svg>
+              </div>
+              <div className="related-project-info">
+                <span className="related-tag-badge" style={{ color: "#38bdf8", background: "rgba(6, 182, 212, 0.15)", borderColor: "rgba(6, 182, 212, 0.35)" }}>
+                  {lang === "en" ? "Related Technical Article" : "Artigo Técnico Vinculado"}
+                </span>
+                <h3 className="related-title">
+                  {lang === "en" ? relatedArticle.titleEn || relatedArticle.title : relatedArticle.titlePt || relatedArticle.title}
+                </h3>
+                <p className="related-desc">
+                  {lang === "en"
+                    ? relatedArticle.shortDescriptionEn || relatedArticle.shortDescription
+                    : relatedArticle.shortDescriptionPt || relatedArticle.shortDescription}
+                </p>
+              </div>
+              <div className="related-project-action">
+                <button
+                  type="button"
+                  className="related-visit-btn"
+                  style={{ borderColor: "#06b6d4", background: "rgba(6, 182, 212, 0.2)", color: "#e0f2fe" }}
+                  onClick={() => {
+                    if (onOpenProject) {
+                      onOpenProject(relatedArticle);
+                    } else {
+                      window.location.href = `/?project=${encodeURIComponent(relatedArticle.id)}`;
+                    }
+                  }}
+                >
+                  <span>{lang === "en" ? "Read Article in Portfolio" : "Ler Artigo no Portfólio"}</span>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                    <polyline points="12 5 19 12 12 19"></polyline>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          )}
+
           {/* MAIN POST CONTENT (RICH MARKDOWN) */}
           <div className="reader-markdown-body">
             <BlogMarkdownRenderer
@@ -645,6 +699,14 @@ export default function BlogPage({
                         Projeto
                       </span>
                     )}
+                    {featuredPost.relatedArticleId && (
+                      <span className="floating-badge article-badge" title="Artigo Técnico Vinculado" style={{ background: "rgba(6, 182, 212, 0.9)", color: "#042f2e" }}>
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: "3px" }}>
+                          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        </svg>
+                        Artigo
+                      </span>
+                    )}
                   </div>
                 </div>
 
@@ -813,6 +875,14 @@ export default function BlogPage({
                                 <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
                               </svg>
                               Projeto
+                            </span>
+                          )}
+                          {post.relatedArticleId && (
+                            <span className="floating-badge article-badge" title="Artigo Técnico Vinculado" style={{ background: "rgba(6, 182, 212, 0.9)", color: "#042f2e" }}>
+                              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: "3px" }}>
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                              </svg>
+                              Artigo
                             </span>
                           )}
                         </div>

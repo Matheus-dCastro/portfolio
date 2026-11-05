@@ -248,6 +248,80 @@ Writing code is not just mechanics: it is an externalization of internal mental 
     publishedAt: "2026-10-08",
     readTime: "4 min",
     isPublished: true
+  },
+  {
+    id: "post-portfolio-ecosystem",
+    channel: "tech",
+    titlePt: "Engenharia do Portfólio: Ecossistema de Blog Duplo, Vite Multi-Page e Inferência Segura com Qwen 3.8",
+    titleEn: "Portfolio Engineering: Dual-Blog Ecosystem, Multi-Page Vite, and Secure Inference with Qwen 3.8",
+    summaryPt: "Mergulho profundo na arquitetura técnica deste portfólio: zero segredos no cliente, Edge Functions para inferência isolada de LLMs, roteamento estático Vite e integração com Supabase.",
+    summaryEn: "Deep-dive into this portfolio's technical architecture: zero client secrets, Edge Functions for isolated LLM inference, Vite multi-page routing, and Supabase integration.",
+    category: "Machine Learning & Backend",
+    tags: ["#React", "#Supabase", "#Vite", "#AI Agent", "#Architecture", "#Cloud"],
+    coverImage: "/portfolio-preview.png",
+    youtubeUrl: "",
+    galleryImages: ["/portfolio-preview.png"],
+    contentPt: `## Arquitetura Moderna de Alta Performance
+
+Este portfólio foi desenhado com o compromisso de aliar a síntese visual de uma vitrine profissional de tecnologia à profundidade analítica de um ecossistema de conteúdo técnico e laboratório criativo.
+
+![Visão Geral da Interface do Portfólio](/portfolio-preview.png)
+
+### 1. Isolamento de Inferência & Zero Segredos no Navegador
+A grande inovação de segurança nesta versão é a eliminação completa de qualquer chave sensível no \`localStorage\` ou código cliente. A inferência de IA utiliza o modelo de última geração **Qwen 3.8 27B** através de Edge Functions serverless no Supabase:
+- O frontend despacha apenas o histórico contextualizado.
+- A borda da nuvem valida guardrails anti-injection e aplica limites estritos de taxa.
+- Respostas são devolvidas com latência sub-centésimo de segundo (<80ms).
+
+### 2. Ecossistema de Blog Duplo (Split Gateway)
+Navegação segmentada entre dois mundos:
+1. **Canal de Engenharia & IA (\`/blog\`):** Artigos aprofundados, benchmarks de LLM, pipelines de visão computacional e arquiteturas de backend.
+2. **Laboratório Alomyr (\`/blog/alomyr\`):** Hiper-realismo artístico, rotinas de retrogaming no Linux e ensaios filosóficos sobre código e consciência.
+
+### 3. Roteamento Multi-Page no Vite
+Adoção de compilação multi-page estática com Rollup:
+\`\`\`javascript
+// vite.config.js
+export default defineConfig({
+  plugins: [react()],
+  build: {
+    rollupOptions: {
+      input: {
+        main: resolve(__dirname, 'index.html'),
+        admin: resolve(__dirname, '4dm1n/index.html'),
+        blog: resolve(__dirname, 'blog/index.html'),
+        blogAlomyr: resolve(__dirname, 'blog/alomyr/index.html')
+      }
+    }
+  }
+});
+\`\`\`
+Isso assegura recarregamentos limpos (F5) em qualquer rota em servidores estáticos como o GitHub Pages.`,
+    contentEn: `## High-Performance Modern Architecture
+
+This portfolio was designed to combine the visual synthesis of a professional showcase with the analytical depth of an engineering blog and creative lab.
+
+![Portfolio Interface Overview](/portfolio-preview.png)
+
+### 1. Inference Isolation & Zero Client Secrets
+The primary security milestone of this release is eliminating all API keys from browser storage. AI inference runs **Qwen 3.8 27B** through serverless Supabase Edge Functions:
+- Client code dispatches only clean message histories.
+- Cloud edge enforces prompt injection guardrails and rate limiting.
+- Output arrives with sub-100ms response latency.
+
+### 2. Dual-Blog Ecosystem (Split Gateway)
+Structured into two distinct editorial paths:
+1. **Engineering & AI Channel (\`/blog\`):** Deep dives, LLM telemetry, computer vision pipelines, and scalable backend design.
+2. **Alomyr Creative Lab (\`/blog/alomyr\`):** Hyper-realistic pencil drawing, Linux retrogaming, and philosophy of mind.
+
+### 3. Vite Multi-Page Static Builds
+Configured with dedicated HTML entrypoints for direct URL reloads on GitHub Pages without single-page fallback issues.`,
+    relatedProjectId: "portfolio-ecosystem",
+    relatedArticleId: null,
+    author: "Matheus de Castro",
+    publishedAt: "2026-11-05",
+    readTime: "5 min",
+    isPublished: true
   }
 ];
 
@@ -259,6 +333,13 @@ export function getStoredBlogPosts() {
     if (raw) {
       const parsed = JSON.parse(raw);
       if (Array.isArray(parsed) && parsed.length > 0) {
+        const existingIds = new Set(parsed.map((p) => p.id));
+        const missing = DEFAULT_BLOG_POSTS.filter((p) => !existingIds.has(p.id));
+        if (missing.length > 0) {
+          const merged = [...parsed, ...missing];
+          saveBlogPosts(merged);
+          return merged;
+        }
         return parsed;
       }
     }

@@ -140,13 +140,18 @@
 - [x] **Passo 39:** Execução do build e deploy de produção no GitHub Pages (`npm run deploy`) com verificação final.
 - [x] **Passo 40:** Integração da chave do Alomyr (`GROQ_API_KEY`), migração preventiva para o modelo ativo `qwen/qwen3.8-27b` (substituindo o descontinuado 2.5), suporte a persistência da chave no Supabase (`agent_configs` + metadata tag) e inferência com 100% de disponibilidade.
 - [x] **Passo 41:** Publicação do deploy final no GitHub Pages (`npm run deploy`) sem a página 404.
+- [x] **Passo 42:** Redimensionamento e harmonia estética do card do Alomyr em "Saber Mais" (`ViewDraft`): ampliação da largura horizontal para 1040px, proporções horizontais equilibradas, padding compacto e chips de perguntas rápidas objetivos para visual moderno tipo banner.
+- [x] **Passo 43:** Exibição 100% garantida do projeto do Portfólio (`portfolio-ecosystem`) na aba de Projetos Pessoais (`Projects.jsx` e `AdminDraft.jsx`), com merge resiliente contra sobreposição do Supabase e print da tela `/portfolio-preview.png` incorporado no conteúdo.
+- [x] **Passo 44:** Criação da postagem aprofundada de engenharia do portfólio no Blog (`post-portfolio-ecosystem`), com cover, tags e vínculo bidirecional direto para o card do projeto.
+- [x] **Passo 45:** Adição de opção para vincular Artigos Técnicos no editor do Blog (`AdminDraft.jsx`), com exibição de badge e callouts interativos no leitor do Blog (`BlogPage.jsx`).
+- [x] **Passo 46:** Build limpo e deploy de produção no GitHub Pages (`npm run deploy`).
 
 ---
 
 ## 🏆 STATUS GERAL DO PROJETO: DEPLOY REALIZADO COM SUCESSO!
-- **Total de Passos Concluídos:** 41 de 41 (100%)
+- **Total de Passos Concluídos:** 46 de 46 (100%)
 - **Hospedagem Frontend:** GitHub Pages (`https://matheusdecastro.com/`) publicado via `gh-pages` branch.
-- **Assistente Alomyr:** 100% operacional em tempo real utilizando o modelo de última geração `qwen/qwen3.8-27b` (com chave integrada e resiliência ponta a ponta).
-- **Backend & Cloud:** Supabase Cloud (PostgreSQL + Storage) + migração SQL pronta em `supabase/migrations/20261105_agent_groq_key.sql`.
-- **Painel Administrativo (`/4dm1n`):** Aba do Agente com seleção de modelos Groq ativos, visualização/edição de chave e sincronização em nuvem.
+- **Card do Alomyr:** Esteticamente balanceado na horizontal no "Saber Mais", sem esticamento vertical.
+- **Projeto do Portfólio:** Visível em Projetos Pessoais e integrado ao post de engenharia do blog com print.
+- **Blog & Artigos:** Suporte completo a vínculo bidirecional tanto com Projetos quanto com Artigos Técnicos.
 - **Página 404:** Excluída temporariamente do deploy conforme instrução.
