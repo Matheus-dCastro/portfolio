@@ -71,3 +71,27 @@
 - [x] **Passo 14:** Testes no localhost concluídos e relatório consolidado (pronto para validação do usuário; deploy aguardando comando `ok`).
 
 ---
+
+## 🎨 SPRINT DE REFINAMENTOS DE UI & VITRINE DE DESENHOS (EM EXECUÇÃO)
+**Status Geral:** Executando correções imediatas de UI e expansão da galeria/interesses
+
+### 📌 Fila de Execução em Andamento:
+- [x] **Passo 15:** Ícones de 'Baixar' e 'Abrir na Web' na cor roxa (`#a78bfa` / `#8b5cf6`) em todo o sistema.
+- [x] **Passo 16:** Correção do hover das logos Ubuntu e Markdown (neutras/monocromáticas por padrão; cores oficiais ativadas apenas no hover).
+- [x] **Passo 17:** Extensão da edição no Dashboard `/4dm1n` para **todos os cards de interesse** (7 cards personalizáveis: títulos, descrições, fotos e categorias).
+- [x] **Passo 18:** Refinamento da vitrine pública de desenhos para visitantes (lightbox aprimorado com miniaturas, navegação suave, tags de hiper-realismo e alta resolução).
+
+---
+
+## 🚀 PROPOSTA DE ARQUITETURA: ECOSSISTEMA DE BLOG DUPLO (SPLIT GATEWAY)
+**Status:** Avaliação técnica elaborada (Aguardando comando **"go"** do usuário para iniciar codificação)
+
+### 📐 Estrutura Planejada:
+- [ ] **Split Gateway Intermediário (`/blog/?`):** Tela de escolha entre os dois ecossistemas com botões imersivos no Hero e na Navbar.
+- [ ] **Vertente 1: Blog Acadêmico / Profissional (`/blog`):** Engenharia de IA, Backend, arquitetura corporativa e pipelines de projetos.
+- [ ] **Vertente 2: Laboratório Criativo & Geek (`/blog/alomyr/`):** Hiper-realismo, retrogaming, ensaios reflexivos (pensamentos) e setups.
+- [ ] **Formatos Ricos:** Suporte a vídeos incorporados do YouTube, galerias de imagens e Markdown dinâmico.
+- [ ] **Integração Bidirecional:** Cards de projetos da home com atalho direto para os posts detalhados e vice-versa.
+- [ ] **Gestão Unificada no `/4dm1n`:** Aba administrativa para criação, moderação e categorização com canais específicos.
+
+---

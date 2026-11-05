@@ -13,6 +13,9 @@ import {
   saveCvConfig,
   DEFAULT_CV_CONFIG,
   getStoredCustomHobby,
+  getStoredHobbies,
+  saveHobbies,
+  DEFAULT_HOBBIES_LIST,
   convertGoogleDocsToEmbedUrl
 } from "../data/projectsData";
 import {
@@ -24,6 +27,7 @@ import {
   fetchCvConfig,
   fetchAgentConfig,
   fetchCustomHobby,
+  fetchHobbies,
   persistWork,
   removeWork,
   persistArticle,
@@ -39,6 +43,7 @@ import {
   uploadCvPdf,
   persistAgentConfig,
   persistCustomHobby,
+  persistHobbies,
   persistBatchOrder,
   getCurrentUser,
   logoutUser
@@ -170,15 +175,10 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
   const [draggedDrawingIdx, setDraggedDrawingIdx] = useState(null);
   const drawingFileInputRef = useRef(null);
 
-  // Custom Hobby Card States (Além de Código & Café)
-  const [customHobbyCategory, setCustomHobbyCategory] = useState("Deep Learning & Arte");
-  const [customHobbyTitlePt, setCustomHobbyTitlePt] = useState("Hiper-realismo & Algoritmos");
-  const [customHobbyTitleEn, setCustomHobbyTitleEn] = useState("Hyper-realism & Algorithms");
-  const [customHobbyDescPt, setCustomHobbyDescPt] = useState("A mesma precisão cirúrgica exigida no hiper-realismo a grafite guia o refinamento de tensores e redes neurais profundas.");
-  const [customHobbyDescEn, setCustomHobbyDescEn] = useState("The same surgical precision demanded in graphite hyper-realism guides deep neural network refinement.");
-  const [customHobbyPhoto, setCustomHobbyPhoto] = useState("");
-  const [customHobbyPublished, setCustomHobbyPublished] = useState(true);
-  const [customHobbyActiveLang, setCustomHobbyActiveLang] = useState("pt");
+  // Hobbies / Interests Cards States (Todos os 7 Cards)
+  const [hobbiesList, setHobbiesList] = useState(() => getStoredHobbies());
+  const [selectedHobbyId, setSelectedHobbyId] = useState("hobby-1");
+  const [hobbyActiveLang, setHobbyActiveLang] = useState("pt");
 
   const [currentUser, setCurrentUser] = useState(null);
 
@@ -229,15 +229,9 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
         if (cfg?.groqApiKey) setAgentApiKey(cfg.groqApiKey);
       });
     } else if (activeTab === "customHobby") {
-      fetchCustomHobby().then((h) => {
-        if (h) {
-          if (h.category) setCustomHobbyCategory(h.category);
-          if (h.titlePt) setCustomHobbyTitlePt(h.titlePt);
-          if (h.titleEn) setCustomHobbyTitleEn(h.titleEn);
-          if (h.descriptionPt) setCustomHobbyDescPt(h.descriptionPt);
-          if (h.descriptionEn) setCustomHobbyDescEn(h.descriptionEn);
-          if (h.photoUrl) setCustomHobbyPhoto(h.photoUrl);
-          if (h.isPublished !== undefined) setCustomHobbyPublished(h.isPublished);
+      fetchHobbies().then((list) => {
+        if (Array.isArray(list) && list.length > 0) {
+          setHobbiesList(list);
         }
       });
     }
@@ -1123,23 +1117,34 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
     );
   };
 
-  const handleSaveCustomHobby = async (e) => {
+  const selectedHobby =
+    hobbiesList.find((h) => h.id === selectedHobbyId) || hobbiesList[0] || DEFAULT_HOBBIES_LIST[0];
+
+  const updateSelectedHobbyField = (field, val) => {
+    setHobbiesList((prev) =>
+      prev.map((item) =>
+        item.id === selectedHobby.id ? { ...item, [field]: val } : item
+      )
+    );
+  };
+
+  const handleSaveHobbiesList = async (e) => {
     if (e && e.preventDefault) e.preventDefault();
-    const payload = {
-      category: customHobbyCategory.trim(),
-      titlePt: customHobbyTitlePt.trim(),
-      titleEn: customHobbyTitleEn.trim(),
-      descriptionPt: customHobbyDescPt.trim(),
-      descriptionEn: customHobbyDescEn.trim(),
-      photoUrl: customHobbyPhoto.trim(),
-      isPublished: customHobbyPublished
-    };
-    const res = await persistCustomHobby(payload);
+    const res = await persistHobbies(hobbiesList);
     showToast(
       res.cloud
-        ? "Card de Destaque salvo e sincronizado no Supabase!"
-        : "Card de Destaque salvo localmente!"
+        ? "Todos os 7 cards de interesses foram salvos e sincronizados no Supabase!"
+        : "Cards de interesses salvos com sucesso no armazenamento local!",
+      "success"
     );
+  };
+
+  const handleResetHobbiesList = () => {
+    if (window.confirm("Deseja restaurar os 7 cards de interesses para os textos e fotos padrões originais?")) {
+      setHobbiesList(DEFAULT_HOBBIES_LIST);
+      persistHobbies(DEFAULT_HOBBIES_LIST);
+      showToast("Cards restaurados para o padrão original!", "info");
+    }
   };
 
   const applyFineTuningPreset = (presetKey) => {
@@ -1370,7 +1375,7 @@ DIRETRIZ MÁXIMA DE CONCISÃO:
               className={`cat-btn ${activeTab === "customHobby" ? "active" : ""}`}
               onClick={() => handleTabChange("customHobby")}
             >
-              Card Interesses
+              Interesses (7 Cards)
             </button>
             <button
               type="button"
@@ -1804,10 +1809,47 @@ DIRETRIZ MÁXIMA DE CONCISÃO:
             <div className="cv-card-section">
               <div className="cv-section-header">
                 <div>
-                  <h2>Card de Destaque (Interesses &amp; Além de Código e Café)</h2>
+                  <h2>Gestão dos Cards de Interesses &amp; Hobbies (7 Cards)</h2>
                   <p className="cv-section-subtitle">
-                    Personalize o card exibido ao lado de Código &amp; Café na vitrine de Interesses. Altere título, texto, categoria e foto.
+                    Personalize qualquer um dos 7 cards exibidos na vitrine de Interesses (Arte, Jogos, IA, Leitura, Fitness, Café e Destaque). Altere títulos, textos, fotos e visibilidade.
                   </p>
+                </div>
+              </div>
+
+              {/* Selector Bar: 7 Cards */}
+              <div style={{ marginBottom: "16px" }}>
+                <label style={{ display: "block", fontSize: "0.85rem", fontWeight: "700", color: "#c4b5fd", marginBottom: "8px" }}>
+                  Selecione o Card para Editar:
+                </label>
+                <div style={{ display: "flex", gap: "8px", overflowX: "auto", paddingBottom: "8px" }}>
+                  {hobbiesList.map((h, idx) => {
+                    const isSelected = selectedHobby.id === h.id;
+                    return (
+                      <button
+                        key={h.id}
+                        type="button"
+                        onClick={() => setSelectedHobbyId(h.id)}
+                        style={{
+                          padding: "8px 14px",
+                          borderRadius: "8px",
+                          border: isSelected ? "1.5px solid #8b5cf6" : "1px solid #1f293d",
+                          background: isSelected ? "rgba(139, 92, 246, 0.25)" : "#0d0f17",
+                          color: isSelected ? "#ffffff" : "#94a3b8",
+                          fontWeight: isSelected ? "700" : "500",
+                          fontSize: "0.82rem",
+                          cursor: "pointer",
+                          whiteSpace: "nowrap",
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: "6px",
+                          transition: "all 0.2s"
+                        }}
+                      >
+                        <span style={{ color: "#a78bfa", fontWeight: "bold" }}>#{idx + 1}</span>
+                        <span>{h.titlePt || h.category}</span>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 
@@ -1815,43 +1857,43 @@ DIRETRIZ MÁXIMA DE CONCISÃO:
               <div className="admin-lang-switcher" style={{ marginBottom: "20px" }}>
                 <button
                   type="button"
-                  className={`admin-lang-btn ${customHobbyActiveLang === "pt" ? "active" : ""}`}
-                  onClick={() => setCustomHobbyActiveLang("pt")}
+                  className={`admin-lang-btn ${hobbyActiveLang === "pt" ? "active" : ""}`}
+                  onClick={() => setHobbyActiveLang("pt")}
                 >
                   🇧🇷 Português (PT)
                 </button>
                 <button
                   type="button"
-                  className={`admin-lang-btn ${customHobbyActiveLang === "en" ? "active" : ""}`}
-                  onClick={() => setCustomHobbyActiveLang("en")}
+                  className={`admin-lang-btn ${hobbyActiveLang === "en" ? "active" : ""}`}
+                  onClick={() => setHobbyActiveLang("en")}
                 >
                   🇺🇸 English (EN)
                 </button>
               </div>
 
-              <form onSubmit={handleSaveCustomHobby}>
+              <form onSubmit={handleSaveHobbiesList}>
                 <div className="form-group" style={{ marginBottom: "16px" }}>
                   <label htmlFor="hobby-cat-input">Categoria / Tag do Card:</label>
                   <input
                     id="hobby-cat-input"
                     type="text"
-                    value={customHobbyCategory}
-                    onChange={(e) => setCustomHobbyCategory(e.target.value)}
-                    placeholder="Ex: Deep Learning &amp; Arte, Hiper-realismo, Filosofia..."
+                    value={selectedHobby.category || ""}
+                    onChange={(e) => updateSelectedHobbyField("category", e.target.value)}
+                    placeholder="Ex: Art, Gaming, Future, Coffee, Lifestyle..."
                     style={{ width: "100%", padding: "10px", background: "#0d0f17", border: "1px solid #1f293d", borderRadius: "8px", color: "#fff" }}
                   />
                 </div>
 
-                {customHobbyActiveLang === "pt" ? (
+                {hobbyActiveLang === "pt" ? (
                   <>
                     <div className="form-group" style={{ marginBottom: "16px" }}>
                       <label htmlFor="hobby-title-pt">Título (PT):</label>
                       <input
                         id="hobby-title-pt"
                         type="text"
-                        value={customHobbyTitlePt}
-                        onChange={(e) => setCustomHobbyTitlePt(e.target.value)}
-                        placeholder="Ex: Hiper-realismo &amp; Algoritmos"
+                        value={selectedHobby.titlePt || ""}
+                        onChange={(e) => updateSelectedHobbyField("titlePt", e.target.value)}
+                        placeholder="Título do card em português..."
                         style={{ width: "100%", padding: "10px", background: "#0d0f17", border: "1px solid #1f293d", borderRadius: "8px", color: "#fff" }}
                       />
                     </div>
@@ -1860,9 +1902,9 @@ DIRETRIZ MÁXIMA DE CONCISÃO:
                       <textarea
                         id="hobby-desc-pt"
                         rows="4"
-                        value={customHobbyDescPt}
-                        onChange={(e) => setCustomHobbyDescPt(e.target.value)}
-                        placeholder="Conte algo interessante..."
+                        value={selectedHobby.descriptionPt || ""}
+                        onChange={(e) => updateSelectedHobbyField("descriptionPt", e.target.value)}
+                        placeholder="Conte a história ou reflexão deste interesse..."
                         style={{ width: "100%", padding: "10px", background: "#0d0f17", border: "1px solid #1f293d", borderRadius: "8px", color: "#fff" }}
                       />
                     </div>
@@ -1874,9 +1916,9 @@ DIRETRIZ MÁXIMA DE CONCISÃO:
                       <input
                         id="hobby-title-en"
                         type="text"
-                        value={customHobbyTitleEn}
-                        onChange={(e) => setCustomHobbyTitleEn(e.target.value)}
-                        placeholder="Ex: Hyper-realism &amp; Algorithms"
+                        value={selectedHobby.titleEn || ""}
+                        onChange={(e) => updateSelectedHobbyField("titleEn", e.target.value)}
+                        placeholder="Card title in English..."
                         style={{ width: "100%", padding: "10px", background: "#0d0f17", border: "1px solid #1f293d", borderRadius: "8px", color: "#fff" }}
                       />
                     </div>
@@ -1885,9 +1927,9 @@ DIRETRIZ MÁXIMA DE CONCISÃO:
                       <textarea
                         id="hobby-desc-en"
                         rows="4"
-                        value={customHobbyDescEn}
-                        onChange={(e) => setCustomHobbyDescEn(e.target.value)}
-                        placeholder="Tell something interesting..."
+                        value={selectedHobby.descriptionEn || ""}
+                        onChange={(e) => updateSelectedHobbyField("descriptionEn", e.target.value)}
+                        placeholder="Describe this interest in English..."
                         style={{ width: "100%", padding: "10px", background: "#0d0f17", border: "1px solid #1f293d", borderRadius: "8px", color: "#fff" }}
                       />
                     </div>
@@ -1900,8 +1942,8 @@ DIRETRIZ MÁXIMA DE CONCISÃO:
                     <input
                       id="hobby-photo-input"
                       type="text"
-                      value={customHobbyPhoto}
-                      onChange={(e) => setCustomHobbyPhoto(e.target.value)}
+                      value={selectedHobby.photoUrl || ""}
+                      onChange={(e) => updateSelectedHobbyField("photoUrl", e.target.value)}
                       placeholder="Cole uma URL de imagem ou selecione um arquivo..."
                       style={{ flex: 1, padding: "10px", background: "#0d0f17", border: "1px solid #1f293d", borderRadius: "8px", color: "#fff" }}
                     />
@@ -1930,7 +1972,7 @@ DIRETRIZ MÁXIMA DE CONCISÃO:
                           const file = e.target.files?.[0];
                           if (file) {
                             const reader = new FileReader();
-                            reader.onload = () => setCustomHobbyPhoto(reader.result);
+                            reader.onload = () => updateSelectedHobbyField("photoUrl", reader.result);
                             reader.readAsDataURL(file);
                           }
                         }}
@@ -1943,28 +1985,48 @@ DIRETRIZ MÁXIMA DE CONCISÃO:
                   <label style={{ display: "inline-flex", alignItems: "center", gap: "8px", cursor: "pointer", color: "#e2e8f0" }}>
                     <input
                       type="checkbox"
-                      checked={customHobbyPublished}
-                      onChange={(e) => setCustomHobbyPublished(e.target.checked)}
+                      checked={selectedHobby.isPublished !== false}
+                      onChange={(e) => updateSelectedHobbyField("isPublished", e.target.checked)}
                     />
                     Card Ativo e Visível na Vitrine
                   </label>
                 </div>
 
-                <button
-                  type="submit"
-                  style={{
-                    background: "#8b5cf6",
-                    color: "#fff",
-                    border: "none",
-                    padding: "12px 24px",
-                    borderRadius: "8px",
-                    fontWeight: "700",
-                    cursor: "pointer",
-                    fontSize: "0.9rem"
-                  }}
-                >
-                  Salvar Card de Destaque
-                </button>
+                <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", alignItems: "center" }}>
+                  <button
+                    type="submit"
+                    style={{
+                      background: "#8b5cf6",
+                      color: "#fff",
+                      border: "none",
+                      padding: "12px 24px",
+                      borderRadius: "8px",
+                      fontWeight: "700",
+                      cursor: "pointer",
+                      fontSize: "0.9rem",
+                      boxShadow: "0 4px 14px rgba(139, 92, 246, 0.4)"
+                    }}
+                  >
+                    💾 Salvar Todos os Interesses (7 Cards)
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handleResetHobbiesList}
+                    style={{
+                      background: "transparent",
+                      color: "#9ca3af",
+                      border: "1px solid #374151",
+                      padding: "12px 18px",
+                      borderRadius: "8px",
+                      fontWeight: "600",
+                      cursor: "pointer",
+                      fontSize: "0.85rem"
+                    }}
+                  >
+                    ↺ Restaurar Padrões Originais
+                  </button>
+                </div>
               </form>
             </div>
           </div>
@@ -1974,15 +2036,15 @@ DIRETRIZ MÁXIMA DE CONCISÃO:
             <div className="cv-card-section" style={{ position: "sticky", top: "20px" }}>
               <div className="cv-section-header">
                 <div>
-                  <h3>Prévia do Card na Vitrine</h3>
+                  <h3>Prévia do Card Selecionado</h3>
                   <p className="cv-section-subtitle">Visualização exata de como os visitantes verão este card.</p>
                 </div>
               </div>
 
               <div className="hobbies-grid" style={{ gridTemplateColumns: "1fr", maxWidth: "340px", margin: "16px auto" }}>
-                <div className="hobby-card custom-hobby-card" style={{ height: "320px", display: "flex", flexDirection: "column" }}>
+                <div className={`hobby-card ${selectedHobby.layout || ""}`} style={{ height: "320px", display: "flex", flexDirection: "column" }}>
                   <img
-                    src={customHobbyPhoto || "/IMG_3104.webp"}
+                    src={selectedHobby.photoUrl || "/IMG_3104.webp"}
                     alt="Preview"
                     style={{ width: "100%", height: "180px", objectFit: "cover", borderRadius: "8px 8px 0 0" }}
                     onError={(e) => {
@@ -1990,9 +2052,17 @@ DIRETRIZ MÁXIMA DE CONCISÃO:
                     }}
                   />
                   <div className="hobby-content" style={{ padding: "16px" }}>
-                    <span className="hobby-category">{customHobbyCategory || "Destaque"}</span>
-                    <h3 style={{ margin: "4px 0" }}>{customHobbyActiveLang === "en" ? (customHobbyTitleEn || "Title") : (customHobbyTitlePt || "Título")}</h3>
-                    <p style={{ fontSize: "0.82rem", color: "#94a3b8" }}>{customHobbyActiveLang === "en" ? (customHobbyDescEn || "Description...") : (customHobbyDescPt || "Descrição...")}</p>
+                    <span className="hobby-category">{selectedHobby.category || "Hobby"}</span>
+                    <h3 style={{ margin: "4px 0" }}>
+                      {hobbyActiveLang === "en"
+                        ? selectedHobby.titleEn || selectedHobby.titlePt || "Title"
+                        : selectedHobby.titlePt || selectedHobby.titleEn || "Título"}
+                    </h3>
+                    <p style={{ fontSize: "0.82rem", color: "#94a3b8" }}>
+                      {hobbyActiveLang === "en"
+                        ? selectedHobby.descriptionEn || selectedHobby.descriptionPt || "Description..."
+                        : selectedHobby.descriptionPt || selectedHobby.descriptionEn || "Descrição..."}
+                    </p>
                   </div>
                 </div>
               </div>

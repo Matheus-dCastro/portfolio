@@ -117,25 +117,29 @@
 }
 
 .gdocs-action {
-  background: rgba(59, 130, 246, 0.15);
-  border: 1px solid rgba(59, 130, 246, 0.35);
-  color: #93c5fd;
+  background: rgba(139, 92, 246, 0.12);
+  border: 1px solid rgba(139, 92, 246, 0.35);
+  color: #c4b5fd;
 }
 
 .gdocs-action:hover {
-  background: rgba(59, 130, 246, 0.25);
+  background: rgba(139, 92, 246, 0.25);
+  border-color: #8b5cf6;
   color: #ffffff;
+  box-shadow: 0 0 15px rgba(139, 92, 246, 0.35);
 }
 
 .pdf-action {
-  background: rgba(239, 68, 68, 0.15);
-  border: 1px solid rgba(239, 68, 68, 0.35);
-  color: #fca5a5;
+  background: rgba(139, 92, 246, 0.12);
+  border: 1px solid rgba(139, 92, 246, 0.35);
+  color: #c4b5fd;
 }
 
 .pdf-action:hover {
-  background: rgba(239, 68, 68, 0.25);
+  background: rgba(139, 92, 246, 0.25);
+  border-color: #8b5cf6;
   color: #ffffff;
+  box-shadow: 0 0 15px rgba(139, 92, 246, 0.35);
 }
 
 .share-action {

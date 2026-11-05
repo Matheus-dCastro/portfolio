@@ -1,17 +1,22 @@
+// src/components/Interecese.jsx
 import { useState, useEffect } from "react";
 import { useLanguage } from "../context/useLanguage";
-import { getStoredCustomHobby } from "../data/projectsData";
-import { fetchCustomHobby } from "../lib/supabaseService";
+import { getStoredHobbies } from "../data/projectsData";
+import { fetchHobbies } from "../lib/supabaseService";
 
 function Intereceses({ mensagem, capa1, capa2, capa3, capa4, capa5, capa6 }) {
   const { t, lang } = useLanguage();
-  const [customHobby, setCustomHobby] = useState(() => getStoredCustomHobby());
+  const [hobbies, setHobbies] = useState(() => getStoredHobbies());
 
   useEffect(() => {
-    fetchCustomHobby().then((data) => {
-      if (data) setCustomHobby(data);
+    fetchHobbies().then((data) => {
+      if (Array.isArray(data) && data.length > 0) {
+        setHobbies(data);
+      }
     });
   }, []);
+
+  const fallbackCovers = [capa1, capa2, capa3, capa4, capa5, capa6, capa1];
 
   return (
     <section className="hobbies-section">
@@ -30,81 +35,33 @@ function Intereceses({ mensagem, capa1, capa2, capa3, capa4, capa5, capa6 }) {
       <p className="hobby-intro">{mensagem || t("hobbies.intro")}</p>
 
       <div className="hobbies-grid">
-        <div className="hobby-card tall">
-          <img src={capa1} alt="Art" />
-          <div className="hobby-content">
-            <span className="hobby-category">Art</span>
-            <h3>{t("hobbies.card_art_title")}</h3>
-            <p>{t("hobbies.card_art_desc")}</p>
-          </div>
-        </div>
+        {hobbies
+          .filter((hobby) => hobby.isPublished !== false)
+          .map((hobby, index) => {
+            const title =
+              lang === "en"
+                ? hobby.titleEn || hobby.titlePt || ""
+                : hobby.titlePt || hobby.titleEn || "";
+            const desc =
+              lang === "en"
+                ? hobby.descriptionEn || hobby.descriptionPt || ""
+                : hobby.descriptionPt || hobby.descriptionEn || "";
+            const cover = hobby.photoUrl || fallbackCovers[index % fallbackCovers.length];
 
-        <div className="hobby-card wide">
-          <img src={capa2} alt="Gaming" />
-          <div className="hobby-content">
-            <span className="hobby-category">Gaming</span>
-            <h3>{t("hobbies.card_gaming_title")}</h3>
-            <p>{t("hobbies.card_gaming_desc")}</p>
-          </div>
-        </div>
-
-        <div className="hobby-card">
-          <img src={capa3} alt="AI & ML" />
-          <div className="hobby-content">
-            <span className="hobby-category">Future</span>
-            <h3>{t("hobbies.card_future_title")}</h3>
-            <p>{t("hobbies.card_future_desc")}</p>
-          </div>
-        </div>
-
-        <div className="hobby-card">
-          <img src={capa4} alt="Reading" />
-          <div className="hobby-content">
-            <span className="hobby-category">Reading</span>
-            <h3>{t("hobbies.card_reading_title")}</h3>
-            <p>{t("hobbies.card_reading_desc")}</p>
-          </div>
-        </div>
-
-        <div className="hobby-card">
-          <img src={capa5} alt="Fitness Life" />
-          <div className="hobby-content">
-            <span className="hobby-category">Lifestyle</span>
-            <h3>{t("hobbies.card_fitness_title")}</h3>
-            <p>{t("hobbies.card_fitness_desc")}</p>
-          </div>
-        </div>
-
-        <div className="hobby-card">
-          <img src={capa6} alt="Coffee" />
-          <div className="hobby-content">
-            <span className="hobby-category">Coffee</span>
-            <h3>{t("hobbies.card_coffee_title")}</h3>
-            <p>{t("hobbies.card_coffee_desc")}</p>
-          </div>
-        </div>
-
-        {customHobby && customHobby.isPublished !== false && (
-          <div className="hobby-card custom-hobby-card">
-            <img
-              src={customHobby.photoUrl || capa1}
-              alt={lang === "en" ? (customHobby.titleEn || customHobby.titlePt) : (customHobby.titlePt || customHobby.titleEn)}
-            />
-            <div className="hobby-content">
-              <span className="hobby-category">{customHobby.category || "Destaque"}</span>
-              <h3>
-                {lang === "en"
-                  ? (customHobby.titleEn || customHobby.titlePt || "Hyper-realism & AI")
-                  : (customHobby.titlePt || customHobby.titleEn || "Hiper-realismo & Algoritmos")}
-              </h3>
-              <p>
-                {lang === "en"
-                  ? (customHobby.descriptionEn || customHobby.descriptionPt || "")
-                  : (customHobby.descriptionPt || customHobby.descriptionEn || "")}
-              </p>
-            </div>
-          </div>
-        )}
+            return (
+              <div
+                key={hobby.id || index}
+                className={`hobby-card ${hobby.layout || ""}`}
+              >
+                <img src={cover} alt={title} loading="lazy" />
+                <div className="hobby-content">
+                  <span className="hobby-category">{hobby.category || "Hobby"}</span>
+                  <h3>{title}</h3>
+                  <p>{desc}</p>
+                </div>
+              </div>
+            );
+          })}
       </div>
     </section>
   );

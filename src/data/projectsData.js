@@ -10,6 +10,12 @@ import arte6 from "../assets/img/IMG_3285-convertido-de-jpeg.webp";
 import arte7 from "../assets/img/IMG_3104.webp";
 import arte8 from "../assets/img/IMG_3110.webp";
 import arte9 from "../assets/img/IMG_3286-convertido-de-jpeg.webp";
+import capa1 from "../assets/img/1CF53B24-759E-48D5-B0C5-9CA7349A544E.webp";
+import capa2 from "../assets/img/566644515_18081743411050733_8226103790257785455_n.webp";
+import capa3 from "../assets/img/575981249_18291228211272949_514477677943118836_n.webp";
+import capa4 from "../assets/img/584385202_18086409646964312_3912764164389240104_n.webp";
+import capa5 from "../assets/img/Gama-4.webp";
+import capa6 from "../assets/img/IMG_3091.webp";
 
 export const DEFAULT_PROJECTS = [
   {
@@ -1125,6 +1131,112 @@ export function convertGoogleDocsToEmbedUrl(url) {
   }
   
   return cleanUrl;
+}
+
+export const DEFAULT_HOBBIES_LIST = [
+  {
+    id: "hobby-1",
+    category: "Art",
+    layout: "tall",
+    titlePt: "Arte & Desenho Hiper-realista",
+    titleEn: "Art & Hyper-realism",
+    descriptionPt: "O desenho e a arte hiper-realista me ensinaram disciplina, atenção extrema aos detalhes e paciência para construir resultados complexos camada por camada.",
+    descriptionEn: "Drawing and hyper-realistic art taught me discipline, extreme attention to detail, and the patience to build complex results layer by layer.",
+    photoUrl: capa1,
+    isPublished: true
+  },
+  {
+    id: "hobby-2",
+    category: "Gaming",
+    layout: "wide",
+    titlePt: "Mundo Gamer & Retrô",
+    titleEn: "Gaming & Retro",
+    descriptionPt: "Dos clássicos retrô aos jogos de estratégia modernos, vejo o game design como uma aula de sistemas complexos, feedback imediato e resolução criativa de problemas.",
+    descriptionEn: "From retro classics to modern strategy games, I see game design as a masterclass in complex systems, immediate feedback loops, and creative problem solving.",
+    photoUrl: capa2,
+    isPublished: true
+  },
+  {
+    id: "hobby-3",
+    category: "Future",
+    layout: "",
+    titlePt: "Fronteiras da IA & ML",
+    titleEn: "AI Frontiers & ML",
+    descriptionPt: "Fascinado pelo impacto da inteligência artificial generativa, modelos cognitivos e automação na evolução do trabalho humano e da sociedade.",
+    descriptionEn: "Fascinated by the impact of generative artificial intelligence, cognitive models, and automation on the evolution of human labor and society.",
+    photoUrl: capa3,
+    isPublished: true
+  },
+  {
+    id: "hobby-4",
+    category: "Reading",
+    layout: "",
+    titlePt: "Leituras & Filosofia",
+    titleEn: "Reading & Philosophy",
+    descriptionPt: "Livros de ficção científica, filosofia e tecnologia expandem minha visão de mundo e alimentam novas abordagens para engenharia de software.",
+    descriptionEn: "Sci-fi, philosophy, and technology books broaden my worldview and fuel fresh perspectives on software engineering.",
+    photoUrl: capa4,
+    isPublished: true
+  },
+  {
+    id: "hobby-5",
+    category: "Lifestyle",
+    layout: "",
+    titlePt: "Vida Ativa & Disciplina",
+    titleEn: "Active Life & Fitness",
+    descriptionPt: "Musculação e rotina saudável são pilares fundamentais para manter foco absoluto, alta energia e clareza mental durante maratonas de código.",
+    descriptionEn: "Weightlifting and a healthy routine are fundamental pillars for maintaining absolute focus, high energy, and mental clarity during coding sprints.",
+    photoUrl: capa5,
+    isPublished: true
+  },
+  {
+    id: "hobby-6",
+    category: "Coffee",
+    layout: "",
+    titlePt: "Código & Café Especial",
+    titleEn: "Code & Special Coffee",
+    descriptionPt: "O café é meu parceiro diário para transformar problemas complexos de lógica em soluções elegantes e arquiteturas de código limpo.",
+    descriptionEn: "Coffee is my daily partner in turning complex logic puzzles into elegant solutions and clean code architectures.",
+    photoUrl: capa6,
+    isPublished: true
+  },
+  {
+    id: "hobby-7",
+    category: "Deep Learning & Arte",
+    layout: "custom-hobby-card",
+    titlePt: "Hiper-realismo & Algoritmos",
+    titleEn: "Hyper-realism & Algorithms",
+    descriptionPt: "A mesma precisão cirúrgica exigida no hiper-realismo a grafite guia o refinamento de tensores e redes neurais profundas.",
+    descriptionEn: "The same surgical precision demanded in graphite hyper-realism guides deep neural network refinement.",
+    photoUrl: capa1,
+    isPublished: true
+  }
+];
+
+export function getStoredHobbies() {
+  try {
+    const raw = localStorage.getItem("portfolio_hobbies_list");
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return DEFAULT_HOBBIES_LIST.map((defHobby) => {
+          const match = parsed.find((p) => p.id === defHobby.id);
+          return match ? { ...defHobby, ...match } : defHobby;
+        });
+      }
+    }
+  } catch (e) {
+    console.warn("Falha ao ler hobbies:", e);
+  }
+  return DEFAULT_HOBBIES_LIST;
+}
+
+export function saveHobbies(hobbies) {
+  try {
+    localStorage.setItem("portfolio_hobbies_list", JSON.stringify(hobbies));
+  } catch (e) {
+    console.error("Erro ao salvar hobbies:", e);
+  }
 }
 
 export const DEFAULT_CUSTOM_HOBBY = {

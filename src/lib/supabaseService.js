@@ -16,7 +16,9 @@ import {
   getStoredDrawings,
   saveDrawings,
   getStoredCustomHobby,
-  saveCustomHobby
+  saveCustomHobby,
+  getStoredHobbies,
+  saveHobbies
 } from "../data/projectsData.js";
 
 // ==========================================
@@ -738,6 +740,62 @@ export async function persistCustomHobby(hobbyData) {
       return { success: true, cloud: true };
     } catch (err) {
       console.error("Erro ao persistir custom hobby:", err);
+      return { success: true, cloud: false, error: err.message };
+    }
+  }
+  return { success: true, cloud: false };
+}
+
+export async function fetchHobbies() {
+  if (isSupabaseConfigured && supabase) {
+    try {
+      const { data, error } = await supabase
+        .from("agent_configs")
+        .select("custom_hobby_json")
+        .eq("id", "production")
+        .maybeSingle();
+
+      if (!error && data?.custom_hobby_json) {
+        if (Array.isArray(data.custom_hobby_json)) {
+          saveHobbies(data.custom_hobby_json);
+          return data.custom_hobby_json;
+        } else if (data.custom_hobby_json?.hobbiesList && Array.isArray(data.custom_hobby_json.hobbiesList)) {
+          saveHobbies(data.custom_hobby_json.hobbiesList);
+          return data.custom_hobby_json.hobbiesList;
+        }
+      }
+    } catch (err) {
+      console.warn("Falha ao buscar hobbies do Supabase:", err);
+    }
+  }
+  return getStoredHobbies();
+}
+
+export async function persistHobbies(hobbiesList) {
+  saveHobbies(hobbiesList);
+  if (isSupabaseConfigured && supabase) {
+    try {
+      const payload = {
+        hobbiesList,
+        updatedAt: new Date().toISOString()
+      };
+      const { error } = await supabase
+        .from("agent_configs")
+        .upsert(
+          {
+            id: "production",
+            custom_hobby_json: payload,
+            updated_at: new Date().toISOString()
+          },
+          { onConflict: "id" }
+        );
+      if (error && error.message && error.message.includes("custom_hobby_json")) {
+        return { success: true, cloud: false };
+      }
+      if (error) throw error;
+      return { success: true, cloud: true };
+    } catch (err) {
+      console.error("Erro ao persistir hobbies no Supabase:", err);
       return { success: true, cloud: false, error: err.message };
     }
   }

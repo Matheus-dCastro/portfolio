@@ -778,11 +778,23 @@ h2 span {
 .skill-item svg.skill-tech-icon {
   width: 42px;
   height: 42px;
-  transition: transform 0.3s var(--ease);
+  color: #8b5cf6;
+  fill: currentColor;
+  transition: transform 0.3s var(--ease), color 0.3s var(--ease), fill 0.3s var(--ease);
 }
 
 .skill-item:hover svg.skill-tech-icon {
   transform: scale(1.08);
+}
+
+.skill-item:hover svg.skill-ubuntu-icon {
+  color: #E95420;
+  fill: #E95420;
+}
+
+.skill-item:hover svg.skill-markdown-icon {
+  color: #FFFFFF;
+  fill: #FFFFFF;
 }
 
 /* O texto acende em branco puro no hover para contrastar com o ícone colorido */
@@ -1060,6 +1072,20 @@ h2 span {
 .cv-option-icon {
   font-size: 2rem;
   line-height: 1;
+  color: #a78bfa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cv-option-icon svg {
+  stroke: #a78bfa;
+  transition: all 0.25s ease;
+}
+
+.cv-option-card:hover .cv-option-icon svg {
+  stroke: #c4b5fd;
+  filter: drop-shadow(0 0 8px rgba(167, 139, 250, 0.6));
 }
 
 .cv-option-text {
@@ -1093,13 +1119,15 @@ h2 span {
 
 .cv-option-arrow {
   font-size: 1.2rem;
-  color: #ffffff;
+  color: #a78bfa;
   font-weight: 700;
-  transition: transform 0.2s;
+  transition: all 0.2s ease;
 }
 
 .cv-option-card:hover .cv-option-arrow {
+  color: #c4b5fd;
   transform: translateX(3px);
+  filter: drop-shadow(0 0 6px rgba(167, 139, 250, 0.5));
 }
 
 .cv-modal-footer {
@@ -2105,6 +2133,8 @@ footer {
   justify-content: space-between;
   align-items: center;
   padding: 0 6px;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
 .lightbox-counter-label {
@@ -2113,25 +2143,56 @@ footer {
   color: #c084fc;
   background: rgba(139, 92, 246, 0.15);
   border: 1px solid rgba(139, 92, 246, 0.35);
-  padding: 5px 14px;
+  padding: 6px 14px;
   border-radius: 999px;
-  letter-spacing: 1px;
+  letter-spacing: 0.5px;
+}
+
+.lightbox-toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.lightbox-tool-btn {
+  background: rgba(20, 20, 30, 0.8);
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  color: #c4b5fd;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(8px);
+}
+
+.lightbox-tool-btn:hover {
+  background: rgba(139, 92, 246, 0.3);
+  border-color: #8b5cf6;
+  color: #ffffff;
+  transform: translateY(-1px);
 }
 
 .close-lightbox-btn {
   background: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.2);
   color: #ffffff;
-  width: 38px;
-  height: 38px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
-  font-size: 1.1rem;
+  font-size: 1.2rem;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: all 0.2s;
   backdrop-filter: blur(8px);
+  line-height: 1;
 }
 
 .close-lightbox-btn:hover {
@@ -2154,28 +2215,37 @@ footer {
   align-items: center;
   justify-content: center;
   max-width: 90%;
+  overflow: auto;
+  border-radius: 14px;
 }
 
 .lightbox-image-box img {
   max-width: 100%;
-  max-height: 72vh;
+  max-height: 64vh;
   border-radius: 14px;
   object-fit: contain;
-  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.7), 0 0 30px rgba(139, 92, 246, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8), 0 0 30px rgba(139, 92, 246, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  cursor: zoom-in;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.lightbox-image-box img.zoomed-img {
+  cursor: zoom-out;
+  transform: scale(1.4);
+  max-height: 80vh;
 }
 
 .lightbox-nav {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  background: rgba(20, 20, 30, 0.7);
+  background: rgba(20, 20, 30, 0.75);
   color: #ffffff;
   border: 1px solid rgba(255, 255, 255, 0.25);
   border-radius: 50%;
   width: 48px;
   height: 48px;
-  font-size: 1.8rem;
   cursor: pointer;
   backdrop-filter: blur(10px);
   transition: all 0.2s ease;
@@ -2183,7 +2253,6 @@ footer {
   align-items: center;
   justify-content: center;
   z-index: 10;
-  line-height: 1;
 }
 
 .lightbox-nav:hover {
@@ -2202,13 +2271,28 @@ footer {
 }
 
 .lightbox-caption-card {
-  background: rgba(15, 15, 24, 0.85);
+  background: rgba(15, 15, 24, 0.9);
   border: 1px solid rgba(139, 92, 246, 0.25);
-  border-radius: 12px;
+  border-radius: 14px;
   padding: 12px 24px;
   text-align: center;
   max-width: 800px;
-  backdrop-filter: blur(10px);
+  width: 100%;
+  box-sizing: border-box;
+  backdrop-filter: blur(12px);
+}
+
+.art-technique-pill {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: #c4b5fd;
+  background: rgba(139, 92, 246, 0.2);
+  padding: 2px 10px;
+  border-radius: 999px;
+  margin-bottom: 6px;
+  letter-spacing: 0.05em;
 }
 
 .lightbox-caption-title {
@@ -2220,9 +2304,58 @@ footer {
 
 .lightbox-caption-text {
   margin: 4px 0 0 0;
-  font-size: 0.92rem;
+  font-size: 0.88rem;
   color: #a78bfa;
   font-style: italic;
+}
+
+.art-lightbox-hint {
+  display: block;
+  font-size: 0.72rem;
+  color: #6b7280;
+  margin-top: 6px;
+}
+
+/* Miniatures Thumbnails Strip */
+.lightbox-thumbnails-strip {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  max-width: 85%;
+  padding: 6px 8px;
+  background: rgba(10, 10, 16, 0.75);
+  border-radius: 12px;
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  scrollbar-width: thin;
+}
+
+.lightbox-thumb-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 2px solid transparent;
+  padding: 0;
+  background: transparent;
+  cursor: pointer;
+  opacity: 0.45;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.lightbox-thumb-btn.active,
+.lightbox-thumb-btn:hover {
+  border-color: #8b5cf6;
+  opacity: 1;
+  transform: scale(1.08);
+  box-shadow: 0 0 10px rgba(139, 92, 246, 0.4);
+}
+
+.lightbox-thumb-btn img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
 @media (max-width: 900px) {

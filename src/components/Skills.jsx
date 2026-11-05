@@ -45,7 +45,7 @@ function Skills() {
             viewBox="0 0 24 24"
             width="42"
             height="42"
-            fill="#E95420"
+            fill="currentColor"
             className="skill-tech-icon skill-ubuntu-icon"
             xmlns="http://www.w3.org/2000/svg"
           >
@@ -88,7 +88,7 @@ function Skills() {
             viewBox="0 0 24 24"
             width="42"
             height="42"
-            fill="#FFFFFF"
+            fill="currentColor"
             className="skill-tech-icon skill-markdown-icon"
             xmlns="http://www.w3.org/2000/svg"
           >
