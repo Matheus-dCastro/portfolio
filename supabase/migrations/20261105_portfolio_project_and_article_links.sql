@@ -51,7 +51,7 @@ Configuração avançada do Rollup / Vite com múltiplos entrypoints HTML estát
 
 ### 3. Painel Administrativo Moderado
 Área restrita de moderação com autenticação por sessão, reordenação interativa de projetos e desenhos via drag-and-drop, editor Markdown com preview em tempo real e moderação de tags e mídias ricas (vídeos YouTube e galerias de fotos).',
-    'post-portfolio-ecosystem',
+    NULL,
     0,
     true,
     timezone('utc'::text, now()),
