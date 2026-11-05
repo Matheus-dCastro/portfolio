@@ -930,7 +930,8 @@ const STORAGE_KEYS = {
   THOUGHTS: "portfolio_thoughts_data_v1",
   EXPERIENCES: "portfolio_experiences_data_v1",
   CV_CONFIG: "portfolio_cv_config_v1",
-  DRAWINGS: "portfolio_drawings_data_v1"
+  DRAWINGS: "portfolio_drawings_data_v1",
+  CUSTOM_HOBBY: "portfolio_custom_hobby_v1"
 };
 
 // Helper methods with localStorage fallback
@@ -1124,4 +1125,34 @@ export function convertGoogleDocsToEmbedUrl(url) {
   }
   
   return cleanUrl;
+}
+
+export const DEFAULT_CUSTOM_HOBBY = {
+  category: "Deep Learning & Arte",
+  titlePt: "Hiper-realismo & Algoritmos",
+  titleEn: "Hyper-realism & Algorithms",
+  descriptionPt: "A mesma precisão cirúrgica exigida no hiper-realismo a grafite guia o refinamento de tensores e redes neurais profundas.",
+  descriptionEn: "The same surgical precision demanded in graphite hyper-realism guides deep neural network refinement.",
+  photoUrl: "",
+  isPublished: true
+};
+
+export function getStoredCustomHobby() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEYS.CUSTOM_HOBBY);
+    if (raw) {
+      return { ...DEFAULT_CUSTOM_HOBBY, ...JSON.parse(raw) };
+    }
+  } catch (e) {
+    console.warn("Falha ao ler custom hobby:", e);
+  }
+  return DEFAULT_CUSTOM_HOBBY;
+}
+
+export function saveCustomHobby(data) {
+  try {
+    localStorage.setItem(STORAGE_KEYS.CUSTOM_HOBBY, JSON.stringify(data));
+  } catch (e) {
+    console.error("Erro ao salvar custom hobby:", e);
+  }
 }

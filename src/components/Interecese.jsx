@@ -1,7 +1,17 @@
+import { useState, useEffect } from "react";
 import { useLanguage } from "../context/useLanguage";
+import { getStoredCustomHobby } from "../data/projectsData";
+import { fetchCustomHobby } from "../lib/supabaseService";
 
 function Intereceses({ mensagem, capa1, capa2, capa3, capa4, capa5, capa6 }) {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
+  const [customHobby, setCustomHobby] = useState(() => getStoredCustomHobby());
+
+  useEffect(() => {
+    fetchCustomHobby().then((data) => {
+      if (data) setCustomHobby(data);
+    });
+  }, []);
 
   return (
     <section className="hobbies-section">
@@ -73,6 +83,28 @@ function Intereceses({ mensagem, capa1, capa2, capa3, capa4, capa5, capa6 }) {
             <p>{t("hobbies.card_coffee_desc")}</p>
           </div>
         </div>
+
+        {customHobby && customHobby.isPublished !== false && (
+          <div className="hobby-card custom-hobby-card">
+            <img
+              src={customHobby.photoUrl || capa1}
+              alt={lang === "en" ? (customHobby.titleEn || customHobby.titlePt) : (customHobby.titlePt || customHobby.titleEn)}
+            />
+            <div className="hobby-content">
+              <span className="hobby-category">{customHobby.category || "Destaque"}</span>
+              <h3>
+                {lang === "en"
+                  ? (customHobby.titleEn || customHobby.titlePt || "Hyper-realism & AI")
+                  : (customHobby.titlePt || customHobby.titleEn || "Hiper-realismo & Algoritmos")}
+              </h3>
+              <p>
+                {lang === "en"
+                  ? (customHobby.descriptionEn || customHobby.descriptionPt || "")
+                  : (customHobby.descriptionPt || customHobby.descriptionEn || "")}
+              </p>
+            </div>
+          </div>
+        )}
       </div>
     </section>
   );

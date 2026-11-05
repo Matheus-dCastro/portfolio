@@ -7,6 +7,7 @@ import { supabase, isSupabaseConfigured } from "./supabaseClient";
 import {
   getStoredProjects,
   getStoredArticles,
+  getStoredThoughts,
   getStoredExperiences,
   getStoredCvConfig
 } from "../data/projectsData";
@@ -17,7 +18,7 @@ export const FALLBACK_MODEL = "llama-3.3-70b-versatile";
 export const DEFAULT_SYSTEM_PROMPT = `Você é o Alomyr, o Assistente Oficial de Inteligência Artificial do portfólio de Matheus de Castro.
 
 ## SEU PAPEL E OBJETIVO
-Seu objetivo é orientar visitantes, recrutadores, pesquisadores e parceiros técnicos, apresentando com clareza as qualificações, projetos, publicações e competências técnicas de Matheus de Castro nas áreas de:
+Seu objetivo é orientar visitantes, recrutadores, pesquisadores e parceiros técnicos, apresentando com clareza as qualificações, projetos, publicações (artigos), ensaios e reflexões (pensamentos) e competências técnicas de Matheus de Castro nas áreas de:
 - Machine Learning Engineering & Deep Learning (PyTorch, Computer Vision, U-Net, Data Analysis)
 - Arquitetura de Backend & Engenharia de Software (Python, FastAPI, PostgreSQL, Docker, RESTful APIs)
 - Automação de Fluxos de Trabalho Inteligentes & DevOps (n8n, Linux Ubuntu Server, Bash, CI/CD)
@@ -26,12 +27,12 @@ Seu objetivo é orientar visitantes, recrutadores, pesquisadores e parceiros té
 ## DIRETRIZES DE COMPORTAMENTO
 1. IDENTIDADE: Seu nome é Alomyr. Apresente-se sempre como Alomyr.
 2. IDIOMA: Responda fluente e naturalmente no idioma utilizado pelo visitante (inglês ou português).
-3. ESCOPO FECHADO: Responda APENAS sobre a trajetória acadêmica, profissional, projetos, artigos e competências de Matheus de Castro.
+3. ESCOPO FECHADO: Responda APENAS sobre a trajetória acadêmica, profissional, projetos, artigos, pensamentos/reflexões e competências de Matheus de Castro.
 4. RECUSA DE ESCOPO: Se o usuário pedir receitas, piadas ou tópicos não relacionados ao portfólio, recuse cordial e profissionalmente:
-   "Como Alomyr, assistente oficial do portfólio de Matheus de Castro, meu escopo é limitado a dúvidas sobre seus projetos de IA, backend e currículo."
+   "Como Alomyr, assistente oficial do portfólio de Matheus de Castro, meu escopo é limitado a dúvidas sobre seus projetos de IA, backend, artigos, reflexões e currículo."
 5. TOM DE VOZ: Técnico, profissional, acolhedor, conciso e preciso.
 6. PROIBIDO ALUCINAR: Nunca invente experiências ou projetos que não constem no contexto fornecido.
-7. LINKS E DIRECIONAMENTO: Sempre que falar de um projeto, mencione-o em negrito e convide o usuário a conferir a seção Works ou o GitHub oficial: https://github.com/Matheus-dCastro`;
+7. LINKS E DIRECIONAMENTO: Sempre que falar de um projeto ou artigo, mencione-o em negrito e convide o usuário a conferir a seção Works ou o GitHub oficial: https://github.com/Matheus-dCastro`;
 
 // ==============================================================================
 // 🛡️ GUARDRAILS DE CLIENTE (FAST PRE-FLIGHT CHECK)
@@ -148,6 +149,20 @@ export function buildPortfolioContext() {
     context += "\n";
   }
 
+  const thoughts = getStoredThoughts();
+  if (thoughts.length > 0) {
+    context += "#### PENSAMENTOS & REFLEXÕES (ENSAIOS TÉCNICOS/FILOSÓFICOS):\n";
+    thoughts.forEach((th) => {
+      context += `- Pensamento/Ensaio "${th.title}" [${th.category}]:\n`;
+      context += `  * Resumo: ${th.shortDescription || th.aboutContext || "Sem resumo"}\n`;
+      if (th.content) {
+        context += `  * Trecho de conteúdo: ${th.content.slice(0, 300)}...\n`;
+      }
+      if (th.googleDocsUrl) context += `  * Link Google Docs: ${th.googleDocsUrl}\n`;
+    });
+    context += "\n";
+  }
+
   context += "#### CURRÍCULO:\n";
   context += `- Versão Interativa Google Docs: ${cvConfig.googleDocsUrl || "Disponível no site"}\n`;
   context += `- Documento Oficial PDF: ${cvConfig.pdfUrl || "Disponível para download no Hero"}\n`;
@@ -165,7 +180,7 @@ export function buildPortfolioContext() {
  * @param {string} model
  * @returns {Promise<{success: boolean, text: string, model: string, error?: string}>}
  */
-export async function sendChatMessage(messages, customPrompt = null, model = PRIMARY_MODEL) {
+export async function sendChatMessage(messages, customPrompt = null, model = PRIMARY_MODEL, apiKey = null) {
   // 1. Extrai a última mensagem do usuário
   const userMessages = messages.filter((m) => m.sender === "user" || m.role === "user");
   const lastUserMsg = userMessages[userMessages.length - 1];
@@ -184,13 +199,17 @@ export async function sendChatMessage(messages, customPrompt = null, model = PRI
   // 3. Invocação da Supabase Edge Function (/chat-qwen)
   if (isSupabaseConfigured && supabase) {
     try {
+      const invokeBody = {
+        message: queryText,
+        conversationHistory: messages,
+        customPrompt,
+        model
+      };
+      if (apiKey) {
+        invokeBody.apiKey = apiKey;
+      }
       const { data, error } = await supabase.functions.invoke("chat-qwen", {
-        body: {
-          message: queryText,
-          conversationHistory: messages,
-          customPrompt,
-          model
-        }
+        body: invokeBody
       });
 
       if (!error && data) {

@@ -141,6 +141,10 @@ export default function ChatWidget() {
   }, [lang, t]);
 
   const messagesEndRef = useRef(null);
+  const messagesRef = useRef(messages);
+  messagesRef.current = messages;
+  const isTypingRef = useRef(isTyping);
+  isTypingRef.current = isTyping;
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -154,10 +158,14 @@ export default function ChatWidget() {
 
   const handleSendMessage = async (textToSend) => {
     const query = (textToSend || inputText).trim();
-    if (!query || isTyping) return;
+    if (!query || isTypingRef.current) return;
 
     setInputText("");
-    const newHistory = [...messages, { sender: "user", text: query }];
+    const currentMsgs = messagesRef.current.length > 0
+      ? messagesRef.current
+      : [{ sender: "bot", text: t("agent.welcome_message") }];
+
+    const newHistory = [...currentMsgs, { sender: "user", text: query }];
     setChatMessages(newHistory);
     setIsTyping(true);
 
@@ -186,10 +194,28 @@ export default function ChatWidget() {
     }
   };
 
+  const handleSendMessageRef = useRef(handleSendMessage);
+  handleSendMessageRef.current = handleSendMessage;
+
+  useEffect(() => {
+    const handleExternalOpen = (e) => {
+      setIsOpen(true);
+      const prompt = e.detail?.prompt;
+      if (prompt) {
+        setTimeout(() => {
+          if (handleSendMessageRef.current) {
+            handleSendMessageRef.current(prompt);
+          }
+        }, 150);
+      }
+    };
+    window.addEventListener("open-alomyr-chat", handleExternalOpen);
+    return () => window.removeEventListener("open-alomyr-chat", handleExternalOpen);
+  }, []);
+
   const quickPrompts = t("agent.quick_prompts") || [
     "What are Matheus's main projects?",
     "What is his academic background?",
-    "Experience with Computer Vision / U-Net?",
     "How to view or download his Resume?"
   ];
 
@@ -203,7 +229,6 @@ export default function ChatWidget() {
           onClick={() => setIsOpen(true)}
           title={t("agent.trigger_title")}
         >
-          <span className="chat-widget-pulse-dot"></span>
           <span>{t("agent.trigger_btn")}</span>
         </button>
       )}
@@ -220,7 +245,6 @@ export default function ChatWidget() {
                   Alomyr
                 </h4>
                 <p className="chat-widget-subtitle">
-                  <span className="chat-widget-pulse-dot" style={{ width: 6, height: 6 }}></span>
                   {t("agent.subtitle")}
                 </p>
               </div>

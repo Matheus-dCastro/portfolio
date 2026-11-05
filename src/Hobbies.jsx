@@ -18,7 +18,7 @@ import capa4 from "./assets/img/584385202_18086409646964312_3912764164389240104_
 import capa5 from "./assets/img/Gama-4.webp";
 import capa6 from "./assets/img/IMG_3091.webp";
 
-function Hobbies({ onBackToHome }) {
+function Hobbies({ onBackToHome, onOpenThought }) {
   const { t, lang } = useLanguage();
   const [thoughts, setThoughts] = useState(() => getStoredThoughts());
   const [drawings, setDrawings] = useState(() => getStoredDrawings());
@@ -110,32 +110,36 @@ function Hobbies({ onBackToHome }) {
                   </div>
                   <div className="thought-bottom-bar">
                     <div style={{ display: "flex", gap: "8px", alignItems: "center", flexWrap: "wrap" }}>
-                      {item.googleDocsUrl && (
-                        <a
-                          href={item.googleDocsUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="thought-doc-link"
-                        >
-                          {t("thoughts.read_gdocs")}
-                        </a>
-                      )}
-                      {item.pdfUrl && !item.googleDocsUrl && (
-                        <a
-                          href={item.pdfUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="thought-doc-link"
-                        >
-                          {t("thoughts.open_pdf")}
-                        </a>
-                      )}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (onOpenThought) {
+                            onOpenThought(item);
+                          } else {
+                            window.location.href = `/?project=${encodeURIComponent(item.id)}`;
+                          }
+                        }}
+                        className="thought-doc-link thought-saiba-mais-btn"
+                        style={{
+                          cursor: "pointer",
+                          background: "rgba(139, 92, 246, 0.12)",
+                          border: "1px solid rgba(139, 92, 246, 0.4)",
+                          color: "#c4b5fd",
+                          padding: "6px 14px",
+                          borderRadius: "8px",
+                          fontSize: "0.82rem",
+                          fontWeight: "600",
+                          transition: "all 0.2s ease"
+                        }}
+                      >
+                        {lang === "en" ? "Read Full Thought ↗" : "Ler Completo (Saber Mais) ↗"}
+                      </button>
                     </div>
 
                     <ShareButton
                       title={itemTitle}
                       text={itemContent}
-                      url={`/?page=hobbies#thought-${item.id}`}
+                      url={`/?project=${encodeURIComponent(item.id)}`}
                     />
                   </div>
                   {item.tags && item.tags.length > 0 && (

@@ -6,8 +6,9 @@ import AdminDraft from "./components/AdminDraft";
 import ViewDraft from "./components/ViewDraft";
 import OrderDraft from "./components/OrderDraft";
 import LoginDraft from "./components/LoginDraft";
+import NotFound from "./components/NotFound";
 import ChatWidget from "./components/ChatWidget";
-import { getStoredProjects, getStoredArticles } from "./data/projectsData";
+import { getStoredProjects, getStoredArticles, getStoredThoughts } from "./data/projectsData";
 import { getCurrentUser, onAuthChange, isAuthorizedAdmin } from "./lib/supabaseService";
 
 function App() {
@@ -15,38 +16,65 @@ function App() {
     const urlParams = new URLSearchParams(window.location.search);
     const projectId = urlParams.get("project") || urlParams.get("id");
     if (projectId) {
-      const all = [...getStoredProjects(), ...getStoredArticles()];
+      const all = [
+        ...getStoredProjects(),
+        ...getStoredArticles(),
+        ...getStoredThoughts()
+      ];
       return all.find((p) => p.id === projectId) || null;
     }
     return null;
   });
 
   const [currentPage, setCurrentPage] = useState(() => {
-    if (window.location.pathname.includes("/l0g1n") || window.location.pathname.includes("/login")) {
-      return "login";
-    }
-    if (window.location.pathname.includes("/4dm1n")) {
-      return "admin";
-    }
-    if (window.location.pathname.includes("/draft-view")) {
-      return "view-draft";
-    }
-    if (window.location.pathname.includes("/draft-order")) {
-      return "order-draft";
-    }
-    if (window.location.pathname.includes("/contacts")) {
-      return "links";
-    }
-    const urlParams = new URLSearchParams(window.location.search);
-    const project = urlParams.get("project");
-    if (project) {
-      return "project-detail";
-    }
-    const page = urlParams.get("page");
-    if (page === "links" || page === "hobbies") {
-      return page;
+    if (typeof window !== "undefined") {
+      const hash = window.location.hash || "";
+      // Se vier de autenticação OAuth com access_token na hash ou redirecionamento com /#
+      if (hash.includes("access_token") || hash.includes("refresh_token") || hash === "#" || hash === "#/") {
+        window.history.replaceState({}, "", "/4dm1n");
+        return "admin";
+      }
+      const rawPath = window.location.pathname.replace(/\/$/, "");
+      if (rawPath.includes("/404")) {
+        return "not-found";
+      }
+      if (rawPath.includes("/l0g1n") || rawPath.includes("/login")) {
+        return "login";
+      }
+      if (rawPath.includes("/4dm1n")) {
+        return "admin";
+      }
+      if (rawPath.includes("/draft-view")) {
+        return "view-draft";
+      }
+      if (rawPath.includes("/draft-order")) {
+        return "order-draft";
+      }
+      if (rawPath.includes("/contacts")) {
+        return "links";
+      }
+      const urlParams = new URLSearchParams(window.location.search);
+      const project = urlParams.get("project");
+      if (project) {
+        return "project-detail";
+      }
+      const page = urlParams.get("page");
+      if (page === "links" || page === "hobbies") {
+        return page;
+      }
+      if (rawPath !== "" && rawPath !== "/" && rawPath !== "/index.html") {
+        return "not-found";
+      }
     }
     return "home";
+  });
+
+  const [returnToAdmin, setReturnToAdmin] = useState(() => {
+    if (typeof window !== "undefined") {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get("from") === "admin";
+    }
+    return false;
   });
 
   const [currentUser, setCurrentUser] = useState(null);
@@ -63,10 +91,16 @@ function App() {
       setCurrentUser(user);
       setAuthChecked(true);
 
-      if (event === "SIGNED_IN" && user) {
-        if (window.location.pathname.includes("/l0g1n") || window.location.pathname.includes("/login")) {
-          setCurrentPage("admin");
-          window.history.pushState({}, "", "/4dm1n");
+      if ((event === "SIGNED_IN" || event === "USER_UPDATED") && user) {
+        const hash = window.location.hash || "";
+        const isOAuthCallback = hash.includes("access_token") || hash.includes("refresh_token") || hash === "#" || hash === "#/";
+        const isLoginPage = window.location.pathname.includes("/l0g1n") || window.location.pathname.includes("/login");
+
+        if (isLoginPage || isOAuthCallback) {
+          if (isAuthorizedAdmin(user)) {
+            setCurrentPage("admin");
+            window.history.replaceState({}, "", "/4dm1n");
+          }
         }
       } else if (event === "SIGNED_OUT") {
         if (currentPage === "admin" || currentPage === "order-draft") {
@@ -84,10 +118,39 @@ function App() {
   // Handle browser back/forward buttons
   useEffect(() => {
     const handlePopState = () => {
+      const rawPath = window.location.pathname.replace(/\/$/, "");
+      if (rawPath.includes("/404")) {
+        setCurrentPage("not-found");
+        return;
+      }
+      if (rawPath.includes("/l0g1n") || rawPath.includes("/login")) {
+        setCurrentPage("login");
+        return;
+      }
+      if (rawPath.includes("/4dm1n")) {
+        setCurrentPage("admin");
+        return;
+      }
+      if (rawPath.includes("/draft-view")) {
+        setCurrentPage("view-draft");
+        return;
+      }
+      if (rawPath.includes("/draft-order")) {
+        setCurrentPage("order-draft");
+        return;
+      }
+      if (rawPath.includes("/contacts")) {
+        setCurrentPage("links");
+        return;
+      }
       const urlParams = new URLSearchParams(window.location.search);
       const projId = urlParams.get("project");
       if (projId) {
-        const all = [...getStoredProjects(), ...getStoredArticles()];
+        const all = [
+          ...getStoredProjects(),
+          ...getStoredArticles(),
+          ...getStoredThoughts()
+        ];
         const found = all.find((p) => p.id === projId);
         if (found) {
           setSelectedProject(found);
@@ -98,6 +161,8 @@ function App() {
       const page = urlParams.get("page");
       if (page === "links" || page === "hobbies") {
         setCurrentPage(page);
+      } else if (rawPath !== "" && rawPath !== "/" && rawPath !== "/index.html") {
+        setCurrentPage("not-found");
       } else {
         setCurrentPage("home");
       }
@@ -107,18 +172,37 @@ function App() {
     return () => window.removeEventListener("popstate", handlePopState);
   }, []);
 
-  const handleOpenProject = (project) => {
+  const handleOpenProject = (project, fromAdmin = false) => {
     setSelectedProject(project);
+    const isFromAdmin = fromAdmin || currentPage === "admin" || window.location.pathname.includes("/4dm1n");
+    if (isFromAdmin) {
+      setReturnToAdmin(true);
+    }
     setCurrentPage("project-detail");
     window.history.pushState(
-      { project: project.id },
+      { project: project.id, fromAdmin: isFromAdmin },
       "",
-      `/?project=${encodeURIComponent(project.id)}`
+      `/?project=${encodeURIComponent(project.id)}${isFromAdmin ? "&from=admin" : ""}`
     );
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handleBackToHome = (targetSection = null) => {
+    if (returnToAdmin || (typeof window !== "undefined" && window.location.search.includes("from=admin"))) {
+      setReturnToAdmin(false);
+      setCurrentPage("admin");
+      window.history.pushState({}, "", "/4dm1n");
+      return;
+    }
+    if (targetSection === "thoughts") {
+      setCurrentPage("hobbies");
+      window.history.pushState({}, "", "/?page=hobbies#thoughts");
+      setTimeout(() => {
+        const el = document.getElementById("thoughts");
+        if (el) el.scrollIntoView({ behavior: "smooth" });
+      }, 60);
+      return;
+    }
     if (
       window.location.pathname.includes("/contacts") ||
       window.location.pathname.includes("/4dm1n") ||
@@ -143,7 +227,7 @@ function App() {
   if (currentPage === "hobbies") {
     return (
       <>
-        <Hobbies onBackToHome={handleBackToHome} />
+        <Hobbies onBackToHome={handleBackToHome} onOpenThought={handleOpenProject} />
         <ChatWidget />
       </>
     );
@@ -229,6 +313,30 @@ function App() {
               "",
               `/?project=${encodeURIComponent(proj.id)}`
             );
+          }}
+        />
+        <ChatWidget />
+      </>
+    );
+  }
+
+  if (currentPage === "not-found") {
+    return (
+      <>
+        <NotFound
+          onBackToHome={() => {
+            setCurrentPage("home");
+            window.history.pushState({}, "", "/");
+            window.scrollTo({ top: 0, behavior: "smooth" });
+          }}
+          onExploreWorks={() => {
+            setCurrentPage("home");
+            window.history.pushState({}, "", "/#works");
+            window.scrollTo({ top: 0, behavior: "smooth" });
+            setTimeout(() => {
+              const el = document.getElementById("works");
+              if (el) el.scrollIntoView({ behavior: "smooth" });
+            }, 150);
           }}
         />
         <ChatWidget />

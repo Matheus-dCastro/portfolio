@@ -12,6 +12,7 @@ import {
   getStoredCvConfig,
   saveCvConfig,
   DEFAULT_CV_CONFIG,
+  getStoredCustomHobby,
   convertGoogleDocsToEmbedUrl
 } from "../data/projectsData";
 import {
@@ -22,6 +23,7 @@ import {
   fetchDrawings,
   fetchCvConfig,
   fetchAgentConfig,
+  fetchCustomHobby,
   persistWork,
   removeWork,
   persistArticle,
@@ -36,6 +38,7 @@ import {
   persistCvConfig,
   uploadCvPdf,
   persistAgentConfig,
+  persistCustomHobby,
   persistBatchOrder,
   getCurrentUser,
   logoutUser
@@ -125,6 +128,9 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
   const [agentTemperature, setAgentTemperature] = useState(0.3);
   const [agentMaxTokens, setAgentMaxTokens] = useState(800);
   const [agentGuardrailsActive, setAgentGuardrailsActive] = useState(true);
+  const [agentApiKey, setAgentApiKey] = useState("");
+  const [showApiKey, setShowApiKey] = useState(false);
+  const [hasSavedApiKey, setHasSavedApiKey] = useState(false);
   const [testChatMessage, setTestChatMessage] = useState("");
   const [isChatLoading, setIsChatLoading] = useState(false);
   const [chatMessages, setChatMessages] = useState([
@@ -161,7 +167,18 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
   const [isDraggingDrawing, setIsDraggingDrawing] = useState(false);
   const [drawingUploadFeedback, setDrawingUploadFeedback] = useState(null);
   const [drawingDisplayOrder, setDrawingDisplayOrder] = useState(0);
+  const [draggedDrawingIdx, setDraggedDrawingIdx] = useState(null);
   const drawingFileInputRef = useRef(null);
+
+  // Custom Hobby Card States (Além de Código & Café)
+  const [customHobbyCategory, setCustomHobbyCategory] = useState("Deep Learning & Arte");
+  const [customHobbyTitlePt, setCustomHobbyTitlePt] = useState("Hiper-realismo & Algoritmos");
+  const [customHobbyTitleEn, setCustomHobbyTitleEn] = useState("Hyper-realism & Algorithms");
+  const [customHobbyDescPt, setCustomHobbyDescPt] = useState("A mesma precisão cirúrgica exigida no hiper-realismo a grafite guia o refinamento de tensores e redes neurais profundas.");
+  const [customHobbyDescEn, setCustomHobbyDescEn] = useState("The same surgical precision demanded in graphite hyper-realism guides deep neural network refinement.");
+  const [customHobbyPhoto, setCustomHobbyPhoto] = useState("");
+  const [customHobbyPublished, setCustomHobbyPublished] = useState(true);
+  const [customHobbyActiveLang, setCustomHobbyActiveLang] = useState("pt");
 
   const [currentUser, setCurrentUser] = useState(null);
 
@@ -208,6 +225,20 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
         if (cfg?.modelName) setAgentModel(cfg.modelName);
         if (cfg?.temperature !== undefined) setAgentTemperature(Number(cfg.temperature));
         if (cfg?.maxTokens !== undefined) setAgentMaxTokens(Number(cfg.maxTokens));
+        if (cfg?.hasApiKey) setHasSavedApiKey(true);
+        if (cfg?.groqApiKey) setAgentApiKey(cfg.groqApiKey);
+      });
+    } else if (activeTab === "customHobby") {
+      fetchCustomHobby().then((h) => {
+        if (h) {
+          if (h.category) setCustomHobbyCategory(h.category);
+          if (h.titlePt) setCustomHobbyTitlePt(h.titlePt);
+          if (h.titleEn) setCustomHobbyTitleEn(h.titleEn);
+          if (h.descriptionPt) setCustomHobbyDescPt(h.descriptionPt);
+          if (h.descriptionEn) setCustomHobbyDescEn(h.descriptionEn);
+          if (h.photoUrl) setCustomHobbyPhoto(h.photoUrl);
+          if (h.isPublished !== undefined) setCustomHobbyPublished(h.isPublished);
+        }
       });
     }
   }, [activeTab]);
@@ -545,6 +576,26 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
       res.cloud
         ? "Ordem dos desenhos atualizada no Supabase!"
         : "Ordem dos desenhos atualizada localmente!"
+    );
+  };
+
+  const handleMoveDrawingTo = async (fromIdx, toIdx) => {
+    if (fromIdx === toIdx || fromIdx < 0 || toIdx < 0 || fromIdx >= items.length || toIdx >= items.length) return;
+    const newItems = [...items];
+    const [moved] = newItems.splice(fromIdx, 1);
+    newItems.splice(toIdx, 0, moved);
+
+    const reordered = newItems.map((it, idx) => ({
+      ...it,
+      displayOrder: idx
+    }));
+
+    setItems(reordered);
+    const res = await persistBatchOrder("drawings", reordered);
+    showToast(
+      res.cloud
+        ? "Nova ordem dos desenhos salva e publicada no Supabase!"
+        : "Nova ordem dos desenhos salva localmente!"
     );
   };
 
@@ -1057,11 +1108,37 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
 
   // Save Agent Prompt & Finetuning
   const handleSaveAgentPrompt = async () => {
-    const res = await persistAgentConfig(agentPrompt, agentModel, agentTemperature, agentMaxTokens);
+    const res = await persistAgentConfig(
+      agentPrompt,
+      agentModel,
+      agentTemperature,
+      agentMaxTokens,
+      agentApiKey
+    );
+    if (agentApiKey) setHasSavedApiKey(true);
     showToast(
       res.cloud
-        ? "Configurações do Agente salvas e sincronizadas no Supabase!"
+        ? "Configurações do Agente e Chave salvas e sincronizadas no Supabase!"
         : "Configurações do Agente salvas localmente!"
+    );
+  };
+
+  const handleSaveCustomHobby = async (e) => {
+    if (e && e.preventDefault) e.preventDefault();
+    const payload = {
+      category: customHobbyCategory.trim(),
+      titlePt: customHobbyTitlePt.trim(),
+      titleEn: customHobbyTitleEn.trim(),
+      descriptionPt: customHobbyDescPt.trim(),
+      descriptionEn: customHobbyDescEn.trim(),
+      photoUrl: customHobbyPhoto.trim(),
+      isPublished: customHobbyPublished
+    };
+    const res = await persistCustomHobby(payload);
+    showToast(
+      res.cloud
+        ? "Card de Destaque salvo e sincronizado no Supabase!"
+        : "Card de Destaque salvo localmente!"
     );
   };
 
@@ -1135,7 +1212,7 @@ DIRETRIZ MÁXIMA DE CONCISÃO:
     setIsChatLoading(true);
 
     try {
-      const res = await sendChatMessage(newHistory, agentPrompt, agentModel);
+      const res = await sendChatMessage(newHistory, agentPrompt, agentModel, agentApiKey || null);
       setChatMessages((prev) => [
         ...prev,
         {
@@ -1290,6 +1367,13 @@ DIRETRIZ MÁXIMA DE CONCISÃO:
             </button>
             <button
               type="button"
+              className={`cat-btn ${activeTab === "customHobby" ? "active" : ""}`}
+              onClick={() => handleTabChange("customHobby")}
+            >
+              Card Interesses
+            </button>
+            <button
+              type="button"
               className={`cat-btn agent-tab ${activeTab === "agent" ? "active" : ""}`}
               onClick={() => handleTabChange("agent")}
             >
@@ -1438,10 +1522,80 @@ DIRETRIZ MÁXIMA DE CONCISÃO:
                     value={agentModel}
                     onChange={(e) => setAgentModel(e.target.value)}
                   >
-                    <option value="qwen-2.5-coder-32b">Qwen 2.5 Coder 32B (Groq Fast)</option>
-                    <option value="llama-3.3-70b-versatile">Llama 3.3 70B Versatile (Deep Reasoning)</option>
-                    <option value="qwen/qwen3.8-27b">Qwen 3.8 27B</option>
+                    <option value="qwen-2.5-coder-32b">Qwen 2.5 Coder 32B (Groq Fast - Padrão)</option>
+                    <option value="llama-3.3-70b-versatile">Llama 3.3 70B Versatile (Meta - Raciocínio Profundo)</option>
+                    <option value="llama-3.1-8b-instant">Llama 3.1 8B Instant (Meta - Baixa Latência)</option>
+                    <option value="mixtral-8x7b-32768">Mixtral 8x7B (Mistral AI)</option>
+                    <option value="gemma2-9b-it">Gemma 2 9B (Google)</option>
                   </select>
+                </div>
+
+                <div className="finetune-control-item" style={{ gridColumn: "1 / -1", background: "rgba(139, 92, 246, 0.05)", padding: "12px", borderRadius: "10px", border: "1px solid rgba(139, 92, 246, 0.15)" }}>
+                  <label htmlFor="agent-api-key" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
+                    <span style={{ color: "#e2e8f0", fontWeight: "600", fontSize: "0.82rem" }}>
+                      🔑 Chave Groq API (Armazenada com Segurança no Supabase Cloud):
+                    </span>
+                    {hasSavedApiKey && (
+                      <span style={{ color: "#34d399", fontSize: "0.72rem", fontWeight: "600", background: "rgba(16, 185, 129, 0.15)", padding: "2px 8px", borderRadius: "4px" }}>
+                        ✓ Chave Vinculada na Nuvem
+                      </span>
+                    )}
+                  </label>
+                  <div style={{ display: "flex", gap: "8px" }}>
+                    <input
+                      id="agent-api-key"
+                      type={showApiKey ? "text" : "password"}
+                      value={agentApiKey}
+                      onChange={(e) => setAgentApiKey(e.target.value)}
+                      placeholder={hasSavedApiKey ? "•••••••••••••••••••••••••••••••• (Chave já salva na nuvem. Digite nova para atualizar)" : "Insira sua Groq API Key (ex: gsk_...)"}
+                      style={{
+                        flex: 1,
+                        background: "#090a10",
+                        border: "1px solid #2e1065",
+                        color: "#f3f4f6",
+                        padding: "8px 12px",
+                        borderRadius: "8px",
+                        fontSize: "0.84rem"
+                      }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowApiKey(!showApiKey)}
+                      style={{
+                        background: "rgba(139, 92, 246, 0.2)",
+                        border: "1px solid rgba(139, 92, 246, 0.4)",
+                        color: "#c4b5fd",
+                        padding: "0 12px",
+                        borderRadius: "8px",
+                        cursor: "pointer",
+                        fontSize: "0.78rem",
+                        fontWeight: "600"
+                      }}
+                      title={showApiKey ? "Ocultar Chave" : "Mostrar Chave"}
+                    >
+                      {showApiKey ? "Ocultar" : "Mostrar"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleSaveAgentPrompt}
+                      style={{
+                        background: "#8b5cf6",
+                        border: "none",
+                        color: "#ffffff",
+                        padding: "0 16px",
+                        borderRadius: "8px",
+                        cursor: "pointer",
+                        fontSize: "0.78rem",
+                        fontWeight: "600",
+                        whiteSpace: "nowrap"
+                      }}
+                    >
+                      Salvar Chave &amp; Modelo
+                    </button>
+                  </div>
+                  <span style={{ fontSize: "0.7rem", color: "#94a3b8", marginTop: "6px", display: "block" }}>
+                    🔒 As chaves cadastradas aqui são gravadas no Supabase Cloud e injetadas na Edge Function sem expor nada no cliente público.
+                  </span>
                 </div>
 
                 <div className="finetune-control-item">
@@ -1560,7 +1714,6 @@ DIRETRIZ MÁXIMA DE CONCISÃO:
             <div className="chat-simulator-container">
               <div className="chat-sim-header">
                 <div className="bot-status-indicator">
-                  <span className="status-dot"></span>
                   <strong>Simulador do Chatbot (Alomyr • {agentModel})</strong>
                 </div>
                 <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
@@ -1642,6 +1795,207 @@ DIRETRIZ MÁXIMA DE CONCISÃO:
                   {isChatLoading ? "Enviando..." : "Enviar ↗"}
                 </button>
               </form>
+            </div>
+          </div>
+        </div>
+      ) : activeTab === "customHobby" ? (
+        <div className="cv-admin-dashboard custom-hobby-dashboard">
+          <div className="cv-dash-left">
+            <div className="cv-card-section">
+              <div className="cv-section-header">
+                <div>
+                  <h2>Card de Destaque (Interesses &amp; Além de Código e Café)</h2>
+                  <p className="cv-section-subtitle">
+                    Personalize o card exibido ao lado de Código &amp; Café na vitrine de Interesses. Altere título, texto, categoria e foto.
+                  </p>
+                </div>
+              </div>
+
+              {/* Language Switcher */}
+              <div className="admin-lang-switcher" style={{ marginBottom: "20px" }}>
+                <button
+                  type="button"
+                  className={`admin-lang-btn ${customHobbyActiveLang === "pt" ? "active" : ""}`}
+                  onClick={() => setCustomHobbyActiveLang("pt")}
+                >
+                  🇧🇷 Português (PT)
+                </button>
+                <button
+                  type="button"
+                  className={`admin-lang-btn ${customHobbyActiveLang === "en" ? "active" : ""}`}
+                  onClick={() => setCustomHobbyActiveLang("en")}
+                >
+                  🇺🇸 English (EN)
+                </button>
+              </div>
+
+              <form onSubmit={handleSaveCustomHobby}>
+                <div className="form-group" style={{ marginBottom: "16px" }}>
+                  <label htmlFor="hobby-cat-input">Categoria / Tag do Card:</label>
+                  <input
+                    id="hobby-cat-input"
+                    type="text"
+                    value={customHobbyCategory}
+                    onChange={(e) => setCustomHobbyCategory(e.target.value)}
+                    placeholder="Ex: Deep Learning &amp; Arte, Hiper-realismo, Filosofia..."
+                    style={{ width: "100%", padding: "10px", background: "#0d0f17", border: "1px solid #1f293d", borderRadius: "8px", color: "#fff" }}
+                  />
+                </div>
+
+                {customHobbyActiveLang === "pt" ? (
+                  <>
+                    <div className="form-group" style={{ marginBottom: "16px" }}>
+                      <label htmlFor="hobby-title-pt">Título (PT):</label>
+                      <input
+                        id="hobby-title-pt"
+                        type="text"
+                        value={customHobbyTitlePt}
+                        onChange={(e) => setCustomHobbyTitlePt(e.target.value)}
+                        placeholder="Ex: Hiper-realismo &amp; Algoritmos"
+                        style={{ width: "100%", padding: "10px", background: "#0d0f17", border: "1px solid #1f293d", borderRadius: "8px", color: "#fff" }}
+                      />
+                    </div>
+                    <div className="form-group" style={{ marginBottom: "16px" }}>
+                      <label htmlFor="hobby-desc-pt">Descrição / Texto (PT):</label>
+                      <textarea
+                        id="hobby-desc-pt"
+                        rows="4"
+                        value={customHobbyDescPt}
+                        onChange={(e) => setCustomHobbyDescPt(e.target.value)}
+                        placeholder="Conte algo interessante..."
+                        style={{ width: "100%", padding: "10px", background: "#0d0f17", border: "1px solid #1f293d", borderRadius: "8px", color: "#fff" }}
+                      />
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="form-group" style={{ marginBottom: "16px" }}>
+                      <label htmlFor="hobby-title-en">Title (EN):</label>
+                      <input
+                        id="hobby-title-en"
+                        type="text"
+                        value={customHobbyTitleEn}
+                        onChange={(e) => setCustomHobbyTitleEn(e.target.value)}
+                        placeholder="Ex: Hyper-realism &amp; Algorithms"
+                        style={{ width: "100%", padding: "10px", background: "#0d0f17", border: "1px solid #1f293d", borderRadius: "8px", color: "#fff" }}
+                      />
+                    </div>
+                    <div className="form-group" style={{ marginBottom: "16px" }}>
+                      <label htmlFor="hobby-desc-en">Description / Text (EN):</label>
+                      <textarea
+                        id="hobby-desc-en"
+                        rows="4"
+                        value={customHobbyDescEn}
+                        onChange={(e) => setCustomHobbyDescEn(e.target.value)}
+                        placeholder="Tell something interesting..."
+                        style={{ width: "100%", padding: "10px", background: "#0d0f17", border: "1px solid #1f293d", borderRadius: "8px", color: "#fff" }}
+                      />
+                    </div>
+                  </>
+                )}
+
+                <div className="form-group" style={{ marginBottom: "16px" }}>
+                  <label htmlFor="hobby-photo-input">URL da Imagem / Foto do Card:</label>
+                  <div style={{ display: "flex", gap: "8px" }}>
+                    <input
+                      id="hobby-photo-input"
+                      type="text"
+                      value={customHobbyPhoto}
+                      onChange={(e) => setCustomHobbyPhoto(e.target.value)}
+                      placeholder="Cole uma URL de imagem ou selecione um arquivo..."
+                      style={{ flex: 1, padding: "10px", background: "#0d0f17", border: "1px solid #1f293d", borderRadius: "8px", color: "#fff" }}
+                    />
+                    <label
+                      style={{
+                        background: "rgba(139, 92, 246, 0.2)",
+                        border: "1px solid rgba(139, 92, 246, 0.4)",
+                        color: "#c4b5fd",
+                        padding: "10px 16px",
+                        borderRadius: "8px",
+                        cursor: "pointer",
+                        fontWeight: "600",
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: "6px",
+                        fontSize: "0.85rem",
+                        whiteSpace: "nowrap"
+                      }}
+                    >
+                      📁 Upload Foto
+                      <input
+                        type="file"
+                        accept="image/*"
+                        style={{ display: "none" }}
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            const reader = new FileReader();
+                            reader.onload = () => setCustomHobbyPhoto(reader.result);
+                            reader.readAsDataURL(file);
+                          }
+                        }}
+                      />
+                    </label>
+                  </div>
+                </div>
+
+                <div className="form-group" style={{ marginBottom: "20px" }}>
+                  <label style={{ display: "inline-flex", alignItems: "center", gap: "8px", cursor: "pointer", color: "#e2e8f0" }}>
+                    <input
+                      type="checkbox"
+                      checked={customHobbyPublished}
+                      onChange={(e) => setCustomHobbyPublished(e.target.checked)}
+                    />
+                    Card Ativo e Visível na Vitrine
+                  </label>
+                </div>
+
+                <button
+                  type="submit"
+                  style={{
+                    background: "#8b5cf6",
+                    color: "#fff",
+                    border: "none",
+                    padding: "12px 24px",
+                    borderRadius: "8px",
+                    fontWeight: "700",
+                    cursor: "pointer",
+                    fontSize: "0.9rem"
+                  }}
+                >
+                  Salvar Card de Destaque
+                </button>
+              </form>
+            </div>
+          </div>
+
+          {/* Right: Live Preview */}
+          <div className="cv-dash-right">
+            <div className="cv-card-section" style={{ position: "sticky", top: "20px" }}>
+              <div className="cv-section-header">
+                <div>
+                  <h3>Prévia do Card na Vitrine</h3>
+                  <p className="cv-section-subtitle">Visualização exata de como os visitantes verão este card.</p>
+                </div>
+              </div>
+
+              <div className="hobbies-grid" style={{ gridTemplateColumns: "1fr", maxWidth: "340px", margin: "16px auto" }}>
+                <div className="hobby-card custom-hobby-card" style={{ height: "320px", display: "flex", flexDirection: "column" }}>
+                  <img
+                    src={customHobbyPhoto || "/IMG_3104.webp"}
+                    alt="Preview"
+                    style={{ width: "100%", height: "180px", objectFit: "cover", borderRadius: "8px 8px 0 0" }}
+                    onError={(e) => {
+                      e.target.src = "https://images.unsplash.com/photo-1579783902614-a3fb3927b675?auto=format&fit=crop&w=600&q=80";
+                    }}
+                  />
+                  <div className="hobby-content" style={{ padding: "16px" }}>
+                    <span className="hobby-category">{customHobbyCategory || "Destaque"}</span>
+                    <h3 style={{ margin: "4px 0" }}>{customHobbyActiveLang === "en" ? (customHobbyTitleEn || "Title") : (customHobbyTitlePt || "Título")}</h3>
+                    <p style={{ fontSize: "0.82rem", color: "#94a3b8" }}>{customHobbyActiveLang === "en" ? (customHobbyDescEn || "Description...") : (customHobbyDescPt || "Descrição...")}</p>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -2002,7 +2356,7 @@ DIRETRIZ MÁXIMA DE CONCISÃO:
                       className="cv-option-card gdocs-card"
                     >
                       <span className="cv-option-icon gdocs-icon">
-                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
                       </span>
                       <div className="cv-option-text">
                         <div className="cv-option-badge">
@@ -2021,7 +2375,7 @@ DIRETRIZ MÁXIMA DE CONCISÃO:
                       className="cv-option-card pdf-card"
                     >
                       <span className="cv-option-icon pdf-icon">
-                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#f87171" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
                       </span>
                       <div className="cv-option-text">
                         <div className="cv-option-badge">
@@ -2092,14 +2446,61 @@ DIRETRIZ MÁXIMA DE CONCISÃO:
                   </span>
                 </div>
               ) : (
-                items.map((drawing, idx) => {
-                  const isSelected = drawing.id === selectedId;
-                  return (
-                    <div
-                      key={drawing.id || idx}
-                      className={`explorer-item-card drawing-sidebar-card ${isSelected ? "selected" : ""}`}
-                      onClick={() => loadDrawingIntoForm(drawing)}
+                <>
+                  <div style={{ padding: "0 12px 10px 12px" }}>
+                    <button
+                      type="button"
+                      className="btn-order-board-quick"
+                      onClick={() => {
+                        if (onNavigateToOrder) onNavigateToOrder();
+                        else window.location.href = "/draft-order?tab=drawings";
+                      }}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: "6px",
+                        width: "100%",
+                        padding: "8px 10px",
+                        background: "rgba(139, 92, 246, 0.12)",
+                        border: "1px dashed rgba(139, 92, 246, 0.4)",
+                        borderRadius: "8px",
+                        color: "#c4b5fd",
+                        fontSize: "0.76rem",
+                        fontWeight: "600",
+                        cursor: "pointer",
+                        transition: "all 0.2s ease"
+                      }}
                     >
+                      <span>🎨</span> Organizar em Grade (Drag &amp; Drop) ↗
+                    </button>
+                  </div>
+                  {items.map((drawing, idx) => {
+                    const isSelected = drawing.id === selectedId;
+                    return (
+                      <div
+                        key={drawing.id || idx}
+                        draggable={true}
+                        onDragStart={(e) => {
+                          e.dataTransfer.effectAllowed = "move";
+                          setDraggedDrawingIdx(idx);
+                        }}
+                        onDragOver={(e) => {
+                          e.preventDefault();
+                          e.dataTransfer.dropEffect = "move";
+                        }}
+                        onDrop={(e) => {
+                          e.preventDefault();
+                          if (draggedDrawingIdx !== null && draggedDrawingIdx !== idx) {
+                            handleMoveDrawingTo(draggedDrawingIdx, idx);
+                          }
+                          setDraggedDrawingIdx(null);
+                        }}
+                        className={`explorer-item-card drawing-sidebar-card ${isSelected ? "selected" : ""} ${draggedDrawingIdx === idx ? "dragging-sidebar-card" : ""}`}
+                        onClick={() => loadDrawingIntoForm(drawing)}
+                        style={{ cursor: "grab" }}
+                        title="Arraste para reposicionar ou clique para editar"
+                      >
                       <div className="drawing-card-thumb-wrap">
                         {drawing.src ? (
                           <img
@@ -2167,7 +2568,7 @@ DIRETRIZ MÁXIMA DE CONCISÃO:
                       </button>
                     </div>
                   );
-                })
+                })}</>
               )}
             </div>
 

@@ -94,8 +94,12 @@ CREATE TABLE IF NOT EXISTS public.agent_configs (
     system_prompt TEXT NOT NULL,
     max_tokens INTEGER NOT NULL DEFAULT 1024,
     temperature NUMERIC(3, 2) NOT NULL DEFAULT 0.3,
+    groq_api_key TEXT,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
+
+ALTER TABLE public.agent_configs ADD COLUMN IF NOT EXISTS groq_api_key TEXT;
+ALTER TABLE public.agent_configs ADD COLUMN IF NOT EXISTS custom_hobby_json JSONB;
 
 -- 7. RELACIONAMENTO BIDIRECIONAL (PROJETO <-> ARTIGO)
 DO $$ BEGIN

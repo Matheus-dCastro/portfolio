@@ -3,43 +3,56 @@ import {
   getStoredProjects,
   resetProjectsToDefault,
   getStoredArticles,
-  getStoredThoughts
+  getStoredThoughts,
+  getStoredDrawings
 } from "../data/projectsData";
 import {
   fetchWorks,
   fetchArticles,
   fetchThoughts,
+  fetchDrawings,
   persistBatchOrder
 } from "../lib/supabaseService";
+import CategoryIcon from "./CategoryIcon";
 import "./OrderDraft.css";
 
 const CATEGORIES = [
   {
     id: "Profissional",
     label: "Profissional & Corporativo",
-    icon: "",
+    icon: <CategoryIcon category="Profissional" size={20} />,
     badgeClass: "cat-profissional",
     description: "Projetos desenvolvidos para empresas, clientes corporativos e soluções de produção em larga escala."
   },
   {
     id: "Pessoal",
     label: "Projetos Pessoais & Inovações",
-    icon: "",
+    icon: <CategoryIcon category="Pessoal" size={20} />,
     badgeClass: "cat-pessoal",
     description: "Projetos autorais, ferramentas de produtividade, suítes de design e extensões públicas."
   },
   {
     id: "Acadêmico",
     label: "Acadêmico & Pesquisa Científica",
-    icon: "",
+    icon: <CategoryIcon category="Acadêmico" size={20} />,
     badgeClass: "cat-academico",
     description: "Pesquisas na UFRN/IFRN, experimentos de Machine Learning, Deep Learning, Visão Computacional e algoritmos complexos."
   }
 ];
 
 export default function OrderDraft({ onBackToHome, onOpenProjectDetail, onNavigateToAdmin }) {
-  const [activeTab, setActiveTab] = useState("projects"); // 'projects' | 'articles' | 'thoughts'
-  const [items, setItems] = useState(() => getStoredProjects());
+  const [activeTab, setActiveTab] = useState(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get("tab") || "projects";
+  });
+  const [items, setItems] = useState(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const tab = urlParams.get("tab");
+    if (tab === "articles") return getStoredArticles();
+    if (tab === "thoughts") return getStoredThoughts();
+    if (tab === "drawings") return getStoredDrawings();
+    return getStoredProjects();
+  });
   const [searchQuery, setSearchQuery] = useState("");
   const [draggedItemId, setDraggedItemId] = useState(null);
   const [dragOverCategory, setDragOverCategory] = useState(null);
@@ -54,8 +67,10 @@ export default function OrderDraft({ onBackToHome, onOpenProjectDetail, onNaviga
       setItems(getStoredProjects());
     } else if (tab === "articles") {
       setItems(getStoredArticles());
-    } else {
+    } else if (tab === "thoughts") {
       setItems(getStoredThoughts());
+    } else if (tab === "drawings") {
+      setItems(getStoredDrawings());
     }
   };
 
@@ -68,12 +83,37 @@ export default function OrderDraft({ onBackToHome, onOpenProjectDetail, onNaviga
       fetchArticles(true).then((data) => {
         if (Array.isArray(data)) setItems(data);
       });
-    } else {
+    } else if (activeTab === "thoughts") {
       fetchThoughts(true).then((data) => {
+        if (Array.isArray(data)) setItems(data);
+      });
+    } else if (activeTab === "drawings") {
+      fetchDrawings(true).then((data) => {
         if (Array.isArray(data)) setItems(data);
       });
     }
   }, [activeTab]);
+
+  const moveDrawing = (currentIndex, delta) => {
+    const targetIndex = currentIndex + delta;
+    if (targetIndex < 0 || targetIndex >= items.length) return;
+    const newItems = [...items];
+    const [moved] = newItems.splice(currentIndex, 1);
+    newItems.splice(targetIndex, 0, moved);
+    setItems(newItems);
+  };
+
+  const handleDropDrawing = (targetIndex) => {
+    if (draggedItemId === null || draggedItemId === undefined) return;
+    const fromIdx = items.findIndex((it) => it.id === draggedItemId);
+    if (fromIdx < 0 || fromIdx === targetIndex) return;
+    const newItems = [...items];
+    const [moved] = newItems.splice(fromIdx, 1);
+    newItems.splice(targetIndex, 0, moved);
+    setItems(newItems);
+    setDraggedItemId(null);
+    setDragOverTargetId(null);
+  };
 
   const showNotification = (msg) => {
     setNotification(msg);
@@ -218,6 +258,9 @@ export default function OrderDraft({ onBackToHome, onOpenProjectDetail, onNaviga
       if (activeTab === "projects") {
         const def = resetProjectsToDefault();
         setItems([...def]);
+      } else if (activeTab === "drawings") {
+        localStorage.removeItem("portfolio_drawings_data_v1");
+        setItems(getStoredDrawings());
       } else {
         localStorage.removeItem(`portfolio_${activeTab}_data_v1`);
         if (activeTab === "articles") setItems(getStoredArticles());
@@ -308,6 +351,12 @@ export default function OrderDraft({ onBackToHome, onOpenProjectDetail, onNaviga
           >
             Pensamentos & Insights
           </button>
+          <button
+            className={`order-tab-btn ${activeTab === "drawings" ? "active" : ""}`}
+            onClick={() => handleTabChange("drawings")}
+          >
+            🎨 Obras &amp; Desenhos
+          </button>
         </div>
 
         <div className="order-search-box">
@@ -349,7 +398,120 @@ export default function OrderDraft({ onBackToHome, onOpenProjectDetail, onNaviga
 
       {/* Main Container with 3 Separated Category Sections */}
       <main className="order-cards-container">
-        {CATEGORIES.map((category) => {
+        {activeTab === "drawings" ? (
+          <section className="category-session-block" style={{ width: "100%", maxWidth: "1280px", margin: "0 auto" }}>
+            <div className="session-header-bar">
+              <div className="session-title-group">
+                <span className="session-icon">🎨</span>
+                <div>
+                  <h2 className="session-title">
+                    Galeria: <span>Obras de Arte &amp; Hiper-realismo</span>
+                  </h2>
+                  <p className="session-desc">
+                    Arraste os cards para reorganizar a galeria visual. Você também pode usar as setas laterais para mover um a um.
+                  </p>
+                </div>
+              </div>
+              <div className="session-count-badge">
+                <span>{items.length} obras</span>
+              </div>
+            </div>
+
+            <div className="order-cards-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: "16px" }}>
+              {items
+                .filter((d) => {
+                  if (!searchQuery) return true;
+                  const q = searchQuery.toLowerCase();
+                  return (
+                    (d.title && d.title.toLowerCase().includes(q)) ||
+                    (d.description && d.description.toLowerCase().includes(q))
+                  );
+                })
+                .map((drawing, dIdx) => {
+                  const isDragging = draggedItemId === drawing.id;
+                  const isTarget = dragOverTargetId === drawing.id;
+
+                  return (
+                    <div
+                      key={drawing.id || dIdx}
+                      className={`order-project-card ${isDragging ? "is-dragging" : ""} ${isTarget ? "is-drag-over" : ""}`}
+                      draggable={!previewMode}
+                      onDragStart={(e) => {
+                        e.dataTransfer.setData("text/plain", drawing.id);
+                        setDraggedItemId(drawing.id);
+                      }}
+                      onDragOver={(e) => {
+                        e.preventDefault();
+                        setDragOverTargetId(drawing.id);
+                      }}
+                      onDrop={(e) => {
+                        e.preventDefault();
+                        handleDropDrawing(dIdx);
+                      }}
+                      onDragEnd={handleDragEnd}
+                      style={{ display: "flex", flexDirection: "column", height: "100%" }}
+                    >
+                      <div className="card-top-header">
+                        <div className="card-position-badge">
+                          <span className="position-number">Posição #{dIdx + 1}</span>
+                          {dIdx === 0 && <span className="featured-tag">1º Destaque</span>}
+                        </div>
+                        <span className={`drawing-status-pill ${drawing.isPublished !== false ? "published" : "draft"}`} style={{ fontSize: "0.68rem" }}>
+                          {drawing.isPublished !== false ? "Publicado" : "Rascunho"}
+                        </span>
+                      </div>
+
+                      <div style={{ width: "100%", height: "160px", background: "#0a0c16", borderRadius: "8px", overflow: "hidden", margin: "10px 0", position: "relative" }}>
+                        {drawing.src ? (
+                          <img
+                            src={drawing.src}
+                            alt={drawing.title}
+                            style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                          />
+                        ) : (
+                          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", color: "#64748b" }}>Sem Imagem</div>
+                        )}
+                      </div>
+
+                      <h3 className="project-title" style={{ fontSize: "1rem", margin: "4px 0" }}>
+                        {drawing.title || "Obra sem título"}
+                      </h3>
+                      <p className="project-description" style={{ fontSize: "0.8rem", color: "#94a3b8", flex: 1, margin: "4px 0 12px 0" }}>
+                        {drawing.description || "Sem técnica informada"}
+                      </p>
+
+                      {!previewMode && (
+                        <div className="card-order-controls" style={{ marginTop: "auto", display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: "1px solid rgba(255,255,255,0.08)", paddingTop: "8px" }}>
+                          <span style={{ fontSize: "0.72rem", color: "#a78bfa" }}>⋮⋮ Arrastar Card</span>
+                          <div className="order-nav-buttons" style={{ display: "flex", gap: "4px" }}>
+                            <button
+                              type="button"
+                              className="move-btn"
+                              disabled={dIdx === 0}
+                              onClick={() => moveDrawing(dIdx, -1)}
+                              title="Subir posição"
+                            >
+                              ◀
+                            </button>
+                            <button
+                              type="button"
+                              className="move-btn"
+                              disabled={dIdx === items.length - 1}
+                              onClick={() => moveDrawing(dIdx, 1)}
+                              title="Descer posição"
+                            >
+                              ▶
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+            </div>
+          </section>
+        ) : (
+          CATEGORIES.map((category) => {
           const categoryItems = items
             .filter((item) => (item.category || "Profissional") === category.id)
             .filter((item) => {
@@ -555,7 +717,7 @@ export default function OrderDraft({ onBackToHome, onOpenProjectDetail, onNaviga
               )}
             </section>
           );
-        })}
+        }))}
       </main>
     </div>
   );

@@ -9,7 +9,7 @@ import {
 } from "../lib/supabaseService";
 import "./LoginDraft.css";
 
-export default function LoginDraft({ onNavigateToAdmin }) {
+export default function LoginDraft({ onNavigateToAdmin, onBackToHome }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [notice, setNotice] = useState("");
@@ -25,8 +25,8 @@ export default function LoginDraft({ onNavigateToAdmin }) {
           setNotice("Sessão ativa de Matheus de Castro detectada. Redirecionando...");
           setTimeout(() => {
             if (onNavigateToAdmin) onNavigateToAdmin();
-            else window.location.href = "/4dm1n";
-          }, 500);
+            else window.location.replace("/4dm1n");
+          }, 300);
         } else {
           logoutUser();
           setErrorNotice("Acesso Negado: Apenas a conta de Matheus de Castro (Matheus-dCastro) possui autorização.");
@@ -67,8 +67,8 @@ export default function LoginDraft({ onNavigateToAdmin }) {
         setNotice("Autenticado como Matheus de Castro! Redirecionando para o painel 4dm1n...");
         setTimeout(() => {
           if (onNavigateToAdmin) onNavigateToAdmin();
-          else window.location.href = "/4dm1n";
-        }, 600);
+          else window.location.replace("/4dm1n");
+        }, 300);
       }
     } catch (err) {
       console.error("Erro na autenticação:", err);
@@ -177,7 +177,25 @@ export default function LoginDraft({ onNavigateToAdmin }) {
         </button>
       </div>
 
-    
+      <div style={{ marginTop: "16px", textAlign: "center" }}>
+        <button
+          type="button"
+          onClick={() => {
+            if (onBackToHome) onBackToHome();
+            else window.location.href = "/";
+          }}
+          style={{
+            background: "none",
+            border: "none",
+            color: "#8b949e",
+            fontSize: "0.82rem",
+            cursor: "pointer",
+            textDecoration: "underline"
+          }}
+        >
+          ← Voltar para o Portfólio
+        </button>
+      </div>
     </div>
   );
 }

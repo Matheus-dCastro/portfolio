@@ -1,15 +1,25 @@
 import { useState } from "react";
-import { getStoredProjects, getStoredArticles, convertGoogleDocsToEmbedUrl } from "../data/projectsData";
+import {
+  getStoredProjects,
+  getStoredArticles,
+  getStoredThoughts,
+  convertGoogleDocsToEmbedUrl
+} from "../data/projectsData";
 import { useLanguage } from "../context/useLanguage";
 import LanguageSwitcher from "./LanguageSwitcher";
 import ShareButton from "./ShareButton";
+import CategoryIcon from "./CategoryIcon";
 import "./ViewDraft.css";
 
 function getInitialProject(propProject) {
   if (propProject) return propProject;
   const urlParams = new URLSearchParams(window.location.search);
   const projectId = urlParams.get("project") || urlParams.get("id");
-  const allItems = [...getStoredProjects(), ...getStoredArticles()];
+  const allItems = [
+    ...getStoredProjects(),
+    ...getStoredArticles(),
+    ...getStoredThoughts()
+  ];
 
   if (projectId) {
     const found = allItems.find((p) => p.id === projectId);
@@ -23,6 +33,7 @@ export default function ViewDraft({ project: propProject, onBackToHome, onSelect
   const { t, lang } = useLanguage();
   const [internalProject, setInternalProject] = useState(() => getInitialProject(propProject));
   const [activeContentTab, setActiveContentTab] = useState("auto"); // 'auto' | 'readme' | 'gdocs' | 'pdf'
+  const [inlineQuestion, setInlineQuestion] = useState("");
 
   const project = propProject || internalProject;
 
@@ -37,13 +48,23 @@ export default function ViewDraft({ project: propProject, onBackToHome, onSelect
     );
   }
 
-  const isArticle = Boolean(
+  const isThought = Boolean(
+    project.id?.startsWith("th-") ||
+    project.id?.startsWith("thought-") ||
+    getStoredThoughts().some((th) => th.id === project.id)
+  );
+
+  const isArticle = !isThought && Boolean(
     project.relatedProjectId ||
     project.id?.startsWith("art-") ||
     getStoredArticles().some((a) => a.id === project.id)
   );
 
-  const activeCollection = isArticle ? getStoredArticles() : getStoredProjects();
+  const activeCollection = isThought
+    ? getStoredThoughts()
+    : isArticle
+    ? getStoredArticles()
+    : getStoredProjects();
   const currentIndex = activeCollection.findIndex((p) => p.id === project.id);
   const prevProject = currentIndex > 0 ? activeCollection[currentIndex - 1] : null;
   const nextProject =
@@ -87,12 +108,58 @@ export default function ViewDraft({ project: propProject, onBackToHome, onSelect
     ? getStoredProjects().find((p) => p.id === project.relatedProjectId)
     : null;
 
+  const isFromAdmin = typeof window !== "undefined" && window.location.search.includes("from=admin");
+
+  const itemTypeName = isThought
+    ? (lang === "en" ? "thought" : "pensamento")
+    : isArticle
+    ? (lang === "en" ? "article" : "artigo")
+    : (lang === "en" ? "project" : "projeto");
+
+  const contextualQuestions = isThought
+    ? [
+        lang === "en" ? `What is the central insight of "${projectTitle}"?` : `Qual é a reflexão central do texto "${projectTitle}"?`,
+        lang === "en" ? `How does this relate to Matheus's technical vision?` : `Como este pensamento se relaciona com a visão técnica de Matheus?`,
+        lang === "en" ? `What inspired this reflection?` : `O que motivou e inspirou a reflexão "${projectTitle}"?`
+      ]
+    : isArticle
+    ? [
+        lang === "en" ? `What is the core thesis of "${projectTitle}"?` : `Qual é a tese principal e conclusões do artigo "${projectTitle}"?`,
+        lang === "en" ? `Which methodologies were explored in this article?` : `Quais metodologias foram abordadas no artigo "${projectTitle}"?`,
+        lang === "en" ? `Provide an executive summary of this article.` : `Faça um resumo executivo em tópicos do artigo "${projectTitle}".`
+      ]
+    : [
+        lang === "en" ? `How was "${projectTitle}" architected?` : `Como o projeto "${projectTitle}" foi arquitetado?`,
+        lang === "en" ? `What technologies and models were used?` : `Quais tecnologias e modelos foram utilizados em "${projectTitle}"?`,
+        lang === "en" ? `What practical results and metrics were achieved?` : `Quais resultados e métricas práticas foram alcançados em "${projectTitle}"?`
+      ];
+
+  const handleAskAlomyr = (questionText) => {
+    window.dispatchEvent(
+      new CustomEvent("open-alomyr-chat", {
+        detail: {
+          prompt: questionText || ""
+        }
+      })
+    );
+  };
+
   return (
     <div className="view-detail-page">
       {/* Top Header Bar - Integrated with system */}
       <nav className="view-top-header">
-        <button className="back-to-projects-btn" onClick={() => onBackToHome && onBackToHome(isArticle ? "articles" : "projects")}>
-          <span className="arrow">←</span> {isArticle ? t("view.back_to_articles") : t("view.back_to_projects")}
+        <button
+          className="back-to-projects-btn"
+          onClick={() => onBackToHome && onBackToHome(isThought ? "thoughts" : isArticle ? "articles" : "projects")}
+        >
+          <span className="arrow">←</span>{" "}
+          {isFromAdmin
+            ? (lang === "en" ? "Back to 4dm1n Editor" : "Voltar ao Editor 4dm1n")
+            : isThought
+            ? t("view.back_to_thoughts")
+            : isArticle
+            ? t("view.back_to_articles")
+            : t("view.back_to_projects")}
         </button>
 
         <div className="header-actions-group">
@@ -183,12 +250,16 @@ export default function ViewDraft({ project: propProject, onBackToHome, onSelect
         <div className="article-header">
           <div className="article-badges-row">
             <span
-              className={`category-badge cat-${project.category
+              className={`category-badge cat-${(isThought ? "pessoal" : project.category)
                 ?.toLowerCase()
                 .normalize("NFD")
                 .replace(/[\u0300-\u036f]/g, "")}`}
+              style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}
             >
-              {project.category === "Profissional"
+              <CategoryIcon category={isThought ? "Pessoal" : project.category} size={13} />
+              {isThought
+                ? (lang === "en" ? "Thought & Reflection" : "Pensamento & Reflexão")
+                : project.category === "Profissional"
                 ? (lang === "en" ? "Professional" : "Profissional")
                 : project.category === "Pessoal"
                 ? (lang === "en" ? "Personal" : "Pessoal")
@@ -379,42 +450,132 @@ export default function ViewDraft({ project: propProject, onBackToHome, onSelect
           </section>
         )}
 
-        {/* Next / Prev Project Navigation */}
-        <section className="project-navigation-footer">
-          <div className="nav-col prev-col">
+        {/* Contextual Alomyr Assistant Section */}
+        <section className="view-alomyr-contextual-section">
+          <div className="alomyr-context-card">
+            <div className="alomyr-context-header">
+              <div className="alomyr-context-avatar">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 2a10 10 0 0 1 10 10c0 5.523-4.477 10-10 10S2 17.523 2 12A10 10 0 0 1 12 2z"></path>
+                  <path d="m9 12 2 2 4-4"></path>
+                </svg>
+              </div>
+              <div className="alomyr-context-headings">
+                <div className="alomyr-context-badge">
+                  <span className="badge-spark">✦</span> {t("view.alomyr_badge")}
+                </div>
+                <h3 className="alomyr-context-title">
+                  {t("view.alomyr_title").replace("{type}", itemTypeName)}
+                </h3>
+                <p className="alomyr-context-desc">
+                  {t("view.alomyr_subtitle")}
+                </p>
+              </div>
+            </div>
+
+            {/* Quick Suggested Prompt Chips */}
+            <div className="alomyr-context-chips">
+              {contextualQuestions.map((q, idx) => (
+                <button
+                  key={idx}
+                  type="button"
+                  className="alomyr-context-chip-btn"
+                  onClick={() => handleAskAlomyr(q)}
+                >
+                  <span className="chip-spark">💬</span>
+                  <span>{q}</span>
+                </button>
+              ))}
+            </div>
+
+            {/* Inline Input Form */}
+            <form
+              className="alomyr-context-form"
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (!inlineQuestion.trim()) return;
+                handleAskAlomyr(
+                  `[Sobre o ${itemTypeName} "${projectTitle}"]: ${inlineQuestion.trim()}`
+                );
+                setInlineQuestion("");
+              }}
+            >
+              <input
+                type="text"
+                className="alomyr-context-input"
+                value={inlineQuestion}
+                onChange={(e) => setInlineQuestion(e.target.value)}
+                placeholder={t("view.alomyr_input_placeholder").replace("{type}", itemTypeName)}
+              />
+              <button
+                type="submit"
+                className="alomyr-context-submit-btn"
+                disabled={!inlineQuestion.trim()}
+              >
+                <span>{t("view.alomyr_ask_btn")}</span>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="22" y1="2" x2="11" y2="13"></line>
+                  <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                </svg>
+              </button>
+              <button
+                type="button"
+                className="alomyr-context-chat-btn"
+                onClick={() => handleAskAlomyr()}
+                title="Abrir Alomyr Chat"
+              >
+                {t("view.alomyr_open_btn")}
+              </button>
+            </form>
+          </div>
+        </section>
+
+        {/* Next / Prev Project Navigation - Minimalist Arrow Design */}
+        <section className="minimal-navigation-footer">
+          <div className="minimal-nav-col prev">
             {prevProject && (
               <button
                 type="button"
-                className="nav-project-card"
+                className="minimal-nav-arrow-btn prev-btn"
                 onClick={() => {
                   if (onSelectProject) onSelectProject(prevProject);
                   else setInternalProject(prevProject);
                   window.scrollTo({ top: 0, behavior: "smooth" });
                 }}
+                title={lang === "en" ? `Previous: ${prevProject.titleEn || prevProject.title}` : `Anterior: ${prevProject.titlePt || prevProject.title}`}
+                aria-label={lang === "en" ? `Previous: ${prevProject.titleEn || prevProject.title}` : `Anterior: ${prevProject.titlePt || prevProject.title}`}
               >
-                <span className="nav-direction">{t("view.prev_project")}</span>
-                <h4 className="nav-title">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="19" y1="12" x2="5" y2="12"></line>
+                  <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+                <span className="minimal-nav-tooltip">
                   {lang === "en" ? (prevProject.titleEn || prevProject.title) : (prevProject.titlePt || prevProject.title)}
-                </h4>
+                </span>
               </button>
             )}
           </div>
 
-          <div className="nav-col next-col">
+          <div className="minimal-nav-col next">
             {nextProject && (
               <button
                 type="button"
-                className="nav-project-card next"
+                className="minimal-nav-arrow-btn next-btn"
                 onClick={() => {
                   if (onSelectProject) onSelectProject(nextProject);
                   else setInternalProject(nextProject);
                   window.scrollTo({ top: 0, behavior: "smooth" });
                 }}
+                title={lang === "en" ? `Next: ${nextProject.titleEn || nextProject.title}` : `Próximo: ${nextProject.titlePt || nextProject.title}`}
+                aria-label={lang === "en" ? `Next: ${nextProject.titleEn || nextProject.title}` : `Próximo: ${nextProject.titlePt || nextProject.title}`}
               >
-                <span className="nav-direction">{t("view.next_project")}</span>
-                <h4 className="nav-title">
+                <span className="minimal-nav-tooltip">
                   {lang === "en" ? (nextProject.titleEn || nextProject.title) : (nextProject.titlePt || nextProject.title)}
-                </h4>
+                </span>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                  <polyline points="12 5 19 12 12 19"></polyline>
+                </svg>
               </button>
             )}
           </div>

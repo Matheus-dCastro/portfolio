@@ -775,6 +775,16 @@ h2 span {
   transform: scale(1.08); /* Leve pulo dinâmico */
 }
 
+.skill-item svg.skill-tech-icon {
+  width: 42px;
+  height: 42px;
+  transition: transform 0.3s var(--ease);
+}
+
+.skill-item:hover svg.skill-tech-icon {
+  transform: scale(1.08);
+}
+
 /* O texto acende em branco puro no hover para contrastar com o ícone colorido */
 .skill-item:hover span {
   color: #ffffff;
@@ -1022,31 +1032,29 @@ h2 span {
   border-radius: 10px;
   text-decoration: none;
   transition: all 0.25s ease;
-  border: 1px solid transparent;
+  background: rgba(139, 92, 246, 0.08);
+  border: 1px solid rgba(139, 92, 246, 0.25);
 }
 
-.cv-option-card.gdocs-card {
-  background: rgba(59, 130, 246, 0.08);
-  border-color: rgba(59, 130, 246, 0.25);
-}
-
-.cv-option-card.gdocs-card:hover {
-  background: rgba(59, 130, 246, 0.18);
-  border-color: #3b82f6;
+.cv-option-card:hover {
+  background: rgba(139, 92, 246, 0.18);
+  border-color: #8b5cf6;
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.25);
+  box-shadow: 0 6px 20px rgba(139, 92, 246, 0.25);
 }
 
+.cv-option-card.gdocs-card,
 .cv-option-card.pdf-card {
-  background: rgba(239, 68, 68, 0.08);
-  border-color: rgba(239, 68, 68, 0.25);
+  background: rgba(139, 92, 246, 0.08);
+  border-color: rgba(139, 92, 246, 0.25);
 }
 
+.cv-option-card.gdocs-card:hover,
 .cv-option-card.pdf-card:hover {
-  background: rgba(239, 68, 68, 0.18);
-  border-color: #ef4444;
+  background: rgba(139, 92, 246, 0.18);
+  border-color: #8b5cf6;
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(239, 68, 68, 0.25);
+  box-shadow: 0 6px 20px rgba(139, 92, 246, 0.25);
 }
 
 .cv-option-icon {
@@ -1058,20 +1066,15 @@ h2 span {
   flex: 1;
 }
 
-.cv-option-badge {
+.cv-option-badge,
+.gdocs-card .cv-option-badge,
+.pdf-card .cv-option-badge {
   font-size: 0.68rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   margin-bottom: 2px;
-}
-
-.gdocs-card .cv-option-badge {
-  color: #60a5fa;
-}
-
-.pdf-card .cv-option-badge {
-  color: #f87171;
+  color: #c4b5fd;
 }
 
 .cv-option-text h4 {
@@ -1540,7 +1543,8 @@ footer {
     aspect-ratio: 1 / 1;
   }
 
-  .skill-item img {
+  .skill-item img,
+  .skill-item svg.skill-tech-icon {
     width: 32px;
     height: 32px;
   }

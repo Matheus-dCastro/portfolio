@@ -3,6 +3,7 @@ import { getStoredProjects } from "../data/projectsData";
 import { fetchWorks } from "../lib/supabaseService";
 import { useLanguage } from "../context/useLanguage";
 import ShareButton from "./ShareButton";
+import CategoryIcon from "./CategoryIcon";
 
 export default function Projects({ onOpenProject }) {
   const { t, lang } = useLanguage();
@@ -25,21 +26,21 @@ export default function Projects({ onOpenProject }) {
     {
       id: "Profissional",
       title: t("projects.cat_prof_title"),
-      icon: "",
+      icon: <CategoryIcon category="Profissional" size={22} />,
       badgeClass: "cat-profissional",
       description: t("projects.cat_prof_desc")
     },
     {
       id: "Pessoal",
       title: t("projects.cat_pessoal_title"),
-      icon: "",
+      icon: <CategoryIcon category="Pessoal" size={22} />,
       badgeClass: "cat-pessoal",
       description: t("projects.cat_pessoal_desc")
     },
     {
       id: "Acadêmico",
       title: t("projects.cat_academico_title"),
-      icon: "",
+      icon: <CategoryIcon category="Acadêmico" size={22} />,
       badgeClass: "cat-academico",
       description: t("projects.cat_academico_desc")
     }
@@ -77,7 +78,9 @@ export default function Projects({ onOpenProject }) {
               type="button"
               className={`category-filter-btn ${activeCategory === "Profissional" ? "active" : ""}`}
               onClick={() => setActiveCategory("Profissional")}
+              style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}
             >
+              <CategoryIcon category="Profissional" size={13} />
               {t("projects.filter_prof")} ({profCount})
             </button>
           )}
@@ -86,7 +89,9 @@ export default function Projects({ onOpenProject }) {
               type="button"
               className={`category-filter-btn ${activeCategory === "Pessoal" ? "active" : ""}`}
               onClick={() => setActiveCategory("Pessoal")}
+              style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}
             >
+              <CategoryIcon category="Pessoal" size={13} />
               {t("projects.filter_pessoal")} ({pessoalCount})
             </button>
           )}
@@ -95,7 +100,9 @@ export default function Projects({ onOpenProject }) {
               type="button"
               className={`category-filter-btn ${activeCategory === "Acadêmico" ? "active" : ""}`}
               onClick={() => setActiveCategory("Acadêmico")}
+              style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}
             >
+              <CategoryIcon category="Acadêmico" size={13} />
               {t("projects.filter_academico")} ({academicoCount})
             </button>
           )}
@@ -140,6 +147,13 @@ export default function Projects({ onOpenProject }) {
                   return (
                     <div key={project.id} className="project-card">
                       <div className="project-header">
+                        <span
+                          className={`tag cat-badge-tag cat-${(project.category || "Profissional").toLowerCase()}`}
+                          style={{ display: "inline-flex", alignItems: "center", gap: "4px", color: "#a78bfa" }}
+                        >
+                          <CategoryIcon category={project.category || "Profissional"} size={12} />
+                          {project.category || "Profissional"}
+                        </span>
                         {project.tags?.map((tag, tIdx) => (
                           <span
                             key={tIdx}

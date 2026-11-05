@@ -98,6 +98,13 @@ function Perfil({ nomeCompleto, description, foto, cv }) {
           >
             {t("hero.download_cv")}
           </button>
+          <a
+            href="#contact"
+            className="btn btn-outline hero-contact-btn"
+            title={lang === "en" ? "Go to contacts and social profiles" : "Ir para contatos e redes sociais"}
+          >
+            {t("hero.contact_btn")}
+          </a>
         </div>
       </div>
 
@@ -185,7 +192,7 @@ function Perfil({ nomeCompleto, description, foto, cv }) {
                   onClick={() => setShowCvModal(false)}
                 >
                   <span className="cv-option-icon gdocs-icon">
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                       <polyline points="14 2 14 8 20 8"></polyline>
                       <line x1="16" y1="13" x2="8" y2="13"></line>
@@ -211,7 +218,7 @@ function Perfil({ nomeCompleto, description, foto, cv }) {
                   onClick={() => setShowCvModal(false)}
                 >
                   <span className="cv-option-icon pdf-icon">
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#f87171" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                       <polyline points="7 10 12 15 17 10"></polyline>
                       <line x1="12" y1="15" x2="12" y2="3"></line>

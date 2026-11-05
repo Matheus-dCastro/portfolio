@@ -3,6 +3,7 @@ import { getStoredArticles } from "../data/projectsData";
 import { fetchArticles } from "../lib/supabaseService";
 import { useLanguage } from "../context/useLanguage";
 import ShareButton from "./ShareButton";
+import CategoryIcon from "./CategoryIcon";
 
 export default function Articles({ onOpenArticle }) {
   const { t, lang } = useLanguage();
@@ -65,7 +66,9 @@ export default function Articles({ onOpenArticle }) {
               type="button"
               className={`category-filter-btn ${activeFilter === cat ? "active" : ""}`}
               onClick={() => setActiveFilter(cat)}
+              style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}
             >
+              <CategoryIcon category={cat} size={13} />
               {categoryLabels[cat] || cat} ({count})
             </button>
           );
@@ -84,6 +87,13 @@ export default function Articles({ onOpenArticle }) {
           return (
             <div key={article.id} className="project-card article-card">
               <div className="project-header">
+                <span
+                  className={`tag cat-badge-tag cat-${(article.category || "Acadêmico").toLowerCase()}`}
+                  style={{ display: "inline-flex", alignItems: "center", gap: "4px", color: "#a78bfa" }}
+                >
+                  <CategoryIcon category={article.category || "Acadêmico"} size={12} />
+                  {categoryLabels[article.category] || article.category || "Acadêmico"}
+                </span>
                 {article.tags?.slice(0, 3).map((tag, tIdx) => (
                   <span
                     key={tIdx}

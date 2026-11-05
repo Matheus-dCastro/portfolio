@@ -23,6 +23,7 @@ export const translations = {
     "hero.subtitle": "IT Technician — IFRN. Undergraduate student in Information Technology (BTI) at UFRN, focusing studies on Machine Learning and backend architecture.",
     "hero.see_projects": "See My Projects",
     "hero.download_cv": "Download CV / Docs",
+    "hero.contact_btn": "Contact & Links",
     "hero.card_art": "ART",
     "hero.card_coder": "CODER IS",
 
@@ -76,7 +77,7 @@ export const translations = {
     "articles.tag": "Publications & Research",
     "articles.title_prefix": "Technical ",
     "articles.title_highlight": "Articles",
-    "articles.lead_text": "In-depth analyses on Deep Learning, system architecture with FastAPI, Linux automation, and intersections between art and engineering.",
+    "articles.lead_text": "",
     "articles.filter_all": "All",
     "articles.read_time": "min read",
     "articles.read_full": "Read Full Article",
@@ -152,6 +153,7 @@ export const translations = {
     "view.loading": "Loading project information...",
     "view.back_to_projects": "Back to Projects",
     "view.back_to_articles": "Back to Articles",
+    "view.back_to_thoughts": "Back to Thoughts",
     "view.github_repo": "GitHub Repository",
     "view.live_demo": "Live Demo",
     "view.gdocs": "Google Docs",
@@ -179,6 +181,20 @@ export const translations = {
     "view.cta_github": "View Repository on GitHub",
     "view.cta_home": "Back to Home",
     "view.no_content": "No detailed documentation was included for this project.",
+    "view.alomyr_badge": "ALOMYR AI ASSISTANT",
+    "view.alomyr_title": "Questions about this {type}? Ask Alomyr",
+    "view.alomyr_subtitle": "Ask technical questions, request executive summaries, or understand the architecture and methodology with the official AI assistant.",
+    "view.alomyr_input_placeholder": "Ask Alomyr anything about this {type}...",
+    "view.alomyr_ask_btn": "Ask",
+    "view.alomyr_open_btn": "Open Chat ↗",
+
+    // 404 Page
+    "notfound.badge": "ERROR 404 • LOST IN CYBERSPACE",
+    "notfound.title": "Awooo! You wandered into the digital void...",
+    "notfound.subtitle": "Our cyber wolf explored every sector of the server, but couldn't locate this page. It may have drifted into deep space.",
+    "notfound.back_home": "← Return to Safety (Home)",
+    "notfound.ask_alomyr": "Ask Alomyr for Help 💬",
+    "notfound.explore_works": "Explore Projects & Works ↗",
 
     // AI Agent - Alomyr
     "agent.name": "Alomyr",
@@ -197,7 +213,6 @@ export const translations = {
     "agent.quick_prompts": [
       "What are Matheus's main projects?",
       "What is his academic background?",
-      "Experience with Computer Vision / U-Net?",
       "How to view or download his Resume?"
     ]
   },
@@ -223,6 +238,7 @@ export const translations = {
     "hero.subtitle": "Técnico em TI — IFRN. Graduando em Tecnologia da Informação (BTI) na UFRN, com foco de estudos em Machine Learning e desenvolvimento backend.",
     "hero.see_projects": "Ver Meus Projetos",
     "hero.download_cv": "Baixar CV / Docs",
+    "hero.contact_btn": "Contatos & Redes",
     "hero.card_art": "ART",
     "hero.card_coder": "CODER IS",
 
@@ -276,7 +292,7 @@ export const translations = {
     "articles.tag": "Publicações & Estudos",
     "articles.title_prefix": "Artigos ",
     "articles.title_highlight": "Técnicos",
-    "articles.lead_text": "Análises aprofundadas sobre Deep Learning, arquitetura de sistemas com FastAPI, automação com Linux e intersecções entre arte e engenharia.",
+    "articles.lead_text": "",
     "articles.filter_all": "Todos",
     "articles.read_time": "min de leitura",
     "articles.read_full": "Ler Artigo Completo",
@@ -352,6 +368,7 @@ export const translations = {
     "view.loading": "Carregando informações do projeto...",
     "view.back_to_projects": "Voltar aos Projetos",
     "view.back_to_articles": "Voltar aos Artigos",
+    "view.back_to_thoughts": "Voltar aos Pensamentos",
     "view.github_repo": "Repositório GitHub",
     "view.live_demo": "Live Demo",
     "view.gdocs": "Google Docs",
@@ -379,6 +396,20 @@ export const translations = {
     "view.cta_github": "Ver Repositório no GitHub",
     "view.cta_home": "Voltar ao Início",
     "view.no_content": "Nenhuma documentação detalhada foi incluída para este projeto.",
+    "view.alomyr_badge": "ASSISTENTE INTELIGENTE ALOMYR",
+    "view.alomyr_title": "Dúvidas sobre este {type}? Pergunte ao Alomyr",
+    "view.alomyr_subtitle": "Tire dúvidas técnicas, solicite resumos executivos ou aprofunde a arquitetura e metodologia diretamente com o assistente oficial de IA.",
+    "view.alomyr_input_placeholder": "Pergunte ao Alomyr qualquer detalhe sobre este {type}...",
+    "view.alomyr_ask_btn": "Perguntar",
+    "view.alomyr_open_btn": "Abrir Chat ↗",
+
+    // 404 Page
+    "notfound.badge": "ERRO 404 • PERDIDO NO HIPERESPAÇO",
+    "notfound.title": "Auuu! Você se perdeu na névoa digital...",
+    "notfound.subtitle": "Nosso pequeno lobo farejou todos os cantos do servidor, mas não encontrou esta rota. Ela pode ter sido movida, excluída ou perdida no hiperespaço.",
+    "notfound.back_home": "← Voltar em Segurança ao Início",
+    "notfound.ask_alomyr": "Pedir Ajuda ao Alomyr 💬",
+    "notfound.explore_works": "Explorar Projetos & Trabalhos ↗",
 
     // AI Agent - Alomyr
     "agent.name": "Alomyr",
@@ -395,9 +426,8 @@ export const translations = {
     "agent.send_title": "Enviar mensagem",
     "agent.welcome_message": "Olá! Sou o Alomyr, o Assistente de Inteligência Artificial oficial de Matheus de Castro. Como posso te orientar sobre os projetos de IA, backend ou currículo?",
     "agent.quick_prompts": [
-      "Quais são os principais projetos?",
+      "Quais são os principais projetos de IA e Backend?",
       "Qual a formação acadêmica do Matheus?",
-      "Experiência com Visão Computacional / U-Net?",
       "Como visualizar ou baixar o Currículo?"
     ]
   }

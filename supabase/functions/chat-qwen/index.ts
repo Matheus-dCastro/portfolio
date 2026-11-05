@@ -123,24 +123,26 @@ serve(async (req) => {
     let activeModelName = model || "qwen-2.5-coder-32b";
     let activeTemperature = 0.3;
     let activeMaxTokens = 800;
+    let dbGroqApiKey = "";
 
     if (supabaseUrl && supabaseKey) {
       const supabase = createClient(supabaseUrl, supabaseKey);
 
       // 1. Carrega agent_configs de produção
-      if (!systemPromptBase) {
-        const { data: agentConfig } = await supabase
-          .from("agent_configs")
-          .select("system_prompt, model_name, temperature, max_tokens")
-          .eq("id", "production")
-          .maybeSingle();
+      const { data: agentConfig } = await supabase
+        .from("agent_configs")
+        .select("system_prompt, model_name, temperature, max_tokens, groq_api_key")
+        .eq("id", "production")
+        .maybeSingle();
 
-        if (agentConfig) {
-          systemPromptBase = agentConfig.system_prompt || "";
-          if (!model && agentConfig.model_name) activeModelName = agentConfig.model_name;
-          if (agentConfig.temperature !== undefined) activeTemperature = Number(agentConfig.temperature);
-          if (agentConfig.max_tokens !== undefined) activeMaxTokens = Number(agentConfig.max_tokens);
+      if (agentConfig) {
+        if (!systemPromptBase && agentConfig.system_prompt) {
+          systemPromptBase = agentConfig.system_prompt;
         }
+        if (!model && agentConfig.model_name) activeModelName = agentConfig.model_name;
+        if (agentConfig.temperature !== undefined) activeTemperature = Number(agentConfig.temperature);
+        if (agentConfig.max_tokens !== undefined) activeMaxTokens = Number(agentConfig.max_tokens);
+        if (agentConfig.groq_api_key) dbGroqApiKey = agentConfig.groq_api_key;
       }
 
       // 2. Carrega lista de projetos publicados
@@ -197,7 +199,7 @@ serve(async (req) => {
     }
 
     const defaultPrompt = `Você é o Alomyr, o Assistente Oficial de IA do portfólio de Matheus de Castro.
-Responda exclusivamente sobre a carreira, projetos de Machine Learning/Backend, artigos e qualificações de Matheus de Castro.
+Responda exclusivamente sobre a carreira, projetos de Machine Learning/Backend, artigos, pensamentos/reflexões e qualificações de Matheus de Castro.
 Mantenha um tom técnico, acolhedor e direto. Nunca alucine projetos inexistentes.
 Sempre que mencionar projetos, inclua o nome em destaque e convide o visitante a conferir no GitHub ou no portfólio.`;
 
@@ -218,7 +220,7 @@ Sempre que mencionar projetos, inclua o nome em destaque e convide o visitante a
     ];
 
     // Inference with Groq API
-    const groqApiKey = Deno.env.get("GROQ_API_KEY") || Deno.env.get("QWEN_API_KEY");
+    const groqApiKey = Deno.env.get("GROQ_API_KEY") || Deno.env.get("QWEN_API_KEY") || dbGroqApiKey || body.apiKey;
 
     if (!groqApiKey) {
       return new Response(

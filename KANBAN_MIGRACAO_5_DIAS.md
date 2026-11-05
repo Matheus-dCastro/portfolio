@@ -51,8 +51,23 @@
 
 ---
 
-### 💡 Próximas Sugestões de Melhorias:
-1. **Streaming SSE no Chatbot:** Implementar Server-Sent Events na Edge Function para exibir a digitação de tokens em tempo real (efeito typewriter fluido).
-2. **Rate Limiting por IP na Edge Function:** Adicionar controle de taxa (ex: 20 requisições/hora por IP) no Supabase ou Upstash Redis para prevenir abuso de cotas gratuitas da Groq.
-3. **Analytics Anônimo de Perguntas:** Registrar tópicos mais consultados pelos recrutadores no assistente para guiar novos artigos e projetos destacados.
-4. **Exportação de Relatórios de Acesso em PDF:** Gerar resumo analítico dos projetos mais visualizados para o administrador.
+## 🚀 SPRINT ATUAL: REFINAMENTO DE UX, DRAG & DROP DE DESENHOS, GESTÃO DE CHAVES & TELAS DEDICADAS
+**Status Geral:** Em execução (Passo a passo antes de cada modificação)
+
+### 📌 Fila de Execução em Andamento:
+- [x] **Passo 1:** Padronização de cores no modal de currículo (mesmo esquema dark/roxo/neon) e remoção da animação do pontinho verde no Alomyr.
+- [x] **Passo 2:** Cadastro seguro de chaves de API e seleção dinâmica de modelos do agente diretamente pelo Dashboard (`agent_configs` e Edge Function).
+- [x] **Passo 3:** Tela dedicada estilo "Saber Mais" para Pensamentos (leitura completa, anexo Google Docs/PDF e navegação).
+- [x] **Passo 4:** Sistema de Drag & Drop para reordenar cards de desenhos na galeria/admin e salvar/publicar nova ordem.
+- [x] **Passo 5:** Correção de redirecionamento no Admin: retorno da prévia direto para o `/4dm1n` e correção do login (remoção de `/#`).
+- [x] **Passo 6:** Ícones minimalistas para categorias (Profissional, Acadêmico e Pessoal) seguindo a paleta do portfólio.
+- [x] **Passo 7:** Botão de atalho rápido para Contatos / Redes Sociais ao lado do botão de Download do CV no Hero.
+- [x] **Passo 8:** Redução das sugestões de perguntas do Alomyr para 3 perguntas de alto impacto para recrutadores.
+- [x] **Passo 9:** Cores de ícones: Ubuntu em laranja oficial (`#E95420`) e Markdown em branco (`#FFFFFF`).
+- [x] **Passo 10:** Novo card de destaque em Interesses (ao lado de Código & Café) com customização completa pelo Dashboard (título, texto e foto).
+- [x] **Passo 11:** Refatoração dos botões Próximo/Anterior em telas de detalhes para setas minimalistas intuitivas.
+- [x] **Passo 12:** Integração contextual do Alomyr nas telas de detalhes (Saber Mais de Projetos, Artigos e Pensamentos).
+- [x] **Passo 13:** Tela 404 estilosa e temática seguindo a estética dark/cyber/lobo do portfólio.
+- [x] **Passo 14:** Testes no localhost concluídos e relatório consolidado (pronto para validação do usuário; deploy aguardando comando `ok`).
+
+---

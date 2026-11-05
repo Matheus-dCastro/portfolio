@@ -14,7 +14,9 @@ import {
   getStoredCvConfig,
   saveCvConfig,
   getStoredDrawings,
-  saveDrawings
+  saveDrawings,
+  getStoredCustomHobby,
+  saveCustomHobby
 } from "../data/projectsData.js";
 
 // ==========================================
@@ -683,7 +685,9 @@ export async function fetchAgentConfig() {
           modelName: data.model_name,
           systemPrompt: data.system_prompt,
           maxTokens: data.max_tokens,
-          temperature: data.temperature
+          temperature: data.temperature,
+          hasApiKey: Boolean(data.groq_api_key),
+          groqApiKey: data.groq_api_key || ""
         };
       }
     } catch (err) {
@@ -691,6 +695,53 @@ export async function fetchAgentConfig() {
     }
   }
   return null;
+}
+
+export async function fetchCustomHobby() {
+  if (isSupabaseConfigured && supabase) {
+    try {
+      const { data, error } = await supabase
+        .from("agent_configs")
+        .select("custom_hobby_json")
+        .eq("id", "production")
+        .maybeSingle();
+
+      if (!error && data?.custom_hobby_json) {
+        saveCustomHobby(data.custom_hobby_json);
+        return data.custom_hobby_json;
+      }
+    } catch (err) {
+      console.warn("Falha ao buscar custom_hobby_json do Supabase:", err);
+    }
+  }
+  return getStoredCustomHobby();
+}
+
+export async function persistCustomHobby(hobbyData) {
+  saveCustomHobby(hobbyData);
+  if (isSupabaseConfigured && supabase) {
+    try {
+      const { error } = await supabase
+        .from("agent_configs")
+        .upsert(
+          {
+            id: "production",
+            custom_hobby_json: hobbyData,
+            updated_at: new Date().toISOString()
+          },
+          { onConflict: "id" }
+        );
+      if (error && error.message && error.message.includes("custom_hobby_json")) {
+        return { success: true, cloud: false };
+      }
+      if (error) throw error;
+      return { success: true, cloud: true };
+    } catch (err) {
+      console.error("Erro ao persistir custom hobby:", err);
+      return { success: true, cloud: false, error: err.message };
+    }
+  }
+  return { success: true, cloud: false };
 }
 
 // ==========================================
@@ -1086,23 +1137,41 @@ export async function persistAgentConfig(
   systemPrompt,
   modelName = "qwen-2.5-coder-32b",
   temperature = 0.3,
-  maxTokens = 800
+  maxTokens = 800,
+  groqApiKey = null
 ) {
   localStorage.setItem("portfolio_agent_system_prompt", systemPrompt);
+  localStorage.setItem("portfolio_agent_model", modelName);
 
   if (isSupabaseConfigured && supabase) {
     try {
-      const { error } = await supabase.from("agent_configs").upsert(
-        {
-          id: "production",
-          model_name: modelName,
-          system_prompt: systemPrompt,
-          temperature: Number(temperature),
-          max_tokens: Number(maxTokens),
-          updated_at: new Date().toISOString()
-        },
+      const payload = {
+        id: "production",
+        model_name: modelName,
+        system_prompt: systemPrompt,
+        temperature: Number(temperature),
+        max_tokens: Number(maxTokens),
+        updated_at: new Date().toISOString()
+      };
+      if (groqApiKey && typeof groqApiKey === "string" && groqApiKey.trim()) {
+        payload.groq_api_key = groqApiKey.trim();
+      }
+
+      let { error } = await supabase.from("agent_configs").upsert(
+        payload,
         { onConflict: "id" }
       );
+
+      // Se falhar porque a coluna groq_api_key ainda não existe no schema remoto, tenta sem ela
+      if (error && error.message && error.message.includes("groq_api_key")) {
+        delete payload.groq_api_key;
+        const retry = await supabase.from("agent_configs").upsert(
+          payload,
+          { onConflict: "id" }
+        );
+        error = retry.error;
+      }
+
       if (error) throw error;
       return { success: true, cloud: true };
     } catch (err) {

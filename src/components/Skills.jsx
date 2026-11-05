@@ -40,10 +40,18 @@ function Skills() {
           <span>PostgreSQL</span>
         </div>
         <div className="skill-item">
-          <img
-            src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/ubuntu/ubuntu-plain.svg"
-            alt="Ubuntu"
-          />
+          <svg
+            role="img"
+            viewBox="0 0 24 24"
+            width="42"
+            height="42"
+            fill="#E95420"
+            className="skill-tech-icon skill-ubuntu-icon"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <title>Ubuntu</title>
+            <path d="M17.61.455a3.41 3.41 0 0 0-3.41 3.41 3.41 3.41 0 0 0 3.41 3.41 3.41 3.41 0 0 0 3.41-3.41 3.41 3.41 0 0 0-3.41-3.41zM12.92.8C8.923.777 5.137 2.941 3.148 6.451a4.5 4.5 0 0 1 .26-.007 4.92 4.92 0 0 1 2.585.737A8.316 8.316 0 0 1 12.688 3.6 4.944 4.944 0 0 1 13.723.834 11.008 11.008 0 0 0 12.92.8zm9.226 4.994a4.915 4.915 0 0 1-1.918 2.246 8.36 8.36 0 0 1-.273 8.303 4.89 4.89 0 0 1 1.632 2.54 11.156 11.156 0 0 0 .559-13.089zM3.41 7.932A3.41 3.41 0 0 0 0 11.342a3.41 3.41 0 0 0 3.41 3.409 3.41 3.41 0 0 0 3.41-3.41 3.41 3.41 0 0 0-3.41-3.41zm2.027 7.866a4.908 4.908 0 0 1-2.915.358 11.1 11.1 0 0 0 7.991 6.698 11.234 11.234 0 0 0 2.422.249 4.879 4.879 0 0 1-.999-2.85 8.484 8.484 0 0 1-.836-.136 8.304 8.304 0 0 1-5.663-4.32zm11.405.928a3.41 3.41 0 0 0-3.41 3.41 3.41 3.41 0 0 0 3.41 3.41 3.41 3.41 0 0 0 3.41-3.41 3.41 3.41 0 0 0-3.41-3.41z"/>
+          </svg>
           <span>Ubuntu</span>
         </div>
         <div className="skill-item">
@@ -75,10 +83,18 @@ function Skills() {
           <span>CSS3</span>
         </div>
         <div className="skill-item">
-          <img
-            src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/markdown/markdown-original.svg"
-            alt="Markdown"
-          />
+          <svg
+            role="img"
+            viewBox="0 0 24 24"
+            width="42"
+            height="42"
+            fill="#FFFFFF"
+            className="skill-tech-icon skill-markdown-icon"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <title>Markdown</title>
+            <path d="M22.27 19.385H1.73A1.73 1.73 0 010 17.655V6.345a1.73 1.73 0 011.73-1.73h20.54A1.73 1.73 0 0124 6.345v11.308a1.73 1.73 0 01-1.73 1.731zM5.769 15.923v-4.5l2.308 2.885 2.307-2.885v4.5h2.308V8.078h-2.308l-2.307 2.885-2.308-2.885H3.46v7.847zM21.232 12h-2.309V8.077h-2.307V12h-2.308l3.461 4.039z"/>
+          </svg>
           <span>Markdown</span>
         </div>
         <div className="skill-item focus-study">
