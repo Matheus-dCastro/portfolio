@@ -152,12 +152,12 @@ export default function Projects({ onOpenProject, onNavigateToBlogPost }) {
                       <div className="project-header">
                         <span
                           className={`tag cat-badge-tag cat-${(project.category || "Profissional").toLowerCase()}`}
-                          style={{ display: "inline-flex", alignItems: "center", gap: "4px", color: "#a78bfa" }}
+                          style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}
                         >
                           <CategoryIcon category={project.category || "Profissional"} size={12} />
                           {project.category || "Profissional"}
                         </span>
-                        {project.tags?.map((tag, tIdx) => (
+                        {project.tags?.slice(0, 3).map((tag, tIdx) => (
                           <span
                             key={tIdx}
                             className={`tag ${tIdx === 1 ? "font-bold" : ""}`}
@@ -165,8 +165,13 @@ export default function Projects({ onOpenProject, onNavigateToBlogPost }) {
                             {tag}
                           </span>
                         ))}
+                        {project.tags && project.tags.length > 3 && (
+                          <span className="tag tag-more" title={project.tags.slice(3).join(", ")}>
+                            +{project.tags.length - 3}
+                          </span>
+                        )}
                         {project.contentType === "google-docs" && (
-                          <span className="tag font-bold gdocs-badge">Google Docs</span>
+                          <span className="tag font-bold gdocs-badge">Docs</span>
                         )}
                         {project.contentType === "pdf" && (
                           <span className="tag font-bold pdf-badge">PDF</span>
@@ -177,8 +182,8 @@ export default function Projects({ onOpenProject, onNavigateToBlogPost }) {
                           </span>
                         )}
                         {linkedBlog && (
-                          <span className="tag font-bold blog-badge" style={{ color: "#c084fc", borderColor: "rgba(192, 132, 252, 0.4)", background: "rgba(139, 92, 246, 0.12)" }} title="Artigo aprofundado no Blog">
-                            📝 Blog
+                          <span className="tag font-bold blog-badge" title="Artigo aprofundado no Blog">
+                            Blog
                           </span>
                         )}
                       </div>

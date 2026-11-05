@@ -361,41 +361,6 @@ export default function ViewDraft({ project: propProject, onBackToHome, onSelect
               </button>
             </div>
           )}
-
-          {linkedBlogPost && (
-            <div className="linked-item-banner blog-linked-banner">
-              <div className="linked-banner-icon" style={{ borderColor: "#a78bfa", color: "#c084fc", background: "rgba(139, 92, 246, 0.15)" }}>
-                📝
-              </div>
-              <div className="linked-banner-info">
-                <span className="linked-banner-tag" style={{ color: "#c084fc" }}>
-                  {lang === "en" ? "Deep-Dive Blog Post" : "Post Aprofundado no Blog"}
-                </span>
-                <h4 className="linked-banner-title">
-                  {lang === "en" ? (linkedBlogPost.titleEn || linkedBlogPost.titlePt) : linkedBlogPost.titlePt}
-                </h4>
-                <p className="linked-banner-desc">
-                  {lang === "en"
-                    ? (linkedBlogPost.summaryEn || linkedBlogPost.summaryPt)
-                    : linkedBlogPost.summaryPt}
-                </p>
-              </div>
-              <button
-                type="button"
-                className="btn-open-linked"
-                style={{ borderColor: "#8b5cf6", background: "rgba(139, 92, 246, 0.2)", color: "#fff" }}
-                onClick={() => {
-                  if (onNavigateToBlogPost) {
-                    onNavigateToBlogPost(linkedBlogPost);
-                  } else {
-                    window.location.href = `${(linkedBlogPost.channel || "tech") === "alomyr" ? "/blog/alomyr" : "/blog"}?post=${encodeURIComponent(linkedBlogPost.id)}`;
-                  }
-                }}
-              >
-                {lang === "en" ? "Read on Blog ↗" : "Ler no Blog ↗"}
-              </button>
-            </div>
-          )}
         </div>
 
         {/* Content Type Selector (if multiple formats available) */}
@@ -506,19 +471,57 @@ export default function ViewDraft({ project: propProject, onBackToHome, onSelect
           </section>
         )}
 
+        {/* Linked Blog Post Banner (Positioned right before Alomyr Integration) */}
+        {linkedBlogPost && (
+          <div className="linked-item-banner blog-linked-banner bottom-highlight">
+            <div className="linked-banner-icon" style={{ borderColor: "rgba(139, 92, 246, 0.35)", color: "#c084fc", background: "rgba(139, 92, 246, 0.15)" }}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+                <line x1="16" y1="17" x2="8" y2="17"></line>
+              </svg>
+            </div>
+            <div className="linked-banner-info">
+              <span className="linked-banner-tag" style={{ color: "#c084fc" }}>
+                {lang === "en" ? "Deep-Dive Blog Post" : "Artigo Completo no Blog"}
+              </span>
+              <h4 className="linked-banner-title">
+                {lang === "en" ? (linkedBlogPost.titleEn || linkedBlogPost.titlePt) : linkedBlogPost.titlePt}
+              </h4>
+              <p className="linked-banner-desc">
+                {lang === "en"
+                  ? (linkedBlogPost.summaryEn || linkedBlogPost.summaryPt)
+                  : linkedBlogPost.summaryPt}
+              </p>
+            </div>
+            <button
+              type="button"
+              className="btn-open-linked"
+              style={{ borderColor: "#8b5cf6", background: "rgba(139, 92, 246, 0.2)", color: "#fff" }}
+              onClick={() => {
+                if (onNavigateToBlogPost) {
+                  onNavigateToBlogPost(linkedBlogPost);
+                } else {
+                  window.location.href = `${(linkedBlogPost.channel || "tech") === "alomyr" ? "/blog/alomyr" : "/blog"}?post=${encodeURIComponent(linkedBlogPost.id)}`;
+                }
+              }}
+            >
+              {lang === "en" ? "Read Full Article ↗" : "Ler Matéria no Blog ↗"}
+            </button>
+          </div>
+        )}
+
         {/* Contextual Alomyr Assistant Section */}
         <section className="view-alomyr-contextual-section">
           <div className="alomyr-context-card">
             <div className="alomyr-context-header">
               <div className="alomyr-context-avatar">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M12 2a10 10 0 0 1 10 10c0 5.523-4.477 10-10 10S2 17.523 2 12A10 10 0 0 1 12 2z"></path>
-                  <path d="m9 12 2 2 4-4"></path>
-                </svg>
+                <img src="/wolf(2).png" alt="Alomyr" className="alomyr-banner-wolf-img" />
               </div>
               <div className="alomyr-context-headings">
                 <div className="alomyr-context-badge">
-                  <span className="badge-spark">✦</span> {t("view.alomyr_badge")}
+                  <span className="badge-dot"></span> {t("view.alomyr_badge")}
                 </div>
                 <h3 className="alomyr-context-title">
                   {t("view.alomyr_title").replace("{type}", itemTypeName)}
@@ -538,7 +541,9 @@ export default function ViewDraft({ project: propProject, onBackToHome, onSelect
                   className="alomyr-context-chip-btn"
                   onClick={() => handleAskAlomyr(q)}
                 >
-                  <span className="chip-spark">💬</span>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: "4px" }}>
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                  </svg>
                   <span>{q}</span>
                 </button>
               ))}

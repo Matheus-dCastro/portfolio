@@ -104,7 +104,11 @@ export default function ArtGallery({ artDrawings = [] }) {
                     loading="lazy"
                   />
                   <div className="art-zoom-hint">
-                    <span>🔍 {t("gallery.expand")}</span>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: "4px" }}>
+                      <circle cx="11" cy="11" r="8"></circle>
+                      <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                    <span>{t("gallery.expand")}</span>
                   </div>
                 </div>
                 <div className="art-overlay">
@@ -143,7 +147,11 @@ export default function ArtGallery({ artDrawings = [] }) {
                   onClick={() => setIsZoomed(!isZoomed)}
                   title={isZoomed ? "Diminuir Zoom (Z)" : "Ampliar Detalhes HD (Z)"}
                 >
-                  <span>{isZoomed ? "🔍 100%" : "🔍 Zoom HD"}</span>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: "4px" }}>
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                  </svg>
+                  <span>{isZoomed ? "100%" : "Zoom HD"}</span>
                 </button>
 
                 <a
@@ -215,7 +223,7 @@ export default function ArtGallery({ artDrawings = [] }) {
             {/* Bottom Caption */}
             <div className="lightbox-caption-card">
               <span className="art-technique-pill">
-                🎨 {lang === "en" ? "Graphite on Paper • Hyper-realism" : "Grafite sobre Papel • Hiper-realismo"}
+                {lang === "en" ? "Graphite on Paper • Hyper-realism" : "Grafite sobre Papel • Hiper-realismo"}
               </span>
               <h3 className="lightbox-caption-title">
                 {lang === "en" ? (selectedArt.titleEn || selectedArt.title) : (selectedArt.titlePt || selectedArt.title)}

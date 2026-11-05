@@ -122,8 +122,21 @@
 
 ---
 
-## 🏁 STATUS FINAL DA SPRINT: 100% CONCLUÍDO E HOMOLOGADO EM LOCALHOST
-- Todos os 32 passos foram minuciosamente executados, testados via build de produção e documentados.
-- Build do Vite executado com sucesso (0 erros).
-- Servidor local ativo em `http://localhost:5173/`.
-- **Deploy:** Bloqueado conforme diretriz mandatória. Aguardando a verificação no localhost e o comando **`ok`** do usuário.
+## 🏁 STATUS DA SPRINT ANTERIOR: CONCLUÍDA
+- 32 passos executados com sucesso e commitados na branch `refatoring-securit`.
+
+---
+
+## 🚀 SPRINT FINAL: REFINAMENTOS DE UI, REMOÇÃO DE EMOJIS, CARDS SAIBAMAIS, AVISO EM CONSTRUÇÃO & DEPLOY
+**Status Geral:** Iniciado - Executando passo a passo
+
+### 📌 Fila de Execução em Andamento:
+- [x] **Passo 33:** Melhoria da dimensão, espaçamento e alinhamento das tags dos cards de projetos e artigos (resolução de erro visual).
+- [x] **Passo 34:** Remoção de todos os emojis coloridos que fogem do tema do site, substituindo por ícones SVG monocromáticos ou texto limpo.
+- [x] **Passo 35:** Realocação do card de link para o post do blog para o final da página em "Saber Mais" (`ViewDraft`), imediatamente antes do card do Alomyr.
+- [x] **Passo 36:** Padronização visual do card do Alomyr no Saber Mais com a identidade do blog e uso da imagem do mascote lobo (`/wolf(2).png`).
+- [x] **Passo 37:** Banner informativo no Split Gateway (`/blog/?`) salientando que as páginas de blog estão em construção e em fase experimental.
+- [x] **Passo 38:** Configuração para não publicar a página do 404 (`404.html`) no deploy de produção por enquanto.
+- [/] **Passo 39:** Execução do build e deploy de produção no GitHub Pages (`npm run deploy`) com verificação final.
+
+---

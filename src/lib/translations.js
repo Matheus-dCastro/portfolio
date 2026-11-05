@@ -195,7 +195,7 @@ export const translations = {
     "notfound.title": "Awooo! You wandered into the digital void...",
     "notfound.subtitle": "Our cyber wolf explored every sector of the server, but couldn't locate this page. It may have drifted into deep space.",
     "notfound.back_home": "← Return to Safety (Home)",
-    "notfound.ask_alomyr": "Ask Alomyr for Help 💬",
+    "notfound.ask_alomyr": "Ask Alomyr for Help",
     "notfound.explore_works": "Explore Projects & Works ↗",
 
     // AI Agent - Alomyr
@@ -443,7 +443,7 @@ export const translations = {
     "notfound.title": "Auuu! Você se perdeu na névoa digital...",
     "notfound.subtitle": "Nosso pequeno lobo farejou todos os cantos do servidor, mas não encontrou esta rota. Ela pode ter sido movida, excluída ou perdida no hiperespaço.",
     "notfound.back_home": "← Voltar em Segurança ao Início",
-    "notfound.ask_alomyr": "Pedir Ajuda ao Alomyr 💬",
+    "notfound.ask_alomyr": "Pedir Ajuda ao Alomyr",
     "notfound.explore_works": "Explorar Projetos & Trabalhos ↗",
 
     // AI Agent - Alomyr

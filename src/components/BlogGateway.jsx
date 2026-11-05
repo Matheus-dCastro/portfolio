@@ -68,6 +68,19 @@ export default function BlogGateway({ onSelectChannel, onBackToHome }) {
           </div>
           <h1 className="gateway-title">{t("blog.gateway_title")}</h1>
           <p className="gateway-subtitle">{t("blog.gateway_subtitle")}</p>
+
+          {/* Active Construction & Preview Notice */}
+          <div className="gateway-wip-notice">
+            <div className="wip-notice-badge">
+              <span className="wip-dot"></span>
+              <span>{lang === "en" ? "WORK IN PROGRESS • EXPERIMENTAL PREVIEW" : "EM CONSTRUÇÃO • PRÉVIA EXPERIMENTAL"}</span>
+            </div>
+            <p className="wip-notice-text">
+              {lang === "en"
+                ? "Please note: The engineering blog and Alomyr lab feeds are currently under active development. Layouts, media embeds, and publications are being refined and are not yet in final production use."
+                : "Atenção: Os canais do Blog de Engenharia e do Laboratório Alomyr estão atualmente em fase ativa de construção. Os layouts, mídias e postagens estão sendo refinados e ainda não estão em uso definitivo."}
+            </p>
+          </div>
         </div>
 
         {/* Portals Split Cards */}
@@ -171,8 +184,8 @@ export default function BlogGateway({ onSelectChannel, onBackToHome }) {
         <div className="gateway-bottom-info">
           <p>
             {lang === "en"
-              ? "⚡ Both channels offer bidirectional links to technical projects and seamless switching."
-              : "⚡ Ambos os canais contam com links bidirecionais para os projetos técnicos e alternância rápida."}
+              ? "Both channels offer bidirectional links to technical projects and seamless switching."
+              : "Ambos os canais contam com links bidirecionais para os projetos técnicos e alternância rápida."}
           </p>
         </div>
       </main>

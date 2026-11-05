@@ -1217,9 +1217,11 @@ h2 span {
 }
 
 .project-header {
-  margin-bottom: 25px;
+  margin-bottom: 18px;
   display: flex;
-  gap: 8px;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
 }
 
 .project-card h3 {
@@ -1234,14 +1236,63 @@ h2 span {
 }
 
 .tag {
-  display: inline-block;
-  padding: 4px 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 9px;
   background: rgba(139, 92, 246, 0.08);
   color: var(--purple-bright);
-  border: 1px solid rgba(139, 92, 246, 0.15);
-  border-radius: 50px;
+  border: 1px solid rgba(139, 92, 246, 0.18);
+  border-radius: 6px;
   font-size: 0.7rem;
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: 0.02em;
   text-transform: uppercase;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.tag:hover {
+  background: rgba(139, 92, 246, 0.16);
+  border-color: rgba(139, 92, 246, 0.35);
+}
+
+.tag.cat-badge-tag {
+  background: rgba(139, 92, 246, 0.14);
+  border-color: rgba(139, 92, 246, 0.32);
+  color: #c4b5fd;
+  font-weight: 700;
+}
+
+.tag.font-bold {
+  font-weight: 700;
+}
+
+.tag.gdocs-badge,
+.tag.pdf-badge {
+  background: rgba(16, 185, 129, 0.1);
+  border-color: rgba(16, 185, 129, 0.28);
+  color: #34d399;
+}
+
+.tag.related-tag {
+  background: rgba(56, 189, 248, 0.1);
+  border-color: rgba(56, 189, 248, 0.28);
+  color: #38bdf8;
+}
+
+.tag.blog-badge {
+  background: rgba(139, 92, 246, 0.12);
+  border-color: rgba(139, 92, 246, 0.35);
+  color: #c084fc;
+}
+
+.tag.tag-more {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.12);
+  color: #94a3b8;
 }
 
 .architecture-highlight {

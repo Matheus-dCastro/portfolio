@@ -294,6 +294,15 @@
   box-shadow: 0 8px 30px rgba(139, 92, 246, 0.25);
 }
 
+.linked-item-banner.bottom-highlight {
+  margin: 3.5rem 0 1.25rem;
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(15, 23, 42, 0.85) 100%);
+  border: 1px solid rgba(139, 92, 246, 0.32);
+  border-radius: 18px;
+  padding: 1.4rem 1.8rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+
 .linked-banner-icon {
   font-size: 2rem;
   line-height: 1;
@@ -857,16 +866,23 @@
 }
 
 .alomyr-context-avatar {
-  width: 46px;
-  height: 46px;
-  border-radius: 12px;
-  background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
-  color: #ffffff;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: rgba(139, 92, 246, 0.15);
+  border: 1px solid rgba(139, 92, 246, 0.35);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 16px rgba(139, 92, 246, 0.45);
+  box-shadow: 0 4px 18px rgba(139, 92, 246, 0.35);
   flex-shrink: 0;
+  overflow: hidden;
+}
+
+.alomyr-banner-wolf-img {
+  width: 34px;
+  height: 34px;
+  object-fit: contain;
 }
 
 .alomyr-context-headings {
@@ -876,7 +892,7 @@
 .alomyr-context-badge {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
+  gap: 6px;
   font-size: 0.72rem;
   font-weight: 800;
   text-transform: uppercase;
@@ -888,8 +904,11 @@
   margin-bottom: 0.45rem;
 }
 
-.alomyr-context-badge .badge-spark {
-  color: #a78bfa;
+.alomyr-context-badge .badge-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #a78bfa;
 }
 
 .alomyr-context-title {

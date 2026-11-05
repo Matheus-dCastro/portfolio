@@ -89,7 +89,7 @@ export default function Articles({ onOpenArticle }) {
               <div className="project-header">
                 <span
                   className={`tag cat-badge-tag cat-${(article.category || "Acadêmico").toLowerCase()}`}
-                  style={{ display: "inline-flex", alignItems: "center", gap: "4px", color: "#a78bfa" }}
+                  style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}
                 >
                   <CategoryIcon category={article.category || "Acadêmico"} size={12} />
                   {categoryLabels[article.category] || article.category || "Acadêmico"}
@@ -102,13 +102,18 @@ export default function Articles({ onOpenArticle }) {
                     {tag}
                   </span>
                 ))}
+                {article.tags && article.tags.length > 3 && (
+                  <span className="tag tag-more" title={article.tags.slice(3).join(", ")}>
+                    +{article.tags.length - 3}
+                  </span>
+                )}
                 {article.contentType === "google-docs" && (
-                  <span className="gdocs-badge" title="Google Docs">
+                  <span className="tag gdocs-badge" title="Google Docs">
                     Docs
                   </span>
                 )}
                 {article.contentType === "pdf" && (
-                  <span className="pdf-badge" title="PDF">
+                  <span className="tag pdf-badge" title="PDF">
                     PDF
                   </span>
                 )}
