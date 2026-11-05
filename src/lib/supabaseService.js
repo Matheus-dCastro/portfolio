@@ -678,6 +678,17 @@ export async function fetchCvConfig() {
   return getStoredCvConfig();
 }
 
+export function extractKeyFromPrompt(prompt) {
+  if (!prompt || typeof prompt !== "string") return "";
+  const match = prompt.match(/<!--\s*AGENT_KEY:\s*([^\s>]+)\s*-->/);
+  return match ? match[1] : "";
+}
+
+export function cleanPromptFromKey(prompt) {
+  if (!prompt || typeof prompt !== "string") return "";
+  return prompt.replace(/<!--\s*AGENT_KEY:\s*[^\s>]+\s*-->\n?/, "").trim();
+}
+
 export async function fetchAgentConfig() {
   if (isSupabaseConfigured && supabase) {
     try {
@@ -688,13 +699,15 @@ export async function fetchAgentConfig() {
         .maybeSingle();
 
       if (!error && data) {
+        const groqApiKey = data.groq_api_key || extractKeyFromPrompt(data.system_prompt) || "";
         return {
           modelName: data.model_name,
-          systemPrompt: data.system_prompt,
+          systemPrompt: cleanPromptFromKey(data.system_prompt),
+          rawSystemPrompt: data.system_prompt,
           maxTokens: data.max_tokens,
           temperature: data.temperature,
-          hasApiKey: Boolean(data.groq_api_key),
-          groqApiKey: data.groq_api_key || ""
+          hasApiKey: Boolean(groqApiKey),
+          groqApiKey: groqApiKey
         };
       }
     } catch (err) {
@@ -1416,26 +1429,36 @@ export async function uploadDrawingImage(file) {
 
 export async function persistAgentConfig(
   systemPrompt,
-  modelName = "qwen-2.5-coder-32b",
+  modelName = "qwen/qwen3.8-27b",
   temperature = 0.3,
   maxTokens = 800,
   groqApiKey = null
 ) {
-  localStorage.setItem("portfolio_agent_system_prompt", systemPrompt);
+  const cleanPrompt = cleanPromptFromKey(systemPrompt);
+  localStorage.setItem("portfolio_agent_system_prompt", cleanPrompt);
   localStorage.setItem("portfolio_agent_model", modelName);
 
   if (isSupabaseConfigured && supabase) {
     try {
+      const activeKey = (groqApiKey && typeof groqApiKey === "string" && groqApiKey.trim())
+        ? groqApiKey.trim()
+        : extractKeyFromPrompt(systemPrompt);
+
+      // Embed tag inside prompt so key persists even if column doesn't exist yet
+      const promptToStore = activeKey
+        ? `<!-- AGENT_KEY: ${activeKey} -->\n${cleanPrompt}`
+        : cleanPrompt;
+
       const payload = {
         id: "production",
         model_name: modelName,
-        system_prompt: systemPrompt,
+        system_prompt: promptToStore,
         temperature: Number(temperature),
         max_tokens: Number(maxTokens),
         updated_at: new Date().toISOString()
       };
-      if (groqApiKey && typeof groqApiKey === "string" && groqApiKey.trim()) {
-        payload.groq_api_key = groqApiKey.trim();
+      if (activeKey) {
+        payload.groq_api_key = activeKey;
       }
 
       let { error } = await supabase.from("agent_configs").upsert(
@@ -1443,7 +1466,7 @@ export async function persistAgentConfig(
         { onConflict: "id" }
       );
 
-      // Se falhar porque a coluna groq_api_key ainda não existe no schema remoto, tenta sem ela
+      // Se falhar porque a coluna groq_api_key ainda não existe no schema remoto, tenta sem ela mantendo o prompt com tag
       if (error && error.message && error.message.includes("groq_api_key")) {
         delete payload.groq_api_key;
         const retry = await supabase.from("agent_configs").upsert(

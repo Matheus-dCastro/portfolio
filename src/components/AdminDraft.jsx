@@ -59,7 +59,7 @@ import {
 } from "../data/blogData";
 import { isSupabaseConfigured } from "../lib/supabaseClient";
 import { DOCUMENT_TEMPLATES } from "../data/templatesData";
-import { sendChatMessage } from "../lib/llmService";
+import { sendChatMessage, getGroqApiKey } from "../lib/llmService";
 import "./AdminDraft.css";
 
 const generateUniqueId = () => `item-${Date.now()}`;
@@ -138,13 +138,13 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
   const [agentPrompt, setAgentPrompt] = useState(() => {
     return localStorage.getItem("portfolio_agent_system_prompt") || DEFAULT_AGENT_SYSTEM_PROMPT;
   });
-  const [agentModel, setAgentModel] = useState("qwen-2.5-coder-32b");
+  const [agentModel, setAgentModel] = useState("qwen/qwen3.8-27b");
   const [agentTemperature, setAgentTemperature] = useState(0.3);
   const [agentMaxTokens, setAgentMaxTokens] = useState(800);
   const [agentGuardrailsActive, setAgentGuardrailsActive] = useState(true);
-  const [agentApiKey, setAgentApiKey] = useState("");
+  const [agentApiKey, setAgentApiKey] = useState(() => getGroqApiKey() || "");
   const [showApiKey, setShowApiKey] = useState(false);
-  const [hasSavedApiKey, setHasSavedApiKey] = useState(false);
+  const [hasSavedApiKey, setHasSavedApiKey] = useState(() => Boolean(getGroqApiKey()));
   const [testChatMessage, setTestChatMessage] = useState("");
   const [isChatLoading, setIsChatLoading] = useState(false);
   const [chatMessages, setChatMessages] = useState([
@@ -258,11 +258,26 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
     } else if (activeTab === "agent") {
       fetchAgentConfig().then((cfg) => {
         if (cfg?.systemPrompt) setAgentPrompt(cfg.systemPrompt);
-        if (cfg?.modelName) setAgentModel(cfg.modelName);
+        if (cfg?.modelName) {
+          const mod = cfg.modelName;
+          if (mod.includes("qwen") || mod.includes("2.5") || mod.includes("coder")) {
+            setAgentModel("qwen/qwen3.8-27b");
+          } else if (mod.includes("120b")) {
+            setAgentModel("openai/gpt-oss-120b");
+          } else if (mod.includes("20b") || mod.includes("llama")) {
+            setAgentModel("openai/gpt-oss-20b");
+          } else {
+            setAgentModel(mod);
+          }
+        }
         if (cfg?.temperature !== undefined) setAgentTemperature(Number(cfg.temperature));
         if (cfg?.maxTokens !== undefined) setAgentMaxTokens(Number(cfg.maxTokens));
         if (cfg?.hasApiKey) setHasSavedApiKey(true);
-        if (cfg?.groqApiKey) setAgentApiKey(cfg.groqApiKey);
+        if (cfg?.groqApiKey) {
+          setAgentApiKey(cfg.groqApiKey);
+        } else if (getGroqApiKey()) {
+          setAgentApiKey(getGroqApiKey());
+        }
       });
     } else if (activeTab === "customHobby") {
       fetchHobbies().then((list) => {
@@ -1342,7 +1357,7 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
   const applyFineTuningPreset = (presetKey) => {
     switch (presetKey) {
       case "recruiter":
-        setAgentModel("qwen-2.5-coder-32b");
+        setAgentModel("qwen/qwen3.8-27b");
         setAgentTemperature(0.2);
         setAgentMaxTokens(700);
         setAgentGuardrailsActive(true);
@@ -1355,7 +1370,7 @@ Seu foco nesta persona é RECUPERAÇÃO E APRESENTAÇÃO TÉCNICA PARA RECRUTADO
         showToast("Preset 'Recrutador Técnico' aplicado!");
         break;
       case "deep_learning":
-        setAgentModel("llama-3.3-70b-versatile");
+        setAgentModel("openai/gpt-oss-120b");
         setAgentTemperature(0.25);
         setAgentMaxTokens(1000);
         setAgentGuardrailsActive(true);
@@ -1368,7 +1383,7 @@ Seu foco nesta persona é PESQUISA CIENTÍFICA E ENGENHARIA DE DEEP LEARNING.
         showToast("Preset 'Deep Learning & Pesquisa' aplicado!");
         break;
       case "backend":
-        setAgentModel("qwen-2.5-coder-32b");
+        setAgentModel("qwen/qwen3.8-27b");
         setAgentTemperature(0.2);
         setAgentMaxTokens(800);
         setAgentGuardrailsActive(true);
@@ -1381,7 +1396,7 @@ Seu foco nesta persona é ENGENHARIA DE SOFTWARE BACKEND & DEVOPS.
         showToast("Preset 'Backend & DevOps' aplicado!");
         break;
       case "concise":
-        setAgentModel("qwen-2.5-coder-32b");
+        setAgentModel("openai/gpt-oss-20b");
         setAgentTemperature(0.15);
         setAgentMaxTokens(500);
         setAgentGuardrailsActive(true);
@@ -1727,11 +1742,9 @@ DIRETRIZ MÁXIMA DE CONCISÃO:
                     value={agentModel}
                     onChange={(e) => setAgentModel(e.target.value)}
                   >
-                    <option value="qwen-2.5-coder-32b">Qwen 2.5 Coder 32B (Groq Fast - Padrão)</option>
-                    <option value="llama-3.3-70b-versatile">Llama 3.3 70B Versatile (Meta - Raciocínio Profundo)</option>
-                    <option value="llama-3.1-8b-instant">Llama 3.1 8B Instant (Meta - Baixa Latência)</option>
-                    <option value="mixtral-8x7b-32768">Mixtral 8x7B (Mistral AI)</option>
-                    <option value="gemma2-9b-it">Gemma 2 9B (Google)</option>
+                    <option value="qwen/qwen3.8-27b">Qwen 3.8 27B (Groq Fast - Recomendado)</option>
+                    <option value="openai/gpt-oss-120b">GPT-OSS 120B (Raciocínio Profundo & MLOps)</option>
+                    <option value="openai/gpt-oss-20b">GPT-OSS 20B (Ultrarrápido & Baixa Latência)</option>
                   </select>
                 </div>
 

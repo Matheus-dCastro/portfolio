@@ -120,7 +120,7 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || Deno.env.get("SUPABASE_ANON_KEY");
     let dynamicContext = "";
     let systemPromptBase = customPrompt || "";
-    let activeModelName = model || "qwen-2.5-coder-32b";
+    let activeModelName = model || "qwen/qwen3.8-27b";
     let activeTemperature = 0.3;
     let activeMaxTokens = 800;
     let dbGroqApiKey = "";
@@ -143,6 +143,10 @@ serve(async (req) => {
         if (agentConfig.temperature !== undefined) activeTemperature = Number(agentConfig.temperature);
         if (agentConfig.max_tokens !== undefined) activeMaxTokens = Number(agentConfig.max_tokens);
         if (agentConfig.groq_api_key) dbGroqApiKey = agentConfig.groq_api_key;
+        if (!dbGroqApiKey && agentConfig.system_prompt) {
+          const keyMatch = agentConfig.system_prompt.match(/<!--\s*AGENT_KEY:\s*([^\s>]+)\s*-->/);
+          if (keyMatch) dbGroqApiKey = keyMatch[1];
+        }
       }
 
       // 2. Carrega lista de projetos publicados
@@ -237,8 +241,17 @@ Sempre que mencionar projetos, inclua o nome em destaque e convide o visitante a
 
     // Map model names if needed
     let modelToRequest = activeModelName;
-    if (activeModelName === "Qwen 2.5 Coder 32B-Instruct" || activeModelName === "qwen-2.5-coder-32b") {
-      modelToRequest = "qwen-2.5-coder-32b";
+    if (
+      !activeModelName ||
+      activeModelName.includes("qwen") ||
+      activeModelName === "Qwen 2.5 Coder 32B-Instruct" ||
+      activeModelName === "qwen-2.5-coder-32b"
+    ) {
+      modelToRequest = "qwen/qwen3.8-27b";
+    } else if (activeModelName.includes("120b")) {
+      modelToRequest = "openai/gpt-oss-120b";
+    } else if (activeModelName.includes("20b") || activeModelName.includes("llama")) {
+      modelToRequest = "openai/gpt-oss-20b";
     }
 
     const groqResponse = await fetch("https://api.groq.com/openai/v1/chat/completions", {

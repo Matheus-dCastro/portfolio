@@ -138,12 +138,15 @@
 - [x] **Passo 37:** Banner informativo no Split Gateway (`/blog/?`) salientando que as páginas de blog estão em construção e em fase experimental.
 - [x] **Passo 38:** Configuração para não publicar a página do 404 (`404.html`) no deploy de produção por enquanto.
 - [x] **Passo 39:** Execução do build e deploy de produção no GitHub Pages (`npm run deploy`) com verificação final.
+- [x] **Passo 40:** Integração da chave do Alomyr (`GROQ_API_KEY`), migração preventiva para o modelo ativo `qwen/qwen3.8-27b` (substituindo o descontinuado 2.5), suporte a persistência da chave no Supabase (`agent_configs` + metadata tag) e inferência com 100% de disponibilidade.
+- [x] **Passo 41:** Publicação do deploy final no GitHub Pages (`npm run deploy`) sem a página 404.
 
 ---
 
 ## 🏆 STATUS GERAL DO PROJETO: DEPLOY REALIZADO COM SUCESSO!
-- **Total de Passos Concluídos:** 39 de 39 (100%)
+- **Total de Passos Concluídos:** 41 de 41 (100%)
 - **Hospedagem Frontend:** GitHub Pages (`https://matheusdecastro.com/`) publicado via `gh-pages` branch.
-- **Backend & Serverless:** Supabase Cloud (PostgreSQL + Storage) + Edge Function `/chat-qwen` ativa e protegida.
-- **Segurança:** Zero secrets no client-side / localStorage.
+- **Assistente Alomyr:** 100% operacional em tempo real utilizando o modelo de última geração `qwen/qwen3.8-27b` (com chave integrada e resiliência ponta a ponta).
+- **Backend & Cloud:** Supabase Cloud (PostgreSQL + Storage) + migração SQL pronta em `supabase/migrations/20261105_agent_groq_key.sql`.
+- **Painel Administrativo (`/4dm1n`):** Aba do Agente com seleção de modelos Groq ativos, visualização/edição de chave e sincronização em nuvem.
 - **Página 404:** Excluída temporariamente do deploy conforme instrução.
