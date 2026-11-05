@@ -46,4 +46,4 @@ arrumar botao de seta duplicada q o gemini fez errado
 arrumar a resposta do agente
 arrumar e gardiraios
 arrumar o sistema do dashboard (finetunning)
-
+puxar o idioma do proprio navegador de forma automatica
