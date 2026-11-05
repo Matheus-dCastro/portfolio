@@ -1346,11 +1346,13 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
 
     if (activeTab === "projects") {
       const res = await persistWork(updatedItem);
-      showToast(
-        res.cloud
-          ? "Projeto salvo e sincronizado no Supabase!"
-          : "Projeto salvo localmente (offline)!"
-      );
+      if (res.cloud) {
+        showToast("Projeto salvo e sincronizado no Supabase Cloud!");
+      } else if (res.error) {
+        showToast("Salvo localmente. Erro na nuvem: " + res.error);
+      } else {
+        showToast("Projeto salvo localmente (offline)!");
+      }
     } else if (activeTab === "articles") {
       const res = await persistArticle(updatedItem);
       showToast(

@@ -158,7 +158,9 @@ export function mapProjectToDbWork(item) {
     google_docs_url: item.googleDocsUrl || "",
     pdf_url: item.pdfUrl || "",
     content: contentToSave,
-    related_article_id: item.relatedArticleId ? item.relatedArticleId : null,
+    related_article_id: (item.relatedArticleId && Array.isArray(getStoredArticles()) && getStoredArticles().some((a) => a.id === item.relatedArticleId))
+      ? item.relatedArticleId
+      : null,
     display_order: item.displayOrder ?? 0,
     is_published: item.isPublished !== false
   };
@@ -509,9 +511,13 @@ export async function fetchWorks(includeDrafts = false) {
       const { data, error } = await query;
       if (!error && Array.isArray(data)) {
         const mapped = data.map(mapDbWorkToProject);
-        // Garante que projetos essenciais (como o projeto do próprio portfólio) apareçam mesmo se ainda não persistidos na nuvem
+        // Garante que projetos essenciais (como o projeto do próprio portfólio) apareçam preservando edições locais
         const remoteIds = new Set(mapped.map((p) => p.id));
-        const missingDefaults = DEFAULT_PROJECTS.filter((p) => !remoteIds.has(p.id));
+        const storedLocal = getStoredProjects();
+        const missingDefaults = DEFAULT_PROJECTS.filter((p) => !remoteIds.has(p.id)).map((def) => {
+          const locallyEdited = storedLocal.find((l) => l.id === def.id);
+          return locallyEdited || def;
+        });
         const combined = [...mapped, ...missingDefaults];
 
         saveProjects(combined); // Mantém cache offline sincronizado
@@ -1067,12 +1073,12 @@ export async function persistWork(item) {
   if (isSupabaseConfigured && supabase) {
     try {
       const payload = mapProjectToDbWork(item);
-      const { error } = await supabase.from("works").upsert(payload, { onConflict: "id" });
+      const { data, error } = await supabase.from("works").upsert(payload, { onConflict: "id" }).select();
       if (error) throw error;
-      return { success: true, cloud: true };
+      return { success: true, cloud: true, data };
     } catch (err) {
       console.error("Erro ao salvar projeto no Supabase:", err);
-      return { success: true, cloud: false, error: err.message };
+      return { success: false, cloud: false, error: err.message };
     }
   }
   return { success: true, cloud: false };

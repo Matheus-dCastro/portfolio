@@ -38,6 +38,11 @@ O agente atua exclusivamente como assistente de desenvolvimento frontend e refin
   `{coise isso ai}`
 * E vedado implementar codigo sem antes apresentar o plano no Markdown e receber a confirmacao com o comando acima.
 
+### Regra 6: DEPLOY APENAS COM O COMANDO "ok"
+* **Trava de Deploy em Producao:** O agente NUNCA deve executar comandos de deploy para producao (ex: `npm run deploy`, `gh-pages`) a menos que o usuario envie expressamente o comando:
+  `ok`
+* Caso o comando `ok` nao tenha sido emitido pelo usuario no turno atual, o deploy deve ser suspenso e o agente deve aguardar a confirmacao antes de publicar.
+
 ---
 
 ## 3. Diretrizes de Seguranca do Ecossistema

@@ -170,14 +170,16 @@
 - [x] **Passo 49:** Conexão da foto de perfil dinâmica no Hero (`Home.jsx` / `Perfil.jsx`) e no leitor de posts do blog (`BlogPage.jsx`).
 - [x] **Passo 50:** Sincronização do projeto do portfólio (`portfolio-ecosystem`) no Supabase Cloud via sessão autenticada do `/4dm1n` e botão dedicado "Sync Portfólio".
 - [x] **Passo 51:** Criação do arquivo de governança `AGENTS.MD` definindo: proibição de emojis, proteção ao trabalho paralelo do usuário, restrição de acesso ao banco sem `{oxente dale carai}`, escopo estrito de frontend e protocolo de planejamento prévio com liberação via `{coise isso ai}`.
+- [x] **Passo 52:** Correção da persistência online do card de projeto do portfólio no Supabase: resolução do conflito de foreign key (`fk_works_related_article`) no `mapProjectToDbWork`, blindagem do `fetchWorks` para preservar edições locais, e regra de deploy estritamente pelo comando `ok` no `AGENTS.MD`.
+- [x] **Passo 53:** Criação do backup de segurança da branch `main` pré-merge (`backup-main-pre-security`), merge de `refatoring-securit` para a `main`, push sincronizado e publicação de deploy em produção.
 
 ---
 
 ## STATUS GERAL DO PROJETO: CONCLUÍDO E PRONTO PARA TESTE LOCAL
 
-- Total de Passos Executados: 51 de 51 (100%)
+- Total de Passos Executados: 53 de 53 (100%)
 - Card do Alomyr: Layout panorâmico horizontal 100% preenchido com 3 cards de perguntas e input integrado.
 - Foto de Perfil: Gerenciável pelo painel administrativo `/4dm1n` com upload e preview.
-- Projeto do Portfólio: Pronto para sincronização na nuvem e visível na vitrine.
-- Governança de Agente: Arquivo `AGENTS.MD` configurado com todas as travas e diretrizes mandatórias.
-- Deploy: Aguardando comando de teste e aprovação do usuário.
+- Projeto do Portfólio: Sincronização online corrigida (sem conflito de FK) e com feedback em tempo real.
+- Governança de Agente: Arquivo `AGENTS.MD` atualizado com regra de deploy via `ok`.
+- Backup e Merge: Branch `main` atualizada com backup preventivo salvo no GitHub.
