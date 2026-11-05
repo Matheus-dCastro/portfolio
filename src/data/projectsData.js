@@ -327,6 +327,150 @@ ext install Alomyr.obsidian-neon-110
 \`\`\``
   },
   {
+    id: "portfolio-ecosystem",
+    title: "Portfolio Web & Dual-Blog Ecosystem",
+    titleEn: "Portfolio Web & Dual-Blog Ecosystem",
+    titlePt: "Portfólio Web, Ecossistema de Blog & Agente IA",
+    category: "Pessoal",
+    tags: ["React", "Supabase", "Vite", "Edge Functions", "AI Agent"],
+    shortDescription: "Personal high-performance portfolio featuring a dual-blog ecosystem, serverless Edge Functions for isolated LLM inference, and zero secrets in localStorage.",
+    shortDescriptionEn: "Personal high-performance portfolio featuring a dual-blog ecosystem, serverless Edge Functions for isolated LLM inference, and zero secrets in localStorage.",
+    shortDescriptionPt: "Portfólio web de alta performance com ecossistema de blog duplo, Edge Functions serverless para inferência isolada de LLMs e zero credenciais no cliente.",
+    aboutContext: "Complete engineering and visual architecture of Matheus de Castro's personal website. Built with Vite, React, Supabase Cloud, serverless edge functions for secure inference, and custom cyber-minimal UI.",
+    aboutContextEn: "Complete engineering and visual architecture of Matheus de Castro's personal website. Built with Vite, React, Supabase Cloud, serverless edge functions for secure inference, and custom cyber-minimal UI.",
+    aboutContextPt: "Arquitetura técnica e visual completa do portfólio pessoal de Matheus de Castro. Construído com Vite, React, Supabase Cloud, edge functions serverless para inferência segura e UI cyber-minimalista.",
+    github: "https://github.com/Matheus-dCastro/portfolio",
+    demo: "https://matheusdecastro.com/",
+    relatedArticleId: "post-agentmetrics-architecture",
+    contentType: "markdown",
+    googleDocsUrl: "",
+    pdfUrl: "",
+    updatedAt: "2026-11-05",
+    content: `# Portfólio Web, Ecossistema de Blog & Agente IA
+
+![Preview da Interface do Portfólio](/portfolio-preview.png)
+
+Uma plataforma web moderna e ultrarrápida projetada para centralizar a presença profissional, artigos técnicos, laboratório de arte/cultura geek e assistente de IA conversacional.
+
+## Arquitetura de Alto Nível
+
+A aplicação foi projetada sob uma filosofia de **Zero Secrets no LocalStorage**, performance máxima e desacoplamento serverless:
+
+- **Frontend:** Desenvolvido em **React 18** com **Vite 6 / Rolldown**, compilado estaticamente para entrega via CDN global do **GitHub Pages** com domínio próprio (\`matheusdecastro.com\`).
+- **Banco de Dados & Storage:** **Supabase Cloud (PostgreSQL)** para persistência de rascunhos, posts do blog, metadados de projetos e upload de imagens em alta definição no bucket de Storage.
+- **Inferência Segura de IA (Edge Function):** O agente conversacional Alomyr realiza inferência via Supabase Edge Function serverless (\`chat-qwen\`), mantendo chaves de API restritas e seguras na nuvem.
+- **Ecossistema de Blog Duplo:** Gateway intermediário com roteamento em dois canais autônomos:
+  1. \`/blog\`: Foco em Machine Learning, Visão Computacional e Engenharia de Backend.
+  2. \`/blog/alomyr\`: Laboratório criativo para hiper-realismo em grafite, cultura geek e retrogaming.
+
+---
+
+## Destaques de Engenharia e Segurança
+
+### 1. Zero Secrets no Client-Side
+Nenhuma credencial sensível ou chave de API de LLM trafega ou fica persistida no \`localStorage\` do visitante. Todas as requisições de chat são despachadas via \`supabase.functions.invoke('chat-qwen')\`, autenticadas e com rate-limiting na infraestrutura em nuvem.
+
+### 2. Roteamento Estático Multi-Page no Vite
+Configuração avançada do Rollup / Vite com múltiplos entrypoints HTML estáticos (\`blog/index.html\`, \`blog/alomyr/index.html\`, \`4dm1n/index.html\`), viabilizando recargas diretas de página (F5) em qualquer sub-rota sem erro 404 em hospedagens estáticas.
+
+### 3. Painel Administrativo Moderado
+Área restrita de moderação com autenticação por sessão, reordenação interativa de projetos e desenhos via drag-and-drop, editor Markdown com preview em tempo real e moderação de tags e mídias ricas (vídeos YouTube e galerias de fotos).
+
+\`\`\`bash
+# Como clonar e rodar o projeto localmente
+git clone https://github.com/Matheus-dCastro/portfolio.git
+cd portfolio
+
+# Instalar dependências
+npm install
+
+# Iniciar servidor de desenvolvimento
+npm run dev
+\`\`\``,
+    contentEn: `# Web Portfolio, Dual-Blog Ecosystem & AI Agent
+
+![Portfolio Interface Preview](/portfolio-preview.png)
+
+A modern, ultra-responsive personal platform designed to centralize professional achievements, engineering articles, creative labs, and an interactive AI assistant.
+
+## High-Level Architecture
+
+Engineered around a **Zero Secrets in LocalStorage** philosophy, serverless decoupling, and extreme visual polish:
+
+- **Frontend:** Built with **React 18** and **Vite 6**, statically generated and served globally via **GitHub Pages** custom domain (\`matheusdecastro.com\`).
+- **Backend & Cloud DB:** **Supabase Cloud (PostgreSQL)** for dynamic posts, project metadata, and image assets storage.
+- **Serverless AI Inference:** The Alomyr AI assistant communicates through an isolated Supabase Edge Function (\`chat-qwen\`), safeguarding backend credentials in cloud vault secrets.
+- **Dual-Blog Split Gateway:** Intermediate choice architecture routing visitors to two distinct channels:
+  1. \`/blog\`: Deep technical articles, computer vision, and backend architecture.
+  2. \`/blog/alomyr\`: Creative laboratory for hyper-realistic graphite art, geek culture, and retrogaming.
+
+---
+
+## Engineering & Security Highlights
+
+### 1. Zero Client-Side Secrets
+No proprietary LLM keys or master credentials reside in the browser's \`localStorage\`. All inference requests run through \`supabase.functions.invoke('chat-qwen')\` with strict server-side validation.
+
+### 2. Multi-Page Static Vite Build
+Custom entry points configured for \`blog/index.html\`, \`blog/alomyr/index.html\`, and \`4dm1n/index.html\`, guaranteeing direct URL navigation and seamless refresh (F5) on static hosts.
+
+### 3. Full Administrative Studio
+Secured dashboard for publishing, Markdown authoring with live preview, drag-and-drop ordering, and media management (YouTube 16:9 embeds & high-res image galleries).
+
+\`\`\`bash
+# Clone and run locally
+git clone https://github.com/Matheus-dCastro/portfolio.git
+cd portfolio
+
+# Install dependencies
+npm install
+
+# Start local dev server
+npm run dev
+\`\`\``,
+    contentPt: `# Portfólio Web, Ecossistema de Blog & Agente IA
+
+![Preview da Interface do Portfólio](/portfolio-preview.png)
+
+Uma plataforma web moderna e ultrarrápida projetada para centralizar a presença profissional, artigos técnicos, laboratório de arte/cultura geek e assistente de IA conversacional.
+
+## Arquitetura de Alto Nível
+
+A aplicação foi projetada sob uma filosofia de **Zero Secrets no LocalStorage**, performance máxima e desacoplamento serverless:
+
+- **Frontend:** Desenvolvido em **React 18** com **Vite 6 / Rolldown**, compilado estaticamente para entrega via CDN global do **GitHub Pages** com domínio próprio (\`matheusdecastro.com\`).
+- **Banco de Dados & Storage:** **Supabase Cloud (PostgreSQL)** para persistência de rascunhos, posts do blog, metadados de projetos e upload de imagens em alta definição no bucket de Storage.
+- **Inferência Segura de IA (Edge Function):** O agente conversacional Alomyr realiza inferência via Supabase Edge Function serverless (\`chat-qwen\`), mantendo chaves de API restritas e seguras na nuvem.
+- **Ecossistema de Blog Duplo:** Gateway intermediário com roteamento em dois canais autônomos:
+  1. \`/blog\`: Foco em Machine Learning, Visão Computacional e Engenharia de Backend.
+  2. \`/blog/alomyr\`: Laboratório criativo para hiper-realismo em grafite, cultura geek e retrogaming.
+
+---
+
+## Destaques de Engenharia e Segurança
+
+### 1. Zero Secrets no Client-Side
+Nenhuma credencial sensível ou chave de API de LLM trafega ou fica persistida no \`localStorage\` do visitante. Todas as requisições de chat são despachadas via \`supabase.functions.invoke('chat-qwen')\`, autenticadas e com rate-limiting na infraestrutura em nuvem.
+
+### 2. Roteamento Estático Multi-Page no Vite
+Configuração avançada do Rollup / Vite com múltiplos entrypoints HTML estáticos (\`blog/index.html\`, \`blog/alomyr/index.html\`, \`4dm1n/index.html\`), viabilizando recargas diretas de página (F5) em qualquer sub-rota sem erro 404 em hospedagens estáticas.
+
+### 3. Painel Administrativo Moderado
+Área restrita de moderação com autenticação por sessão, reordenação interativa de projetos e desenhos via drag-and-drop, editor Markdown com preview em tempo real e moderação de tags e mídias ricas (vídeos YouTube e galerias de fotos).
+
+\`\`\`bash
+# Como clonar e rodar o projeto localmente
+git clone https://github.com/Matheus-dCastro/portfolio.git
+cd portfolio
+
+# Instalar dependências
+npm install
+
+# Iniciar servidor de desenvolvimento
+npm run dev
+\`\`\``
+  },
+  {
     id: "cachina-solucoes",
     title: "Cachina Solutions",
     titleEn: "Cachina Solutions",
@@ -947,7 +1091,7 @@ export function getStoredProjects() {
     if (raw !== null) {
       const parsed = JSON.parse(raw);
       if (Array.isArray(parsed) && parsed.length > 0) {
-        return parsed.map((item) => {
+        const merged = parsed.map((item) => {
           const defaultItem = DEFAULT_PROJECTS.find((p) => p.id === item.id);
           if (!defaultItem) return item;
           return {
@@ -963,6 +1107,15 @@ export function getStoredProjects() {
             aboutContextPt: item.aboutContextPt || defaultItem.aboutContextPt
           };
         });
+
+        // Garantir que novos projetos adicionados em DEFAULT_PROJECTS apareçam mesmo com cache existente
+        DEFAULT_PROJECTS.forEach((dp) => {
+          if (!merged.some((p) => p.id === dp.id)) {
+            merged.push(dp);
+          }
+        });
+
+        return merged;
       }
     }
   } catch (e) {

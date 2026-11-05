@@ -129,6 +129,18 @@ export default function BlogPage({
     return result;
   }, [channelPosts, selectedTag, searchQuery, lang]);
 
+  // Ei Nerd Portal Architecture: Lead Story (Destaque Principal) & Secondary Editorial Feed
+  const isBrowsingAll = !searchQuery.trim() && !selectedTag;
+  const featuredPost = useMemo(() => {
+    if (!isBrowsingAll || filteredPosts.length === 0) return null;
+    return filteredPosts[0];
+  }, [isBrowsingAll, filteredPosts]);
+
+  const regularPosts = useMemo(() => {
+    if (!isBrowsingAll) return filteredPosts;
+    return filteredPosts.slice(1);
+  }, [isBrowsingAll, filteredPosts]);
+
   // Selected post object
   const activePost = useMemo(() => {
     if (!selectedPostId) return null;
@@ -496,7 +508,7 @@ export default function BlogPage({
           </footer>
         </article>
       ) : (
-        /* FEED VIEW (GRID OF POSTS) */
+        /* FEED VIEW (EI NERD INSPIRED EDITORIAL PORTAL) */
         <main className="blog-feed-container">
           {/* Channel Banner */}
           <section className="feed-hero-section">
@@ -511,7 +523,7 @@ export default function BlogPage({
               {isTech ? t("blog.portal_tech_desc") : t("blog.portal_alomyr_desc")}
             </p>
 
-            {/* Search & Tag Filter Bar */}
+            {/* Search Input Bar */}
             <div className="feed-controls-card">
               <div className="search-input-wrapper">
                 <svg className="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -535,40 +547,162 @@ export default function BlogPage({
                   </button>
                 )}
               </div>
-
-              {/* Tag Chips Scroll */}
-              {availableTags.length > 0 && (
-                <div className="tag-filter-scroll">
-                  <button
-                    type="button"
-                    className={`tag-filter-pill ${selectedTag === null ? "active" : ""}`}
-                    onClick={() => setSelectedTag(null)}
-                  >
-                    {t("blog.all_tags")} ({channelPosts.length})
-                  </button>
-                  {availableTags.map((tg, idx) => {
-                    const count = channelPosts.filter(
-                      (p) => Array.isArray(p.tags) && p.tags.includes(tg)
-                    ).length;
-                    return (
-                      <button
-                        key={idx}
-                        type="button"
-                        className={`tag-filter-pill ${selectedTag === tg ? "active" : ""}`}
-                        onClick={() => setSelectedTag(selectedTag === tg ? null : tg)}
-                      >
-                        {tg} <span className="pill-count">({count})</span>
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
             </div>
           </section>
 
+          {/* EI NERD STYLE: TRENDING TOPICS (TÓPICOS EM ALTA) BAR */}
+          {availableTags.length > 0 && (
+            <div className="einerd-trending-bar">
+              <div className="einerd-trending-label">
+                <span className="trending-flame">🔥</span>
+                <span>{t("blog.trending_topics")}</span>
+              </div>
+              <div className="einerd-trending-chips">
+                <button
+                  type="button"
+                  className={`einerd-trending-chip ${selectedTag === null ? "active" : ""}`}
+                  onClick={() => setSelectedTag(null)}
+                >
+                  {t("blog.all_tags")} ({channelPosts.length})
+                </button>
+                {availableTags.map((tg, idx) => {
+                  const count = channelPosts.filter(
+                    (p) => Array.isArray(p.tags) && p.tags.includes(tg)
+                  ).length;
+                  return (
+                    <button
+                      key={idx}
+                      type="button"
+                      className={`einerd-trending-chip ${selectedTag === tg ? "active" : ""}`}
+                      onClick={() => setSelectedTag(selectedTag === tg ? null : tg)}
+                    >
+                      {tg} <span className="chip-count">({count})</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* EI NERD STYLE: HERO FEATURED ARTICLE (MANCHETE PRINCIPAL) */}
+          {featuredPost && (
+            <section className="einerd-featured-section">
+              <article
+                className="einerd-featured-card"
+                onClick={() => handleSelectPost(featuredPost)}
+              >
+                <div className="einerd-featured-media">
+                  {featuredPost.coverImage ? (
+                    <img
+                      src={featuredPost.coverImage}
+                      alt={lang === "en" ? featuredPost.titleEn || featuredPost.titlePt : featuredPost.titlePt}
+                      className="einerd-featured-img"
+                    />
+                  ) : (
+                    <div className={`einerd-featured-placeholder ${isTech ? "tech" : "alomyr"}`}>
+                      <span>{isTech ? "🧠 DEEP TECH" : "🎨 CREATIVE LAB"}</span>
+                    </div>
+                  )}
+                  <div className="einerd-featured-overlay" />
+                  
+                  {/* Floating Badges */}
+                  <div className="einerd-floating-badges">
+                    <span className={`einerd-badge-lead ${isTech ? "tech" : "alomyr"}`}>
+                      ⚡ {t("blog.featured_lead")}
+                    </span>
+                    {featuredPost.youtubeUrl && (
+                      <span className="floating-badge video-badge" title={t("blog.video_attached")}>
+                        ▶ Vídeo
+                      </span>
+                    )}
+                    {Array.isArray(featuredPost.galleryImages) && featuredPost.galleryImages.length > 0 && (
+                      <span className="floating-badge gallery-badge" title={t("blog.gallery_attached")}>
+                        🖼 {featuredPost.galleryImages.length} Fotos
+                      </span>
+                    )}
+                    {featuredPost.relatedProjectId && (
+                      <span className="floating-badge project-badge" title={t("blog.related_project")}>
+                        🔗 Projeto
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                <div className="einerd-featured-content">
+                  <div className="einerd-meta-row">
+                    <span className={`einerd-category ${isTech ? "tech" : "alomyr"}`}>
+                      {featuredPost.category}
+                    </span>
+                    <span className="einerd-meta-item">⏱ {featuredPost.readTime}</span>
+                    <span className="einerd-meta-item">{featuredPost.publishedAt}</span>
+                  </div>
+
+                  <h2 className="einerd-featured-title">
+                    {lang === "en" ? featuredPost.titleEn || featuredPost.titlePt : featuredPost.titlePt}
+                  </h2>
+
+                  <p className="einerd-featured-summary">
+                    {lang === "en" ? featuredPost.summaryEn || featuredPost.summaryPt : featuredPost.summaryPt}
+                  </p>
+
+                  <div className="einerd-featured-footer">
+                    <div className="einerd-author-info">
+                      <span className="einerd-author-dot"></span>
+                      <span className="einerd-author-name">{featuredPost.author || "Matheus de Castro"}</span>
+                    </div>
+
+                    <div className="einerd-featured-actions" onClick={(e) => e.stopPropagation()}>
+                      <button
+                        type="button"
+                        className={`einerd-read-btn ${isTech ? "tech" : "alomyr"}`}
+                        onClick={() => handleSelectPost(featuredPost)}
+                      >
+                        <span>{t("blog.read_story")}</span>
+                        <span className="btn-arrow">→</span>
+                      </button>
+
+                      <ShareButton
+                        title={lang === "en" ? featuredPost.titleEn || featuredPost.titlePt : featuredPost.titlePt}
+                        text={lang === "en" ? featuredPost.summaryEn || featuredPost.summaryPt : featuredPost.summaryPt}
+                        url={`${window.location.origin}${isTech ? "/blog" : "/blog/alomyr"}?post=${encodeURIComponent(featuredPost.id)}`}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </article>
+            </section>
+          )}
+
+          {/* EDITORIAL GRID HEADING */}
+          <div className="einerd-grid-header">
+            <div className="einerd-header-left">
+              <span className={`einerd-accent-pill ${isTech ? "tech" : "alomyr"}`}></span>
+              <h3 className="einerd-grid-title">
+                {isBrowsingAll
+                  ? t("blog.latest_stories")
+                  : (selectedTag
+                      ? `${t("blog.latest_stories")} — ${selectedTag} (${filteredPosts.length})`
+                      : `${t("blog.latest_stories")} (${filteredPosts.length})`)}
+              </h3>
+            </div>
+
+            {(selectedTag || searchQuery) && (
+              <button
+                type="button"
+                className="einerd-clear-tag-btn"
+                onClick={() => {
+                  setSelectedTag(null);
+                  setSearchQuery("");
+                }}
+              >
+                ✕ {t("blog.clear_filters")}
+              </button>
+            )}
+          </div>
+
           {/* POSTS GRID */}
           <section className="feed-grid-section">
-            {filteredPosts.length === 0 ? (
+            {regularPosts.length === 0 && !featuredPost ? (
               <div className="empty-feed-card">
                 <div className="empty-icon">🔍</div>
                 <h3>{t("blog.no_posts_found")}</h3>
@@ -586,13 +720,21 @@ export default function BlogPage({
                       setSearchQuery("");
                     }}
                   >
-                    {lang === "en" ? "Clear Filters" : "Limpar Filtros"}
+                    {t("blog.clear_filters")}
                   </button>
                 )}
               </div>
+            ) : regularPosts.length === 0 && featuredPost ? (
+              <div className="einerd-only-featured-note">
+                <p>
+                  {lang === "en"
+                    ? "Viewing the latest lead story above. More articles coming soon!"
+                    : "Exibindo a manchete principal acima. Novas matérias em breve!"}
+                </p>
+              </div>
             ) : (
               <div className="blog-posts-grid">
-                {filteredPosts.map((post) => {
+                {regularPosts.map((post) => {
                   const title = lang === "en" ? post.titleEn || post.titlePt : post.titlePt;
                   const summary = lang === "en" ? post.summaryEn || post.summaryPt : post.summaryPt;
                   const hasVideo = !!post.youtubeUrl;

@@ -532,6 +532,34 @@
   height: 1rem;
 }
 
+/* Markdown Inline Images & Captions */
+.article-image-block {
+  margin: 2.2rem 0;
+  text-align: center;
+}
+
+.article-md-img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
+  display: inline-block;
+  transition: transform 0.3s ease;
+}
+
+.article-md-img:hover {
+  transform: scale(1.01);
+}
+
+.article-img-caption {
+  display: block;
+  font-size: 0.82rem;
+  color: #94a3b8;
+  margin-top: 0.65rem;
+  font-style: italic;
+}
+
 /* Embedded Google Docs & PDF Viewers */
 .gdocs-reader-wrapper,
 .pdf-reader-wrapper {
@@ -800,8 +828,8 @@
 /* Contextual Alomyr Assistant Card */
 .view-alomyr-contextual-section {
   width: 100%;
-  max-width: 840px;
-  margin: 3rem auto 1.5rem;
+  max-width: 100%;
+  margin: 3.5rem 0 2rem;
   box-sizing: border-box;
 }
 
@@ -809,10 +837,12 @@
   background: linear-gradient(135deg, rgba(139, 92, 246, 0.08) 0%, rgba(15, 15, 23, 0.9) 100%);
   border: 1px solid rgba(139, 92, 246, 0.28);
   border-radius: 20px;
-  padding: 1.85rem 2.2rem;
+  padding: 2rem 2.25rem;
   box-shadow: 0 12px 35px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.06);
   backdrop-filter: blur(12px);
   transition: all 0.25s ease;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .alomyr-context-card:hover {
@@ -914,27 +944,36 @@
 
 .alomyr-context-form {
   display: flex;
-  gap: 0.65rem;
+  gap: 0.75rem;
   align-items: center;
-  flex-wrap: wrap;
+  width: 100%;
 }
 
 .alomyr-context-input {
   flex: 1;
-  min-width: 240px;
+  min-width: 0;
+  height: 44px;
   background: #09090f;
   border: 1px solid #272738;
-  border-radius: 10px;
-  padding: 10px 14px;
+  border-radius: 12px;
+  padding: 0 16px;
   color: #ffffff;
-  font-size: 0.88rem;
+  font-size: 0.9rem;
   outline: none;
   transition: all 0.2s ease;
+  box-sizing: border-box;
 }
 
 .alomyr-context-input:focus {
   border-color: #8b5cf6;
   box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.22);
+}
+
+.alomyr-form-buttons {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  flex-shrink: 0;
 }
 
 .alomyr-context-submit-btn {
@@ -944,12 +983,14 @@
   background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
   color: #ffffff;
   border: none;
-  border-radius: 10px;
-  padding: 10px 18px;
+  border-radius: 12px;
+  height: 44px;
+  padding: 0 18px;
   font-size: 0.86rem;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.2s ease;
+  white-space: nowrap;
 }
 
 .alomyr-context-submit-btn:hover:not(:disabled) {
@@ -966,12 +1007,14 @@
   background: transparent;
   border: 1px solid rgba(139, 92, 246, 0.35);
   color: #c4b5fd;
-  border-radius: 10px;
-  padding: 10px 14px;
+  border-radius: 12px;
+  height: 44px;
+  padding: 0 16px;
   font-size: 0.84rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
+  white-space: nowrap;
 }
 
 .alomyr-context-chat-btn:hover {
@@ -983,7 +1026,8 @@
 /* Responsive */
 @media (max-width: 768px) {
   .alomyr-context-card {
-    padding: 1.25rem 1.25rem;
+    padding: 1.5rem 1.25rem;
+    border-radius: 16px;
   }
   .alomyr-context-header {
     flex-direction: column;
@@ -992,9 +1036,21 @@
   .alomyr-context-form {
     flex-direction: column;
     align-items: stretch;
+    gap: 0.75rem;
   }
   .alomyr-context-input {
-    min-width: unset;
+    width: 100%;
+    min-width: 100%;
+  }
+  .alomyr-form-buttons {
+    display: flex;
+    width: 100%;
+    gap: 0.65rem;
+  }
+  .alomyr-context-submit-btn,
+  .alomyr-context-chat-btn {
+    flex: 1;
+    justify-content: center;
   }
   .article-main-title {
     font-size: 2rem;

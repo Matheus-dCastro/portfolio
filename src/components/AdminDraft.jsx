@@ -3188,10 +3188,10 @@ DIRETRIZ MÁXIMA DE CONCISÃO:
         </div>
       ) : activeTab === "blog" ? (
         /* TAB 8: DUAL-BLOG MODERATION DASHBOARD */
-        <div className="drawings-editor-container blog-admin-container">
-          <main className="drawings-workspace-grid blog-admin-workspace">
+        <div className="blog-admin-container">
+          <main className="blog-admin-workspace">
             {/* LEFT SIDEBAR: Blog Posts Explorer */}
-            <aside className="drawings-list-sidebar blog-posts-sidebar">
+            <aside className="blog-posts-sidebar">
               <div className="drawings-sidebar-header">
                 <div>
                   <h3 style={{ margin: 0, fontSize: "14px", color: "#fff" }}>Publicações do Blog</h3>
@@ -3371,11 +3371,11 @@ DIRETRIZ MÁXIMA DE CONCISÃO:
             </aside>
 
             {/* RIGHT MAIN: Blog Post Editor Form */}
-            <div className="drawings-form-card" style={{ flex: 1, padding: "24px" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px", borderBottom: "1px solid #21262d", paddingBottom: "14px" }}>
+            <div className="blog-editor-form-card">
+              <div className="blog-sticky-top-bar">
                 <div>
-                  <span style={{ fontSize: "11px", fontWeight: "700", textTransform: "uppercase", color: "#a78bfa", letterSpacing: "0.08em" }}>
-                    {selectedBlogId ? "Editando Publicação" : "Nova Publicação"}
+                  <span style={{ fontSize: "11px", fontWeight: "700", textTransform: "uppercase", color: blogChannel === "tech" ? "#38bdf8" : "#c4b5fd", letterSpacing: "0.08em" }}>
+                    {selectedBlogId ? "Editando Publicação" : "Nova Publicação"} • {blogChannel === "tech" ? "Canal Engenharia & IA" : "Canal Laboratório Alomyr"}
                   </span>
                   <h2 style={{ margin: "4px 0 0", fontSize: "1.35rem", color: "#fff" }}>
                     {blogTitlePt || blogTitleEn || "Novo Post do Blog"}
@@ -3399,28 +3399,29 @@ DIRETRIZ MÁXIMA DE CONCISÃO:
                     type="button"
                     className="save-btn"
                     onClick={handleSaveBlogPost}
-                    style={{ padding: "8px 18px", borderRadius: "8px", fontWeight: "600", cursor: "pointer" }}
+                    style={{ padding: "8px 22px", borderRadius: "8px", fontWeight: "700", cursor: "pointer", background: blogChannel === "tech" ? "#0284c7" : "#7c3aed" }}
                   >
-                    Salvar Post
+                    Salvar Post ✓
                   </button>
                 </div>
               </div>
 
               <form onSubmit={handleSaveBlogPost}>
-                {/* Channel Selector */}
-                <div className="drawings-form-group" style={{ marginBottom: "20px" }}>
-                  <label style={{ display: "block", marginBottom: "8px" }}>
-                    <strong>Canal de Publicação (Dual Ecosystem)</strong>
-                  </label>
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+                {/* Section 1: Channel & Status */}
+                <div className="blog-section-card">
+                  <div className="blog-section-card-title">
+                    <span>1. Canal de Destino &amp; Visibilidade</span>
+                  </div>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "14px" }}>
                     <div
                       onClick={() => setBlogChannel("tech")}
                       style={{
                         padding: "14px",
                         borderRadius: "10px",
                         border: blogChannel === "tech" ? "2px solid #0284c7" : "1px solid #30363d",
-                        background: blogChannel === "tech" ? "rgba(2, 132, 199, 0.15)" : "#0d1117",
-                        cursor: "pointer"
+                        background: blogChannel === "tech" ? "rgba(2, 132, 199, 0.18)" : "#0d1117",
+                        cursor: "pointer",
+                        transition: "all 0.2s ease"
                       }}
                     >
                       <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
@@ -3440,8 +3441,9 @@ DIRETRIZ MÁXIMA DE CONCISÃO:
                         padding: "14px",
                         borderRadius: "10px",
                         border: blogChannel === "alomyr" ? "2px solid #8b5cf6" : "1px solid #30363d",
-                        background: blogChannel === "alomyr" ? "rgba(139, 92, 246, 0.15)" : "#0d1117",
-                        cursor: "pointer"
+                        background: blogChannel === "alomyr" ? "rgba(139, 92, 246, 0.18)" : "#0d1117",
+                        cursor: "pointer",
+                        transition: "all 0.2s ease"
                       }}
                     >
                       <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
@@ -3455,21 +3457,65 @@ DIRETRIZ MÁXIMA DE CONCISÃO:
                       </small>
                     </div>
                   </div>
+
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "14px" }}>
+                    <div>
+                      <label style={{ display: "block", fontSize: "12px", color: "#8b949e", marginBottom: "4px" }}>
+                        Data de Publicação
+                      </label>
+                      <input
+                        type="date"
+                        className="drawings-input"
+                        value={blogPublishedAt}
+                        onChange={(e) => setBlogPublishedAt(e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <label style={{ display: "block", fontSize: "12px", color: "#8b949e", marginBottom: "4px" }}>
+                        Tempo Estimado de Leitura
+                      </label>
+                      <input
+                        type="text"
+                        className="drawings-input"
+                        placeholder="Ex: 5 min"
+                        value={blogReadTime}
+                        onChange={(e) => setBlogReadTime(e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <label style={{ display: "block", fontSize: "12px", color: "#8b949e", marginBottom: "4px" }}>
+                        Status de Publicação
+                      </label>
+                      <label style={{ display: "flex", alignItems: "center", gap: "8px", marginTop: "8px", cursor: "pointer", color: "#e2e8f0", fontSize: "13px" }}>
+                        <input
+                          type="checkbox"
+                          checked={blogIsPublished}
+                          onChange={(e) => setBlogIsPublished(e.target.checked)}
+                        />
+                        <span>{blogIsPublished ? "Publicado (visível)" : "Rascunho (privado)"}</span>
+                      </label>
+                    </div>
+                  </div>
                 </div>
 
-                {/* Bilingual Titles & Summaries */}
-                <div style={{ marginBottom: "20px" }}>
-                  <div style={{ display: "flex", gap: "10px", marginBottom: "10px", borderBottom: "1px solid #21262d", paddingBottom: "6px" }}>
+                {/* Section 2: Bilingual Titles & Summaries */}
+                <div className="blog-section-card">
+                  <div className="blog-section-card-title">
+                    <span>2. Títulos &amp; Resumos Executivos (Bilíngue)</span>
+                  </div>
+
+                  <div style={{ display: "flex", gap: "10px", marginBottom: "12px", borderBottom: "1px solid #21262d", paddingBottom: "8px" }}>
                     <button
                       type="button"
                       onClick={() => setBlogEditorLang("pt")}
                       style={{
-                        background: "none",
-                        border: "none",
-                        borderBottom: blogEditorLang === "pt" ? "2px solid #38bdf8" : "none",
+                        background: blogEditorLang === "pt" ? "rgba(56, 189, 248, 0.15)" : "transparent",
+                        border: blogEditorLang === "pt" ? "1px solid #38bdf8" : "1px solid #21262d",
+                        borderRadius: "6px",
                         color: blogEditorLang === "pt" ? "#38bdf8" : "#8b949e",
                         fontWeight: "700",
-                        padding: "4px 8px",
+                        padding: "6px 14px",
+                        fontSize: "12px",
                         cursor: "pointer"
                       }}
                     >
@@ -3479,12 +3525,13 @@ DIRETRIZ MÁXIMA DE CONCISÃO:
                       type="button"
                       onClick={() => setBlogEditorLang("en")}
                       style={{
-                        background: "none",
-                        border: "none",
-                        borderBottom: blogEditorLang === "en" ? "2px solid #a78bfa" : "none",
+                        background: blogEditorLang === "en" ? "rgba(167, 139, 250, 0.15)" : "transparent",
+                        border: blogEditorLang === "en" ? "1px solid #a78bfa" : "1px solid #21262d",
+                        borderRadius: "6px",
                         color: blogEditorLang === "en" ? "#a78bfa" : "#8b949e",
                         fontWeight: "700",
-                        padding: "4px 8px",
+                        padding: "6px 14px",
+                        fontSize: "12px",
                         cursor: "pointer"
                       }}
                     >
@@ -3550,114 +3597,78 @@ DIRETRIZ MÁXIMA DE CONCISÃO:
                   )}
                 </div>
 
-                {/* Metadata Row: Category, Tags */}
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px", marginBottom: "18px" }}>
-                  <div>
-                    <label style={{ display: "block", fontSize: "12px", color: "#8b949e", marginBottom: "4px" }}>
-                      Categoria
-                    </label>
-                    <input
-                      type="text"
-                      className="drawings-input"
-                      list="blog-categories-list"
-                      placeholder="Ex: Machine Learning & Backend"
-                      value={blogCategory}
-                      onChange={(e) => setBlogCategory(e.target.value)}
-                    />
-                    <datalist id="blog-categories-list">
-                      <option value="Machine Learning & Backend" />
-                      <option value="Computer Vision & Deep Learning" />
-                      <option value="DevOps & Automações" />
-                      <option value="Hiper-realismo & Arte" />
-                      <option value="Retrogaming & Tech Geek" />
-                      <option value="Cultura Pop & Nerd" />
-                      <option value="Filosofia & Pensamento" />
-                    </datalist>
+                {/* Section 3: Metadata, Tags & Project Linking */}
+                <div className="blog-section-card">
+                  <div className="blog-section-card-title">
+                    <span>3. Categorização, Tags &amp; Vínculo com Projeto</span>
                   </div>
 
-                  <div>
-                    <label style={{ display: "block", fontSize: "12px", color: "#8b949e", marginBottom: "4px" }}>
-                      Tags (separadas por vírgula)
-                    </label>
-                    <input
-                      type="text"
-                      className="drawings-input"
-                      placeholder="#FastAPI, #PyTorch, #Docker, #Marvel"
-                      value={blogTagsInput}
-                      onChange={(e) => setBlogTagsInput(e.target.value)}
-                    />
-                  </div>
-                </div>
-
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "16px", marginBottom: "18px" }}>
-                  <div>
-                    <label style={{ display: "block", fontSize: "12px", color: "#8b949e", marginBottom: "4px" }}>
-                      Data de Publicação
-                    </label>
-                    <input
-                      type="date"
-                      className="drawings-input"
-                      value={blogPublishedAt}
-                      onChange={(e) => setBlogPublishedAt(e.target.value)}
-                    />
-                  </div>
-
-                  <div>
-                    <label style={{ display: "block", fontSize: "12px", color: "#8b949e", marginBottom: "4px" }}>
-                      Tempo Estimado de Leitura
-                    </label>
-                    <input
-                      type="text"
-                      className="drawings-input"
-                      placeholder="Ex: 5 min"
-                      value={blogReadTime}
-                      onChange={(e) => setBlogReadTime(e.target.value)}
-                    />
-                  </div>
-
-                  <div>
-                    <label style={{ display: "block", fontSize: "12px", color: "#8b949e", marginBottom: "4px" }}>
-                      Visibilidade
-                    </label>
-                    <label style={{ display: "flex", alignItems: "center", gap: "8px", marginTop: "8px", cursor: "pointer", color: "#e2e8f0", fontSize: "13px" }}>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "14px", marginBottom: "14px" }}>
+                    <div>
+                      <label style={{ display: "block", fontSize: "12px", color: "#8b949e", marginBottom: "4px" }}>
+                        Categoria
+                      </label>
                       <input
-                        type="checkbox"
-                        checked={blogIsPublished}
-                        onChange={(e) => setBlogIsPublished(e.target.checked)}
+                        type="text"
+                        className="drawings-input"
+                        list="blog-categories-list"
+                        placeholder="Ex: Machine Learning & Backend"
+                        value={blogCategory}
+                        onChange={(e) => setBlogCategory(e.target.value)}
                       />
-                      <span>Publicado (visível no blog)</span>
+                      <datalist id="blog-categories-list">
+                        <option value="Machine Learning & Backend" />
+                        <option value="Computer Vision & Deep Learning" />
+                        <option value="DevOps & Automações" />
+                        <option value="Hiper-realismo & Arte" />
+                        <option value="Retrogaming & Tech Geek" />
+                        <option value="Cultura Pop & Nerd" />
+                        <option value="Filosofia & Pensamento" />
+                      </datalist>
+                    </div>
+
+                    <div>
+                      <label style={{ display: "block", fontSize: "12px", color: "#8b949e", marginBottom: "4px" }}>
+                        Tags (separadas por vírgula)
+                      </label>
+                      <input
+                        type="text"
+                        className="drawings-input"
+                        placeholder="#FastAPI, #PyTorch, #Docker, #Marvel"
+                        value={blogTagsInput}
+                        onChange={(e) => setBlogTagsInput(e.target.value)}
+                      />
+                    </div>
+                  </div>
+
+                  <div style={{ background: "rgba(139, 92, 246, 0.08)", padding: "12px 14px", borderRadius: "10px", border: "1px solid rgba(139, 92, 246, 0.25)" }}>
+                    <label style={{ display: "block", marginBottom: "4px" }}>
+                      <strong style={{ color: "#c4b5fd", fontSize: "13px" }}>🔗 Vínculo Bidirecional com Projeto do Portfólio</strong>
                     </label>
+                    <p style={{ fontSize: "11px", color: "#94a3b8", margin: "0 0 8px" }}>
+                      Ao vincular um projeto, botões mútuos aparecem no card da home e dentro da leitura deste post.
+                    </p>
+                    <select
+                      className="drawings-input"
+                      value={blogRelatedProjectId}
+                      onChange={(e) => setBlogRelatedProjectId(e.target.value)}
+                      style={{ background: "#0d1117" }}
+                    >
+                      <option value="">-- Nenhum projeto vinculado --</option>
+                      {getStoredProjects().map((proj) => (
+                        <option key={proj.id} value={proj.id}>
+                          {proj.titlePt || proj.titleEn || proj.title} ({proj.category})
+                        </option>
+                      ))}
+                    </select>
                   </div>
                 </div>
 
-                {/* BIDIRECTIONAL LINKING: RELATED PROJECT */}
-                <div className="drawings-form-group" style={{ marginBottom: "20px", background: "rgba(139, 92, 246, 0.08)", padding: "14px", borderRadius: "10px", border: "1px solid rgba(139, 92, 246, 0.25)" }}>
-                  <label style={{ display: "block", marginBottom: "4px" }}>
-                    <strong style={{ color: "#c4b5fd" }}>🔗 Vínculo Bidirecional com Projeto do Portfólio</strong>
-                  </label>
-                  <p style={{ fontSize: "12px", color: "#94a3b8", margin: "0 0 10px" }}>
-                    Ao selecionar um projeto, um banner de redirecionamento mútuo será exibido tanto aqui no blog quanto no card do projeto na página inicial.
-                  </p>
-                  <select
-                    className="drawings-input"
-                    value={blogRelatedProjectId}
-                    onChange={(e) => setBlogRelatedProjectId(e.target.value)}
-                    style={{ background: "#0d1117" }}
-                  >
-                    <option value="">-- Nenhum projeto vinculado --</option>
-                    {getStoredProjects().map((proj) => (
-                      <option key={proj.id} value={proj.id}>
-                        {proj.titlePt || proj.titleEn || proj.title} ({proj.category})
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* RICH MEDIA: YOUTUBE, COVER IMAGE, GALLERY */}
-                <div style={{ marginBottom: "20px", border: "1px solid #30363d", padding: "16px", borderRadius: "12px", background: "#0d1117" }}>
-                  <h4 style={{ margin: "0 0 12px", color: "#fff", fontSize: "14px" }}>
-                    🎬 Mídia Rica: Vídeo do YouTube, Capa e Galeria de Fotos
-                  </h4>
+                {/* Section 4: RICH MEDIA: YOUTUBE, COVER IMAGE, GALLERY */}
+                <div className="blog-section-card">
+                  <div className="blog-section-card-title">
+                    <span>4. Mídia Rica: Vídeo do YouTube, Capa e Galeria de Fotos</span>
+                  </div>
 
                   {/* YouTube Embed URL */}
                   <div className="drawings-form-group" style={{ marginBottom: "14px" }}>
@@ -3757,25 +3768,21 @@ DIRETRIZ MÁXIMA DE CONCISÃO:
                   </div>
                 </div>
 
-                {/* MAIN MARKDOWN BODY (BILINGUAL) */}
-                <div className="drawings-form-group" style={{ marginBottom: "20px" }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
-                    <label>
-                      <strong>Corpo do Post em Markdown ({blogEditorLang.toUpperCase()})</strong>
-                    </label>
-                    <div style={{ display: "flex", gap: "8px" }}>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          if (blogEditorLang === "pt") setBlogContentEn(blogContentPt);
-                          else setBlogContentPt(blogContentEn);
-                          showToast("Conteúdo clonado entre os idiomas!");
-                        }}
-                        style={{ background: "#21262d", border: "1px solid #30363d", color: "#8b949e", borderRadius: "4px", padding: "3px 8px", fontSize: "11px", cursor: "pointer" }}
-                      >
-                        {blogEditorLang === "pt" ? "Copiar PT → EN" : "Copiar EN → PT"}
-                      </button>
-                    </div>
+                {/* Section 5: MAIN MARKDOWN BODY (BILINGUAL) */}
+                <div className="blog-section-card">
+                  <div className="blog-section-card-title" style={{ justifyContent: "space-between" }}>
+                    <span>5. Conteúdo Completo em Markdown ({blogEditorLang.toUpperCase()})</span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (blogEditorLang === "pt") setBlogContentEn(blogContentPt);
+                        else setBlogContentPt(blogContentEn);
+                        showToast("Conteúdo clonado entre os idiomas!");
+                      }}
+                      style={{ background: "#21262d", border: "1px solid #30363d", color: "#8b949e", borderRadius: "4px", padding: "3px 8px", fontSize: "11px", cursor: "pointer" }}
+                    >
+                      {blogEditorLang === "pt" ? "Copiar PT → EN" : "Copiar EN → PT"}
+                    </button>
                   </div>
 
                   {blogEditorLang === "pt" ? (

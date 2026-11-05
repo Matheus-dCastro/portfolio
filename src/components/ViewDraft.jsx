@@ -563,25 +563,27 @@ export default function ViewDraft({ project: propProject, onBackToHome, onSelect
                 onChange={(e) => setInlineQuestion(e.target.value)}
                 placeholder={t("view.alomyr_input_placeholder").replace("{type}", itemTypeName)}
               />
-              <button
-                type="submit"
-                className="alomyr-context-submit-btn"
-                disabled={!inlineQuestion.trim()}
-              >
-                <span>{t("view.alomyr_ask_btn")}</span>
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="22" y1="2" x2="11" y2="13"></line>
-                  <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-                </svg>
-              </button>
-              <button
-                type="button"
-                className="alomyr-context-chat-btn"
-                onClick={() => handleAskAlomyr()}
-                title="Abrir Alomyr Chat"
-              >
-                {t("view.alomyr_open_btn")}
-              </button>
+              <div className="alomyr-form-buttons">
+                <button
+                  type="submit"
+                  className="alomyr-context-submit-btn"
+                  disabled={!inlineQuestion.trim()}
+                >
+                  <span>{t("view.alomyr_ask_btn")}</span>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="22" y1="2" x2="11" y2="13"></line>
+                    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                  </svg>
+                </button>
+                <button
+                  type="button"
+                  className="alomyr-context-chat-btn"
+                  onClick={() => handleAskAlomyr()}
+                  title="Abrir Alomyr Chat"
+                >
+                  {t("view.alomyr_open_btn")}
+                </button>
+              </div>
             </form>
           </div>
         </section>
@@ -724,6 +726,23 @@ function RenderRichMarkdown({ content }) {
       continue;
     } else if (inTable) {
       flushTable();
+    }
+
+    // Images: ![alt](url)
+    const imgMatch = line.trim().match(/^!\[(.*?)\]\((.*?)\)$/);
+    if (imgMatch) {
+      renderedElements.push(
+        <div key={i} className="article-image-block">
+          <img
+            src={imgMatch[2]}
+            alt={imgMatch[1] || "Screenshot"}
+            className="article-md-img"
+            loading="lazy"
+          />
+          {imgMatch[1] && <span className="article-img-caption">{imgMatch[1]}</span>}
+        </div>
+      );
+      continue;
     }
 
     // Headings

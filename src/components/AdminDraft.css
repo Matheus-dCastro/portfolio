@@ -3043,3 +3043,98 @@
   padding: 16px;
   margin-top: 16px;
 }
+
+/* ==========================================================================
+   BLOG MANAGEMENT DASHBOARD (SCROLL REPAIR & REFINED WORKSPACE)
+   ========================================================================== */
+.blog-admin-container {
+  height: calc(100vh - 56px) !important;
+  max-height: calc(100vh - 56px) !important;
+  overflow-y: auto !important;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 24px;
+  width: 100%;
+  box-sizing: border-box;
+  background: #06060a;
+}
+
+.drawings-editor-container {
+  height: calc(100vh - 56px) !important;
+  max-height: calc(100vh - 56px) !important;
+  overflow-y: auto !important;
+}
+
+.blog-admin-workspace {
+  display: grid;
+  grid-template-columns: 360px 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+.blog-posts-sidebar {
+  position: sticky;
+  top: 0;
+  max-height: calc(100vh - 105px);
+  overflow-y: auto;
+  background: #11141d;
+  border: 1px solid #283042;
+  border-radius: 14px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+}
+
+.blog-editor-form-card {
+  background: #11141d;
+  border: 1px solid #283042;
+  border-radius: 14px;
+  padding: 26px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+}
+
+.blog-sticky-top-bar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: rgba(17, 20, 29, 0.95);
+  backdrop-filter: blur(10px);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  border-bottom: 1px solid #283042;
+  padding-bottom: 16px;
+  padding-top: 4px;
+}
+
+.blog-section-card {
+  background: #0a0d14;
+  border: 1px solid #1f2737;
+  border-radius: 12px;
+  padding: 18px 20px;
+  margin-bottom: 22px;
+  transition: border-color 0.2s ease;
+}
+
+.blog-section-card:hover {
+  border-color: #35425c;
+}
+
+.blog-section-card-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #f0f6fc;
+  margin: 0 0 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+@media (max-width: 1024px) {
+  .blog-admin-workspace {
+    grid-template-columns: 1fr;
+  }
+  .blog-posts-sidebar {
+    position: static;
+    max-height: 420px;
+  }
+}

@@ -108,3 +108,22 @@
 - **Deploy:** Bloqueado conforme diretriz mandatória. Aguardando teste local e comando **`ok`** do usuário.
 
 ---
+
+## 🎨 SPRINT: REFINAMENTOS DE UI, SCROLL DO ADMIN, ESTILO EI NERD & REPO DO PORTFÓLIO
+**Status Geral:** Iniciado - Executando passo a passo
+
+### 📌 Fila de Execução em Andamento:
+- [x] **Passo 27:** Correção do scroll da aba de editar o blog no `/4dm1n` e refinamento do fluxo de criação e postagem.
+- [x] **Passo 28:** Ajuste da Navbar (mais altura/padding para respiro) e remoção do efeito de destaque excessivo no botão do Blog.
+- [x] **Passo 29:** Layout das páginas de feed do Blog inspirado no portal *Ei Nerd* (Lead story/Destaque Hero + Grade de Notícias + Tags em Alta), mantendo estética dark/cyber do site.
+- [x] **Passo 30:** Cadastro do repositório do portfólio (`https://github.com/Matheus-dCastro/portfolio`) nos Projetos Pessoais com print/preview no Saber Mais.
+- [x] **Passo 31:** Aprimoramento do redimensionamento e responsividade do card integrado do Alomyr no Saber Mais (`ViewDraft`).
+- [x] **Passo 32:** Atualização do `README.md` (arquitetura antes vs agora, Supabase, Edge Functions) e geração do relatório detalhado de impacto.
+
+---
+
+## 🏁 STATUS FINAL DA SPRINT: 100% CONCLUÍDO E HOMOLOGADO EM LOCALHOST
+- Todos os 32 passos foram minuciosamente executados, testados via build de produção e documentados.
+- Build do Vite executado com sucesso (0 erros).
+- Servidor local ativo em `http://localhost:5173/`.
+- **Deploy:** Bloqueado conforme diretriz mandatória. Aguardando a verificação no localhost e o comando **`ok`** do usuário.

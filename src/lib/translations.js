@@ -242,7 +242,12 @@ export const translations = {
     "blog.back_to_feed": "← Back to Posts",
     "blog.published_on": "Published on",
     "blog.author_prefix": "By",
-    "blog.no_posts_found": "No posts found matching the selected filter."
+    "blog.no_posts_found": "No posts found matching the selected filter.",
+    "blog.featured_lead": "FEATURED STORY",
+    "blog.read_story": "Read Full Story",
+    "blog.trending_topics": "TRENDING TOPICS:",
+    "blog.latest_stories": "Latest Articles",
+    "blog.clear_filters": "Clear Filters"
   },
 
   pt: {
@@ -485,6 +490,11 @@ export const translations = {
     "blog.back_to_feed": "← Voltar aos Posts",
     "blog.published_on": "Publicado em",
     "blog.author_prefix": "Por",
-    "blog.no_posts_found": "Nenhum post encontrado com o filtro selecionado."
+    "blog.no_posts_found": "Nenhum post encontrado com o filtro selecionado.",
+    "blog.featured_lead": "MANCHETE PRINCIPAL",
+    "blog.read_story": "Ler Matéria Completa",
+    "blog.trending_topics": "TÓPICOS EM ALTA:",
+    "blog.latest_stories": "Últimas Matérias",
+    "blog.clear_filters": "Limpar Filtros"
   }
 };
