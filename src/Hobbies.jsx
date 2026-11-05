@@ -18,7 +18,7 @@ import capa4 from "./assets/img/584385202_18086409646964312_3912764164389240104_
 import capa5 from "./assets/img/Gama-4.webp";
 import capa6 from "./assets/img/IMG_3091.webp";
 
-function Hobbies({ onBackToHome, onOpenThought }) {
+function Hobbies({ onBackToHome, onOpenThought, onNavigateToBlog }) {
   const { t, lang } = useLanguage();
   const [thoughts, setThoughts] = useState(() => getStoredThoughts());
   const [drawings, setDrawings] = useState(() => getStoredDrawings());
@@ -71,7 +71,7 @@ function Hobbies({ onBackToHome, onOpenThought }) {
 
   return (
     <div className="portfolio-app-root">
-      <HeadSite lobo={logoWolf} isHobbies={true} onBackToHome={onBackToHome} />
+      <HeadSite lobo={logoWolf} isHobbies={true} onBackToHome={onBackToHome} onNavigateToBlog={onNavigateToBlog} />
       <main>
         <section id="interests">
           <Intereceses

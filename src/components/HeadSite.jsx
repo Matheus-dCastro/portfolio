@@ -9,6 +9,7 @@ function HeadSite({
   isLinks = false,
   onBackToHome,
   onNavigateToLinks,
+  onNavigateToBlog,
 }) {
   const { t } = useLanguage();
 
@@ -23,6 +24,13 @@ function HeadSite({
     if (onNavigateToLinks) {
       e.preventDefault();
       onNavigateToLinks();
+    }
+  };
+
+  const handleBlogClick = (e) => {
+    if (onNavigateToBlog) {
+      e.preventDefault();
+      onNavigateToBlog();
     }
   };
 
@@ -54,6 +62,9 @@ function HeadSite({
             <a href="#interests">{t("nav.interests")}</a>
             <a href="#art-gallery">{t("nav.arts")}</a>
             <a href="#thoughts">{t("nav.thoughts")}</a>
+            <a href="/blog/?" onClick={handleBlogClick} className="nav-blog-link">
+              {t("nav.blog")}
+            </a>
           </>
         ) : (
           <>
@@ -61,6 +72,9 @@ function HeadSite({
             <a href="#skills">{t("nav.skills")}</a>
             <a href="#projects">{t("nav.works")}</a>
             <a href="#about">{t("nav.about")}</a>
+            <a href="/blog/?" onClick={handleBlogClick} className="nav-blog-link">
+              {t("nav.blog")}
+            </a>
             <a href="#" onClick={handleLinksClick} className="connect-link">
               {t("nav.connect")}
             </a>

@@ -83,15 +83,28 @@
 
 ---
 
-## 🚀 PROPOSTA DE ARQUITETURA: ECOSSISTEMA DE BLOG DUPLO (SPLIT GATEWAY)
-**Status:** Avaliação técnica elaborada (Aguardando comando **"go"** do usuário para iniciar codificação)
+## 🚀 SPRINT EM ANDAMENTO: ECOSSISTEMA DE BLOG DUPLO (SPLIT GATEWAY)
+**Status Geral:** Iniciado com autorização do usuário ("dale") - Executando passo a passo
 
-### 📐 Estrutura Planejada:
-- [ ] **Split Gateway Intermediário (`/blog/?`):** Tela de escolha entre os dois ecossistemas com botões imersivos no Hero e na Navbar.
-- [ ] **Vertente 1: Blog Acadêmico / Profissional (`/blog`):** Engenharia de IA, Backend, arquitetura corporativa e pipelines de projetos.
-- [ ] **Vertente 2: Laboratório Criativo & Geek (`/blog/alomyr/`):** Hiper-realismo, retrogaming, ensaios reflexivos (pensamentos) e setups.
-- [ ] **Formatos Ricos:** Suporte a vídeos incorporados do YouTube, galerias de imagens e Markdown dinâmico.
-- [ ] **Integração Bidirecional:** Cards de projetos da home com atalho direto para os posts detalhados e vice-versa.
-- [ ] **Gestão Unificada no `/4dm1n`:** Aba administrativa para criação, moderação e categorização com canais específicos.
+### 📌 Fila de Execução em Andamento:
+- [x] **Passo 19:** Estrutura de dados e persistência do Blog (`src/data/blogData.js` e `src/lib/supabaseService.js`) com canais `tech` e `alomyr`, suporte a tags livres, vídeos do YouTube e galerias de fotos.
+- [x] **Passo 20:** Tela intermediária do Split Gateway (`/blog/?` e componente `BlogGateway.jsx`), portal imersivo com dois botões para escolha ativa de conteúdo.
+- [x] **Passo 21:** Integração dos botões "Blog" na Navbar (`HeadSite.jsx`) e no Hero (`Perfil.jsx`) com links para o Split Gateway.
+- [x] **Passo 22:** Página do Blog Técnico / Acadêmico (`/blog`), feed focado em IA, backend, arquitetura e pipelines.
+- [x] **Passo 23:** Página do Laboratório Criativo & Geek (`/blog/alomyr`), feed dedicado a hiper-realismo, retrogaming, pensamentos e universo nerd.
+- [x] **Passo 24:** Leitor detalhado de post do blog com embed de vídeos do YouTube, galeria de imagens e conexão forte bidirecional com projetos da home.
+- [x] **Passo 25:** Módulo de gestão e moderação do Blog no Dashboard `/4dm1n` (criação de posts, seleção de canal, inserção de vídeos e fotos, moderação de tags).
+- [x] **Passo 26:** Roteamento integrado no `App.jsx`, suporte a multi-páginas no `vite.config.js` e validação com `npm run build`.
+
+### 🎯 Resultados da Sprint de Ecossistema de Blog Duplo:
+- **Split Gateway (`/blog/?`):** Portal imersivo cyberpunk com dois caminhos distintos: *Blog de Engenharia & IA* (`/blog`) e *Laboratório Alomyr* (`/blog/alomyr`).
+- **Navegação & Hero:** Botão "Blog" adicionado na Navbar principal e no Hero com efeitos de brilho e atalho direto ao Gateway.
+- **Canal 1 - Engenharia & IA (`/blog`):** Feed técnico com filtros dinâmicos de tags (`#FastAPI`, `#PyTorch`, `#TimescaleDB`, etc.), busca em tempo real e posts com badges temáticos.
+- **Canal 2 - Laboratório Alomyr (`/blog/alomyr`):** Feed criativo com tags geek (`#Hiper-realismo`, `#Retrogaming`, `#Marvel`, `#Filosofia`), reflexões e galerias.
+- **Mídia Rica Integrada:** Suporte a vídeos do YouTube incorporados (player responsivo 16:9 via iframe) e galerias de fotos com lightbox em alta resolução.
+- **Links Bidirecionais Fortes:** Cards de projetos na página inicial e no `ViewDraft` exibem link direto para o post correspondente no blog, e posts do blog contam com callout direto para o projeto no portfólio.
+- **Dashboard `/4dm1n` (Aba Blog):** Painel administrativo completo para criação, edição, seleção de canal, upload de imagens (Supabase Storage), moderação de tags e exclusão de posts.
+- **Build & Multi-page:** Entradas estáticas `blog/index.html` e `blog/alomyr/index.html` geradas no `vite.config.js` com compilação 100% limpa.
+- **Deploy:** Bloqueado conforme diretriz mandatória. Aguardando teste local e comando **`ok`** do usuário.
 
 ---

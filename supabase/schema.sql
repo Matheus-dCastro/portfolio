@@ -656,3 +656,60 @@ DROP POLICY IF EXISTS "Admin Delete Drawings" ON public.drawings;
 CREATE POLICY "Admin Delete Drawings" ON public.drawings
     FOR DELETE TO authenticated
     USING (auth.role() = 'authenticated');
+
+-- ==============================================================================
+-- 9. TABELA DE BLOG POSTS (CANAL TECH & CANAL ALOMYR)
+-- ==============================================================================
+CREATE TABLE IF NOT EXISTS public.blog_posts (
+    id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
+    channel VARCHAR(50) NOT NULL DEFAULT 'tech',
+    title_pt VARCHAR(255) NOT NULL,
+    title_en VARCHAR(255) NOT NULL,
+    summary_pt TEXT NOT NULL,
+    summary_en TEXT NOT NULL,
+    category VARCHAR(100) NOT NULL,
+    tags TEXT[] NOT NULL DEFAULT '{}',
+    cover_image TEXT,
+    youtube_url TEXT,
+    gallery_images TEXT[] NOT NULL DEFAULT '{}',
+    content_pt TEXT NOT NULL,
+    content_en TEXT NOT NULL,
+    related_project_id TEXT,
+    author VARCHAR(100) NOT NULL DEFAULT 'Matheus de Castro',
+    published_at DATE NOT NULL DEFAULT CURRENT_DATE,
+    read_time VARCHAR(50) NOT NULL DEFAULT '5 min',
+    display_order INTEGER NOT NULL DEFAULT 0,
+    is_published BOOLEAN NOT NULL DEFAULT true,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_blog_posts_channel ON public.blog_posts(channel);
+CREATE INDEX IF NOT EXISTS idx_blog_posts_published ON public.blog_posts(is_published);
+CREATE INDEX IF NOT EXISTS idx_blog_posts_date ON public.blog_posts(published_at DESC);
+
+DROP TRIGGER IF EXISTS trg_blog_posts_updated_at ON public.blog_posts;
+CREATE TRIGGER trg_blog_posts_updated_at BEFORE UPDATE ON public.blog_posts FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
+
+ALTER TABLE public.blog_posts ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Public Read Blog Posts" ON public.blog_posts;
+CREATE POLICY "Public Read Blog Posts" ON public.blog_posts
+    FOR SELECT TO anon, authenticated
+    USING (is_published = true OR auth.role() = 'authenticated');
+
+DROP POLICY IF EXISTS "Admin Insert Blog Posts" ON public.blog_posts;
+CREATE POLICY "Admin Insert Blog Posts" ON public.blog_posts
+    FOR INSERT TO authenticated
+    WITH CHECK (auth.role() = 'authenticated');
+
+DROP POLICY IF EXISTS "Admin Update Blog Posts" ON public.blog_posts;
+CREATE POLICY "Admin Update Blog Posts" ON public.blog_posts
+    FOR UPDATE TO authenticated
+    USING (auth.role() = 'authenticated')
+    WITH CHECK (auth.role() = 'authenticated');
+
+DROP POLICY IF EXISTS "Admin Delete Blog Posts" ON public.blog_posts;
+CREATE POLICY "Admin Delete Blog Posts" ON public.blog_posts
+    FOR DELETE TO authenticated
+    USING (auth.role() = 'authenticated');

@@ -1,13 +1,15 @@
 import { useState, useEffect } from "react";
 import { getStoredProjects } from "../data/projectsData";
+import { getStoredBlogPosts } from "../data/blogData";
 import { fetchWorks } from "../lib/supabaseService";
 import { useLanguage } from "../context/useLanguage";
 import ShareButton from "./ShareButton";
 import CategoryIcon from "./CategoryIcon";
 
-export default function Projects({ onOpenProject }) {
+export default function Projects({ onOpenProject, onNavigateToBlogPost }) {
   const { t, lang } = useLanguage();
   const [projects, setProjects] = useState(() => getStoredProjects());
+  const [blogPosts, setBlogPosts] = useState(() => getStoredBlogPosts());
   const [activeCategory, setActiveCategory] = useState("all");
 
   useEffect(() => {
@@ -143,6 +145,7 @@ export default function Projects({ onOpenProject }) {
                   const desc = lang === "en"
                     ? (project.shortDescriptionEn || project.shortDescription || project.aboutContextEn || project.aboutContext)
                     : (project.shortDescriptionPt || project.shortDescription || project.aboutContextPt || project.aboutContext);
+                  const linkedBlog = blogPosts.find((b) => b.relatedProjectId === project.id);
 
                   return (
                     <div key={project.id} className="project-card">
@@ -173,6 +176,11 @@ export default function Projects({ onOpenProject }) {
                             {t("projects.badge_article")}
                           </span>
                         )}
+                        {linkedBlog && (
+                          <span className="tag font-bold blog-badge" style={{ color: "#c084fc", borderColor: "rgba(192, 132, 252, 0.4)", background: "rgba(139, 92, 246, 0.12)" }} title="Artigo aprofundado no Blog">
+                            📝 Blog
+                          </span>
+                        )}
                       </div>
 
                       <h3>{title}</h3>
@@ -196,6 +204,22 @@ export default function Projects({ onOpenProject }) {
                             >
                               {t("projects.learn_more")} <span>→</span>
                             </button>
+                          )}
+                          {linkedBlog && (
+                            <a
+                              href={`${(linkedBlog.channel || "tech") === "alomyr" ? "/blog/alomyr" : "/blog"}?post=${encodeURIComponent(linkedBlog.id)}`}
+                              onClick={(e) => {
+                                if (onNavigateToBlogPost) {
+                                  e.preventDefault();
+                                  onNavigateToBlogPost(linkedBlog);
+                                }
+                              }}
+                              className="link-arrow blog-post-link"
+                              style={{ color: "#c084fc", fontWeight: 600 }}
+                              title={lang === "en" ? "Read full blog post" : "Ler post completo no blog"}
+                            >
+                              Blog Post <span>↗</span>
+                            </a>
                           )}
                           {project.github && (
                             <a

@@ -17,7 +17,14 @@ import { fetchWorks, fetchArticles, fetchExperiences } from "./lib/supabaseServi
 import { getStoredProjects, getStoredArticles, getStoredExperiences } from "./data/projectsData";
 import { useLanguage } from "./context/useLanguage";
 
-function Home({ onNavigateToHobbies, onNavigateToLinks, onBackToHome, onOpenProject }) {
+function Home({
+  onNavigateToHobbies,
+  onNavigateToLinks,
+  onBackToHome,
+  onOpenProject,
+  onNavigateToBlog,
+  onNavigateToBlogPost
+}) {
   const { t } = useLanguage();
   const [experiences, setExperiences] = useState(() => getStoredExperiences());
   const [projectsCount, setProjectsCount] = useState(() => getStoredProjects().length);
@@ -76,6 +83,7 @@ function Home({ onNavigateToHobbies, onNavigateToLinks, onBackToHome, onOpenProj
           isHobbies={false}
           onBackToHome={onBackToHome}
           onNavigateToLinks={onNavigateToLinks}
+          onNavigateToBlog={onNavigateToBlog}
           description={descriptionPerfil}
         />
         <Perfil
@@ -83,6 +91,7 @@ function Home({ onNavigateToHobbies, onNavigateToLinks, onBackToHome, onOpenProj
           description={descriptionPerfil}
           foto={fotoPerfil}
           cv={cv}
+          onNavigateToBlog={onNavigateToBlog}
         />
         <section id="skills" className="skills-section">
           <Skills />
@@ -116,7 +125,7 @@ function Home({ onNavigateToHobbies, onNavigateToLinks, onBackToHome, onOpenProj
             )}
 
             {activeShowcaseTab === "projects" && projectsCount > 0 && (
-              <Projects onOpenProject={onOpenProject} />
+              <Projects onOpenProject={onOpenProject} onNavigateToBlogPost={onNavigateToBlogPost} />
             )}
 
             {activeShowcaseTab === "articles" && articlesCount > 0 && (

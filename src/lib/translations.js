@@ -13,6 +13,7 @@ export const translations = {
     "nav.interests": "Interests",
     "nav.arts": "Arts",
     "nav.thoughts": "Thoughts",
+    "nav.blog": "Blog",
     "nav.lang_toggle_aria": "Switch language to Portuguese",
 
     // Hero / Perfil
@@ -24,6 +25,7 @@ export const translations = {
     "hero.see_projects": "See My Projects",
     "hero.download_cv": "Download CV / Docs",
     "hero.contact_btn": "Contact & Links",
+    "hero.blog_btn": "Blog",
     "hero.card_art": "ART",
     "hero.card_coder": "CODER IS",
 
@@ -214,7 +216,33 @@ export const translations = {
       "What are Matheus's main projects?",
       "What is his academic background?",
       "How to view or download his Resume?"
-    ]
+    ],
+
+    // Dual-Blog Ecosystem & Split Gateway
+    "blog.gateway_badge": "MATHEUS DE CASTRO ECOSYSTEM",
+    "blog.gateway_title": "Two Paths, One Mind",
+    "blog.gateway_subtitle": "Choose the journey you want to explore today: deep engineering and AI architecture, or creative immersion in the geek lab.",
+    "blog.portal_tech_tag": "ENGINEERING & SYSTEMS",
+    "blog.portal_tech_title": "Engineering & AI Blog",
+    "blog.portal_tech_desc": "Deep technical articles, software architecture, telemetry pipelines, computer vision, and backend systems.",
+    "blog.portal_tech_btn": "Explore Engineering ↗",
+    "blog.portal_alomyr_tag": "GEEK & ARTISTIC LAB",
+    "blog.portal_alomyr_title": "Alomyr Laboratory",
+    "blog.portal_alomyr_desc": "Philosophical reflections, hyper-realistic graphite artwork, pop/geek culture, retrogaming, and Linux system setups.",
+    "blog.portal_alomyr_btn": "Enter Laboratory ↗",
+    "blog.back_to_portfolio": "← Back to Portfolio",
+    "blog.switch_to_alomyr": "Alomyr Lab ↗",
+    "blog.switch_to_tech": "Engineering Blog ↗",
+    "blog.search_placeholder": "Search by tags, keywords or topics...",
+    "blog.all_tags": "All Tags",
+    "blog.video_attached": "YouTube Video Included",
+    "blog.gallery_attached": "Photo Gallery Included",
+    "blog.related_project": "Related Portfolio Project",
+    "blog.read_more": "Read Full Post",
+    "blog.back_to_feed": "← Back to Posts",
+    "blog.published_on": "Published on",
+    "blog.author_prefix": "By",
+    "blog.no_posts_found": "No posts found matching the selected filter."
   },
 
   pt: {
@@ -228,6 +256,7 @@ export const translations = {
     "nav.interests": "Interesses",
     "nav.arts": "Artes",
     "nav.thoughts": "Pensamentos",
+    "nav.blog": "Blog",
     "nav.lang_toggle_aria": "Mudar idioma para Inglês",
 
     // Hero / Perfil
@@ -239,6 +268,7 @@ export const translations = {
     "hero.see_projects": "Ver Meus Projetos",
     "hero.download_cv": "Baixar CV / Docs",
     "hero.contact_btn": "Contatos & Redes",
+    "hero.blog_btn": "Blog",
     "hero.card_art": "ART",
     "hero.card_coder": "CODER IS",
 
@@ -429,6 +459,32 @@ export const translations = {
       "Quais são os principais projetos de IA e Backend?",
       "Qual a formação acadêmica do Matheus?",
       "Como visualizar ou baixar o Currículo?"
-    ]
+    ],
+
+    // Dual-Blog Ecosystem & Split Gateway
+    "blog.gateway_badge": "ECOSSISTEMA MATHEUS DE CASTRO",
+    "blog.gateway_title": "Dois Caminhos, Uma Mesma Mente",
+    "blog.gateway_subtitle": "Escolha a experiência que deseja explorar hoje: aprofundamento técnico em engenharia ou imersão criativa no laboratório geek.",
+    "blog.portal_tech_tag": "CANAL DE ENGENHARIA",
+    "blog.portal_tech_title": "Blog de Engenharia & IA",
+    "blog.portal_tech_desc": "Artigos técnicos aprofundados, arquitetura de sistemas, pipelines de telemetria, visão computacional e processos de backend.",
+    "blog.portal_tech_btn": "Explorar Engenharia ↗",
+    "blog.portal_alomyr_tag": "LABORATÓRIO GEEK & ARTÍSTICO",
+    "blog.portal_alomyr_title": "Laboratório Alomyr",
+    "blog.portal_alomyr_desc": "Ensaios filosóficos, arte do hiper-realismo em grafite, cultura pop/nerd, retrogaming e configurações de sistema.",
+    "blog.portal_alomyr_btn": "Entrar no Laboratório ↗",
+    "blog.back_to_portfolio": "← Voltar ao Portfólio",
+    "blog.switch_to_alomyr": "Laboratório Alomyr ↗",
+    "blog.switch_to_tech": "Blog de Engenharia ↗",
+    "blog.search_placeholder": "Filtrar por tags, palavras-chave ou tópicos...",
+    "blog.all_tags": "Todas as Tags",
+    "blog.video_attached": "Vídeo YouTube Incluído",
+    "blog.gallery_attached": "Galeria de Fotos",
+    "blog.related_project": "Projeto Relacionado no Portfólio",
+    "blog.read_more": "Ler Post Completo",
+    "blog.back_to_feed": "← Voltar aos Posts",
+    "blog.published_on": "Publicado em",
+    "blog.author_prefix": "Por",
+    "blog.no_posts_found": "Nenhum post encontrado com o filtro selecionado."
   }
 };

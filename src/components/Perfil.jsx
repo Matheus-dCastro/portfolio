@@ -3,7 +3,7 @@ import { getStoredCvConfig } from "../data/projectsData";
 import { fetchCvConfig } from "../lib/supabaseService";
 import { useLanguage } from "../context/useLanguage";
 
-function Perfil({ nomeCompleto, description, foto, cv }) {
+function Perfil({ nomeCompleto, description, foto, cv, onNavigateToBlog }) {
   const { t, lang } = useLanguage();
   const [textoAtual, setTextoAtual] = useState("");
   const [phraseIndex, setPhraseIndex] = useState(0);
@@ -98,6 +98,19 @@ function Perfil({ nomeCompleto, description, foto, cv }) {
           >
             {t("hero.download_cv")}
           </button>
+          <a
+            href="/blog/?"
+            onClick={(e) => {
+              if (onNavigateToBlog) {
+                e.preventDefault();
+                onNavigateToBlog();
+              }
+            }}
+            className="btn btn-outline hero-blog-btn"
+            title={lang === "en" ? "Explore our technical and creative blogs" : "Explorar nossos blogs técnico e criativo"}
+          >
+            {t("hero.blog_btn") || "Blog"}
+          </a>
           <a
             href="#contact"
             className="btn btn-outline hero-contact-btn"

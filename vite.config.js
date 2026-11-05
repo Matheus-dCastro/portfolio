@@ -20,6 +20,8 @@ export default defineConfig({
         order: resolve(__dirname, 'draft-order/index.html'),
         view: resolve(__dirname, 'draft-view/index.html'),
         contacts: resolve(__dirname, 'contacts/index.html'),
+        blog: resolve(__dirname, 'blog/index.html'),
+        blogAlomyr: resolve(__dirname, 'blog/alomyr/index.html'),
         notFound: resolve(__dirname, '404.html')
       }
     }

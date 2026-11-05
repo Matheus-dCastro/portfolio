@@ -45,9 +45,18 @@ import {
   persistCustomHobby,
   persistHobbies,
   persistBatchOrder,
+  fetchBlogPosts,
+  persistBlogPost,
+  removeBlogPost,
+  uploadBlogImage,
   getCurrentUser,
   logoutUser
 } from "../lib/supabaseService";
+import {
+  getStoredBlogPosts,
+  getYoutubeEmbedUrl,
+  BLOG_CHANNELS
+} from "../data/blogData";
 import { isSupabaseConfigured } from "../lib/supabaseClient";
 import { DOCUMENT_TEMPLATES } from "../data/templatesData";
 import { sendChatMessage } from "../lib/llmService";
@@ -180,6 +189,33 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
   const [selectedHobbyId, setSelectedHobbyId] = useState("hobby-1");
   const [hobbyActiveLang, setHobbyActiveLang] = useState("pt");
 
+  // Dual-Blog Moderation States (/blog and /blog/alomyr)
+  const [blogPosts, setBlogPosts] = useState(() => getStoredBlogPosts());
+  const [selectedBlogId, setSelectedBlogId] = useState(null);
+  const [blogChannelFilter, setBlogChannelFilter] = useState("all"); // 'all' | 'tech' | 'alomyr'
+  const [blogChannel, setBlogChannel] = useState("tech");
+  const [blogTitlePt, setBlogTitlePt] = useState("");
+  const [blogTitleEn, setBlogTitleEn] = useState("");
+  const [blogSummaryPt, setBlogSummaryPt] = useState("");
+  const [blogSummaryEn, setBlogSummaryEn] = useState("");
+  const [blogCategory, setBlogCategory] = useState("Machine Learning & Backend");
+  const [blogTagsInput, setBlogTagsInput] = useState("");
+  const [blogCoverImage, setBlogCoverImage] = useState("");
+  const [blogYoutubeUrl, setBlogYoutubeUrl] = useState("");
+  const [blogGalleryInput, setBlogGalleryInput] = useState("");
+  const [blogContentPt, setBlogContentPt] = useState("");
+  const [blogContentEn, setBlogContentEn] = useState("");
+  const [blogRelatedProjectId, setBlogRelatedProjectId] = useState("");
+  const [blogAuthor, setBlogAuthor] = useState("Matheus de Castro");
+  const [blogPublishedAt, setBlogPublishedAt] = useState(new Date().toISOString().split("T")[0]);
+  const [blogReadTime, setBlogReadTime] = useState("5 min");
+  const [blogIsPublished, setBlogIsPublished] = useState(true);
+  const [blogEditorLang, setBlogEditorLang] = useState("pt"); // 'pt' | 'en'
+  const [isUploadingBlogCover, setIsUploadingBlogCover] = useState(false);
+  const [isUploadingBlogGallery, setIsUploadingBlogGallery] = useState(false);
+  const blogCoverInputRef = useRef(null);
+  const blogGalleryInputRef = useRef(null);
+
   const [currentUser, setCurrentUser] = useState(null);
 
   useEffect(() => {
@@ -234,6 +270,12 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
           setHobbiesList(list);
         }
       });
+    } else if (activeTab === "blog") {
+      fetchBlogPosts().then((list) => {
+        if (Array.isArray(list) && list.length > 0) {
+          setBlogPosts(list);
+        }
+      });
     }
   }, [activeTab]);
 
@@ -248,6 +290,150 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
   const showToast = (msg) => {
     setNotification(msg);
     setTimeout(() => setNotification(""), 3500);
+  };
+
+  // Blog Handlers
+  const handleSelectBlogPost = (post) => {
+    if (!post) {
+      handleNewBlogPost();
+      return;
+    }
+    setSelectedBlogId(post.id);
+    setBlogChannel(post.channel || "tech");
+    setBlogTitlePt(post.titlePt || "");
+    setBlogTitleEn(post.titleEn || "");
+    setBlogSummaryPt(post.summaryPt || "");
+    setBlogSummaryEn(post.summaryEn || "");
+    setBlogCategory(post.category || (post.channel === "alomyr" ? "Hiper-realismo & Arte" : "Machine Learning & Backend"));
+    setBlogTagsInput(Array.isArray(post.tags) ? post.tags.join(", ") : "");
+    setBlogCoverImage(post.coverImage || "");
+    setBlogYoutubeUrl(post.youtubeUrl || "");
+    setBlogGalleryInput(Array.isArray(post.galleryImages) ? post.galleryImages.join("\n") : "");
+    setBlogContentPt(post.contentPt || "");
+    setBlogContentEn(post.contentEn || "");
+    setBlogRelatedProjectId(post.relatedProjectId || "");
+    setBlogAuthor(post.author || "Matheus de Castro");
+    setBlogPublishedAt(post.publishedAt || new Date().toISOString().split("T")[0]);
+    setBlogReadTime(post.readTime || "5 min");
+    setBlogIsPublished(post.isPublished !== false);
+  };
+
+  const handleNewBlogPost = () => {
+    setSelectedBlogId(null);
+    setBlogChannel("tech");
+    setBlogTitlePt("");
+    setBlogTitleEn("");
+    setBlogSummaryPt("");
+    setBlogSummaryEn("");
+    setBlogCategory("Machine Learning & Backend");
+    setBlogTagsInput("#FastAPI, #AI-Agents");
+    setBlogCoverImage("");
+    setBlogYoutubeUrl("");
+    setBlogGalleryInput("");
+    setBlogContentPt("## Contexto e Desafio Técnico\n\nDescreva a arquitetura...");
+    setBlogContentEn("## Overview & Technical Challenge\n\nDescribe the architecture...");
+    setBlogRelatedProjectId("");
+    setBlogAuthor("Matheus de Castro");
+    setBlogPublishedAt(new Date().toISOString().split("T")[0]);
+    setBlogReadTime("5 min");
+    setBlogIsPublished(true);
+  };
+
+  const handleSaveBlogPost = async (e) => {
+    if (e) e.preventDefault();
+    if (!blogTitlePt.trim() && !blogTitleEn.trim()) {
+      alert("Por favor, preencha o título do post (em PT ou EN).");
+      return;
+    }
+
+    const tagsArray = blogTagsInput
+      .split(",")
+      .map((t) => t.trim())
+      .filter(Boolean)
+      .map((t) => (t.startsWith("#") ? t : `#${t}`));
+
+    const galleryArray = blogGalleryInput
+      .split(/[\n,]/)
+      .map((s) => s.trim())
+      .filter(Boolean);
+
+    const postObj = {
+      id: selectedBlogId || `post-${Date.now()}`,
+      channel: blogChannel,
+      titlePt: blogTitlePt.trim() || blogTitleEn.trim(),
+      titleEn: blogTitleEn.trim() || blogTitlePt.trim(),
+      summaryPt: blogSummaryPt.trim(),
+      summaryEn: blogSummaryEn.trim(),
+      category: blogCategory.trim() || "Geral",
+      tags: tagsArray,
+      coverImage: blogCoverImage.trim(),
+      youtubeUrl: blogYoutubeUrl.trim(),
+      galleryImages: galleryArray,
+      contentPt: blogContentPt,
+      contentEn: blogContentEn,
+      relatedProjectId: blogRelatedProjectId || null,
+      author: blogAuthor.trim() || "Matheus de Castro",
+      publishedAt: blogPublishedAt || new Date().toISOString().split("T")[0],
+      readTime: blogReadTime.trim() || "5 min",
+      isPublished: blogIsPublished
+    };
+
+    const res = await persistBlogPost(postObj);
+    const updatedList = blogPosts.filter((p) => p.id !== postObj.id);
+    setBlogPosts([postObj, ...updatedList]);
+    setSelectedBlogId(postObj.id);
+    showToast(res.cloud ? "Post salvo no Supabase Cloud!" : "Post salvo localmente!");
+  };
+
+  const handleDeleteBlogPost = async (id) => {
+    if (!confirm("Tem certeza que deseja excluir permanentemente este post do blog?")) return;
+    await removeBlogPost(id);
+    const updated = blogPosts.filter((p) => p.id !== id);
+    setBlogPosts(updated);
+    if (selectedBlogId === id) {
+      handleNewBlogPost();
+    }
+    showToast("Post excluído com sucesso!");
+  };
+
+  const handleUploadBlogCover = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setIsUploadingBlogCover(true);
+    try {
+      const res = await uploadBlogImage(file);
+      if (res?.publicUrl) {
+        setBlogCoverImage(res.publicUrl);
+        showToast(res.cloud ? "Capa enviada ao Supabase Storage!" : "Capa carregada localmente!");
+      }
+    } catch (err) {
+      alert("Erro ao fazer upload da capa: " + err.message);
+    } finally {
+      setIsUploadingBlogCover(false);
+    }
+  };
+
+  const handleUploadBlogGallery = async (e) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+    setIsUploadingBlogGallery(true);
+    try {
+      const urls = [];
+      for (const file of files) {
+        const res = await uploadBlogImage(file);
+        if (res?.publicUrl) urls.push(res.publicUrl);
+      }
+      if (urls.length > 0) {
+        const existing = blogGalleryInput.trim();
+        const merged = existing ? `${existing}\n${urls.join("\n")}` : urls.join("\n");
+        setBlogGalleryInput(merged);
+        showToast(`${urls.length} foto(s) adicionada(s) à galeria!`);
+      }
+    } catch (err) {
+      alert("Erro ao enviar fotos da galeria: " + err.message);
+    } finally {
+      setIsUploadingBlogGallery(false);
+    }
   };
 
   const loadItemIntoForm = (item) => {
@@ -348,7 +534,13 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
 
   const handleTabChange = (tab) => {
     setActiveTab(tab);
-    if (tab === "agent" || tab === "cv") return;
+    if (tab === "agent" || tab === "cv" || tab === "customHobby") return;
+    if (tab === "blog") {
+      if (blogPosts.length > 0 && !selectedBlogId) {
+        handleSelectBlogPost(blogPosts[0]);
+      }
+      return;
+    }
 
     let nextList = [];
     if (tab === "projects") {
@@ -1383,6 +1575,14 @@ DIRETRIZ MÁXIMA DE CONCISÃO:
               onClick={() => handleTabChange("agent")}
             >
               Assistente IA (Alomyr)
+            </button>
+            <button
+              type="button"
+              className={`cat-btn blog-tab ${activeTab === "blog" ? "active" : ""}`}
+              onClick={() => handleTabChange("blog")}
+              style={{ color: activeTab === "blog" ? "#ffffff" : "#c4b5fd" }}
+            >
+              📝 Blog &amp; Lab
             </button>
           </div>
         </div>
@@ -2983,6 +3183,642 @@ DIRETRIZ MÁXIMA DE CONCISÃO:
                   </div>
                 </div>
               </div>
+            </div>
+          </main>
+        </div>
+      ) : activeTab === "blog" ? (
+        /* TAB 8: DUAL-BLOG MODERATION DASHBOARD */
+        <div className="drawings-editor-container blog-admin-container">
+          <main className="drawings-workspace-grid blog-admin-workspace">
+            {/* LEFT SIDEBAR: Blog Posts Explorer */}
+            <aside className="drawings-list-sidebar blog-posts-sidebar">
+              <div className="drawings-sidebar-header">
+                <div>
+                  <h3 style={{ margin: 0, fontSize: "14px", color: "#fff" }}>Publicações do Blog</h3>
+                  <small style={{ color: "#8b949e" }}>{blogPosts.length} post(s) cadastrados</small>
+                </div>
+                <button
+                  type="button"
+                  className="drawings-add-btn"
+                  onClick={handleNewBlogPost}
+                  title="Criar novo post"
+                >
+                  + Novo Post
+                </button>
+              </div>
+
+              {/* Channel Filter Pills */}
+              <div style={{ display: "flex", gap: "6px", padding: "10px 14px", borderBottom: "1px solid #21262d", background: "#0d1117" }}>
+                <button
+                  type="button"
+                  onClick={() => setBlogChannelFilter("all")}
+                  style={{
+                    padding: "4px 8px",
+                    borderRadius: "6px",
+                    fontSize: "11px",
+                    fontWeight: "600",
+                    border: blogChannelFilter === "all" ? "1px solid #8b5cf6" : "1px solid #30363d",
+                    background: blogChannelFilter === "all" ? "rgba(139, 92, 246, 0.2)" : "#161b22",
+                    color: blogChannelFilter === "all" ? "#fff" : "#8b949e",
+                    cursor: "pointer"
+                  }}
+                >
+                  Todos ({blogPosts.length})
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setBlogChannelFilter("tech")}
+                  style={{
+                    padding: "4px 8px",
+                    borderRadius: "6px",
+                    fontSize: "11px",
+                    fontWeight: "600",
+                    border: blogChannelFilter === "tech" ? "1px solid #0284c7" : "1px solid #30363d",
+                    background: blogChannelFilter === "tech" ? "rgba(2, 132, 199, 0.2)" : "#161b22",
+                    color: blogChannelFilter === "tech" ? "#38bdf8" : "#8b949e",
+                    cursor: "pointer"
+                  }}
+                >
+                  Engenharia ({blogPosts.filter((p) => (p.channel || "tech") === "tech").length})
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setBlogChannelFilter("alomyr")}
+                  style={{
+                    padding: "4px 8px",
+                    borderRadius: "6px",
+                    fontSize: "11px",
+                    fontWeight: "600",
+                    border: blogChannelFilter === "alomyr" ? "1px solid #8b5cf6" : "1px solid #30363d",
+                    background: blogChannelFilter === "alomyr" ? "rgba(139, 92, 246, 0.2)" : "#161b22",
+                    color: blogChannelFilter === "alomyr" ? "#c084fc" : "#8b949e",
+                    cursor: "pointer"
+                  }}
+                >
+                  Alomyr ({blogPosts.filter((p) => p.channel === "alomyr").length})
+                </button>
+              </div>
+
+              {/* Posts List */}
+              <div className="drawings-scroll-list" style={{ maxHeight: "calc(100vh - 220px)", overflowY: "auto" }}>
+                {blogPosts
+                  .filter((p) => blogChannelFilter === "all" || (p.channel || "tech") === blogChannelFilter)
+                  .map((post) => {
+                    const isSelected = selectedBlogId === post.id;
+                    const isTechChan = (post.channel || "tech") === "tech";
+                    return (
+                      <div
+                        key={post.id}
+                        className={`drawing-list-item ${isSelected ? "selected" : ""}`}
+                        onClick={() => handleSelectBlogPost(post)}
+                        style={{ cursor: "pointer", position: "relative" }}
+                      >
+                        <div style={{ display: "flex", gap: "10px", alignItems: "flex-start", flex: 1 }}>
+                          {post.coverImage ? (
+                            <img
+                              src={post.coverImage}
+                              alt="Capa"
+                              style={{ width: "42px", height: "42px", borderRadius: "6px", objectFit: "cover", flexShrink: 0 }}
+                            />
+                          ) : (
+                            <div
+                              style={{
+                                width: "42px",
+                                height: "42px",
+                                borderRadius: "6px",
+                                background: isTechChan ? "#0369a1" : "#7c3aed",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                fontSize: "16px",
+                                flexShrink: 0
+                              }}
+                            >
+                              {isTechChan ? "🧠" : "🎨"}
+                            </div>
+                          )}
+                          <div style={{ minWidth: 0, flex: 1 }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "3px" }}>
+                              <span
+                                style={{
+                                  fontSize: "9px",
+                                  fontWeight: "700",
+                                  padding: "2px 5px",
+                                  borderRadius: "4px",
+                                  background: isTechChan ? "rgba(6, 182, 212, 0.2)" : "rgba(139, 92, 246, 0.2)",
+                                  color: isTechChan ? "#38bdf8" : "#c4b5fd"
+                                }}
+                              >
+                                {isTechChan ? "TECH" : "ALOMYR"}
+                              </span>
+                              {post.youtubeUrl && <span style={{ fontSize: "10px" }}>▶</span>}
+                              {Array.isArray(post.galleryImages) && post.galleryImages.length > 0 && (
+                                <span style={{ fontSize: "10px" }}>🖼</span>
+                              )}
+                              <span style={{ fontSize: "10px", color: "#64748b" }}>{post.publishedAt}</span>
+                            </div>
+                            <h4
+                              style={{
+                                margin: 0,
+                                fontSize: "13px",
+                                fontWeight: "600",
+                                color: isSelected ? "#fff" : "#e2e8f0",
+                                whiteSpace: "nowrap",
+                                overflow: "hidden",
+                                textOverflow: "ellipsis"
+                              }}
+                            >
+                              {post.titlePt || post.titleEn || "Sem título"}
+                            </h4>
+                            <p
+                              style={{
+                                margin: "2px 0 0",
+                                fontSize: "11px",
+                                color: "#8b949e",
+                                whiteSpace: "nowrap",
+                                overflow: "hidden",
+                                textOverflow: "ellipsis"
+                              }}
+                            >
+                              {post.category || "Geral"}
+                            </p>
+                          </div>
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteBlogPost(post.id);
+                          }}
+                          style={{
+                            background: "transparent",
+                            border: "none",
+                            color: "#f85149",
+                            cursor: "pointer",
+                            padding: "4px",
+                            fontSize: "14px",
+                            opacity: 0.7
+                          }}
+                          title="Excluir post"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    );
+                  })}
+              </div>
+            </aside>
+
+            {/* RIGHT MAIN: Blog Post Editor Form */}
+            <div className="drawings-form-card" style={{ flex: 1, padding: "24px" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px", borderBottom: "1px solid #21262d", paddingBottom: "14px" }}>
+                <div>
+                  <span style={{ fontSize: "11px", fontWeight: "700", textTransform: "uppercase", color: "#a78bfa", letterSpacing: "0.08em" }}>
+                    {selectedBlogId ? "Editando Publicação" : "Nova Publicação"}
+                  </span>
+                  <h2 style={{ margin: "4px 0 0", fontSize: "1.35rem", color: "#fff" }}>
+                    {blogTitlePt || blogTitleEn || "Novo Post do Blog"}
+                  </h2>
+                </div>
+
+                <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+                  {selectedBlogId && (
+                    <a
+                      href={`${blogChannel === "alomyr" ? "/blog/alomyr" : "/blog"}?post=${encodeURIComponent(selectedBlogId)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="drawings-test-url-btn"
+                      style={{ textDecoration: "none", display: "inline-flex", alignItems: "center", gap: "4px" }}
+                    >
+                      <span>Ver no Blog</span>
+                      <span>↗</span>
+                    </a>
+                  )}
+                  <button
+                    type="button"
+                    className="save-btn"
+                    onClick={handleSaveBlogPost}
+                    style={{ padding: "8px 18px", borderRadius: "8px", fontWeight: "600", cursor: "pointer" }}
+                  >
+                    Salvar Post
+                  </button>
+                </div>
+              </div>
+
+              <form onSubmit={handleSaveBlogPost}>
+                {/* Channel Selector */}
+                <div className="drawings-form-group" style={{ marginBottom: "20px" }}>
+                  <label style={{ display: "block", marginBottom: "8px" }}>
+                    <strong>Canal de Publicação (Dual Ecosystem)</strong>
+                  </label>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+                    <div
+                      onClick={() => setBlogChannel("tech")}
+                      style={{
+                        padding: "14px",
+                        borderRadius: "10px",
+                        border: blogChannel === "tech" ? "2px solid #0284c7" : "1px solid #30363d",
+                        background: blogChannel === "tech" ? "rgba(2, 132, 199, 0.15)" : "#0d1117",
+                        cursor: "pointer"
+                      }}
+                    >
+                      <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
+                        <span style={{ fontSize: "18px" }}>🧠</span>
+                        <strong style={{ color: blogChannel === "tech" ? "#38bdf8" : "#e2e8f0" }}>
+                          Blog de Engenharia &amp; IA (/blog)
+                        </strong>
+                      </div>
+                      <small style={{ color: "#8b949e", display: "block", fontSize: "12px" }}>
+                        Artigos de arquitetura, Machine Learning, backend, telemetria de LLMs e pipelines.
+                      </small>
+                    </div>
+
+                    <div
+                      onClick={() => setBlogChannel("alomyr")}
+                      style={{
+                        padding: "14px",
+                        borderRadius: "10px",
+                        border: blogChannel === "alomyr" ? "2px solid #8b5cf6" : "1px solid #30363d",
+                        background: blogChannel === "alomyr" ? "rgba(139, 92, 246, 0.15)" : "#0d1117",
+                        cursor: "pointer"
+                      }}
+                    >
+                      <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
+                        <span style={{ fontSize: "18px" }}>🎨</span>
+                        <strong style={{ color: blogChannel === "alomyr" ? "#c084fc" : "#e2e8f0" }}>
+                          Laboratório Alomyr (/blog/alomyr)
+                        </strong>
+                      </div>
+                      <small style={{ color: "#8b949e", display: "block", fontSize: "12px" }}>
+                        Hiper-realismo em grafite, retrogaming, cultura geek/Marvel e ensaios filosóficos.
+                      </small>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Bilingual Titles & Summaries */}
+                <div style={{ marginBottom: "20px" }}>
+                  <div style={{ display: "flex", gap: "10px", marginBottom: "10px", borderBottom: "1px solid #21262d", paddingBottom: "6px" }}>
+                    <button
+                      type="button"
+                      onClick={() => setBlogEditorLang("pt")}
+                      style={{
+                        background: "none",
+                        border: "none",
+                        borderBottom: blogEditorLang === "pt" ? "2px solid #38bdf8" : "none",
+                        color: blogEditorLang === "pt" ? "#38bdf8" : "#8b949e",
+                        fontWeight: "700",
+                        padding: "4px 8px",
+                        cursor: "pointer"
+                      }}
+                    >
+                      🇧🇷 Português (PT)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setBlogEditorLang("en")}
+                      style={{
+                        background: "none",
+                        border: "none",
+                        borderBottom: blogEditorLang === "en" ? "2px solid #a78bfa" : "none",
+                        color: blogEditorLang === "en" ? "#a78bfa" : "#8b949e",
+                        fontWeight: "700",
+                        padding: "4px 8px",
+                        cursor: "pointer"
+                      }}
+                    >
+                      🇺🇸 English (EN)
+                    </button>
+                  </div>
+
+                  {blogEditorLang === "pt" ? (
+                    <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                      <div>
+                        <label style={{ display: "block", fontSize: "12px", color: "#38bdf8", fontWeight: "600", marginBottom: "4px" }}>
+                          Título da Publicação (PT) *
+                        </label>
+                        <input
+                          type="text"
+                          className="drawings-input"
+                          placeholder="Ex: Arquitetura de Telemetria de LLMs em Alta Escala..."
+                          value={blogTitlePt}
+                          onChange={(e) => setBlogTitlePt(e.target.value)}
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label style={{ display: "block", fontSize: "12px", color: "#38bdf8", fontWeight: "600", marginBottom: "4px" }}>
+                          Resumo / Lead Executivo (PT)
+                        </label>
+                        <textarea
+                          className="drawings-input"
+                          rows="2"
+                          placeholder="Breve resumo para os cards da vitrine..."
+                          value={blogSummaryPt}
+                          onChange={(e) => setBlogSummaryPt(e.target.value)}
+                        />
+                      </div>
+                    </div>
+                  ) : (
+                    <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                      <div>
+                        <label style={{ display: "block", fontSize: "12px", color: "#a78bfa", fontWeight: "600", marginBottom: "4px" }}>
+                          Post Title (EN) *
+                        </label>
+                        <input
+                          type="text"
+                          className="drawings-input"
+                          placeholder="Ex: High-Scale LLM Telemetry Architecture..."
+                          value={blogTitleEn}
+                          onChange={(e) => setBlogTitleEn(e.target.value)}
+                        />
+                      </div>
+                      <div>
+                        <label style={{ display: "block", fontSize: "12px", color: "#a78bfa", fontWeight: "600", marginBottom: "4px" }}>
+                          Executive Summary / Lead (EN)
+                        </label>
+                        <textarea
+                          className="drawings-input"
+                          rows="2"
+                          placeholder="Short summary for the feed cards..."
+                          value={blogSummaryEn}
+                          onChange={(e) => setBlogSummaryEn(e.target.value)}
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Metadata Row: Category, Tags */}
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px", marginBottom: "18px" }}>
+                  <div>
+                    <label style={{ display: "block", fontSize: "12px", color: "#8b949e", marginBottom: "4px" }}>
+                      Categoria
+                    </label>
+                    <input
+                      type="text"
+                      className="drawings-input"
+                      list="blog-categories-list"
+                      placeholder="Ex: Machine Learning & Backend"
+                      value={blogCategory}
+                      onChange={(e) => setBlogCategory(e.target.value)}
+                    />
+                    <datalist id="blog-categories-list">
+                      <option value="Machine Learning & Backend" />
+                      <option value="Computer Vision & Deep Learning" />
+                      <option value="DevOps & Automações" />
+                      <option value="Hiper-realismo & Arte" />
+                      <option value="Retrogaming & Tech Geek" />
+                      <option value="Cultura Pop & Nerd" />
+                      <option value="Filosofia & Pensamento" />
+                    </datalist>
+                  </div>
+
+                  <div>
+                    <label style={{ display: "block", fontSize: "12px", color: "#8b949e", marginBottom: "4px" }}>
+                      Tags (separadas por vírgula)
+                    </label>
+                    <input
+                      type="text"
+                      className="drawings-input"
+                      placeholder="#FastAPI, #PyTorch, #Docker, #Marvel"
+                      value={blogTagsInput}
+                      onChange={(e) => setBlogTagsInput(e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "16px", marginBottom: "18px" }}>
+                  <div>
+                    <label style={{ display: "block", fontSize: "12px", color: "#8b949e", marginBottom: "4px" }}>
+                      Data de Publicação
+                    </label>
+                    <input
+                      type="date"
+                      className="drawings-input"
+                      value={blogPublishedAt}
+                      onChange={(e) => setBlogPublishedAt(e.target.value)}
+                    />
+                  </div>
+
+                  <div>
+                    <label style={{ display: "block", fontSize: "12px", color: "#8b949e", marginBottom: "4px" }}>
+                      Tempo Estimado de Leitura
+                    </label>
+                    <input
+                      type="text"
+                      className="drawings-input"
+                      placeholder="Ex: 5 min"
+                      value={blogReadTime}
+                      onChange={(e) => setBlogReadTime(e.target.value)}
+                    />
+                  </div>
+
+                  <div>
+                    <label style={{ display: "block", fontSize: "12px", color: "#8b949e", marginBottom: "4px" }}>
+                      Visibilidade
+                    </label>
+                    <label style={{ display: "flex", alignItems: "center", gap: "8px", marginTop: "8px", cursor: "pointer", color: "#e2e8f0", fontSize: "13px" }}>
+                      <input
+                        type="checkbox"
+                        checked={blogIsPublished}
+                        onChange={(e) => setBlogIsPublished(e.target.checked)}
+                      />
+                      <span>Publicado (visível no blog)</span>
+                    </label>
+                  </div>
+                </div>
+
+                {/* BIDIRECTIONAL LINKING: RELATED PROJECT */}
+                <div className="drawings-form-group" style={{ marginBottom: "20px", background: "rgba(139, 92, 246, 0.08)", padding: "14px", borderRadius: "10px", border: "1px solid rgba(139, 92, 246, 0.25)" }}>
+                  <label style={{ display: "block", marginBottom: "4px" }}>
+                    <strong style={{ color: "#c4b5fd" }}>🔗 Vínculo Bidirecional com Projeto do Portfólio</strong>
+                  </label>
+                  <p style={{ fontSize: "12px", color: "#94a3b8", margin: "0 0 10px" }}>
+                    Ao selecionar um projeto, um banner de redirecionamento mútuo será exibido tanto aqui no blog quanto no card do projeto na página inicial.
+                  </p>
+                  <select
+                    className="drawings-input"
+                    value={blogRelatedProjectId}
+                    onChange={(e) => setBlogRelatedProjectId(e.target.value)}
+                    style={{ background: "#0d1117" }}
+                  >
+                    <option value="">-- Nenhum projeto vinculado --</option>
+                    {getStoredProjects().map((proj) => (
+                      <option key={proj.id} value={proj.id}>
+                        {proj.titlePt || proj.titleEn || proj.title} ({proj.category})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* RICH MEDIA: YOUTUBE, COVER IMAGE, GALLERY */}
+                <div style={{ marginBottom: "20px", border: "1px solid #30363d", padding: "16px", borderRadius: "12px", background: "#0d1117" }}>
+                  <h4 style={{ margin: "0 0 12px", color: "#fff", fontSize: "14px" }}>
+                    🎬 Mídia Rica: Vídeo do YouTube, Capa e Galeria de Fotos
+                  </h4>
+
+                  {/* YouTube Embed URL */}
+                  <div className="drawings-form-group" style={{ marginBottom: "14px" }}>
+                    <label style={{ display: "block", fontSize: "12px", color: "#8b949e", marginBottom: "4px" }}>
+                      URL de Vídeo do YouTube (Embed Player)
+                    </label>
+                    <input
+                      type="url"
+                      className="drawings-input"
+                      placeholder="https://www.youtube.com/watch?v=... ou https://youtu.be/..."
+                      value={blogYoutubeUrl}
+                      onChange={(e) => setBlogYoutubeUrl(e.target.value)}
+                    />
+                    {blogYoutubeUrl && getYoutubeEmbedUrl(blogYoutubeUrl) && (
+                      <div style={{ marginTop: "8px", maxWidth: "420px", borderRadius: "8px", overflow: "hidden", border: "1px solid #30363d" }}>
+                        <iframe
+                          src={getYoutubeEmbedUrl(blogYoutubeUrl)}
+                          title="Preview do vídeo"
+                          style={{ width: "100%", height: "236px", border: "none" }}
+                        />
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Cover Image */}
+                  <div className="drawings-form-group" style={{ marginBottom: "14px" }}>
+                    <label style={{ display: "block", fontSize: "12px", color: "#8b949e", marginBottom: "4px" }}>
+                      Imagem de Capa (URL ou Upload no Supabase)
+                    </label>
+                    <div style={{ display: "flex", gap: "10px" }}>
+                      <input
+                        type="text"
+                        className="drawings-input"
+                        placeholder="https://... ou caminho relativo (/IMG_3104.webp)"
+                        value={blogCoverImage}
+                        onChange={(e) => setBlogCoverImage(e.target.value)}
+                        style={{ flex: 1 }}
+                      />
+                      <input
+                        type="file"
+                        accept="image/*"
+                        ref={blogCoverInputRef}
+                        style={{ display: "none" }}
+                        onChange={handleUploadBlogCover}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => blogCoverInputRef.current?.click()}
+                        disabled={isUploadingBlogCover}
+                        className="drawings-test-url-btn"
+                        style={{ whiteSpace: "nowrap" }}
+                      >
+                        {isUploadingBlogCover ? "Enviando..." : "Subir Capa 📤"}
+                      </button>
+                    </div>
+                    {blogCoverImage && (
+                      <div style={{ marginTop: "8px" }}>
+                        <img
+                          src={blogCoverImage}
+                          alt="Prévia da Capa"
+                          style={{ maxHeight: "140px", borderRadius: "8px", objectFit: "cover", border: "1px solid #30363d" }}
+                        />
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Gallery Photos */}
+                  <div className="drawings-form-group">
+                    <label style={{ display: "block", fontSize: "12px", color: "#8b949e", marginBottom: "4px" }}>
+                      Galeria de Fotos (uma URL por linha ou adicione via upload)
+                    </label>
+                    <textarea
+                      className="drawings-input"
+                      rows="3"
+                      placeholder="https://images.unsplash.com/...&#10;/IMG_3110.webp"
+                      value={blogGalleryInput}
+                      onChange={(e) => setBlogGalleryInput(e.target.value)}
+                    />
+                    <div style={{ marginTop: "6px" }}>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        ref={blogGalleryInputRef}
+                        style={{ display: "none" }}
+                        onChange={handleUploadBlogGallery}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => blogGalleryInputRef.current?.click()}
+                        disabled={isUploadingBlogGallery}
+                        className="drawings-test-url-btn"
+                      >
+                        {isUploadingBlogGallery ? "Enviando fotos..." : "+ Subir Fotos para Galeria 📤"}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* MAIN MARKDOWN BODY (BILINGUAL) */}
+                <div className="drawings-form-group" style={{ marginBottom: "20px" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
+                    <label>
+                      <strong>Corpo do Post em Markdown ({blogEditorLang.toUpperCase()})</strong>
+                    </label>
+                    <div style={{ display: "flex", gap: "8px" }}>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (blogEditorLang === "pt") setBlogContentEn(blogContentPt);
+                          else setBlogContentPt(blogContentEn);
+                          showToast("Conteúdo clonado entre os idiomas!");
+                        }}
+                        style={{ background: "#21262d", border: "1px solid #30363d", color: "#8b949e", borderRadius: "4px", padding: "3px 8px", fontSize: "11px", cursor: "pointer" }}
+                      >
+                        {blogEditorLang === "pt" ? "Copiar PT → EN" : "Copiar EN → PT"}
+                      </button>
+                    </div>
+                  </div>
+
+                  {blogEditorLang === "pt" ? (
+                    <textarea
+                      className="drawings-input"
+                      rows="12"
+                      style={{ fontFamily: "ui-monospace, monospace", fontSize: "13px", lineHeight: "1.6" }}
+                      placeholder="## Introdução&#10;&#10;Escreva o conteúdo em Markdown em Português..."
+                      value={blogContentPt}
+                      onChange={(e) => setBlogContentPt(e.target.value)}
+                    />
+                  ) : (
+                    <textarea
+                      className="drawings-input"
+                      rows="12"
+                      style={{ fontFamily: "ui-monospace, monospace", fontSize: "13px", lineHeight: "1.6" }}
+                      placeholder="## Introduction&#10;&#10;Write the markdown content in English..."
+                      value={blogContentEn}
+                      onChange={(e) => setBlogContentEn(e.target.value)}
+                    />
+                  )}
+                </div>
+
+                {/* Form Bottom Actions */}
+                <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px", marginTop: "24px" }}>
+                  {selectedBlogId && (
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteBlogPost(selectedBlogId)}
+                      style={{ padding: "8px 16px", borderRadius: "8px", background: "transparent", border: "1px solid #f85149", color: "#f85149", cursor: "pointer", fontWeight: "600" }}
+                    >
+                      Excluir Post
+                    </button>
+                  )}
+                  <button
+                    type="submit"
+                    className="save-btn"
+                    style={{ padding: "8px 24px", borderRadius: "8px", fontWeight: "600", cursor: "pointer" }}
+                  >
+                    Salvar Publicação
+                  </button>
+                </div>
+              </form>
             </div>
           </main>
         </div>

@@ -20,6 +20,11 @@ import {
   getStoredHobbies,
   saveHobbies
 } from "../data/projectsData.js";
+import {
+  getStoredBlogPosts,
+  saveBlogPosts,
+  DEFAULT_BLOG_POSTS
+} from "../data/blogData.js";
 
 // ==========================================
 // CONTROLE DE ACESSO DO ADMINISTRADOR (WHITELIST)
@@ -800,6 +805,224 @@ export async function persistHobbies(hobbiesList) {
     }
   }
   return { success: true, cloud: false };
+}
+
+// ==========================================
+// SERVIÇOS DO BLOG DUPLO (/blog & /blog/alomyr)
+// ==========================================
+
+export function mapDbPostToBlog(row) {
+  return {
+    id: row.id,
+    channel: row.channel || "tech",
+    titlePt: row.title_pt || "",
+    titleEn: row.title_en || "",
+    summaryPt: row.summary_pt || "",
+    summaryEn: row.summary_en || "",
+    category: row.category || "Geral",
+    tags: Array.isArray(row.tags) ? row.tags : [],
+    coverImage: row.cover_image || "",
+    youtubeUrl: row.youtube_url || "",
+    galleryImages: Array.isArray(row.gallery_images) ? row.gallery_images : [],
+    contentPt: row.content_pt || "",
+    contentEn: row.content_en || "",
+    relatedProjectId: row.related_project_id || "",
+    author: row.author || "Matheus de Castro",
+    publishedAt: row.published_at || new Date().toISOString().split("T")[0],
+    readTime: row.read_time || "5 min",
+    displayOrder: typeof row.display_order === "number" ? row.display_order : 0,
+    isPublished: row.is_published !== false
+  };
+}
+
+export function mapBlogPostToDb(post) {
+  return {
+    id: post.id,
+    channel: post.channel || "tech",
+    title_pt: post.titlePt || "",
+    title_en: post.titleEn || "",
+    summary_pt: post.summaryPt || "",
+    summary_en: post.summaryEn || "",
+    category: post.category || "Geral",
+    tags: Array.isArray(post.tags) ? post.tags : [],
+    cover_image: post.coverImage || "",
+    youtube_url: post.youtubeUrl || "",
+    gallery_images: Array.isArray(post.galleryImages) ? post.galleryImages : [],
+    content_pt: post.contentPt || "",
+    content_en: post.contentEn || "",
+    related_project_id: post.relatedProjectId || null,
+    author: post.author || "Matheus de Castro",
+    published_at: post.publishedAt || new Date().toISOString().split("T")[0],
+    read_time: post.readTime || "5 min",
+    display_order: typeof post.displayOrder === "number" ? post.displayOrder : 0,
+    is_published: post.isPublished !== false,
+    updated_at: new Date().toISOString()
+  };
+}
+
+export async function fetchBlogPosts() {
+  if (isSupabaseConfigured && supabase) {
+    try {
+      const { data, error } = await supabase
+        .from("blog_posts")
+        .select("*")
+        .order("published_at", { ascending: false });
+
+      if (!error && Array.isArray(data) && data.length > 0) {
+        const mapped = data.map(mapDbPostToBlog);
+        saveBlogPosts(mapped);
+        return mapped;
+      }
+
+      const { data: configData, error: configErr } = await supabase
+        .from("agent_configs")
+        .select("custom_hobby_json")
+        .eq("id", "production")
+        .maybeSingle();
+
+      if (!configErr && configData?.custom_hobby_json?.blogPosts && Array.isArray(configData.custom_hobby_json.blogPosts)) {
+        saveBlogPosts(configData.custom_hobby_json.blogPosts);
+        return configData.custom_hobby_json.blogPosts;
+      }
+    } catch (err) {
+      console.warn("Falha ao buscar posts do blog no Supabase, usando local:", err);
+    }
+  }
+  return getStoredBlogPosts();
+}
+
+export async function persistBlogPost(post) {
+  const current = getStoredBlogPosts();
+  const idx = current.findIndex((p) => p.id === post.id);
+  let updatedList;
+  if (idx >= 0) {
+    updatedList = [...current];
+    updatedList[idx] = post;
+  } else {
+    updatedList = [post, ...current];
+  }
+  saveBlogPosts(updatedList);
+
+  if (isSupabaseConfigured && supabase) {
+    try {
+      const dbPayload = mapBlogPostToDb(post);
+      const { error } = await supabase.from("blog_posts").upsert(dbPayload, { onConflict: "id" });
+      if (!error) {
+        return { success: true, cloud: true };
+      }
+
+      const configRes = await supabase
+        .from("agent_configs")
+        .select("custom_hobby_json")
+        .eq("id", "production")
+        .maybeSingle();
+
+      const existingConfig = configRes.data?.custom_hobby_json || {};
+      const mergedConfig = {
+        ...existingConfig,
+        blogPosts: updatedList,
+        updatedAt: new Date().toISOString()
+      };
+
+      await supabase.from("agent_configs").upsert(
+        { id: "production", custom_hobby_json: mergedConfig, updated_at: new Date().toISOString() },
+        { onConflict: "id" }
+      );
+      return { success: true, cloud: true };
+    } catch (err) {
+      console.warn("Erro ao persistir post no Supabase (mantido em local):", err);
+      return { success: true, cloud: false, error: err.message };
+    }
+  }
+  return { success: true, cloud: false };
+}
+
+export async function persistBlogPostsBatch(posts) {
+  saveBlogPosts(posts);
+  if (isSupabaseConfigured && supabase) {
+    try {
+      const configRes = await supabase
+        .from("agent_configs")
+        .select("custom_hobby_json")
+        .eq("id", "production")
+        .maybeSingle();
+
+      const existingConfig = configRes.data?.custom_hobby_json || {};
+      const mergedConfig = {
+        ...existingConfig,
+        blogPosts: posts,
+        updatedAt: new Date().toISOString()
+      };
+
+      await supabase.from("agent_configs").upsert(
+        { id: "production", custom_hobby_json: mergedConfig, updated_at: new Date().toISOString() },
+        { onConflict: "id" }
+      );
+      return { success: true, cloud: true };
+    } catch (err) {
+      console.warn("Erro ao salvar batch de posts do blog:", err);
+    }
+  }
+  return { success: true, cloud: false };
+}
+
+export async function removeBlogPost(id) {
+  const current = getStoredBlogPosts();
+  const updated = current.filter((p) => p.id !== id);
+  saveBlogPosts(updated);
+
+  if (isSupabaseConfigured && supabase) {
+    try {
+      const { error } = await supabase.from("blog_posts").delete().eq("id", id);
+      if (error && error.message && error.message.includes("does not exist")) {
+        await persistBlogPostsBatch(updated);
+      }
+      return { success: true, cloud: true };
+    } catch (err) {
+      console.warn("Erro ao excluir post no Supabase:", err);
+      return { success: true, cloud: false, error: err.message };
+    }
+  }
+  return { success: true, cloud: false };
+}
+
+export async function uploadBlogImage(file) {
+  if (!file) throw new Error("Nenhum arquivo de imagem fornecido.");
+
+  if (isSupabaseConfigured && supabase) {
+    try {
+      const timestamp = Date.now();
+      const cleanName = (file.name || "post_img.webp").replace(/[^a-zA-Z0-9._-]/g, "_");
+      const filePath = `blog/${timestamp}-${cleanName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("documents")
+        .upload(filePath, file, {
+          cacheControl: "3600",
+          upsert: true,
+          contentType: file.type || "image/webp"
+        });
+
+      if (!uploadError) {
+        const { data: publicUrlData } = supabase.storage
+          .from("documents")
+          .getPublicUrl(filePath);
+
+        if (publicUrlData?.publicUrl) {
+          return { success: true, publicUrl: publicUrlData.publicUrl, cloud: true };
+        }
+      }
+    } catch (err) {
+      console.warn("Falha de rede ao subir imagem de blog no Supabase Storage:", err);
+    }
+  }
+
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => resolve({ success: true, publicUrl: e.target.result, cloud: false });
+    reader.onerror = () => reject(new Error("Erro ao ler imagem localmente"));
+    reader.readAsDataURL(file);
+  });
 }
 
 // ==========================================

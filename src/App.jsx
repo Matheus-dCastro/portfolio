@@ -7,6 +7,8 @@ import ViewDraft from "./components/ViewDraft";
 import OrderDraft from "./components/OrderDraft";
 import LoginDraft from "./components/LoginDraft";
 import NotFound from "./components/NotFound";
+import BlogGateway from "./components/BlogGateway";
+import BlogPage from "./components/BlogPage";
 import ChatWidget from "./components/ChatWidget";
 import { getStoredProjects, getStoredArticles, getStoredThoughts } from "./data/projectsData";
 import { getCurrentUser, onAuthChange, isAuthorizedAdmin } from "./lib/supabaseService";
@@ -22,6 +24,14 @@ function App() {
         ...getStoredThoughts()
       ];
       return all.find((p) => p.id === projectId) || null;
+    }
+    return null;
+  });
+
+  const [selectedBlogPostId, setSelectedBlogPostId] = useState(() => {
+    if (typeof window !== "undefined") {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get("post") || null;
     }
     return null;
   });
@@ -53,6 +63,18 @@ function App() {
       if (rawPath.includes("/contacts")) {
         return "links";
       }
+      if (rawPath.includes("/blog/alomyr")) {
+        return "blog-alomyr";
+      }
+      if (rawPath.endsWith("/blog") || rawPath.endsWith("/blog/")) {
+        if (window.location.search === "?" || window.location.search.includes("gateway")) {
+          return "blog-gateway";
+        }
+        return "blog-tech";
+      }
+      if (rawPath.includes("/blog")) {
+        return "blog-tech";
+      }
       const urlParams = new URLSearchParams(window.location.search);
       const project = urlParams.get("project");
       if (project) {
@@ -61,6 +83,15 @@ function App() {
       const page = urlParams.get("page");
       if (page === "links" || page === "hobbies") {
         return page;
+      }
+      if (page === "blog-gateway" || page === "gateway") {
+        return "blog-gateway";
+      }
+      if (page === "blog-tech" || page === "blog") {
+        return "blog-tech";
+      }
+      if (page === "blog-alomyr") {
+        return "blog-alomyr";
       }
       if (rawPath !== "" && rawPath !== "/" && rawPath !== "/index.html") {
         return "not-found";
@@ -143,6 +174,22 @@ function App() {
         setCurrentPage("links");
         return;
       }
+      if (rawPath.includes("/blog/alomyr")) {
+        setCurrentPage("blog-alomyr");
+        const post = urlParams.get("post");
+        setSelectedBlogPostId(post || null);
+        return;
+      }
+      if (rawPath.includes("/blog")) {
+        if (window.location.search === "?" || window.location.search.includes("gateway")) {
+          setCurrentPage("blog-gateway");
+          return;
+        }
+        setCurrentPage("blog-tech");
+        const post = urlParams.get("post");
+        setSelectedBlogPostId(post || null);
+        return;
+      }
       const urlParams = new URLSearchParams(window.location.search);
       const projId = urlParams.get("project");
       if (projId) {
@@ -161,6 +208,16 @@ function App() {
       const page = urlParams.get("page");
       if (page === "links" || page === "hobbies") {
         setCurrentPage(page);
+      } else if (page === "blog-gateway" || page === "gateway") {
+        setCurrentPage("blog-gateway");
+      } else if (page === "blog-tech" || page === "blog") {
+        setCurrentPage("blog-tech");
+        const post = urlParams.get("post");
+        setSelectedBlogPostId(post || null);
+      } else if (page === "blog-alomyr") {
+        setCurrentPage("blog-alomyr");
+        const post = urlParams.get("post");
+        setSelectedBlogPostId(post || null);
       } else if (rawPath !== "" && rawPath !== "/" && rawPath !== "/index.html") {
         setCurrentPage("not-found");
       } else {
@@ -171,6 +228,39 @@ function App() {
     window.addEventListener("popstate", handlePopState);
     return () => window.removeEventListener("popstate", handlePopState);
   }, []);
+
+  const handleNavigateToBlogGateway = () => {
+    setCurrentPage("blog-gateway");
+    window.history.pushState({}, "", "/blog/?");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const handleSelectBlogChannel = (chan) => {
+    if (chan === "alomyr") {
+      setCurrentPage("blog-alomyr");
+      setSelectedBlogPostId(null);
+      window.history.pushState({}, "", "/blog/alomyr");
+    } else {
+      setCurrentPage("blog-tech");
+      setSelectedBlogPostId(null);
+      window.history.pushState({}, "", "/blog");
+    }
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const handleOpenBlogPost = (post) => {
+    const chan = post.channel || "tech";
+    if (chan === "alomyr") {
+      setCurrentPage("blog-alomyr");
+      setSelectedBlogPostId(post.id);
+      window.history.pushState({}, "", `/blog/alomyr?post=${encodeURIComponent(post.id)}`);
+    } else {
+      setCurrentPage("blog-tech");
+      setSelectedBlogPostId(post.id);
+      window.history.pushState({}, "", `/blog?post=${encodeURIComponent(post.id)}`);
+    }
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   const handleOpenProject = (project, fromAdmin = false) => {
     setSelectedProject(project);
@@ -224,10 +314,70 @@ function App() {
     }
   };
 
+  if (currentPage === "blog-gateway") {
+    return (
+      <>
+        <BlogGateway
+          onSelectChannel={handleSelectBlogChannel}
+          onBackToHome={() => {
+            setCurrentPage("home");
+            window.history.pushState({}, "", "/");
+            window.scrollTo({ top: 0, behavior: "smooth" });
+          }}
+        />
+        <ChatWidget />
+      </>
+    );
+  }
+
+  if (currentPage === "blog-tech") {
+    return (
+      <>
+        <BlogPage
+          channel="tech"
+          initialPostId={selectedBlogPostId}
+          onBackToHome={() => {
+            setCurrentPage("home");
+            window.history.pushState({}, "", "/");
+            window.scrollTo({ top: 0, behavior: "smooth" });
+          }}
+          onNavigateToGateway={handleNavigateToBlogGateway}
+          onSwitchChannel={(newChan) => handleSelectBlogChannel(newChan)}
+          onOpenProject={handleOpenProject}
+        />
+        <ChatWidget />
+      </>
+    );
+  }
+
+  if (currentPage === "blog-alomyr") {
+    return (
+      <>
+        <BlogPage
+          channel="alomyr"
+          initialPostId={selectedBlogPostId}
+          onBackToHome={() => {
+            setCurrentPage("home");
+            window.history.pushState({}, "", "/");
+            window.scrollTo({ top: 0, behavior: "smooth" });
+          }}
+          onNavigateToGateway={handleNavigateToBlogGateway}
+          onSwitchChannel={(newChan) => handleSelectBlogChannel(newChan)}
+          onOpenProject={handleOpenProject}
+        />
+        <ChatWidget />
+      </>
+    );
+  }
+
   if (currentPage === "hobbies") {
     return (
       <>
-        <Hobbies onBackToHome={handleBackToHome} onOpenThought={handleOpenProject} />
+        <Hobbies
+          onBackToHome={handleBackToHome}
+          onOpenThought={handleOpenProject}
+          onNavigateToBlog={handleNavigateToBlogGateway}
+        />
         <ChatWidget />
       </>
     );
@@ -314,6 +464,7 @@ function App() {
               `/?project=${encodeURIComponent(proj.id)}`
             );
           }}
+          onNavigateToBlogPost={handleOpenBlogPost}
         />
         <ChatWidget />
       </>
@@ -356,6 +507,8 @@ function App() {
         }}
         onBackToHome={handleBackToHome}
         onOpenProject={handleOpenProject}
+        onNavigateToBlog={handleNavigateToBlogGateway}
+        onNavigateToBlogPost={handleOpenBlogPost}
       />
       <ChatWidget />
     </>

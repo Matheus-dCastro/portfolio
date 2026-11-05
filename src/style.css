@@ -2926,3 +2926,32 @@ footer {
   border-top: 1px solid rgba(255, 255, 255, 0.05);
   flex-wrap: wrap;
 }
+
+/* ==========================================================================
+   BLOG NAVIGATION & HERO BUTTONS
+   ========================================================================== */
+.nav-blog-link {
+  position: relative;
+  font-weight: 600;
+  color: #c4b5fd !important;
+  transition: all 0.2s ease;
+}
+
+.nav-blog-link:hover {
+  color: #ffffff !important;
+  text-shadow: 0 0 10px rgba(167, 139, 250, 0.6);
+}
+
+.hero-blog-btn {
+  border-color: rgba(167, 139, 250, 0.45) !important;
+  color: #c4b5fd !important;
+  background: rgba(139, 92, 246, 0.08) !important;
+}
+
+.hero-blog-btn:hover {
+  background: rgba(139, 92, 246, 0.22) !important;
+  border-color: #a78bfa !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 16px rgba(167, 139, 250, 0.35);
+  transform: translateY(-2px);
+}

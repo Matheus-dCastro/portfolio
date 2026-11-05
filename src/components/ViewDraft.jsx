@@ -5,6 +5,7 @@ import {
   getStoredThoughts,
   convertGoogleDocsToEmbedUrl
 } from "../data/projectsData";
+import { getStoredBlogPosts } from "../data/blogData";
 import { useLanguage } from "../context/useLanguage";
 import LanguageSwitcher from "./LanguageSwitcher";
 import ShareButton from "./ShareButton";
@@ -29,7 +30,7 @@ function getInitialProject(propProject) {
   return allItems.length > 0 ? allItems[0] : null;
 }
 
-export default function ViewDraft({ project: propProject, onBackToHome, onSelectProject }) {
+export default function ViewDraft({ project: propProject, onBackToHome, onSelectProject, onNavigateToBlogPost }) {
   const { t, lang } = useLanguage();
   const [internalProject, setInternalProject] = useState(() => getInitialProject(propProject));
   const [activeContentTab, setActiveContentTab] = useState("auto"); // 'auto' | 'readme' | 'gdocs' | 'pdf'
@@ -107,6 +108,9 @@ export default function ViewDraft({ project: propProject, onBackToHome, onSelect
   const linkedProject = project.relatedProjectId
     ? getStoredProjects().find((p) => p.id === project.relatedProjectId)
     : null;
+  const linkedBlogPost = getStoredBlogPosts().find(
+    (b) => b.relatedProjectId === project.id || (project.relatedBlogPostId && b.id === project.relatedBlogPostId)
+  );
 
   const isFromAdmin = typeof window !== "undefined" && window.location.search.includes("from=admin");
 
@@ -354,6 +358,41 @@ export default function ViewDraft({ project: propProject, onBackToHome, onSelect
                 onClick={() => onSelectProject && onSelectProject(linkedProject)}
               >
                 {t("view.view_attached_project")}
+              </button>
+            </div>
+          )}
+
+          {linkedBlogPost && (
+            <div className="linked-item-banner blog-linked-banner">
+              <div className="linked-banner-icon" style={{ borderColor: "#a78bfa", color: "#c084fc", background: "rgba(139, 92, 246, 0.15)" }}>
+                📝
+              </div>
+              <div className="linked-banner-info">
+                <span className="linked-banner-tag" style={{ color: "#c084fc" }}>
+                  {lang === "en" ? "Deep-Dive Blog Post" : "Post Aprofundado no Blog"}
+                </span>
+                <h4 className="linked-banner-title">
+                  {lang === "en" ? (linkedBlogPost.titleEn || linkedBlogPost.titlePt) : linkedBlogPost.titlePt}
+                </h4>
+                <p className="linked-banner-desc">
+                  {lang === "en"
+                    ? (linkedBlogPost.summaryEn || linkedBlogPost.summaryPt)
+                    : linkedBlogPost.summaryPt}
+                </p>
+              </div>
+              <button
+                type="button"
+                className="btn-open-linked"
+                style={{ borderColor: "#8b5cf6", background: "rgba(139, 92, 246, 0.2)", color: "#fff" }}
+                onClick={() => {
+                  if (onNavigateToBlogPost) {
+                    onNavigateToBlogPost(linkedBlogPost);
+                  } else {
+                    window.location.href = `${(linkedBlogPost.channel || "tech") === "alomyr" ? "/blog/alomyr" : "/blog"}?post=${encodeURIComponent(linkedBlogPost.id)}`;
+                  }
+                }}
+              >
+                {lang === "en" ? "Read on Blog ↗" : "Ler no Blog ↗"}
               </button>
             </div>
           )}
