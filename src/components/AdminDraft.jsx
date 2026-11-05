@@ -16,7 +16,9 @@ import {
   getStoredHobbies,
   saveHobbies,
   DEFAULT_HOBBIES_LIST,
-  convertGoogleDocsToEmbedUrl
+  convertGoogleDocsToEmbedUrl,
+  getStoredProfileConfig,
+  saveProfileConfig
 } from "../data/projectsData";
 import {
   fetchWorks,
@@ -41,6 +43,9 @@ import {
   uploadDrawingImage,
   persistCvConfig,
   uploadCvPdf,
+  uploadProfileImage,
+  persistProfileConfig,
+  fetchProfileConfig,
   persistAgentConfig,
   persistCustomHobby,
   persistHobbies,
@@ -218,6 +223,50 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
   const blogGalleryInputRef = useRef(null);
 
   const [currentUser, setCurrentUser] = useState(null);
+  const [profilePhotoUrl, setProfilePhotoUrl] = useState(() => getStoredProfileConfig()?.photoUrl || "");
+  const [isUploadingProfilePhoto, setIsUploadingProfilePhoto] = useState(false);
+  const profilePhotoInputRef = useRef(null);
+
+  useEffect(() => {
+    fetchProfileConfig().then((cfg) => {
+      if (cfg?.photoUrl) setProfilePhotoUrl(cfg.photoUrl);
+    });
+  }, []);
+
+  const handleSaveProfilePhoto = async (e) => {
+    if (e) e.preventDefault();
+    await persistProfileConfig({ photoUrl: profilePhotoUrl.trim(), updatedAt: new Date().toISOString() });
+    showToast("Foto de perfil atualizada com sucesso!");
+  };
+
+  const handleUploadProfilePhoto = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setIsUploadingProfilePhoto(true);
+    try {
+      const res = await uploadProfileImage(file);
+      if (res.publicUrl) {
+        setProfilePhotoUrl(res.publicUrl);
+        await persistProfileConfig({ photoUrl: res.publicUrl, updatedAt: new Date().toISOString() });
+        showToast(res.cloud ? "Foto enviada para a nuvem e salva!" : "Foto salva localmente!");
+      }
+    } catch (err) {
+      alert("Erro ao enviar foto: " + err.message);
+    } finally {
+      setIsUploadingProfilePhoto(false);
+      if (profilePhotoInputRef.current) profilePhotoInputRef.current.value = "";
+    }
+  };
+
+  const handleSyncPortfolioProject = async () => {
+    const portfolioProj = items.find((p) => p.id === "portfolio-ecosystem");
+    if (portfolioProj) {
+      const res = await persistWork(portfolioProj);
+      showToast(res.cloud ? "Projeto do portfólio sincronizado no Supabase Cloud!" : "Salvo localmente (conecte para nuvem)!");
+    } else {
+      showToast("Projeto do portfólio não encontrado na lista.");
+    }
+  };
 
   useEffect(() => {
     getCurrentUser().then((u) => {
@@ -228,7 +277,15 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
   useEffect(() => {
     if (activeTab === "projects") {
       fetchWorks(true).then((data) => {
-        if (Array.isArray(data)) setItems(data);
+        if (Array.isArray(data)) {
+          setItems(data);
+          if (currentUser) {
+            const portfolioProj = data.find((p) => p.id === "portfolio-ecosystem");
+            if (portfolioProj) {
+              persistWork(portfolioProj);
+            }
+          }
+        }
       });
     } else if (activeTab === "articles") {
       fetchArticles(true).then((data) => {
@@ -1572,7 +1629,7 @@ DIRETRIZ MÁXIMA DE CONCISÃO:
               className={`cat-btn ${activeTab === "cv" ? "active" : ""}`}
               onClick={() => handleTabChange("cv")}
             >
-              Currículo (CV)
+              Currículo & Perfil
             </button>
             <button
               type="button"
@@ -2289,6 +2346,105 @@ DIRETRIZ MÁXIMA DE CONCISÃO:
       ) : activeTab === "cv" ? (
         <div className="cv-admin-dashboard">
           <div className="cv-dash-left">
+            {/* Foto de Perfil & Avatar Section */}
+            <div className="cv-card-section" style={{ marginBottom: "2rem" }}>
+              <div className="cv-section-header">
+                <div>
+                  <h2>Foto de Perfil & Identidade Visual</h2>
+                  <p className="cv-section-subtitle">
+                    Personalize sua foto oficial exibida no Hero da página inicial, no leitor de matérias do blog e na identidade do portfólio.
+                  </p>
+                </div>
+                <div className="cv-status-badge">
+                  <span className="cv-status-dot"></span> Identidade Visual
+                </div>
+              </div>
+
+              <div className="profile-photo-editor-layout" style={{ display: "flex", gap: "2rem", alignItems: "center", flexWrap: "wrap", marginTop: "1.25rem" }}>
+                <div className="profile-preview-box" style={{ textAlign: "center" }}>
+                  <div style={{
+                    width: "90px",
+                    height: "90px",
+                    borderRadius: "50%",
+                    overflow: "hidden",
+                    border: "2px solid #8b5cf6",
+                    boxShadow: "0 0 20px rgba(139, 92, 246, 0.4)",
+                    margin: "0 auto 0.5rem",
+                    background: "#08080e"
+                  }}>
+                    <img
+                      src={profilePhotoUrl || "/assets/img/alomyr.jpeg"}
+                      alt="Prévia da Foto"
+                      style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                    />
+                  </div>
+                  <span style={{ fontSize: "0.72rem", color: "#9ca3af", textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                    Prévia ao Vivo
+                  </span>
+                </div>
+
+                <div className="profile-inputs-box" style={{ flex: 1, minWidth: "260px" }}>
+                  <form onSubmit={handleSaveProfilePhoto} style={{ display: "flex", flexDirection: "column", gap: "0.85rem" }}>
+                    <div>
+                      <label style={{ fontSize: "0.82rem", fontWeight: 700, color: "#e2e8f0", display: "block", marginBottom: "0.35rem" }}>
+                        URL Direta da Foto (Web, Supabase, GitHub, etc.)
+                      </label>
+                      <input
+                        type="url"
+                        className="cv-input"
+                        placeholder="https://exemplo.com/sua-foto.jpg (ou envie um arquivo abaixo)"
+                        value={profilePhotoUrl}
+                        onChange={(e) => setProfilePhotoUrl(e.target.value)}
+                      />
+                    </div>
+
+                    <div style={{ display: "flex", gap: "0.65rem", flexWrap: "wrap", alignItems: "center" }}>
+                      <input
+                        type="file"
+                        ref={profilePhotoInputRef}
+                        onChange={handleUploadProfilePhoto}
+                        accept="image/*"
+                        style={{ display: "none" }}
+                      />
+                      <button
+                        type="button"
+                        className="btn-cv-secondary"
+                        onClick={() => profilePhotoInputRef.current?.click()}
+                        disabled={isUploadingProfilePhoto}
+                        style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}
+                      >
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                        <span>{isUploadingProfilePhoto ? "Enviando..." : "Upload do Computador"}</span>
+                      </button>
+
+                      <button
+                        type="submit"
+                        className="btn-cv-primary"
+                        style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}
+                      >
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                        <span>Salvar Foto</span>
+                      </button>
+
+                      {profilePhotoUrl && (
+                        <button
+                          type="button"
+                          className="btn-cv-danger"
+                          onClick={async () => {
+                            setProfilePhotoUrl("");
+                            await persistProfileConfig({ photoUrl: "", updatedAt: new Date().toISOString() });
+                            showToast("Foto restaurada para o padrão!");
+                          }}
+                        >
+                          Restaurar Padrão
+                        </button>
+                      )}
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+
             <div className="cv-card-section">
               <div className="cv-section-header">
                 <div>
@@ -3878,6 +4034,16 @@ DIRETRIZ MÁXIMA DE CONCISÃO:
             <div className="explorer-header">
               <h3>{activeTab === "projects" ? "Meus Projetos" : activeTab === "articles" ? "Artigos & Papers" : "Pensamentos"}</h3>
               <div className="explorer-header-actions">
+                {activeTab === "projects" && (
+                  <button
+                    className="btn-new-item"
+                    style={{ background: "rgba(139, 92, 246, 0.2)", border: "1px solid #8b5cf6", color: "#e0e7ff" }}
+                    onClick={handleSyncPortfolioProject}
+                    title="Sincronizar projeto do portfólio no Supabase Cloud"
+                  >
+                    Sync Portfólio
+                  </button>
+                )}
                 <button className="btn-new-item" onClick={clearForm} title="Criar novo item do zero">
                   + Novo
                 </button>

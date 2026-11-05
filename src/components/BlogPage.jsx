@@ -14,7 +14,7 @@ import {
   getYoutubeEmbedUrl,
   BLOG_CHANNELS
 } from "../data/blogData";
-import { getStoredProjects, getStoredArticles } from "../data/projectsData";
+import { getStoredProjects, getStoredArticles, getStoredProfileConfig } from "../data/projectsData";
 import "./BlogPage.css";
 
 export default function BlogPage({
@@ -310,7 +310,11 @@ export default function BlogPage({
             </p>
 
             <div className="reader-author-bar">
-              <img src="/perfil.webp" alt="Matheus de Castro" className="reader-author-avatar" />
+              <img
+                src={getStoredProfileConfig()?.photoUrl || "/perfil.webp"}
+                alt="Matheus de Castro"
+                className="reader-author-avatar"
+              />
               <div>
                 <span className="reader-author-name">{activePost.author || "Matheus de Castro"}</span>
                 <span className="reader-author-role">

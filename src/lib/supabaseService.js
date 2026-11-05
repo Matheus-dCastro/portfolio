@@ -19,7 +19,9 @@ import {
   getStoredCustomHobby,
   saveCustomHobby,
   getStoredHobbies,
-  saveHobbies
+  saveHobbies,
+  getStoredProfileConfig,
+  saveProfileConfig
 } from "../data/projectsData.js";
 import {
   getStoredBlogPosts,
@@ -1431,6 +1433,59 @@ export async function uploadDrawingImage(file) {
     reader.onerror = (err) => reject(err);
     reader.readAsDataURL(file);
   });
+}
+
+export async function uploadProfileImage(file) {
+  if (!file) throw new Error("Nenhum arquivo de imagem fornecido.");
+
+  if (isSupabaseConfigured && supabase) {
+    try {
+      const timestamp = Date.now();
+      const cleanName = (file.name || "profile.webp").replace(/[^a-zA-Z0-9._-]/g, "_");
+      const filePath = `avatars/${timestamp}-${cleanName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("documents")
+        .upload(filePath, file, {
+          cacheControl: "3600",
+          upsert: true,
+          contentType: file.type || "image/webp"
+        });
+
+      if (!uploadError) {
+        const { data: publicUrlData } = supabase.storage
+          .from("documents")
+          .getPublicUrl(filePath);
+
+        if (publicUrlData?.publicUrl) {
+          return { success: true, publicUrl: publicUrlData.publicUrl, cloud: true };
+        }
+      } else {
+        console.warn("Upload de foto de perfil avisou:", uploadError.message);
+      }
+    } catch (err) {
+      console.warn("Falha de rede ao subir foto de perfil:", err);
+    }
+  }
+
+  // Fallback em Base64 para funcionamento offline transparente
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      resolve({ success: true, publicUrl: reader.result, cloud: false });
+    };
+    reader.onerror = (err) => reject(err);
+    reader.readAsDataURL(file);
+  });
+}
+
+export async function fetchProfileConfig() {
+  return getStoredProfileConfig();
+}
+
+export async function persistProfileConfig(config) {
+  saveProfileConfig(config);
+  return { success: true, cloud: false };
 }
 
 export async function persistAgentConfig(

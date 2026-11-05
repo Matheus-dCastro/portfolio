@@ -162,7 +162,7 @@
 
 /* Main Article Container */
 .view-main-article {
-  max-width: 1040px;
+  max-width: 1080px;
   width: 100%;
   margin: 0 auto;
   padding: 2.5rem 2rem 5rem;
@@ -835,55 +835,80 @@
   border-color: #8b5cf6;
 }
 
-/* Contextual Alomyr Assistant Card */
+/* Contextual Alomyr Assistant Card - Panoramic, Balanced & Rich */
 .view-alomyr-contextual-section {
   width: 100%;
   max-width: 100%;
-  margin: 2.5rem 0 2rem;
+  margin: 3.5rem 0 2.5rem;
   box-sizing: border-box;
 }
 
 .alomyr-context-card {
-  background: linear-gradient(135deg, rgba(139, 92, 246, 0.08) 0%, rgba(15, 15, 23, 0.95) 100%);
-  border: 1px solid rgba(139, 92, 246, 0.28);
-  border-radius: 18px;
-  padding: 1.5rem 2rem;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.06);
-  backdrop-filter: blur(14px);
+  background: radial-gradient(circle at 12% 18%, rgba(139, 92, 246, 0.16) 0%, rgba(10, 10, 16, 0.98) 75%);
+  border: 1px solid rgba(139, 92, 246, 0.32);
+  border-radius: 20px;
+  padding: 2.2rem 2.4rem;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(16px);
   transition: all 0.25s ease;
   width: 100%;
   box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 1.6rem;
 }
 
 .alomyr-context-card:hover {
-  border-color: rgba(139, 92, 246, 0.45);
-  box-shadow: 0 14px 38px rgba(139, 92, 246, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  border-color: rgba(139, 92, 246, 0.5);
+  box-shadow: 0 20px 48px rgba(139, 92, 246, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
-.alomyr-context-header {
+.alomyr-context-top-bar {
   display: flex;
-  gap: 1.1rem;
+  justify-content: space-between;
   align-items: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.alomyr-context-identity {
+  display: flex;
+  align-items: center;
+  gap: 1.4rem;
+  flex: 1;
+  min-width: 280px;
 }
 
 .alomyr-context-avatar {
-  width: 48px;
-  height: 48px;
+  position: relative;
+  width: 62px;
+  height: 62px;
   border-radius: 50%;
-  background: rgba(139, 92, 246, 0.15);
-  border: 1px solid rgba(139, 92, 246, 0.35);
+  background: rgba(139, 92, 246, 0.18);
+  border: 1.5px solid rgba(167, 139, 250, 0.45);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 16px rgba(139, 92, 246, 0.3);
+  box-shadow: 0 0 24px rgba(139, 92, 246, 0.35);
   flex-shrink: 0;
-  overflow: hidden;
 }
 
 .alomyr-banner-wolf-img {
-  width: 32px;
-  height: 32px;
+  width: 40px;
+  height: 40px;
   object-fit: contain;
+}
+
+.avatar-status-ring {
+  position: absolute;
+  bottom: 0px;
+  right: 0px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #8b5cf6;
+  border: 2px solid #0a0a10;
+  box-shadow: 0 0 8px #8b5cf6;
 }
 
 .alomyr-context-headings {
@@ -893,16 +918,17 @@
 .alomyr-context-badge {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  font-size: 0.7rem;
+  gap: 6px;
+  font-size: 0.72rem;
   font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.09em;
   color: #c4b5fd;
-  background: rgba(139, 92, 246, 0.16);
-  padding: 2px 8px;
+  background: rgba(139, 92, 246, 0.18);
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  padding: 3px 10px;
   border-radius: 999px;
-  margin-bottom: 0.3rem;
+  margin-bottom: 0.35rem;
 }
 
 .alomyr-context-badge .badge-dot {
@@ -913,110 +939,181 @@
 }
 
 .alomyr-context-title {
-  font-size: 1.22rem;
+  font-size: 1.35rem;
   font-weight: 800;
   color: #ffffff;
-  margin: 0 0 0.2rem 0;
-  letter-spacing: -0.01em;
+  margin: 0 0 0.3rem 0;
+  letter-spacing: -0.015em;
+  line-height: 1.25;
 }
 
 .alomyr-context-desc {
-  font-size: 0.85rem;
+  font-size: 0.88rem;
   color: #94a3b8;
   margin: 0;
-  line-height: 1.4;
+  line-height: 1.5;
+  max-width: 680px;
 }
 
-.alomyr-context-chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  margin: 0.95rem 0 1rem;
-}
-
-.alomyr-context-chip-btn {
+.alomyr-open-full-chat-btn {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  background: rgba(255, 255, 255, 0.035);
-  border: 1px solid rgba(139, 92, 246, 0.22);
-  border-radius: 999px;
-  padding: 6px 13px;
-  font-size: 0.79rem;
-  font-weight: 500;
+  gap: 8px;
+  background: rgba(139, 92, 246, 0.15);
+  border: 1px solid rgba(139, 92, 246, 0.38);
   color: #e2e8f0;
-  cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  text-align: left;
-  white-space: nowrap;
-}
-
-.alomyr-context-chip-btn:hover {
-  background: rgba(139, 92, 246, 0.18);
-  border-color: #8b5cf6;
-  color: #ffffff;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.25);
-}
-
-.alomyr-context-chip-btn .chip-spark {
-  font-size: 0.85rem;
-}
-
-.alomyr-context-form {
-  display: flex;
-  gap: 0.65rem;
-  align-items: center;
-  width: 100%;
-}
-
-.alomyr-context-input {
-  flex: 1;
-  min-width: 0;
-  height: 42px;
-  background: #09090f;
-  border: 1px solid #272738;
-  border-radius: 10px;
-  padding: 0 14px;
-  color: #ffffff;
-  font-size: 0.88rem;
-  outline: none;
-  transition: all 0.2s ease;
-  box-sizing: border-box;
-}
-
-.alomyr-context-input:focus {
-  border-color: #8b5cf6;
-  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.22);
-}
-
-.alomyr-form-buttons {
-  display: flex;
-  align-items: center;
-  gap: 0.55rem;
-  flex-shrink: 0;
-}
-
-.alomyr-context-submit-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
-  color: #ffffff;
-  border: none;
-  border-radius: 10px;
-  height: 42px;
-  padding: 0 16px;
-  font-size: 0.84rem;
+  border-radius: 12px;
+  padding: 0.75rem 1.35rem;
+  font-size: 0.86rem;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.2s ease;
   white-space: nowrap;
 }
 
+.alomyr-open-full-chat-btn:hover {
+  background: rgba(139, 92, 246, 0.28);
+  border-color: #a78bfa;
+  color: #ffffff;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(139, 92, 246, 0.3);
+}
+
+/* Middle Section: Suggestions Grid */
+.alomyr-context-suggestions-area {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.suggestions-label {
+  font-size: 0.76rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #a78bfa;
+}
+
+.alomyr-context-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.9rem;
+  width: 100%;
+}
+
+.alomyr-prompt-card-btn {
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  border-radius: 14px;
+  padding: 1.05rem 1.15rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  min-height: 94px;
+  box-sizing: border-box;
+}
+
+.alomyr-prompt-card-btn:hover {
+  background: rgba(139, 92, 246, 0.12);
+  border-color: rgba(167, 139, 250, 0.55);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(139, 92, 246, 0.22);
+}
+
+.prompt-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.55rem;
+}
+
+.prompt-card-tag {
+  font-size: 0.7rem;
+  font-weight: 800;
+  color: #8b5cf6;
+  letter-spacing: 0.05em;
+}
+
+.prompt-card-arrow {
+  color: #64748b;
+  transition: all 0.2s ease;
+}
+
+.alomyr-prompt-card-btn:hover .prompt-card-arrow {
+  color: #a78bfa;
+  transform: translateX(3px);
+}
+
+.prompt-card-text {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #e2e8f0;
+  line-height: 1.45;
+}
+
+/* Bottom Input Bar */
+.alomyr-context-form {
+  width: 100%;
+  margin-top: 0.2rem;
+}
+
+.alomyr-input-container {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  background: #08080e;
+  border: 1px solid #232336;
+  border-radius: 14px;
+  padding: 5px 6px 5px 16px;
+  transition: all 0.2s ease;
+}
+
+.alomyr-input-container:focus-within {
+  border-color: #8b5cf6;
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.25);
+  background: #0c0c16;
+}
+
+.input-search-icon {
+  flex-shrink: 0;
+}
+
+.alomyr-context-input {
+  flex: 1;
+  min-width: 0;
+  height: 42px;
+  background: transparent;
+  border: none;
+  color: #ffffff;
+  font-size: 0.92rem;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.alomyr-context-submit-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  height: 42px;
+  padding: 0 20px;
+  font-size: 0.86rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
 .alomyr-context-submit-btn:hover:not(:disabled) {
   transform: translateY(-1px);
-  box-shadow: 0 4px 15px rgba(139, 92, 246, 0.45);
+  box-shadow: 0 4px 16px rgba(139, 92, 246, 0.45);
 }
 
 .alomyr-context-submit-btn:disabled {
@@ -1024,24 +1121,18 @@
   cursor: not-allowed;
 }
 
-.alomyr-context-chat-btn {
-  background: transparent;
-  border: 1px solid rgba(139, 92, 246, 0.35);
-  color: #c4b5fd;
-  border-radius: 10px;
-  height: 42px;
-  padding: 0 14px;
-  font-size: 0.82rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  white-space: nowrap;
-}
-
-.alomyr-context-chat-btn:hover {
-  background: rgba(139, 92, 246, 0.15);
-  border-color: #8b5cf6;
-  color: #ffffff;
+@media (max-width: 900px) {
+  .alomyr-context-cards-grid {
+    grid-template-columns: 1fr;
+  }
+  .alomyr-context-top-bar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .alomyr-open-full-chat-btn {
+    width: 100%;
+    justify-content: center;
+  }
 }
 
 /* Responsive */

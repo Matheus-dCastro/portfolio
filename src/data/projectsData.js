@@ -1081,7 +1081,8 @@ const STORAGE_KEYS = {
   EXPERIENCES: "portfolio_experiences_data_v1",
   CV_CONFIG: "portfolio_cv_config_v1",
   DRAWINGS: "portfolio_drawings_data_v1",
-  CUSTOM_HOBBY: "portfolio_custom_hobby_v1"
+  CUSTOM_HOBBY: "portfolio_custom_hobby_v1",
+  PROFILE_CONFIG: "portfolio_profile_config_v1"
 };
 
 // Helper methods with localStorage fallback
@@ -1419,5 +1420,33 @@ export function saveCustomHobby(data) {
     localStorage.setItem(STORAGE_KEYS.CUSTOM_HOBBY, JSON.stringify(data));
   } catch (e) {
     console.error("Erro ao salvar custom hobby:", e);
+  }
+}
+
+export const DEFAULT_PROFILE_CONFIG = {
+  photoUrl: "",
+  updatedAt: "2026-11-05"
+};
+
+export function getStoredProfileConfig() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEYS.PROFILE_CONFIG);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed && typeof parsed === "object") {
+        return { ...DEFAULT_PROFILE_CONFIG, ...parsed };
+      }
+    }
+  } catch (e) {
+    console.error("Erro ao ler configuracao de foto de perfil:", e);
+  }
+  return DEFAULT_PROFILE_CONFIG;
+}
+
+export function saveProfileConfig(config) {
+  try {
+    localStorage.setItem(STORAGE_KEYS.PROFILE_CONFIG, JSON.stringify(config));
+  } catch (e) {
+    console.error("Erro ao salvar configuracao de foto de perfil:", e);
   }
 }

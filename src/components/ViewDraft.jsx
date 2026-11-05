@@ -517,44 +517,72 @@ export default function ViewDraft({ project: propProject, onBackToHome, onSelect
           </div>
         )}
 
-        {/* Contextual Alomyr Assistant Section */}
+        {/* Contextual Alomyr Assistant Section - Panoramic & Rich Horizontal Banner */}
         <section className="view-alomyr-contextual-section">
           <div className="alomyr-context-card">
-            <div className="alomyr-context-header">
-              <div className="alomyr-context-avatar">
-                <img src="/wolf(2).png" alt="Alomyr" className="alomyr-banner-wolf-img" />
-              </div>
-              <div className="alomyr-context-headings">
-                <div className="alomyr-context-badge">
-                  <span className="badge-dot"></span> {t("view.alomyr_badge")}
+            {/* Top Row: Mascot Identity & Direct Chat Action */}
+            <div className="alomyr-context-top-bar">
+              <div className="alomyr-context-identity">
+                <div className="alomyr-context-avatar">
+                  <img src="/wolf(2).png" alt="Alomyr" className="alomyr-banner-wolf-img" />
+                  <span className="avatar-status-ring"></span>
                 </div>
-                <h3 className="alomyr-context-title">
-                  {t("view.alomyr_title").replace("{type}", itemTypeName)}
-                </h3>
-                <p className="alomyr-context-desc">
-                  {t("view.alomyr_subtitle")}
-                </p>
+                <div className="alomyr-context-headings">
+                  <div className="alomyr-context-badge">
+                    <span className="badge-dot"></span>
+                    <span>{t("view.alomyr_badge")}</span>
+                  </div>
+                  <h3 className="alomyr-context-title">
+                    {t("view.alomyr_title").replace("{type}", itemTypeName)}
+                  </h3>
+                  <p className="alomyr-context-desc">
+                    {t("view.alomyr_subtitle")}
+                  </p>
+                </div>
               </div>
-            </div>
 
-            {/* Quick Suggested Prompt Chips */}
-            <div className="alomyr-context-chips">
-              {contextualQuestions.map((q, idx) => (
+              <div className="alomyr-context-top-actions">
                 <button
-                  key={idx}
                   type="button"
-                  className="alomyr-context-chip-btn"
-                  onClick={() => handleAskAlomyr(`[Sobre o ${itemTypeName} "${projectTitle}"]: ${q}`)}
+                  className="alomyr-open-full-chat-btn"
+                  onClick={() => handleAskAlomyr()}
+                  title={t("view.alomyr_open_btn")}
                 >
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: "4px" }}>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
                   </svg>
-                  <span>{q}</span>
+                  <span>{t("view.alomyr_open_btn")}</span>
                 </button>
-              ))}
+              </div>
             </div>
 
-            {/* Inline Input Form */}
+            {/* Middle Section: 3 Horizontal Full-Span Prompt Cards */}
+            <div className="alomyr-context-suggestions-area">
+              <span className="suggestions-label">
+                {lang === "en" ? "Suggested contextual inquiries:" : "Perguntas sugeridas sobre este conteúdo:"}
+              </span>
+              <div className="alomyr-context-cards-grid">
+                {contextualQuestions.map((q, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    className="alomyr-prompt-card-btn"
+                    onClick={() => handleAskAlomyr(`[Sobre o ${itemTypeName} "${projectTitle}"]: ${q}`)}
+                  >
+                    <div className="prompt-card-header">
+                      <span className="prompt-card-tag">#{idx + 1}</span>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="prompt-card-arrow">
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                        <polyline points="12 5 19 12 12 19"></polyline>
+                      </svg>
+                    </div>
+                    <span className="prompt-card-text">{q}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Bottom Section: Full-Width Search/Prompt Bar */}
             <form
               className="alomyr-context-form"
               onSubmit={(e) => {
@@ -566,14 +594,18 @@ export default function ViewDraft({ project: propProject, onBackToHome, onSelect
                 setInlineQuestion("");
               }}
             >
-              <input
-                type="text"
-                className="alomyr-context-input"
-                value={inlineQuestion}
-                onChange={(e) => setInlineQuestion(e.target.value)}
-                placeholder={t("view.alomyr_input_placeholder").replace("{type}", itemTypeName)}
-              />
-              <div className="alomyr-form-buttons">
+              <div className="alomyr-input-container">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="input-search-icon">
+                  <circle cx="11" cy="11" r="8"></circle>
+                  <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                <input
+                  type="text"
+                  className="alomyr-context-input"
+                  value={inlineQuestion}
+                  onChange={(e) => setInlineQuestion(e.target.value)}
+                  placeholder={t("view.alomyr_input_placeholder").replace("{type}", itemTypeName)}
+                />
                 <button
                   type="submit"
                   className="alomyr-context-submit-btn"
@@ -584,14 +616,6 @@ export default function ViewDraft({ project: propProject, onBackToHome, onSelect
                     <line x1="22" y1="2" x2="11" y2="13"></line>
                     <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
                   </svg>
-                </button>
-                <button
-                  type="button"
-                  className="alomyr-context-chat-btn"
-                  onClick={() => handleAskAlomyr()}
-                  title="Abrir Alomyr Chat"
-                >
-                  {t("view.alomyr_open_btn")}
                 </button>
               </div>
             </form>

@@ -13,8 +13,8 @@ import logoWolf from "./assets/img/wolf(2).png";
 import fotoAlomyr from "./assets/img/alomyr.jpeg";
 import cvMatheus from "./docs/Matheus Vinicius Silva Freire de Castro.pdf";
 import Rodape from "./components/Rodape";
-import { fetchWorks, fetchArticles, fetchExperiences } from "./lib/supabaseService";
-import { getStoredProjects, getStoredArticles, getStoredExperiences } from "./data/projectsData";
+import { fetchWorks, fetchArticles, fetchExperiences, fetchProfileConfig } from "./lib/supabaseService";
+import { getStoredProjects, getStoredArticles, getStoredExperiences, getStoredProfileConfig } from "./data/projectsData";
 import { useLanguage } from "./context/useLanguage";
 
 function Home({
@@ -30,6 +30,15 @@ function Home({
   const [projectsCount, setProjectsCount] = useState(() => getStoredProjects().length);
   const [articlesCount, setArticlesCount] = useState(() => getStoredArticles().length);
   const [activeShowcaseTab, setActiveShowcaseTab] = useState("projects"); // 'projects' | 'articles'
+  const [currentProfilePhoto, setCurrentProfilePhoto] = useState(() => {
+    return getStoredProfileConfig()?.photoUrl || fotoAlomyr;
+  });
+
+  useEffect(() => {
+    fetchProfileConfig().then((cfg) => {
+      if (cfg?.photoUrl) setCurrentProfilePhoto(cfg.photoUrl);
+    });
+  }, []);
 
   useEffect(() => {
     fetchExperiences().then((loaded) => {
@@ -89,7 +98,7 @@ function Home({
         <Perfil
           nomeCompleto={dados.nomeCompleto}
           description={descriptionPerfil}
-          foto={fotoPerfil}
+          foto={currentProfilePhoto}
           cv={cv}
           onNavigateToBlog={onNavigateToBlog}
         />

@@ -9,41 +9,49 @@
 ---
 
 > [!IMPORTANT]
-> ### 🛡️ DIRETRIZ MANDATÓRIA DE SEGURANÇA (A SER ATUALIZADA):
+>
+> ### 🛡️ DIRETRIZ MANDATÓRIA DE SEGURANÇA (A SER ATUALIZADA)
+>
 > **NADA de segurança, chaves de API secretas (Groq/OpenAI/etc.) ou credenciais/tokens de login deve ser guardado no `localStorage` para manter o sistema seguro.**
-> 
+>
 > **Motivação:** O `localStorage` é compartilhado no contexto do navegador e vulnerável a scripts maliciosos (XSS) e inspeção direta pelo usuário/visitante.
-> 
+>
 > **Plano de Blindagem para as Próximas Atualizações:**
+>
 > 1. **Zero Chaves de IA no Navegador:** As chaves de LLM (ex: `GROQ_API_KEY`) devem residir exclusivamente nos *Secrets do Supabase* (`supabase secrets set GROQ_API_KEY=...`) e serem invocadas através de uma **Edge Function Serverless** (`supabase.functions.invoke('chat-qwen')`), sem nunca trafegar para o frontend.
 > 2. **Autenticação Segura:** Sessões de login de administrador devem usar tokens efêmeros gerenciados diretamente pelo Supabase Auth (com refresh token seguro), sem persistência manual de senhas ou tokens administrativos em texto puro no `localStorage`.
 > 3. **Uso Restrito do LocalStorage:** O `localStorage` deve ser mantido **apenas e exclusivamente** como cache offline secundário para conteúdos públicos (textos de projetos, artigos já publicados e temas visuais).
 
 ## 🔒 PRÓXIMA ATUALIZAÇÃO: Refatoração de Segurança & Zero Secrets no LocalStorage
+
 **Meta:** Eliminar qualquer chave de API ou credencial do cliente/localStorage, isolando a inferência na nuvem Supabase.
 
 ### Bloco 12: Migração para Supabase Edge Function (`/chat-qwen`)
+
 - [x] Criar a Edge Function `supabase/functions/chat-qwen/index.ts` com chamada segura à Groq API, injeção de contexto RAG e guardrails na nuvem.
 - [ ] Salvar a secret no Supabase Cloud (Aguardando OK do usuário para deploy):
+
   ```bash
   npx supabase secrets set GROQ_API_KEY=sua-chave-aqui
   ```
+
 - [ ] Fazer deploy da Edge Function na nuvem Supabase (Aguardando OK do usuário para deploy):
+
   ```bash
   npx supabase functions deploy chat-qwen
   ```
+
 - [x] Atualizar `src/lib/llmService.js` para chamar `supabase.functions.invoke('chat-qwen', ...)` em vez de chamar diretamente a API da Groq no frontend.
 - [x] Remover permanentemente quaisquer leituras ou fallbacks de chaves secretas no `localStorage` do navegador (removida codificação XOR estática e leituras de tokens locais).
 - [x] Garantir que o `localStorage` armazene estritamente cache de dados públicos já exibidos e preferências visuais.
 
-
-### ✅ Tarefas Concluídas nesta Sprint:
+### ✅ Tarefas Concluídas nesta Sprint
 
 - [x] **Botão do Artigo para Detalhes:** Estilizado com padrão visual unificado `.link-arrow highlight` com seta animada `<span>→</span>`, links diretos para leitura em PT/EN e rota corrigida no `App.jsx` + `ViewDraft.jsx` para suportar refresh direto.
 - [x] **Botão de Compartilhar:** Componente universal `ShareButton` implementado com suporte à Web Share API e fallback com feedback visual ("Copiado!") nas abas de Artigos, Projetos, Pensamentos e na tela de Detalhes (`ViewDraft`).
 - [x] **Aba de Artigos com Dois Links (PT & EN):** Cadastre links do Google Docs independentes para Português e Inglês no painel Admin, com persistência retrocompatível via `BILINGUAL_SPLIT` e botões dedicados nos cards e no visualizador.
 - [x] **Visual do Sistema de Currículos:** Ícones vetoriais SVG substituindo caixas vazias no Hero modal e no painel Admin (dropzones bilíngues EN/PT, cards do Google Docs e PDF, prévia ao vivo).
-- [x] **Correção da Seta Duplicada:** Eliminado o caractere `← ` redundante nas chaves de tradução `view.back_to_projects` e `view.back_to_articles` que causava a renderização de setas duplicadas com a tag JSX.
+- [x] **Correção da Seta Duplicada:** Eliminado o caractere `←` redundante nas chaves de tradução `view.back_to_projects` e `view.back_to_articles` que causava a renderização de setas duplicadas com a tag JSX.
 - [x] **Formatação da Resposta do Agente:** Parser `FormattedMessage` no `ChatWidget` renderizando negrito (`**bold**`), código inline (`` `code` ``), links markdown/URLs com abertura segura em nova aba, listas com marcadores e quebras de linha limpas.
 - [x] **Guardrails de Segurança (Anti-Injection & Escopo Fechado):** Validação de camada dupla (cliente em `llmService.js` e servidor em `supabase/functions/chat-qwen/index.ts`) interceptando tentativas de jailbreak, DAN mode, comandos bash/SQL e solicitações fora do escopo (receitas, piadas, clima) com recusa cordial padronizada.
 - [x] **Dashboard de Fine-Tuning do Agente:** Painel completo no Admin com 4 Presets de Persona (Recrutador Técnico, Deep Learning & PyTorch, Backend & DevOps, Conciso & Direto), seletor de modelo Groq, sliders de Temperatura e Max Tokens, monitor de guardrails e simulador com botões de teste rápido e limpeza de histórico.
@@ -52,9 +60,11 @@
 ---
 
 ## 🚀 SPRINT ATUAL: REFINAMENTO DE UX, DRAG & DROP DE DESENHOS, GESTÃO DE CHAVES & TELAS DEDICADAS
+
 **Status Geral:** Em execução (Passo a passo antes de cada modificação)
 
-### 📌 Fila de Execução em Andamento:
+### 📌 Fila de Execução em Andamento
+
 - [x] **Passo 1:** Padronização de cores no modal de currículo (mesmo esquema dark/roxo/neon) e remoção da animação do pontinho verde no Alomyr.
 - [x] **Passo 2:** Cadastro seguro de chaves de API e seleção dinâmica de modelos do agente diretamente pelo Dashboard (`agent_configs` e Edge Function).
 - [x] **Passo 3:** Tela dedicada estilo "Saber Mais" para Pensamentos (leitura completa, anexo Google Docs/PDF e navegação).
@@ -73,9 +83,11 @@
 ---
 
 ## 🎨 SPRINT DE REFINAMENTOS DE UI & VITRINE DE DESENHOS (EM EXECUÇÃO)
+
 **Status Geral:** Executando correções imediatas de UI e expansão da galeria/interesses
 
-### 📌 Fila de Execução em Andamento:
+### 📌 Fila de Execução em Andamento
+
 - [x] **Passo 15:** Ícones de 'Baixar' e 'Abrir na Web' na cor roxa (`#a78bfa` / `#8b5cf6`) em todo o sistema.
 - [x] **Passo 16:** Correção do hover das logos Ubuntu e Markdown (neutras/monocromáticas por padrão; cores oficiais ativadas apenas no hover).
 - [x] **Passo 17:** Extensão da edição no Dashboard `/4dm1n` para **todos os cards de interesse** (7 cards personalizáveis: títulos, descrições, fotos e categorias).
@@ -84,9 +96,11 @@
 ---
 
 ## 🚀 SPRINT EM ANDAMENTO: ECOSSISTEMA DE BLOG DUPLO (SPLIT GATEWAY)
+
 **Status Geral:** Iniciado com autorização do usuário ("dale") - Executando passo a passo
 
-### 📌 Fila de Execução em Andamento:
+### 📌 Fila de Execução em Andamento
+
 - [x] **Passo 19:** Estrutura de dados e persistência do Blog (`src/data/blogData.js` e `src/lib/supabaseService.js`) com canais `tech` e `alomyr`, suporte a tags livres, vídeos do YouTube e galerias de fotos.
 - [x] **Passo 20:** Tela intermediária do Split Gateway (`/blog/?` e componente `BlogGateway.jsx`), portal imersivo com dois botões para escolha ativa de conteúdo.
 - [x] **Passo 21:** Integração dos botões "Blog" na Navbar (`HeadSite.jsx`) e no Hero (`Perfil.jsx`) com links para o Split Gateway.
@@ -96,7 +110,8 @@
 - [x] **Passo 25:** Módulo de gestão e moderação do Blog no Dashboard `/4dm1n` (criação de posts, seleção de canal, inserção de vídeos e fotos, moderação de tags).
 - [x] **Passo 26:** Roteamento integrado no `App.jsx`, suporte a multi-páginas no `vite.config.js` e validação com `npm run build`.
 
-### 🎯 Resultados da Sprint de Ecossistema de Blog Duplo:
+### 🎯 Resultados da Sprint de Ecossistema de Blog Duplo
+
 - **Split Gateway (`/blog/?`):** Portal imersivo cyberpunk com dois caminhos distintos: *Blog de Engenharia & IA* (`/blog`) e *Laboratório Alomyr* (`/blog/alomyr`).
 - **Navegação & Hero:** Botão "Blog" adicionado na Navbar principal e no Hero com efeitos de brilho e atalho direto ao Gateway.
 - **Canal 1 - Engenharia & IA (`/blog`):** Feed técnico com filtros dinâmicos de tags (`#FastAPI`, `#PyTorch`, `#TimescaleDB`, etc.), busca em tempo real e posts com badges temáticos.
@@ -110,9 +125,11 @@
 ---
 
 ## 🎨 SPRINT: REFINAMENTOS DE UI, SCROLL DO ADMIN, ESTILO EI NERD & REPO DO PORTFÓLIO
+
 **Status Geral:** Iniciado - Executando passo a passo
 
-### 📌 Fila de Execução em Andamento:
+### 📌 Fila de Execução em Andamento
+
 - [x] **Passo 27:** Correção do scroll da aba de editar o blog no `/4dm1n` e refinamento do fluxo de criação e postagem.
 - [x] **Passo 28:** Ajuste da Navbar (mais altura/padding para respiro) e remoção do efeito de destaque excessivo no botão do Blog.
 - [x] **Passo 29:** Layout das páginas de feed do Blog inspirado no portal *Ei Nerd* (Lead story/Destaque Hero + Grade de Notícias + Tags em Alta), mantendo estética dark/cyber do site.
@@ -123,14 +140,17 @@
 ---
 
 ## 🏁 STATUS DA SPRINT ANTERIOR: CONCLUÍDA
+
 - 32 passos executados com sucesso e commitados na branch `refatoring-securit`.
 
 ---
 
 ## 🚀 SPRINT FINAL: REFINAMENTOS DE UI, REMOÇÃO DE EMOJIS, CARDS SAIBAMAIS, AVISO EM CONSTRUÇÃO & DEPLOY
+
 **Status Geral:** Iniciado - Executando passo a passo
 
-### 📌 Fila de Execução em Andamento:
+### 📌 Fila de Execução em Andamento
+
 - [x] **Passo 33:** Melhoria da dimensão, espaçamento e alinhamento das tags dos cards de projetos e artigos (resolução de erro visual).
 - [x] **Passo 34:** Remoção de todos os emojis coloridos que fogem do tema do site, substituindo por ícones SVG monocromáticos ou texto limpo.
 - [x] **Passo 35:** Realocação do card de link para o post do blog para o final da página em "Saber Mais" (`ViewDraft`), imediatamente antes do card do Alomyr.
@@ -145,13 +165,19 @@
 - [x] **Passo 44:** Criação da postagem aprofundada de engenharia do portfólio no Blog (`post-portfolio-ecosystem`), com cover, tags e vínculo bidirecional direto para o card do projeto.
 - [x] **Passo 45:** Adição de opção para vincular Artigos Técnicos no editor do Blog (`AdminDraft.jsx`), com exibição de badge e callouts interativos no leitor do Blog (`BlogPage.jsx`).
 - [x] **Passo 46:** Build limpo e deploy de produção no GitHub Pages (`npm run deploy`).
+- [x] **Passo 47:** Redesenho completo do card do Alomyr em "Saber Mais" (`ViewDraft`): layout panorâmico horizontal expandido (1080px), mascote lobo com anel neon, botão direto de chat completo, grid responsivo de 3 colunas para sugestões de perguntas eliminando espaços vazios, e barra de input horizontal integrada.
+- [x] **Passo 48:** Módulo de edição de foto de perfil no Dashboard `/4dm1n` (aba Currículo & Perfil): prévia circular ao vivo, input de URL direta e upload de imagens do computador com fallback offline.
+- [x] **Passo 49:** Conexão da foto de perfil dinâmica no Hero (`Home.jsx` / `Perfil.jsx`) e no leitor de posts do blog (`BlogPage.jsx`).
+- [x] **Passo 50:** Sincronização do projeto do portfólio (`portfolio-ecosystem`) no Supabase Cloud via sessão autenticada do `/4dm1n` e botão dedicado "Sync Portfólio".
+- [x] **Passo 51:** Criação do arquivo de governança `AGENTS.MD` definindo: proibição de emojis, proteção ao trabalho paralelo do usuário, restrição de acesso ao banco sem `{oxente dale carai}`, escopo estrito de frontend e protocolo de planejamento prévio com liberação via `{coise isso ai}`.
 
 ---
 
-## 🏆 STATUS GERAL DO PROJETO: DEPLOY REALIZADO COM SUCESSO!
-- **Total de Passos Concluídos:** 46 de 46 (100%)
-- **Hospedagem Frontend:** GitHub Pages (`https://matheusdecastro.com/`) publicado via `gh-pages` branch.
-- **Card do Alomyr:** Esteticamente balanceado na horizontal no "Saber Mais", sem esticamento vertical.
-- **Projeto do Portfólio:** Visível em Projetos Pessoais e integrado ao post de engenharia do blog com print.
-- **Blog & Artigos:** Suporte completo a vínculo bidirecional tanto com Projetos quanto com Artigos Técnicos.
-- **Página 404:** Excluída temporariamente do deploy conforme instrução.
+## STATUS GERAL DO PROJETO: CONCLUÍDO E PRONTO PARA TESTE LOCAL
+
+- Total de Passos Executados: 51 de 51 (100%)
+- Card do Alomyr: Layout panorâmico horizontal 100% preenchido com 3 cards de perguntas e input integrado.
+- Foto de Perfil: Gerenciável pelo painel administrativo `/4dm1n` com upload e preview.
+- Projeto do Portfólio: Pronto para sincronização na nuvem e visível na vitrine.
+- Governança de Agente: Arquivo `AGENTS.MD` configurado com todas as travas e diretrizes mandatórias.
+- Deploy: Aguardando comando de teste e aprovação do usuário.
