@@ -21,8 +21,8 @@ export default defineConfig({
         view: resolve(__dirname, 'draft-view/index.html'),
         contacts: resolve(__dirname, 'contacts/index.html'),
         blog: resolve(__dirname, 'blog/index.html'),
-        blogAlomyr: resolve(__dirname, 'blog/alomyr/index.html')
-        // notFound: resolve(__dirname, '404.html') // Desabilitado para deploy: não subir a página 404 por hora
+        blogAlomyr: resolve(__dirname, 'blog/alomyr/index.html'),
+        notFound: resolve(__dirname, '404.html')
       }
     }
   }

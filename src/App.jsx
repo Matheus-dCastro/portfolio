@@ -77,6 +77,13 @@ function App() {
         if (window.location.search === "?" || window.location.search.includes("gateway")) {
           return "blog-gateway";
         }
+        const cfg = getStoredBlogGatewayConfig();
+        if (cfg?.defaultRoute === "gateway") {
+          return "blog-gateway";
+        }
+        if (cfg?.defaultRoute === "alomyr") {
+          return "blog-alomyr";
+        }
         return "blog-tech";
       }
       if (rawPath.includes("/blog")) {

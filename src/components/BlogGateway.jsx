@@ -8,6 +8,11 @@ import "./BlogGateway.css";
 export default function BlogGateway({ config = {}, onSelectChannel, onBackToHome }) {
   const { t, lang } = useLanguage();
 
+  const topBadge =
+    lang === "en"
+      ? config.topBadgeEn || t("blog.gateway_badge") || "MATHEUS DE CASTRO ECOSYSTEM"
+      : config.topBadgePt || t("blog.gateway_badge") || "ECOSSISTEMA MATHEUS DE CASTRO";
+
   const gatewayTitle =
     lang === "en"
       ? config.gatewayTitleEn || t("blog.gateway_title")
@@ -19,10 +24,37 @@ export default function BlogGateway({ config = {}, onSelectChannel, onBackToHome
       : config.gatewaySubtitlePt || t("blog.gateway_subtitle");
 
   const showWipNotice = config.wipNoticeVisible !== false;
+  const wipNoticeBadge =
+    lang === "en"
+      ? config.wipNoticeBadgeEn || "ACTIVE REFINEMENT • EDITORIAL PREVIEW"
+      : config.wipNoticeBadgePt || "EM REFINAMENTO • PRÉVIA EDITORIAL";
   const wipNoticeText =
     lang === "en"
-      ? config.wipNoticeTextEn || "Please note: The engineering blog and Alomyr lab feeds are currently under active development. Layouts, media embeds, and publications are being refined."
-      : config.wipNoticeTextPt || "Atenção: Os canais do Blog de Engenharia e do Laboratório Alomyr estão atualmente em fase ativa de refinamento e publicação contínua.";
+      ? config.wipNoticeTextEn || "Notice: The Engineering Blog and Alomyr Lab channels are currently under active refinement."
+      : config.wipNoticeTextPt || "Atenção: Os canais do Blog de Engenharia e do Laboratório Alomyr estão atualmente em fase ativa de refinamento.";
+
+  // Card Tech
+  const techBadge = lang === "en" ? config.cardTechBadgeEn || t("blog.portal_tech_tag") : config.cardTechBadgePt || t("blog.portal_tech_tag");
+  const techTitle = lang === "en" ? config.cardTechTitleEn || t("blog.portal_tech_title") : config.cardTechTitlePt || t("blog.portal_tech_title");
+  const techDesc = lang === "en" ? config.cardTechDescEn || t("blog.portal_tech_desc") : config.cardTechDescPt || t("blog.portal_tech_desc");
+  const techTags = Array.isArray(config.cardTechTags) && config.cardTechTags.length > 0
+    ? config.cardTechTags
+    : ["#FastAPI", "#PyTorch", "#TimescaleDB", "#Telemetry", "#DevOps"];
+  const techBtn = lang === "en" ? config.cardTechBtnEn || t("blog.portal_tech_btn") : config.cardTechBtnPt || t("blog.portal_tech_btn");
+
+  // Card Alomyr
+  const alomyrBadge = lang === "en" ? config.cardAlomyrBadgeEn || t("blog.portal_alomyr_tag") : config.cardAlomyrBadgePt || t("blog.portal_alomyr_tag");
+  const alomyrTitle = lang === "en" ? config.cardAlomyrTitleEn || t("blog.portal_alomyr_title") : config.cardAlomyrTitlePt || t("blog.portal_alomyr_title");
+  const alomyrDesc = lang === "en" ? config.cardAlomyrDescEn || t("blog.portal_alomyr_desc") : config.cardAlomyrDescPt || t("blog.portal_alomyr_desc");
+  const alomyrTags = Array.isArray(config.cardAlomyrTags) && config.cardAlomyrTags.length > 0
+    ? config.cardAlomyrTags
+    : ["#Hiper-realismo", "#Retrogaming", "#Marvel", "#Filosofia", "#Linux"];
+  const alomyrBtn = lang === "en" ? config.cardAlomyrBtnEn || t("blog.portal_alomyr_btn") : config.cardAlomyrBtnPt || t("blog.portal_alomyr_btn");
+
+  // Footer Note
+  const footerNote = lang === "en"
+    ? config.footerNoteEn || "Both channels offer bidirectional links to technical projects and seamless switching."
+    : config.footerNotePt || "Ambos os canais contam com links bidirecionais para os projetos técnicos e alternância rápida.";
 
   const handleSelect = (channel, path) => {
     if (onSelectChannel) {
@@ -80,7 +112,7 @@ export default function BlogGateway({ config = {}, onSelectChannel, onBackToHome
         <div className="gateway-hero-text">
           <div className="gateway-badge">
             <span className="badge-pulse"></span>
-            {t("blog.gateway_badge")}
+            {topBadge}
           </div>
           <h1 className="gateway-title">{gatewayTitle}</h1>
           <p className="gateway-subtitle">{gatewaySubtitle}</p>
@@ -90,7 +122,7 @@ export default function BlogGateway({ config = {}, onSelectChannel, onBackToHome
             <div className="gateway-wip-notice">
               <div className="wip-notice-badge">
                 <span className="wip-dot"></span>
-                <span>{lang === "en" ? "ACTIVE REFINEMENT • EDITORIAL PREVIEW" : "EM REFINAMENTO • PRÉVIA EDITORIAL"}</span>
+                <span>{wipNoticeBadge}</span>
               </div>
               <p className="wip-notice-text">{wipNoticeText}</p>
             </div>
@@ -123,23 +155,21 @@ export default function BlogGateway({ config = {}, onSelectChannel, onBackToHome
                   <line x1="1" y1="14" x2="4" y2="14"></line>
                 </svg>
               </div>
-              <span className="card-tag tech-tag">{t("blog.portal_tech_tag")}</span>
+              <span className="card-tag tech-tag">{techBadge}</span>
             </div>
 
-            <h2 className="card-title">{t("blog.portal_tech_title")}</h2>
-            <p className="card-desc">{t("blog.portal_tech_desc")}</p>
+            <h2 className="card-title">{techTitle}</h2>
+            <p className="card-desc">{techDesc}</p>
 
             <div className="card-chips">
-              <span className="chip">#FastAPI</span>
-              <span className="chip">#PyTorch</span>
-              <span className="chip">#TimescaleDB</span>
-              <span className="chip">#Telemetry</span>
-              <span className="chip">#DevOps</span>
+              {techTags.map((tag, idx) => (
+                <span key={idx} className="chip">{tag.startsWith("#") ? tag : `#${tag}`}</span>
+              ))}
             </div>
 
             <div className="card-footer">
               <span className="card-action-btn tech-btn">
-                <span>{t("blog.portal_tech_btn")}</span>
+                <span>{techBtn}</span>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <line x1="5" y1="12" x2="19" y2="12"></line>
                   <polyline points="12 5 19 12 12 19"></polyline>
@@ -167,23 +197,21 @@ export default function BlogGateway({ config = {}, onSelectChannel, onBackToHome
                   <circle cx="11" cy="11" r="2"></circle>
                 </svg>
               </div>
-              <span className="card-tag alomyr-tag">{t("blog.portal_alomyr_tag")}</span>
+              <span className="card-tag alomyr-tag">{alomyrBadge}</span>
             </div>
 
-            <h2 className="card-title">{t("blog.portal_alomyr_title")}</h2>
-            <p className="card-desc">{t("blog.portal_alomyr_desc")}</p>
+            <h2 className="card-title">{alomyrTitle}</h2>
+            <p className="card-desc">{alomyrDesc}</p>
 
             <div className="card-chips">
-              <span className="chip">#Hiper-realismo</span>
-              <span className="chip">#Retrogaming</span>
-              <span className="chip">#Marvel</span>
-              <span className="chip">#Filosofia</span>
-              <span className="chip">#Linux</span>
+              {alomyrTags.map((tag, idx) => (
+                <span key={idx} className="chip">{tag.startsWith("#") ? tag : `#${tag}`}</span>
+              ))}
             </div>
 
             <div className="card-footer">
               <span className="card-action-btn alomyr-btn">
-                <span>{t("blog.portal_alomyr_btn")}</span>
+                <span>{alomyrBtn}</span>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <line x1="5" y1="12" x2="19" y2="12"></line>
                   <polyline points="12 5 19 12 12 19"></polyline>
@@ -196,11 +224,7 @@ export default function BlogGateway({ config = {}, onSelectChannel, onBackToHome
 
         {/* Footer Hint */}
         <div className="gateway-bottom-info">
-          <p>
-            {lang === "en"
-              ? "Both channels offer bidirectional links to technical projects and seamless switching."
-              : "Ambos os canais contam com links bidirecionais para os projetos técnicos e alternância rápida."}
-          </p>
+          <p>{footerNote}</p>
         </div>
       </main>
     </div>

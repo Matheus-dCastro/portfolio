@@ -72,3 +72,32 @@ Este documento registra o checklist completo de diagnóstico, correções execut
     - [x] Gateway de blog com empilhamento vertical suave em telas menores (`<= 900px` e `<= 480px`).
     - [x] Grade de hobbies com 2 colunas em tablets (641px - 1024px) e 1 coluna em celulares (`<= 640px`).
     - [x] Teste de compilação de produção (`npm run build`) validado com sucesso (zero erros).
+
+- [x] **Frente 6: Gestão da Tela 404 no Painel Administrativo (`🚀 Tela 404`)**
+  - [x] Adicionada aba dedicada **`🚀 Tela 404`** na barra superior do painel administrativo.
+  - [x] Formulário de edição bilíngue (Português e Inglês) para:
+    - [x] Código de status/erro (`404`).
+    - [x] Badge do card superior.
+    - [x] Título principal e subtítulo/mensagem orientadora.
+    - [x] Mascote/ícone com upload de arquivo de imagem ou URL personalizada.
+    - [x] Textos dos botões de ação ("Voltar ao Início", "Perguntar ao Alomyr", "Ver Projetos & Artigos").
+    - [x] Mensagem/Prompt pré-definido disparado no chat do Alomyr ao clicar no botão.
+  - [x] Painel de **Prévia em Tempo Real** interativo ao lado direito, refletindo cada alteração imediatamente.
+  - [x] Sincronização em nuvem no Supabase e armazenamento local com botão de restauração para o padrão.
+
+- [x] **Frente 7: Customização Completa da Interface do Gateway (/blog/?) conforme Imagem**
+  - [x] Adicionada aba dedicada **`🌐 Gateway (/blog/?)`** na barra superior do painel administrativo.
+  - [x] Formulário de edição cobrindo todos os elementos visuais da tela apresentada na captura:
+    - [x] Badge superior ("ECOSSISTEMA MATHEUS DE CASTRO").
+    - [x] Título principal ("Blog & Laboratório Criativo") e subtítulo seletor de dimensão.
+    - [x] Banner de aviso editorial/WIP ("EM REFINAMENTO • PRÉVIA EDITORIAL") com toggle de ativação e texto descritivo.
+    - [x] Card 1 (Engenharia): badge, título, descrição, chips/tags (#FastAPI, #PyTorch, etc.) e botão de ação.
+    - [x] Card 2 (Alomyr): badge, título, descrição, chips/tags (#Hiper-realismo, #Retrogaming, etc.) e botão de ação.
+    - [x] Nota de rodapé sobre links bidirecionais e alternância rápida.
+  - [x] Painel de **Prévia em Tempo Real** interativo ao lado direito.
+  - [x] Controle de roteamento padrão de destino da rota `/blog`.
+
+- [x] **Frente 8: Sessão de Teste & Aguardo de Aprovação para Deploy**
+  - [x] Build de produção testado e aprovado com 0 erros (`npm run build`).
+  - [x] Servidor de teste e pré-visualização aberto.
+  - [x] Aguardando o comando do usuário ("ok") para realizar o deploy em produção (`npm run deploy`).

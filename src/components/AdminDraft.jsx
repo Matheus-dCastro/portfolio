@@ -75,6 +75,8 @@ import {
 import { isSupabaseConfigured } from "../lib/supabaseClient";
 import { DOCUMENT_TEMPLATES } from "../data/templatesData";
 import { sendChatMessage, getGroqApiKey } from "../lib/llmService";
+import NotFound from "./NotFound";
+import BlogGateway from "./BlogGateway";
 import "./AdminDraft.css";
 
 const generateUniqueId = () => `item-${Date.now()}`;
@@ -379,6 +381,10 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
       fetchNotFoundConfig().then((cfg) => {
         if (cfg) setNotfoundConfig(cfg);
       });
+    } else if (activeTab === "gateway") {
+      fetchBlogGatewayConfig().then((cfg) => {
+        if (cfg) setBlogGatewayConfig(cfg);
+      });
     }
   }, [activeTab]);
 
@@ -640,7 +646,7 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
 
   const handleTabChange = (tab) => {
     setActiveTab(tab);
-    if (tab === "agent" || tab === "cv" || tab === "customHobby" || tab === "notfound") return;
+    if (tab === "agent" || tab === "cv" || tab === "customHobby" || tab === "notfound" || tab === "gateway") return;
     if (tab === "blog") {
       if (blogPosts.length > 0 && !selectedBlogId) {
         handleSelectBlogPost(blogPosts[0]);
@@ -1518,6 +1524,60 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
     }
   };
 
+  const handleResetBlogGatewayConfig = () => {
+    if (window.confirm("Deseja restaurar as configurações padrão da tela de Entrada do Blog (/blog/?)?")) {
+      setBlogGatewayConfig(DEFAULT_BLOG_GATEWAY_CONFIG);
+      persistBlogGatewayConfig(DEFAULT_BLOG_GATEWAY_CONFIG);
+      showToast("Configurações do Gateway restauradas para o padrão!", "info");
+    }
+  };
+
+  const handleSaveNotFoundConfig = async (e) => {
+    if (e && e.preventDefault) e.preventDefault();
+    setIsSavingNotFoundConfig(true);
+    try {
+      const res = await persistNotFoundConfig({
+        ...notfoundConfig,
+        updatedAt: new Date().toISOString()
+      });
+      showToast(
+        res.cloud
+          ? "Configurações da Página 404 sincronizadas com o Supabase!"
+          : "Configurações da Página 404 salvas localmente!",
+        "success"
+      );
+    } catch (err) {
+      alert("Erro ao salvar configurações da página 404: " + err.message);
+    } finally {
+      setIsSavingNotFoundConfig(false);
+    }
+  };
+
+  const handleUploadNotFoundMascot = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setIsUploadingNotFoundMascot(true);
+    try {
+      const res = await uploadProfileImage(file);
+      if (res?.publicUrl) {
+        setNotfoundConfig((prev) => ({ ...prev, mascotImage: res.publicUrl }));
+        showToast("Mascote/Ícone da página 404 atualizado com sucesso!", "success");
+      }
+    } catch (err) {
+      alert("Erro ao enviar imagem do mascote: " + err.message);
+    } finally {
+      setIsUploadingNotFoundMascot(false);
+    }
+  };
+
+  const handleResetNotFoundConfig = () => {
+    if (window.confirm("Deseja restaurar as configurações padrão da página 404?")) {
+      setNotfoundConfig(DEFAULT_NOTFOUND_CONFIG);
+      persistNotFoundConfig(DEFAULT_NOTFOUND_CONFIG);
+      showToast("Página 404 restaurada para o padrão!", "info");
+    }
+  };
+
   const applyFineTuningPreset = (presetKey) => {
     switch (presetKey) {
       case "recruiter":
@@ -1763,6 +1823,22 @@ DIRETRIZ MÁXIMA DE CONCISÃO:
             >
               📝 Blog &amp; Lab
             </button>
+            <button
+              type="button"
+              className={`cat-btn gateway-tab ${activeTab === "gateway" ? "active" : ""}`}
+              onClick={() => handleTabChange("gateway")}
+              style={{ color: activeTab === "gateway" ? "#ffffff" : "#c4b5fd" }}
+            >
+              🌐 Gateway (/blog/?)
+            </button>
+            <button
+              type="button"
+              className={`cat-btn notfound-tab ${activeTab === "notfound" ? "active" : ""}`}
+              onClick={() => handleTabChange("notfound")}
+              style={{ color: activeTab === "notfound" ? "#ffffff" : "#fca5a5" }}
+            >
+              🚀 Tela 404
+            </button>
           </div>
         </div>
 
@@ -1778,7 +1854,7 @@ DIRETRIZ MÁXIMA DE CONCISÃO:
           >
             Organizar Vitrine por Tipo
           </button>
-          {onOpenProjectDetail && activeTab !== "agent" && activeTab !== "cv" && activeTab !== "drawings" && (
+          {onOpenProjectDetail && activeTab !== "agent" && activeTab !== "cv" && activeTab !== "drawings" && activeTab !== "customHobby" && activeTab !== "blog" && activeTab !== "gateway" && activeTab !== "notfound" && (
             <button
               type="button"
               className="preview-public-btn"
@@ -4337,6 +4413,815 @@ DIRETRIZ MÁXIMA DE CONCISÃO:
               </div>
             </div>
           </main>
+        </div>
+      ) : activeTab === "gateway" ? (
+        /* TAB 9: BLOG GATEWAY (/blog/?) FULL VISUAL EDITOR */
+        <div className="cv-admin-dashboard gateway-admin-dashboard">
+          <div className="cv-dash-left">
+            <div className="cv-card-section">
+              <div className="cv-section-header">
+                <div>
+                  <h2>🌐 Editor da Tela de Entrada do Blog (/blog/?)</h2>
+                  <p className="cv-section-subtitle">
+                    Personalize todos os textos, badges, avisos, títulos, cards e chips da interface de seleção de canais do blog.
+                  </p>
+                </div>
+                <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+                  <button
+                    type="button"
+                    onClick={handleResetBlogGatewayConfig}
+                    style={{
+                      background: "transparent",
+                      border: "1px solid #30363d",
+                      color: "#94a3b8",
+                      padding: "8px 14px",
+                      borderRadius: "8px",
+                      cursor: "pointer",
+                      fontSize: "0.82rem"
+                    }}
+                  >
+                    Restaurar Padrão
+                  </button>
+                  <a
+                    href="/blog/?"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      background: "rgba(139, 92, 246, 0.15)",
+                      border: "1px solid #8b5cf6",
+                      color: "#c4b5fd",
+                      padding: "8px 14px",
+                      borderRadius: "8px",
+                      textDecoration: "none",
+                      fontSize: "0.82rem",
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "4px"
+                    }}
+                  >
+                    Ver Rota Pública ↗
+                  </a>
+                  <button
+                    type="button"
+                    onClick={handleSaveBlogGatewayConfig}
+                    disabled={isSavingGatewayConfig}
+                    style={{
+                      background: "#8b5cf6",
+                      color: "#ffffff",
+                      border: "none",
+                      padding: "9px 20px",
+                      borderRadius: "8px",
+                      fontWeight: "700",
+                      fontSize: "0.86rem",
+                      cursor: "pointer",
+                      boxShadow: "0 4px 14px rgba(139, 92, 246, 0.4)"
+                    }}
+                  >
+                    {isSavingGatewayConfig ? "Salvando..." : "Salvar Gateway ✓"}
+                  </button>
+                </div>
+              </div>
+
+              {/* Language Switcher for Gateway Editing */}
+              <div style={{ display: "flex", gap: "8px", marginBottom: "20px" }}>
+                <button
+                  type="button"
+                  onClick={() => setHobbyActiveLang("pt")}
+                  style={{
+                    padding: "6px 14px",
+                    borderRadius: "6px",
+                    border: hobbyActiveLang === "pt" ? "1px solid #8b5cf6" : "1px solid #30363d",
+                    background: hobbyActiveLang === "pt" ? "rgba(139, 92, 246, 0.25)" : "#0d1117",
+                    color: hobbyActiveLang === "pt" ? "#fff" : "#8b949e",
+                    fontWeight: "600",
+                    fontSize: "0.82rem",
+                    cursor: "pointer"
+                  }}
+                >
+                  🇧🇷 Editar Textos em Português
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setHobbyActiveLang("en")}
+                  style={{
+                    padding: "6px 14px",
+                    borderRadius: "6px",
+                    border: hobbyActiveLang === "en" ? "1px solid #8b5cf6" : "1px solid #30363d",
+                    background: hobbyActiveLang === "en" ? "rgba(139, 92, 246, 0.25)" : "#0d1117",
+                    color: hobbyActiveLang === "en" ? "#fff" : "#8b949e",
+                    fontWeight: "600",
+                    fontSize: "0.82rem",
+                    cursor: "pointer"
+                  }}
+                >
+                  🇺🇸 Editar Textos em Inglês
+                </button>
+              </div>
+
+              {/* ROTEAMENTO GERAL */}
+              <div className="blog-section-card">
+                <h4 className="blog-section-card-title">⚙️ Roteamento da URL /blog</h4>
+                <div>
+                  <label style={{ display: "block", fontSize: "12px", color: "#8b949e", marginBottom: "6px" }}>
+                    Comportamento ao carregar /blog ou /blog/?:
+                  </label>
+                  <select
+                    className="drawings-input"
+                    value={blogGatewayConfig.defaultRoute || "gateway"}
+                    onChange={(e) => setBlogGatewayConfig({ ...blogGatewayConfig, defaultRoute: e.target.value })}
+                  >
+                    <option value="gateway">Exibir Tela de Entrada Dividida (Gateway - /blog/?)</option>
+                    <option value="tech">Redirecionar direto para Blog de Engenharia & IA (/blog)</option>
+                    <option value="alomyr">Redirecionar direto para Laboratório Alomyr (/blog/alomyr)</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* CABEÇALHO & HERO */}
+              <div className="blog-section-card">
+                <h4 className="blog-section-card-title">🌌 Cabeçalho Principal (Hero)</h4>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: "12px" }}>
+                  <div>
+                    <label style={{ display: "block", fontSize: "12px", color: "#8b949e", marginBottom: "4px" }}>
+                      Badge Superior ({hobbyActiveLang.toUpperCase()})
+                    </label>
+                    <input
+                      type="text"
+                      className="drawings-input"
+                      value={hobbyActiveLang === "pt" ? (blogGatewayConfig.topBadgePt || "") : (blogGatewayConfig.topBadgeEn || "")}
+                      onChange={(e) =>
+                        setBlogGatewayConfig({
+                          ...blogGatewayConfig,
+                          [hobbyActiveLang === "pt" ? "topBadgePt" : "topBadgeEn"]: e.target.value
+                        })
+                      }
+                      placeholder={hobbyActiveLang === "pt" ? "ECOSSISTEMA MATHEUS DE CASTRO" : "MATHEUS DE CASTRO ECOSYSTEM"}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: "block", fontSize: "12px", color: "#8b949e", marginBottom: "4px" }}>
+                      Título Principal ({hobbyActiveLang.toUpperCase()})
+                    </label>
+                    <input
+                      type="text"
+                      className="drawings-input"
+                      value={hobbyActiveLang === "pt" ? (blogGatewayConfig.gatewayTitlePt || "") : (blogGatewayConfig.gatewayTitleEn || "")}
+                      onChange={(e) =>
+                        setBlogGatewayConfig({
+                          ...blogGatewayConfig,
+                          [hobbyActiveLang === "pt" ? "gatewayTitlePt" : "gatewayTitleEn"]: e.target.value
+                        })
+                      }
+                      placeholder={hobbyActiveLang === "pt" ? "Blog & Laboratório Criativo" : "Blog & Creative Laboratory"}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: "block", fontSize: "12px", color: "#8b949e", marginBottom: "4px" }}>
+                      Subtítulo ({hobbyActiveLang.toUpperCase()})
+                    </label>
+                    <input
+                      type="text"
+                      className="drawings-input"
+                      value={hobbyActiveLang === "pt" ? (blogGatewayConfig.gatewaySubtitlePt || "") : (blogGatewayConfig.gatewaySubtitleEn || "")}
+                      onChange={(e) =>
+                        setBlogGatewayConfig({
+                          ...blogGatewayConfig,
+                          [hobbyActiveLang === "pt" ? "gatewaySubtitlePt" : "gatewaySubtitleEn"]: e.target.value
+                        })
+                      }
+                      placeholder="Escolha qual dimensão do ecossistema você deseja explorar:"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* BANNER DE REFINAMENTO */}
+              <div className="blog-section-card">
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
+                  <h4 className="blog-section-card-title" style={{ margin: 0 }}>🚧 Banner de Refinamento & Prévia Editorial</h4>
+                  <label style={{ display: "inline-flex", alignItems: "center", gap: "6px", fontSize: "12px", color: "#c4b5fd", cursor: "pointer" }}>
+                    <input
+                      type="checkbox"
+                      checked={blogGatewayConfig.wipNoticeVisible !== false}
+                      onChange={(e) => setBlogGatewayConfig({ ...blogGatewayConfig, wipNoticeVisible: e.target.checked })}
+                    />
+                    Visível no topo
+                  </label>
+                </div>
+                {blogGatewayConfig.wipNoticeVisible !== false && (
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: "12px" }}>
+                    <div>
+                      <label style={{ display: "block", fontSize: "12px", color: "#8b949e", marginBottom: "4px" }}>
+                        Badge do Banner ({hobbyActiveLang.toUpperCase()})
+                      </label>
+                      <input
+                        type="text"
+                        className="drawings-input"
+                        value={hobbyActiveLang === "pt" ? (blogGatewayConfig.wipNoticeBadgePt || "") : (blogGatewayConfig.wipNoticeBadgeEn || "")}
+                        onChange={(e) =>
+                          setBlogGatewayConfig({
+                            ...blogGatewayConfig,
+                            [hobbyActiveLang === "pt" ? "wipNoticeBadgePt" : "wipNoticeBadgeEn"]: e.target.value
+                          })
+                        }
+                        placeholder={hobbyActiveLang === "pt" ? "EM REFINAMENTO • PRÉVIA EDITORIAL" : "ACTIVE REFINEMENT • EDITORIAL PREVIEW"}
+                      />
+                    </div>
+                    <div>
+                      <label style={{ display: "block", fontSize: "12px", color: "#8b949e", marginBottom: "4px" }}>
+                        Texto do Banner ({hobbyActiveLang.toUpperCase()})
+                      </label>
+                      <textarea
+                        rows="2"
+                        className="drawings-input"
+                        value={hobbyActiveLang === "pt" ? (blogGatewayConfig.wipNoticeTextPt || "") : (blogGatewayConfig.wipNoticeTextEn || "")}
+                        onChange={(e) =>
+                          setBlogGatewayConfig({
+                            ...blogGatewayConfig,
+                            [hobbyActiveLang === "pt" ? "wipNoticeTextPt" : "wipNoticeTextEn"]: e.target.value
+                          })
+                        }
+                        placeholder="Atenção: Os canais do Blog de Engenharia e do Laboratório Alomyr..."
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* CARD 1: CANAL DE ENGENHARIA */}
+              <div className="blog-section-card" style={{ borderLeft: "3px solid #38bdf8" }}>
+                <h4 className="blog-section-card-title">⚡ Card 1: Canal de Engenharia & IA (/blog)</h4>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: "12px" }}>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+                    <div>
+                      <label style={{ display: "block", fontSize: "12px", color: "#8b949e", marginBottom: "4px" }}>
+                        Badge do Card ({hobbyActiveLang.toUpperCase()})
+                      </label>
+                      <input
+                        type="text"
+                        className="drawings-input"
+                        value={hobbyActiveLang === "pt" ? (blogGatewayConfig.cardTechBadgePt || "") : (blogGatewayConfig.cardTechBadgeEn || "")}
+                        onChange={(e) =>
+                          setBlogGatewayConfig({
+                            ...blogGatewayConfig,
+                            [hobbyActiveLang === "pt" ? "cardTechBadgePt" : "cardTechBadgeEn"]: e.target.value
+                          })
+                        }
+                        placeholder="CANAL DE ENGENHARIA"
+                      />
+                    </div>
+                    <div>
+                      <label style={{ display: "block", fontSize: "12px", color: "#8b949e", marginBottom: "4px" }}>
+                        Título do Card ({hobbyActiveLang.toUpperCase()})
+                      </label>
+                      <input
+                        type="text"
+                        className="drawings-input"
+                        value={hobbyActiveLang === "pt" ? (blogGatewayConfig.cardTechTitlePt || "") : (blogGatewayConfig.cardTechTitleEn || "")}
+                        onChange={(e) =>
+                          setBlogGatewayConfig({
+                            ...blogGatewayConfig,
+                            [hobbyActiveLang === "pt" ? "cardTechTitlePt" : "cardTechTitleEn"]: e.target.value
+                          })
+                        }
+                        placeholder="Blog de Engenharia & IA"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label style={{ display: "block", fontSize: "12px", color: "#8b949e", marginBottom: "4px" }}>
+                      Descrição do Card ({hobbyActiveLang.toUpperCase()})
+                    </label>
+                    <textarea
+                      rows="2"
+                      className="drawings-input"
+                      value={hobbyActiveLang === "pt" ? (blogGatewayConfig.cardTechDescPt || "") : (blogGatewayConfig.cardTechDescEn || "")}
+                      onChange={(e) =>
+                        setBlogGatewayConfig({
+                          ...blogGatewayConfig,
+                          [hobbyActiveLang === "pt" ? "cardTechDescPt" : "cardTechDescEn"]: e.target.value
+                        })
+                      }
+                      placeholder="Artigos técnicos aprofundados, arquitetura de sistemas..."
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: "block", fontSize: "12px", color: "#8b949e", marginBottom: "4px" }}>
+                      Chips / Tags (separadas por vírgula)
+                    </label>
+                    <input
+                      type="text"
+                      className="drawings-input"
+                      value={Array.isArray(blogGatewayConfig.cardTechTags) ? blogGatewayConfig.cardTechTags.join(", ") : ""}
+                      onChange={(e) =>
+                        setBlogGatewayConfig({
+                          ...blogGatewayConfig,
+                          cardTechTags: e.target.value.split(",").map((s) => s.trim()).filter(Boolean)
+                        })
+                      }
+                      placeholder="#FastAPI, #PyTorch, #TimescaleDB, #Telemetry, #DevOps"
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: "block", fontSize: "12px", color: "#8b949e", marginBottom: "4px" }}>
+                      Texto do Botão ({hobbyActiveLang.toUpperCase()})
+                    </label>
+                    <input
+                      type="text"
+                      className="drawings-input"
+                      value={hobbyActiveLang === "pt" ? (blogGatewayConfig.cardTechBtnPt || "") : (blogGatewayConfig.cardTechBtnEn || "")}
+                      onChange={(e) =>
+                        setBlogGatewayConfig({
+                          ...blogGatewayConfig,
+                          [hobbyActiveLang === "pt" ? "cardTechBtnPt" : "cardTechBtnEn"]: e.target.value
+                        })
+                      }
+                      placeholder="Explorar Engenharia ↗"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* CARD 2: LABORATÓRIO ALOMYR */}
+              <div className="blog-section-card" style={{ borderLeft: "3px solid #c084fc" }}>
+                <h4 className="blog-section-card-title">🧪 Card 2: Laboratório Alomyr (/blog/alomyr)</h4>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: "12px" }}>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+                    <div>
+                      <label style={{ display: "block", fontSize: "12px", color: "#8b949e", marginBottom: "4px" }}>
+                        Badge do Card ({hobbyActiveLang.toUpperCase()})
+                      </label>
+                      <input
+                        type="text"
+                        className="drawings-input"
+                        value={hobbyActiveLang === "pt" ? (blogGatewayConfig.cardAlomyrBadgePt || "") : (blogGatewayConfig.cardAlomyrBadgeEn || "")}
+                        onChange={(e) =>
+                          setBlogGatewayConfig({
+                            ...blogGatewayConfig,
+                            [hobbyActiveLang === "pt" ? "cardAlomyrBadgePt" : "cardAlomyrBadgeEn"]: e.target.value
+                          })
+                        }
+                        placeholder="LABORATÓRIO GEEK & ARTÍSTICO"
+                      />
+                    </div>
+                    <div>
+                      <label style={{ display: "block", fontSize: "12px", color: "#8b949e", marginBottom: "4px" }}>
+                        Título do Card ({hobbyActiveLang.toUpperCase()})
+                      </label>
+                      <input
+                        type="text"
+                        className="drawings-input"
+                        value={hobbyActiveLang === "pt" ? (blogGatewayConfig.cardAlomyrTitlePt || "") : (blogGatewayConfig.cardAlomyrTitleEn || "")}
+                        onChange={(e) =>
+                          setBlogGatewayConfig({
+                            ...blogGatewayConfig,
+                            [hobbyActiveLang === "pt" ? "cardAlomyrTitlePt" : "cardAlomyrTitleEn"]: e.target.value
+                          })
+                        }
+                        placeholder="Laboratório Alomyr"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label style={{ display: "block", fontSize: "12px", color: "#8b949e", marginBottom: "4px" }}>
+                      Descrição do Card ({hobbyActiveLang.toUpperCase()})
+                    </label>
+                    <textarea
+                      rows="2"
+                      className="drawings-input"
+                      value={hobbyActiveLang === "pt" ? (blogGatewayConfig.cardAlomyrDescPt || "") : (blogGatewayConfig.cardAlomyrDescEn || "")}
+                      onChange={(e) =>
+                        setBlogGatewayConfig({
+                          ...blogGatewayConfig,
+                          [hobbyActiveLang === "pt" ? "cardAlomyrDescPt" : "cardAlomyrDescEn"]: e.target.value
+                        })
+                      }
+                      placeholder="Ensaios filosóficos, arte do hiper-realismo em grafite..."
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: "block", fontSize: "12px", color: "#8b949e", marginBottom: "4px" }}>
+                      Chips / Tags (separadas por vírgula)
+                    </label>
+                    <input
+                      type="text"
+                      className="drawings-input"
+                      value={Array.isArray(blogGatewayConfig.cardAlomyrTags) ? blogGatewayConfig.cardAlomyrTags.join(", ") : ""}
+                      onChange={(e) =>
+                        setBlogGatewayConfig({
+                          ...blogGatewayConfig,
+                          cardAlomyrTags: e.target.value.split(",").map((s) => s.trim()).filter(Boolean)
+                        })
+                      }
+                      placeholder="#Hiper-realismo, #Retrogaming, #Marvel, #Filosofia, #Linux"
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: "block", fontSize: "12px", color: "#8b949e", marginBottom: "4px" }}>
+                      Texto do Botão ({hobbyActiveLang.toUpperCase()})
+                    </label>
+                    <input
+                      type="text"
+                      className="drawings-input"
+                      value={hobbyActiveLang === "pt" ? (blogGatewayConfig.cardAlomyrBtnPt || "") : (blogGatewayConfig.cardAlomyrBtnEn || "")}
+                      onChange={(e) =>
+                        setBlogGatewayConfig({
+                          ...blogGatewayConfig,
+                          [hobbyActiveLang === "pt" ? "cardAlomyrBtnPt" : "cardAlomyrBtnEn"]: e.target.value
+                        })
+                      }
+                      placeholder="Entrar no Laboratório ↗"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* RODAPÉ DO GATEWAY */}
+              <div className="blog-section-card">
+                <h4 className="blog-section-card-title">📝 Nota de Rodapé</h4>
+                <div>
+                  <label style={{ display: "block", fontSize: "12px", color: "#8b949e", marginBottom: "4px" }}>
+                    Texto do Rodapé ({hobbyActiveLang.toUpperCase()})
+                  </label>
+                  <textarea
+                    rows="2"
+                    className="drawings-input"
+                    value={hobbyActiveLang === "pt" ? (blogGatewayConfig.footerNotePt || "") : (blogGatewayConfig.footerNoteEn || "")}
+                    onChange={(e) =>
+                      setBlogGatewayConfig({
+                        ...blogGatewayConfig,
+                        [hobbyActiveLang === "pt" ? "footerNotePt" : "footerNoteEn"]: e.target.value
+                      })
+                    }
+                    placeholder="Ambos os canais contam com links bidirecionais..."
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* RIGHT COLUMN: LIVE INTERACTIVE PREVIEW */}
+          <div className="cv-dash-right">
+            <div className="cv-preview-card" style={{ padding: "0", overflow: "hidden", height: "calc(100vh - 120px)", display: "flex", flexDirection: "column" }}>
+              <div style={{ background: "#0e1117", padding: "12px 18px", borderBottom: "1px solid #1f2737", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <span style={{ fontSize: "0.82rem", fontWeight: "700", color: "#c4b5fd" }}>
+                  👁️ Prévia em Tempo Real (/blog/?)
+                </span>
+                <span style={{ fontSize: "0.75rem", color: "#8b949e" }}>
+                  Atualiza conforme você digita
+                </span>
+              </div>
+              <div style={{ flex: 1, overflowY: "auto", position: "relative", background: "#030306" }}>
+                <BlogGateway config={blogGatewayConfig} onSelectChannel={(ch) => alert(`Canal selecionado na prévia: ${ch}`)} onBackToHome={() => {}} />
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : activeTab === "notfound" ? (
+        /* TAB 10: 404 PAGE EDITOR & LIVE PREVIEW */
+        <div className="cv-admin-dashboard notfound-admin-dashboard">
+          <div className="cv-dash-left">
+            <div className="cv-card-section">
+              <div className="cv-section-header">
+                <div>
+                  <h2>🚀 Editor da Página 404 (Rota Não Encontrada)</h2>
+                  <p className="cv-section-subtitle">
+                    Personalize a experiência do usuário quando uma página inexistente for acessada, incluindo o mascote, textos, botões e o prompt que direciona o assistente Alomyr.
+                  </p>
+                </div>
+                <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+                  <button
+                    type="button"
+                    onClick={handleResetNotFoundConfig}
+                    style={{
+                      background: "transparent",
+                      border: "1px solid #30363d",
+                      color: "#94a3b8",
+                      padding: "8px 14px",
+                      borderRadius: "8px",
+                      cursor: "pointer",
+                      fontSize: "0.82rem"
+                    }}
+                  >
+                    Restaurar Padrão
+                  </button>
+                  <a
+                    href="/pagina-404-teste-preview"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      background: "rgba(239, 68, 68, 0.15)",
+                      border: "1px solid #f87171",
+                      color: "#fca5a5",
+                      padding: "8px 14px",
+                      borderRadius: "8px",
+                      textDecoration: "none",
+                      fontSize: "0.82rem",
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "4px"
+                    }}
+                  >
+                    Testar Rota 404 ↗
+                  </a>
+                  <button
+                    type="button"
+                    onClick={handleSaveNotFoundConfig}
+                    disabled={isSavingNotFoundConfig}
+                    style={{
+                      background: "#ef4444",
+                      color: "#ffffff",
+                      border: "none",
+                      padding: "9px 20px",
+                      borderRadius: "8px",
+                      fontWeight: "700",
+                      fontSize: "0.86rem",
+                      cursor: "pointer",
+                      boxShadow: "0 4px 14px rgba(239, 68, 68, 0.4)"
+                    }}
+                  >
+                    {isSavingNotFoundConfig ? "Salvando..." : "Salvar 404 ✓"}
+                  </button>
+                </div>
+              </div>
+
+              {/* Language Switcher for 404 Editing */}
+              <div style={{ display: "flex", gap: "8px", marginBottom: "20px" }}>
+                <button
+                  type="button"
+                  onClick={() => setNotfoundActiveLang("pt")}
+                  style={{
+                    padding: "6px 14px",
+                    borderRadius: "6px",
+                    border: notfoundActiveLang === "pt" ? "1px solid #ef4444" : "1px solid #30363d",
+                    background: notfoundActiveLang === "pt" ? "rgba(239, 68, 68, 0.25)" : "#0d1117",
+                    color: notfoundActiveLang === "pt" ? "#fff" : "#8b949e",
+                    fontWeight: "600",
+                    fontSize: "0.82rem",
+                    cursor: "pointer"
+                  }}
+                >
+                  🇧🇷 Editar Textos em Português
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setNotfoundActiveLang("en")}
+                  style={{
+                    padding: "6px 14px",
+                    borderRadius: "6px",
+                    border: notfoundActiveLang === "en" ? "1px solid #ef4444" : "1px solid #30363d",
+                    background: notfoundActiveLang === "en" ? "rgba(239, 68, 68, 0.25)" : "#0d1117",
+                    color: notfoundActiveLang === "en" ? "#fff" : "#8b949e",
+                    fontWeight: "600",
+                    fontSize: "0.82rem",
+                    cursor: "pointer"
+                  }}
+                >
+                  🇺🇸 Editar Textos em Inglês
+                </button>
+              </div>
+
+              {/* IDENTIFICAÇÃO & TEXTOS PRINCIPAIS */}
+              <div className="blog-section-card">
+                <h4 className="blog-section-card-title">💬 Títulos &amp; Mensagem de Erro</h4>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: "12px" }}>
+                  <div style={{ display: "grid", gridTemplateColumns: "120px 1fr", gap: "12px" }}>
+                    <div>
+                      <label style={{ display: "block", fontSize: "12px", color: "#8b949e", marginBottom: "4px" }}>
+                        Código
+                      </label>
+                      <input
+                        type="text"
+                        className="drawings-input"
+                        value={notfoundConfig.errorCode || "404"}
+                        onChange={(e) => setNotfoundConfig({ ...notfoundConfig, errorCode: e.target.value })}
+                        placeholder="404"
+                      />
+                    </div>
+                    <div>
+                      <label style={{ display: "block", fontSize: "12px", color: "#8b949e", marginBottom: "4px" }}>
+                        Badge ({notfoundActiveLang.toUpperCase()})
+                      </label>
+                      <input
+                        type="text"
+                        className="drawings-input"
+                        value={notfoundActiveLang === "pt" ? (notfoundConfig.badgePt || "") : (notfoundConfig.badgeEn || "")}
+                        onChange={(e) =>
+                          setNotfoundConfig({
+                            ...notfoundConfig,
+                            [notfoundActiveLang === "pt" ? "badgePt" : "badgeEn"]: e.target.value
+                          })
+                        }
+                        placeholder={notfoundActiveLang === "pt" ? "Rota Não Encontrada" : "Route Not Found"}
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label style={{ display: "block", fontSize: "12px", color: "#8b949e", marginBottom: "4px" }}>
+                      Título Principal ({notfoundActiveLang.toUpperCase()})
+                    </label>
+                    <input
+                      type="text"
+                      className="drawings-input"
+                      value={notfoundActiveLang === "pt" ? (notfoundConfig.titlePt || "") : (notfoundConfig.titleEn || "")}
+                      onChange={(e) =>
+                        setNotfoundConfig({
+                          ...notfoundConfig,
+                          [notfoundActiveLang === "pt" ? "titlePt" : "titleEn"]: e.target.value
+                        })
+                      }
+                      placeholder={notfoundActiveLang === "pt" ? "Você caiu em um vácuo cósmico" : "Lost in the cosmic void"}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: "block", fontSize: "12px", color: "#8b949e", marginBottom: "4px" }}>
+                      Subtítulo / Mensagem Explicativa ({notfoundActiveLang.toUpperCase()})
+                    </label>
+                    <textarea
+                      rows="3"
+                      className="drawings-input"
+                      value={notfoundActiveLang === "pt" ? (notfoundConfig.subtitlePt || "") : (notfoundConfig.subtitleEn || "")}
+                      onChange={(e) =>
+                        setNotfoundConfig({
+                          ...notfoundConfig,
+                          [notfoundActiveLang === "pt" ? "subtitlePt" : "subtitleEn"]: e.target.value
+                        })
+                      }
+                      placeholder="A página ou recurso que você tentou acessar não existe..."
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* MASCOTE & IMAGEM */}
+              <div className="blog-section-card">
+                <h4 className="blog-section-card-title">🐺 Mascote / Ícone da 404</h4>
+                <div style={{ display: "flex", gap: "20px", alignItems: "center" }}>
+                  <div
+                    style={{
+                      width: "80px",
+                      height: "80px",
+                      borderRadius: "50%",
+                      background: "rgba(139, 92, 246, 0.15)",
+                      border: "2px solid rgba(139, 92, 246, 0.4)",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      overflow: "hidden"
+                    }}
+                  >
+                    <img
+                      src={notfoundConfig.mascotImage || "/wolf(2).png"}
+                      alt="Mascote 404"
+                      style={{ width: "65px", height: "65px", objectFit: "contain" }}
+                      onError={(e) => { e.target.src = "/wolf(2).png"; }}
+                    />
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ display: "flex", gap: "10px", alignItems: "center", marginBottom: "8px" }}>
+                      <input
+                        type="file"
+                        ref={notfoundMascotInputRef}
+                        accept="image/*"
+                        style={{ display: "none" }}
+                        onChange={handleUploadNotFoundMascot}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => notfoundMascotInputRef.current?.click()}
+                        disabled={isUploadingNotFoundMascot}
+                        className="btn-upload-file"
+                        style={{ padding: "8px 16px", fontSize: "0.82rem" }}
+                      >
+                        {isUploadingNotFoundMascot ? "Enviando mascote..." : "📁 Fazer Upload de Imagem"}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setNotfoundConfig({ ...notfoundConfig, mascotImage: "/wolf(2).png" })}
+                        style={{
+                          background: "transparent",
+                          border: "1px solid #30363d",
+                          color: "#94a3b8",
+                          padding: "8px 12px",
+                          borderRadius: "8px",
+                          cursor: "pointer",
+                          fontSize: "0.8rem"
+                        }}
+                      >
+                        Usar Lobo Padrão
+                      </button>
+                    </div>
+                    <input
+                      type="text"
+                      className="drawings-input"
+                      value={notfoundConfig.mascotImage || ""}
+                      onChange={(e) => setNotfoundConfig({ ...notfoundConfig, mascotImage: e.target.value })}
+                      placeholder="Ou insira a URL direta da imagem..."
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* BOTÕES DE AÇÃO */}
+              <div className="blog-section-card">
+                <h4 className="blog-section-card-title">🔘 Textos dos Botões de Ação</h4>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: "12px" }}>
+                  <div>
+                    <label style={{ display: "block", fontSize: "12px", color: "#8b949e", marginBottom: "4px" }}>
+                      Botão "Voltar ao Início" ({notfoundActiveLang.toUpperCase()})
+                    </label>
+                    <input
+                      type="text"
+                      className="drawings-input"
+                      value={notfoundActiveLang === "pt" ? (notfoundConfig.backHomeTextPt || "") : (notfoundConfig.backHomeTextEn || "")}
+                      onChange={(e) =>
+                        setNotfoundConfig({
+                          ...notfoundConfig,
+                          [notfoundActiveLang === "pt" ? "backHomeTextPt" : "backHomeTextEn"]: e.target.value
+                        })
+                      }
+                      placeholder={notfoundActiveLang === "pt" ? "Voltar para o Início" : "Back to Home"}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: "block", fontSize: "12px", color: "#8b949e", marginBottom: "4px" }}>
+                      Botão "Perguntar ao Alomyr" ({notfoundActiveLang.toUpperCase()})
+                    </label>
+                    <input
+                      type="text"
+                      className="drawings-input"
+                      value={notfoundActiveLang === "pt" ? (notfoundConfig.askAlomyrTextPt || "") : (notfoundConfig.askAlomyrTextEn || "")}
+                      onChange={(e) =>
+                        setNotfoundConfig({
+                          ...notfoundConfig,
+                          [notfoundActiveLang === "pt" ? "askAlomyrTextPt" : "askAlomyrTextEn"]: e.target.value
+                        })
+                      }
+                      placeholder={notfoundActiveLang === "pt" ? "Perguntar ao Alomyr 💬" : "Ask Alomyr 💬"}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: "block", fontSize: "12px", color: "#8b949e", marginBottom: "4px" }}>
+                      Botão "Ver Projetos & Artigos" ({notfoundActiveLang.toUpperCase()})
+                    </label>
+                    <input
+                      type="text"
+                      className="drawings-input"
+                      value={notfoundActiveLang === "pt" ? (notfoundConfig.exploreWorksTextPt || "") : (notfoundConfig.exploreWorksTextEn || "")}
+                      onChange={(e) =>
+                        setNotfoundConfig({
+                          ...notfoundConfig,
+                          [notfoundActiveLang === "pt" ? "exploreWorksTextPt" : "exploreWorksTextEn"]: e.target.value
+                        })
+                      }
+                      placeholder={notfoundActiveLang === "pt" ? "Ver Projetos & Artigos" : "Explore Projects & Papers"}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* PROMPT DO ASSISTENTE ALOMYR */}
+              <div className="blog-section-card" style={{ borderLeft: "3px solid #8b5cf6" }}>
+                <h4 className="blog-section-card-title">🤖 Prompt Enviado ao Alomyr ao Clicar</h4>
+                <p style={{ margin: "0 0 10px", fontSize: "0.8rem", color: "#94a3b8" }}>
+                  Quando o visitante clica no botão "Perguntar ao Alomyr" na página 404, esta mensagem é automaticamente pré-carregada no chat para orientá-lo:
+                </p>
+                <textarea
+                  rows="3"
+                  className="drawings-input"
+                  value={notfoundActiveLang === "pt" ? (notfoundConfig.alomyrPromptPt || "") : (notfoundConfig.alomyrPromptEn || "")}
+                  onChange={(e) =>
+                    setNotfoundConfig({
+                      ...notfoundConfig,
+                      [notfoundActiveLang === "pt" ? "alomyrPromptPt" : "alomyrPromptEn"]: e.target.value
+                    })
+                  }
+                  placeholder={
+                    notfoundActiveLang === "pt"
+                      ? "Olá Alomyr! Me perdi em uma rota inexistente (404)..."
+                      : "Hi Alomyr! I got lost on a 404 page..."
+                  }
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* RIGHT COLUMN: LIVE INTERACTIVE PREVIEW */}
+          <div className="cv-dash-right">
+            <div className="cv-preview-card" style={{ padding: "0", overflow: "hidden", height: "calc(100vh - 120px)", display: "flex", flexDirection: "column" }}>
+              <div style={{ background: "#0e1117", padding: "12px 18px", borderBottom: "1px solid #1f2737", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <span style={{ fontSize: "0.82rem", fontWeight: "700", color: "#f87171" }}>
+                  👁️ Prévia em Tempo Real da Tela 404
+                </span>
+                <span style={{ fontSize: "0.75rem", color: "#8b949e" }}>
+                  Atualiza conforme você digita
+                </span>
+              </div>
+              <div style={{ flex: 1, overflowY: "auto", position: "relative", background: "#030306" }}>
+                <NotFound previewConfig={notfoundConfig} onBackToHome={() => {}} onExploreWorks={() => {}} />
+              </div>
+            </div>
+          </div>
         </div>
       ) : (
         /* TABS 1, 2, 3: PROJECTS / ARTICLES / THOUGHTS EDITING */
