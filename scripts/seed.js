@@ -141,14 +141,27 @@ async function runSeed() {
   console.log("\n[SEED] Inserindo Configuracoes do Agente de IA...");
   const { error: agentError } = await client.from("agent_configs").upsert({
     id: "production",
-    model_name: "Qwen 2.5 Coder 32B-Instruct",
-    system_prompt: "Voce e o assistente oficial do portfolio de Matheus de Castro.",
+    model_name: "qwen/qwen3.8-27b",
+    system_prompt: "Você é o assistente oficial do portfólio de Matheus de Castro.",
     updated_at: new Date().toISOString()
   }, { onConflict: "id" });
   if (agentError) {
     console.warn(`  [AVISO] Agent Config: ${agentError.message}`);
   } else {
     console.log("  [OK] Agent Config sincronizado.");
+  }
+
+  // 7. Inserir Profile Config
+  console.log("\n[SEED] Inserindo Profile Config...");
+  const { error: profileError } = await client.from("profile_configs").upsert({
+    id: "production",
+    photo_url: "",
+    updated_at: new Date().toISOString()
+  }, { onConflict: "id" });
+  if (profileError) {
+    console.warn(`  [AVISO] Profile Config: ${profileError.message}`);
+  } else {
+    console.log("  [OK] Profile Config sincronizado.");
   }
 
   console.log("\n[SEED] Seed finalizado com sucesso!");

@@ -487,6 +487,7 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
       author: blogAuthor.trim() || "Matheus de Castro",
       publishedAt: blogPublishedAt || new Date().toISOString().split("T")[0],
       readTime: blogReadTime.trim() || "5 min",
+      displayOrder: (blogPosts.find((p) => p.id === selectedBlogId)?.displayOrder ?? 0),
       isPublished: blogIsPublished
     };
 
@@ -494,7 +495,13 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
     const updatedList = blogPosts.filter((p) => p.id !== postObj.id);
     setBlogPosts([postObj, ...updatedList]);
     setSelectedBlogId(postObj.id);
-    showToast(res.cloud ? "Post salvo no Supabase Cloud!" : "Post salvo localmente!");
+    if (res.cloud) {
+      showToast("Post salvo e sincronizado no Supabase Cloud!");
+    } else if (res.error) {
+      showToast("Post salvo localmente. Aviso na nuvem: " + res.error);
+    } else {
+      showToast("Post salvo localmente (offline)!");
+    }
   };
 
   const handleDeleteBlogPost = async (id) => {

@@ -481,7 +481,7 @@ export function mapDbDrawing(row) {
     title: row.title,
     titleEn: row.title_en || existing?.titleEn || row.title,
     titlePt: row.title_pt || existing?.titlePt || row.title,
-    src: row.src,
+    src: row.image_url || row.src || "",
     description: row.description || "",
     descriptionEn: row.description_en || existing?.descriptionEn || row.description || "",
     descriptionPt: row.description_pt || existing?.descriptionPt || row.description || "",
@@ -494,11 +494,12 @@ export function mapDbDrawing(row) {
 export function mapDrawingToDb(item) {
   return {
     id: item.id,
-    title: item.titleEn || item.title,
-    src: item.src,
-    description: item.descriptionEn || item.description || "",
+    title: item.titleEn || item.title || item.titlePt || "",
+    image_url: item.src || item.imageUrl || "",
+    description: item.descriptionEn || item.description || item.descriptionPt || "",
     display_order: item.displayOrder ?? 0,
-    is_published: item.isPublished !== false
+    is_published: item.isPublished !== false,
+    updated_at: new Date().toISOString()
   };
 }
 
@@ -1053,6 +1054,7 @@ export function mapDbPostToBlog(row) {
     contentPt: row.content_pt || "",
     contentEn: row.content_en || "",
     relatedProjectId: row.related_project_id || "",
+    relatedArticleId: row.related_article_id || "",
     author: row.author || "Matheus de Castro",
     publishedAt: row.published_at || new Date().toISOString().split("T")[0],
     readTime: row.read_time || "5 min",
@@ -1062,25 +1064,42 @@ export function mapDbPostToBlog(row) {
 }
 
 export function mapBlogPostToDb(post) {
+  const publishedAt = (post.publishedAt && typeof post.publishedAt === "string" && post.publishedAt.trim())
+    ? post.publishedAt.trim().split("T")[0]
+    : new Date().toISOString().split("T")[0];
+
+  const tagsArray = Array.isArray(post.tags)
+    ? post.tags
+    : typeof post.tags === "string"
+      ? post.tags.split(",").map((t) => t.trim()).filter(Boolean)
+      : [];
+
+  const galleryArray = Array.isArray(post.galleryImages)
+    ? post.galleryImages
+    : typeof post.galleryImages === "string"
+      ? post.galleryImages.split(/[\n,]/).map((s) => s.trim()).filter(Boolean)
+      : [];
+
   return {
     id: post.id,
-    channel: post.channel || "tech",
-    title_pt: post.titlePt || "",
-    title_en: post.titleEn || "",
-    summary_pt: post.summaryPt || "",
-    summary_en: post.summaryEn || "",
+    channel: post.channel === "alomyr" ? "alomyr" : "tech",
+    title_pt: post.titlePt || post.title_pt || "",
+    title_en: post.titleEn || post.title_en || "",
+    summary_pt: post.summaryPt || post.summary_pt || "",
+    summary_en: post.summaryEn || post.summary_en || "",
     category: post.category || "Geral",
-    tags: Array.isArray(post.tags) ? post.tags : [],
-    cover_image: post.coverImage || "",
-    youtube_url: post.youtubeUrl || "",
-    gallery_images: Array.isArray(post.galleryImages) ? post.galleryImages : [],
-    content_pt: post.contentPt || "",
-    content_en: post.contentEn || "",
-    related_project_id: post.relatedProjectId || null,
+    tags: tagsArray,
+    cover_image: post.coverImage || post.cover_image || "",
+    youtube_url: post.youtubeUrl || post.youtube_url || "",
+    gallery_images: galleryArray,
+    content_pt: post.contentPt || post.content_pt || "",
+    content_en: post.contentEn || post.content_en || "",
+    related_project_id: (post.relatedProjectId && typeof post.relatedProjectId === "string" && post.relatedProjectId.trim()) ? post.relatedProjectId.trim() : null,
+    related_article_id: (post.relatedArticleId && typeof post.relatedArticleId === "string" && post.relatedArticleId.trim()) ? post.relatedArticleId.trim() : null,
     author: post.author || "Matheus de Castro",
-    published_at: post.publishedAt || new Date().toISOString().split("T")[0],
-    read_time: post.readTime || "5 min",
-    display_order: typeof post.displayOrder === "number" ? post.displayOrder : 0,
+    published_at: publishedAt,
+    read_time: post.readTime || post.read_time || "5 min",
+    display_order: typeof post.displayOrder === "number" ? post.displayOrder : (typeof post.display_order === "number" ? post.display_order : 0),
     is_published: post.isPublished !== false,
     updated_at: new Date().toISOString()
   };
@@ -1145,10 +1164,13 @@ export async function persistBlogPost(post) {
         persistBlogPostsBatch(updatedList).catch(() => {});
         return { success: true, cloud: true };
       }
-      return await persistBlogPostsBatch(updatedList);
+      console.warn("Erro ao fazer upsert em blog_posts, acionando fallback batch:", error);
+      const fallback = await persistBlogPostsBatch(updatedList);
+      return { success: true, cloud: fallback.cloud, error: error.message };
     } catch (err) {
       console.warn("Erro ao persistir post no Supabase (usando batch fallback):", err);
-      return await persistBlogPostsBatch(updatedList);
+      const fallback = await persistBlogPostsBatch(updatedList);
+      return { success: true, cloud: fallback.cloud, error: err.message };
     }
   }
   return { success: true, cloud: false };
