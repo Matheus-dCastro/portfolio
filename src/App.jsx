@@ -17,6 +17,8 @@ import {
   isAuthorizedAdmin,
   getStoredBlogGatewayConfig,
   fetchBlogGatewayConfig,
+  getStoredNotFoundConfig,
+  fetchNotFoundConfig,
   fetchWorks,
   fetchArticles,
   fetchThoughts
@@ -25,8 +27,12 @@ import { supabase } from "./lib/supabaseClient";
 
 function App() {
   const [gatewayConfig, setGatewayConfig] = useState(() => getStoredBlogGatewayConfig());
+  const [notfoundConfig, setNotfoundConfig] = useState(() => getStoredNotFoundConfig());
 
   useEffect(() => {
+    fetchNotFoundConfig().then((cfg) => {
+      if (cfg) setNotfoundConfig(cfg);
+    });
     fetchBlogGatewayConfig().then((cfg) => {
       if (cfg) {
         setGatewayConfig(cfg);
@@ -554,6 +560,7 @@ function App() {
     return (
       <>
         <NotFound
+          previewConfig={notfoundConfig}
           onBackToHome={() => {
             setCurrentPage("home");
             window.history.pushState({}, "", "/");

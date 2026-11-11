@@ -210,6 +210,7 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
 
   // Blog Gateway Configuration (/blog/?)
   const [blogGatewayConfig, setBlogGatewayConfig] = useState(() => getStoredBlogGatewayConfig());
+  const [gatewayActiveLang, setGatewayActiveLang] = useState("pt");
   const [isSavingGatewayConfig, setIsSavingGatewayConfig] = useState(false);
 
   // 404 Error Page Customization States
@@ -4542,13 +4543,13 @@ DIRETRIZ MÁXIMA DE CONCISÃO:
               <div style={{ display: "flex", gap: "8px", marginBottom: "20px" }}>
                 <button
                   type="button"
-                  onClick={() => setHobbyActiveLang("pt")}
+                  onClick={() => setGatewayActiveLang("pt")}
                   style={{
                     padding: "6px 14px",
                     borderRadius: "6px",
-                    border: hobbyActiveLang === "pt" ? "1px solid #8b5cf6" : "1px solid #30363d",
-                    background: hobbyActiveLang === "pt" ? "rgba(139, 92, 246, 0.25)" : "#0d1117",
-                    color: hobbyActiveLang === "pt" ? "#fff" : "#8b949e",
+                    border: gatewayActiveLang === "pt" ? "1px solid #8b5cf6" : "1px solid #30363d",
+                    background: gatewayActiveLang === "pt" ? "rgba(139, 92, 246, 0.25)" : "#0d1117",
+                    color: gatewayActiveLang === "pt" ? "#fff" : "#8b949e",
                     fontWeight: "600",
                     fontSize: "0.82rem",
                     cursor: "pointer"
@@ -4558,13 +4559,13 @@ DIRETRIZ MÁXIMA DE CONCISÃO:
                 </button>
                 <button
                   type="button"
-                  onClick={() => setHobbyActiveLang("en")}
+                  onClick={() => setGatewayActiveLang("en")}
                   style={{
                     padding: "6px 14px",
                     borderRadius: "6px",
-                    border: hobbyActiveLang === "en" ? "1px solid #8b5cf6" : "1px solid #30363d",
-                    background: hobbyActiveLang === "en" ? "rgba(139, 92, 246, 0.25)" : "#0d1117",
-                    color: hobbyActiveLang === "en" ? "#fff" : "#8b949e",
+                    border: gatewayActiveLang === "en" ? "1px solid #8b5cf6" : "1px solid #30363d",
+                    background: gatewayActiveLang === "en" ? "rgba(139, 92, 246, 0.25)" : "#0d1117",
+                    color: gatewayActiveLang === "en" ? "#fff" : "#8b949e",
                     fontWeight: "600",
                     fontSize: "0.82rem",
                     cursor: "pointer"
@@ -4599,50 +4600,50 @@ DIRETRIZ MÁXIMA DE CONCISÃO:
                 <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: "12px" }}>
                   <div>
                     <label style={{ display: "block", fontSize: "12px", color: "#8b949e", marginBottom: "4px" }}>
-                      Badge Superior ({hobbyActiveLang.toUpperCase()})
+                      Badge Superior ({gatewayActiveLang.toUpperCase()})
                     </label>
                     <input
                       type="text"
                       className="drawings-input"
-                      value={hobbyActiveLang === "pt" ? (blogGatewayConfig.topBadgePt || "") : (blogGatewayConfig.topBadgeEn || "")}
+                      value={gatewayActiveLang === "pt" ? (blogGatewayConfig.topBadgePt || "") : (blogGatewayConfig.topBadgeEn || "")}
                       onChange={(e) =>
                         setBlogGatewayConfig({
                           ...blogGatewayConfig,
-                          [hobbyActiveLang === "pt" ? "topBadgePt" : "topBadgeEn"]: e.target.value
+                          [gatewayActiveLang === "pt" ? "topBadgePt" : "topBadgeEn"]: e.target.value
                         })
                       }
-                      placeholder={hobbyActiveLang === "pt" ? "ECOSSISTEMA MATHEUS DE CASTRO" : "MATHEUS DE CASTRO ECOSYSTEM"}
+                      placeholder={gatewayActiveLang === "pt" ? "ECOSSISTEMA MATHEUS DE CASTRO" : "MATHEUS DE CASTRO ECOSYSTEM"}
                     />
                   </div>
                   <div>
                     <label style={{ display: "block", fontSize: "12px", color: "#8b949e", marginBottom: "4px" }}>
-                      Título Principal ({hobbyActiveLang.toUpperCase()})
+                      Título Principal ({gatewayActiveLang.toUpperCase()})
                     </label>
                     <input
                       type="text"
                       className="drawings-input"
-                      value={hobbyActiveLang === "pt" ? (blogGatewayConfig.gatewayTitlePt || "") : (blogGatewayConfig.gatewayTitleEn || "")}
+                      value={gatewayActiveLang === "pt" ? (blogGatewayConfig.gatewayTitlePt || "") : (blogGatewayConfig.gatewayTitleEn || "")}
                       onChange={(e) =>
                         setBlogGatewayConfig({
                           ...blogGatewayConfig,
-                          [hobbyActiveLang === "pt" ? "gatewayTitlePt" : "gatewayTitleEn"]: e.target.value
+                          [gatewayActiveLang === "pt" ? "gatewayTitlePt" : "gatewayTitleEn"]: e.target.value
                         })
                       }
-                      placeholder={hobbyActiveLang === "pt" ? "Blog & Laboratório Criativo" : "Blog & Creative Laboratory"}
+                      placeholder={gatewayActiveLang === "pt" ? "Blog & Laboratório Criativo" : "Blog & Creative Laboratory"}
                     />
                   </div>
                   <div>
                     <label style={{ display: "block", fontSize: "12px", color: "#8b949e", marginBottom: "4px" }}>
-                      Subtítulo ({hobbyActiveLang.toUpperCase()})
+                      Subtítulo ({gatewayActiveLang.toUpperCase()})
                     </label>
                     <input
                       type="text"
                       className="drawings-input"
-                      value={hobbyActiveLang === "pt" ? (blogGatewayConfig.gatewaySubtitlePt || "") : (blogGatewayConfig.gatewaySubtitleEn || "")}
+                      value={gatewayActiveLang === "pt" ? (blogGatewayConfig.gatewaySubtitlePt || "") : (blogGatewayConfig.gatewaySubtitleEn || "")}
                       onChange={(e) =>
                         setBlogGatewayConfig({
                           ...blogGatewayConfig,
-                          [hobbyActiveLang === "pt" ? "gatewaySubtitlePt" : "gatewaySubtitleEn"]: e.target.value
+                          [gatewayActiveLang === "pt" ? "gatewaySubtitlePt" : "gatewaySubtitleEn"]: e.target.value
                         })
                       }
                       placeholder="Escolha qual dimensão do ecossistema você deseja explorar:"
@@ -4668,33 +4669,33 @@ DIRETRIZ MÁXIMA DE CONCISÃO:
                   <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: "12px" }}>
                     <div>
                       <label style={{ display: "block", fontSize: "12px", color: "#8b949e", marginBottom: "4px" }}>
-                        Badge do Banner ({hobbyActiveLang.toUpperCase()})
+                        Badge do Banner ({gatewayActiveLang.toUpperCase()})
                       </label>
                       <input
                         type="text"
                         className="drawings-input"
-                        value={hobbyActiveLang === "pt" ? (blogGatewayConfig.wipNoticeBadgePt || "") : (blogGatewayConfig.wipNoticeBadgeEn || "")}
+                        value={gatewayActiveLang === "pt" ? (blogGatewayConfig.wipNoticeBadgePt || "") : (blogGatewayConfig.wipNoticeBadgeEn || "")}
                         onChange={(e) =>
                           setBlogGatewayConfig({
                             ...blogGatewayConfig,
-                            [hobbyActiveLang === "pt" ? "wipNoticeBadgePt" : "wipNoticeBadgeEn"]: e.target.value
+                            [gatewayActiveLang === "pt" ? "wipNoticeBadgePt" : "wipNoticeBadgeEn"]: e.target.value
                           })
                         }
-                        placeholder={hobbyActiveLang === "pt" ? "EM REFINAMENTO • PRÉVIA EDITORIAL" : "ACTIVE REFINEMENT • EDITORIAL PREVIEW"}
+                        placeholder={gatewayActiveLang === "pt" ? "EM REFINAMENTO • PRÉVIA EDITORIAL" : "ACTIVE REFINEMENT • EDITORIAL PREVIEW"}
                       />
                     </div>
                     <div>
                       <label style={{ display: "block", fontSize: "12px", color: "#8b949e", marginBottom: "4px" }}>
-                        Texto do Banner ({hobbyActiveLang.toUpperCase()})
+                        Texto do Banner ({gatewayActiveLang.toUpperCase()})
                       </label>
                       <textarea
                         rows="2"
                         className="drawings-input"
-                        value={hobbyActiveLang === "pt" ? (blogGatewayConfig.wipNoticeTextPt || "") : (blogGatewayConfig.wipNoticeTextEn || "")}
+                        value={gatewayActiveLang === "pt" ? (blogGatewayConfig.wipNoticeTextPt || "") : (blogGatewayConfig.wipNoticeTextEn || "")}
                         onChange={(e) =>
                           setBlogGatewayConfig({
                             ...blogGatewayConfig,
-                            [hobbyActiveLang === "pt" ? "wipNoticeTextPt" : "wipNoticeTextEn"]: e.target.value
+                            [gatewayActiveLang === "pt" ? "wipNoticeTextPt" : "wipNoticeTextEn"]: e.target.value
                           })
                         }
                         placeholder="Atenção: Os canais do Blog de Engenharia e do Laboratório Alomyr..."
@@ -4711,16 +4712,16 @@ DIRETRIZ MÁXIMA DE CONCISÃO:
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
                     <div>
                       <label style={{ display: "block", fontSize: "12px", color: "#8b949e", marginBottom: "4px" }}>
-                        Badge do Card ({hobbyActiveLang.toUpperCase()})
+                        Badge do Card ({gatewayActiveLang.toUpperCase()})
                       </label>
                       <input
                         type="text"
                         className="drawings-input"
-                        value={hobbyActiveLang === "pt" ? (blogGatewayConfig.cardTechBadgePt || "") : (blogGatewayConfig.cardTechBadgeEn || "")}
+                        value={gatewayActiveLang === "pt" ? (blogGatewayConfig.cardTechBadgePt || "") : (blogGatewayConfig.cardTechBadgeEn || "")}
                         onChange={(e) =>
                           setBlogGatewayConfig({
                             ...blogGatewayConfig,
-                            [hobbyActiveLang === "pt" ? "cardTechBadgePt" : "cardTechBadgeEn"]: e.target.value
+                            [gatewayActiveLang === "pt" ? "cardTechBadgePt" : "cardTechBadgeEn"]: e.target.value
                           })
                         }
                         placeholder="CANAL DE ENGENHARIA"
@@ -4728,16 +4729,16 @@ DIRETRIZ MÁXIMA DE CONCISÃO:
                     </div>
                     <div>
                       <label style={{ display: "block", fontSize: "12px", color: "#8b949e", marginBottom: "4px" }}>
-                        Título do Card ({hobbyActiveLang.toUpperCase()})
+                        Título do Card ({gatewayActiveLang.toUpperCase()})
                       </label>
                       <input
                         type="text"
                         className="drawings-input"
-                        value={hobbyActiveLang === "pt" ? (blogGatewayConfig.cardTechTitlePt || "") : (blogGatewayConfig.cardTechTitleEn || "")}
+                        value={gatewayActiveLang === "pt" ? (blogGatewayConfig.cardTechTitlePt || "") : (blogGatewayConfig.cardTechTitleEn || "")}
                         onChange={(e) =>
                           setBlogGatewayConfig({
                             ...blogGatewayConfig,
-                            [hobbyActiveLang === "pt" ? "cardTechTitlePt" : "cardTechTitleEn"]: e.target.value
+                            [gatewayActiveLang === "pt" ? "cardTechTitlePt" : "cardTechTitleEn"]: e.target.value
                           })
                         }
                         placeholder="Blog de Engenharia & IA"
@@ -4746,16 +4747,16 @@ DIRETRIZ MÁXIMA DE CONCISÃO:
                   </div>
                   <div>
                     <label style={{ display: "block", fontSize: "12px", color: "#8b949e", marginBottom: "4px" }}>
-                      Descrição do Card ({hobbyActiveLang.toUpperCase()})
+                      Descrição do Card ({gatewayActiveLang.toUpperCase()})
                     </label>
                     <textarea
                       rows="2"
                       className="drawings-input"
-                      value={hobbyActiveLang === "pt" ? (blogGatewayConfig.cardTechDescPt || "") : (blogGatewayConfig.cardTechDescEn || "")}
+                      value={gatewayActiveLang === "pt" ? (blogGatewayConfig.cardTechDescPt || "") : (blogGatewayConfig.cardTechDescEn || "")}
                       onChange={(e) =>
                         setBlogGatewayConfig({
                           ...blogGatewayConfig,
-                          [hobbyActiveLang === "pt" ? "cardTechDescPt" : "cardTechDescEn"]: e.target.value
+                          [gatewayActiveLang === "pt" ? "cardTechDescPt" : "cardTechDescEn"]: e.target.value
                         })
                       }
                       placeholder="Artigos técnicos aprofundados, arquitetura de sistemas..."
@@ -4780,16 +4781,16 @@ DIRETRIZ MÁXIMA DE CONCISÃO:
                   </div>
                   <div>
                     <label style={{ display: "block", fontSize: "12px", color: "#8b949e", marginBottom: "4px" }}>
-                      Texto do Botão ({hobbyActiveLang.toUpperCase()})
+                      Texto do Botão ({gatewayActiveLang.toUpperCase()})
                     </label>
                     <input
                       type="text"
                       className="drawings-input"
-                      value={hobbyActiveLang === "pt" ? (blogGatewayConfig.cardTechBtnPt || "") : (blogGatewayConfig.cardTechBtnEn || "")}
+                      value={gatewayActiveLang === "pt" ? (blogGatewayConfig.cardTechBtnPt || "") : (blogGatewayConfig.cardTechBtnEn || "")}
                       onChange={(e) =>
                         setBlogGatewayConfig({
                           ...blogGatewayConfig,
-                          [hobbyActiveLang === "pt" ? "cardTechBtnPt" : "cardTechBtnEn"]: e.target.value
+                          [gatewayActiveLang === "pt" ? "cardTechBtnPt" : "cardTechBtnEn"]: e.target.value
                         })
                       }
                       placeholder="Explorar Engenharia ↗"
@@ -4805,16 +4806,16 @@ DIRETRIZ MÁXIMA DE CONCISÃO:
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
                     <div>
                       <label style={{ display: "block", fontSize: "12px", color: "#8b949e", marginBottom: "4px" }}>
-                        Badge do Card ({hobbyActiveLang.toUpperCase()})
+                        Badge do Card ({gatewayActiveLang.toUpperCase()})
                       </label>
                       <input
                         type="text"
                         className="drawings-input"
-                        value={hobbyActiveLang === "pt" ? (blogGatewayConfig.cardAlomyrBadgePt || "") : (blogGatewayConfig.cardAlomyrBadgeEn || "")}
+                        value={gatewayActiveLang === "pt" ? (blogGatewayConfig.cardAlomyrBadgePt || "") : (blogGatewayConfig.cardAlomyrBadgeEn || "")}
                         onChange={(e) =>
                           setBlogGatewayConfig({
                             ...blogGatewayConfig,
-                            [hobbyActiveLang === "pt" ? "cardAlomyrBadgePt" : "cardAlomyrBadgeEn"]: e.target.value
+                            [gatewayActiveLang === "pt" ? "cardAlomyrBadgePt" : "cardAlomyrBadgeEn"]: e.target.value
                           })
                         }
                         placeholder="LABORATÓRIO GEEK & ARTÍSTICO"
@@ -4822,16 +4823,16 @@ DIRETRIZ MÁXIMA DE CONCISÃO:
                     </div>
                     <div>
                       <label style={{ display: "block", fontSize: "12px", color: "#8b949e", marginBottom: "4px" }}>
-                        Título do Card ({hobbyActiveLang.toUpperCase()})
+                        Título do Card ({gatewayActiveLang.toUpperCase()})
                       </label>
                       <input
                         type="text"
                         className="drawings-input"
-                        value={hobbyActiveLang === "pt" ? (blogGatewayConfig.cardAlomyrTitlePt || "") : (blogGatewayConfig.cardAlomyrTitleEn || "")}
+                        value={gatewayActiveLang === "pt" ? (blogGatewayConfig.cardAlomyrTitlePt || "") : (blogGatewayConfig.cardAlomyrTitleEn || "")}
                         onChange={(e) =>
                           setBlogGatewayConfig({
                             ...blogGatewayConfig,
-                            [hobbyActiveLang === "pt" ? "cardAlomyrTitlePt" : "cardAlomyrTitleEn"]: e.target.value
+                            [gatewayActiveLang === "pt" ? "cardAlomyrTitlePt" : "cardAlomyrTitleEn"]: e.target.value
                           })
                         }
                         placeholder="Laboratório Alomyr"
@@ -4840,16 +4841,16 @@ DIRETRIZ MÁXIMA DE CONCISÃO:
                   </div>
                   <div>
                     <label style={{ display: "block", fontSize: "12px", color: "#8b949e", marginBottom: "4px" }}>
-                      Descrição do Card ({hobbyActiveLang.toUpperCase()})
+                      Descrição do Card ({gatewayActiveLang.toUpperCase()})
                     </label>
                     <textarea
                       rows="2"
                       className="drawings-input"
-                      value={hobbyActiveLang === "pt" ? (blogGatewayConfig.cardAlomyrDescPt || "") : (blogGatewayConfig.cardAlomyrDescEn || "")}
+                      value={gatewayActiveLang === "pt" ? (blogGatewayConfig.cardAlomyrDescPt || "") : (blogGatewayConfig.cardAlomyrDescEn || "")}
                       onChange={(e) =>
                         setBlogGatewayConfig({
                           ...blogGatewayConfig,
-                          [hobbyActiveLang === "pt" ? "cardAlomyrDescPt" : "cardAlomyrDescEn"]: e.target.value
+                          [gatewayActiveLang === "pt" ? "cardAlomyrDescPt" : "cardAlomyrDescEn"]: e.target.value
                         })
                       }
                       placeholder="Ensaios filosóficos, arte do hiper-realismo em grafite..."
@@ -4874,16 +4875,16 @@ DIRETRIZ MÁXIMA DE CONCISÃO:
                   </div>
                   <div>
                     <label style={{ display: "block", fontSize: "12px", color: "#8b949e", marginBottom: "4px" }}>
-                      Texto do Botão ({hobbyActiveLang.toUpperCase()})
+                      Texto do Botão ({gatewayActiveLang.toUpperCase()})
                     </label>
                     <input
                       type="text"
                       className="drawings-input"
-                      value={hobbyActiveLang === "pt" ? (blogGatewayConfig.cardAlomyrBtnPt || "") : (blogGatewayConfig.cardAlomyrBtnEn || "")}
+                      value={gatewayActiveLang === "pt" ? (blogGatewayConfig.cardAlomyrBtnPt || "") : (blogGatewayConfig.cardAlomyrBtnEn || "")}
                       onChange={(e) =>
                         setBlogGatewayConfig({
                           ...blogGatewayConfig,
-                          [hobbyActiveLang === "pt" ? "cardAlomyrBtnPt" : "cardAlomyrBtnEn"]: e.target.value
+                          [gatewayActiveLang === "pt" ? "cardAlomyrBtnPt" : "cardAlomyrBtnEn"]: e.target.value
                         })
                       }
                       placeholder="Entrar no Laboratório ↗"
@@ -4897,16 +4898,16 @@ DIRETRIZ MÁXIMA DE CONCISÃO:
                 <h4 className="blog-section-card-title">📝 Nota de Rodapé</h4>
                 <div>
                   <label style={{ display: "block", fontSize: "12px", color: "#8b949e", marginBottom: "4px" }}>
-                    Texto do Rodapé ({hobbyActiveLang.toUpperCase()})
+                    Texto do Rodapé ({gatewayActiveLang.toUpperCase()})
                   </label>
                   <textarea
                     rows="2"
                     className="drawings-input"
-                    value={hobbyActiveLang === "pt" ? (blogGatewayConfig.footerNotePt || "") : (blogGatewayConfig.footerNoteEn || "")}
+                    value={gatewayActiveLang === "pt" ? (blogGatewayConfig.footerNotePt || "") : (blogGatewayConfig.footerNoteEn || "")}
                     onChange={(e) =>
                       setBlogGatewayConfig({
                         ...blogGatewayConfig,
-                        [hobbyActiveLang === "pt" ? "footerNotePt" : "footerNoteEn"]: e.target.value
+                        [gatewayActiveLang === "pt" ? "footerNotePt" : "footerNoteEn"]: e.target.value
                       })
                     }
                     placeholder="Ambos os canais contam com links bidirecionais..."
@@ -5049,8 +5050,8 @@ DIRETRIZ MÁXIMA DE CONCISÃO:
                       <input
                         type="text"
                         className="drawings-input"
-                        value={notfoundConfig.errorCode || "404"}
-                        onChange={(e) => setNotfoundConfig({ ...notfoundConfig, errorCode: e.target.value })}
+                        value={notfoundConfig.statusCode || notfoundConfig.errorCode || "404"}
+                        onChange={(e) => setNotfoundConfig({ ...notfoundConfig, errorCode: e.target.value, statusCode: e.target.value })}
                         placeholder="404"
                       />
                     </div>
@@ -5189,11 +5190,12 @@ DIRETRIZ MÁXIMA DE CONCISÃO:
                     <input
                       type="text"
                       className="drawings-input"
-                      value={notfoundActiveLang === "pt" ? (notfoundConfig.backHomeTextPt || "") : (notfoundConfig.backHomeTextEn || "")}
+                      value={notfoundActiveLang === "pt" ? (notfoundConfig.buttonHomePt || notfoundConfig.backHomeTextPt || "") : (notfoundConfig.buttonHomeEn || notfoundConfig.backHomeTextEn || "")}
                       onChange={(e) =>
                         setNotfoundConfig({
                           ...notfoundConfig,
-                          [notfoundActiveLang === "pt" ? "backHomeTextPt" : "backHomeTextEn"]: e.target.value
+                          [notfoundActiveLang === "pt" ? "backHomeTextPt" : "backHomeTextEn"]: e.target.value,
+                          [notfoundActiveLang === "pt" ? "buttonHomePt" : "buttonHomeEn"]: e.target.value
                         })
                       }
                       placeholder={notfoundActiveLang === "pt" ? "Voltar para o Início" : "Back to Home"}
@@ -5206,11 +5208,12 @@ DIRETRIZ MÁXIMA DE CONCISÃO:
                     <input
                       type="text"
                       className="drawings-input"
-                      value={notfoundActiveLang === "pt" ? (notfoundConfig.askAlomyrTextPt || "") : (notfoundConfig.askAlomyrTextEn || "")}
+                      value={notfoundActiveLang === "pt" ? (notfoundConfig.buttonAskAlomyrPt || notfoundConfig.askAlomyrTextPt || "") : (notfoundConfig.buttonAskAlomyrEn || notfoundConfig.askAlomyrTextEn || "")}
                       onChange={(e) =>
                         setNotfoundConfig({
                           ...notfoundConfig,
-                          [notfoundActiveLang === "pt" ? "askAlomyrTextPt" : "askAlomyrTextEn"]: e.target.value
+                          [notfoundActiveLang === "pt" ? "askAlomyrTextPt" : "askAlomyrTextEn"]: e.target.value,
+                          [notfoundActiveLang === "pt" ? "buttonAskAlomyrPt" : "buttonAskAlomyrEn"]: e.target.value
                         })
                       }
                       placeholder={notfoundActiveLang === "pt" ? "Perguntar ao Alomyr 💬" : "Ask Alomyr 💬"}
@@ -5223,11 +5226,12 @@ DIRETRIZ MÁXIMA DE CONCISÃO:
                     <input
                       type="text"
                       className="drawings-input"
-                      value={notfoundActiveLang === "pt" ? (notfoundConfig.exploreWorksTextPt || "") : (notfoundConfig.exploreWorksTextEn || "")}
+                      value={notfoundActiveLang === "pt" ? (notfoundConfig.buttonProjectsPt || notfoundConfig.exploreWorksTextPt || "") : (notfoundConfig.buttonProjectsEn || notfoundConfig.exploreWorksTextEn || "")}
                       onChange={(e) =>
                         setNotfoundConfig({
                           ...notfoundConfig,
-                          [notfoundActiveLang === "pt" ? "exploreWorksTextPt" : "exploreWorksTextEn"]: e.target.value
+                          [notfoundActiveLang === "pt" ? "exploreWorksTextPt" : "exploreWorksTextEn"]: e.target.value,
+                          [notfoundActiveLang === "pt" ? "buttonProjectsPt" : "buttonProjectsEn"]: e.target.value
                         })
                       }
                       placeholder={notfoundActiveLang === "pt" ? "Ver Projetos & Artigos" : "Explore Projects & Papers"}
@@ -5245,11 +5249,12 @@ DIRETRIZ MÁXIMA DE CONCISÃO:
                 <textarea
                   rows="3"
                   className="drawings-input"
-                  value={notfoundActiveLang === "pt" ? (notfoundConfig.alomyrPromptPt || "") : (notfoundConfig.alomyrPromptEn || "")}
+                  value={notfoundActiveLang === "pt" ? (notfoundConfig.askAlomyrPromptPt || notfoundConfig.alomyrPromptPt || "") : (notfoundConfig.askAlomyrPromptEn || notfoundConfig.alomyrPromptEn || "")}
                   onChange={(e) =>
                     setNotfoundConfig({
                       ...notfoundConfig,
-                      [notfoundActiveLang === "pt" ? "alomyrPromptPt" : "alomyrPromptEn"]: e.target.value
+                      [notfoundActiveLang === "pt" ? "alomyrPromptPt" : "alomyrPromptEn"]: e.target.value,
+                      [notfoundActiveLang === "pt" ? "askAlomyrPromptPt" : "askAlomyrPromptEn"]: e.target.value
                     })
                   }
                   placeholder={

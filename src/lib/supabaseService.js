@@ -59,34 +59,41 @@ export function isAuthorizedAdmin(user) {
 const BILINGUAL_SPLIT = "<!-- BILINGUAL_SPLIT -->";
 
 export function mapDbWorkToProject(row) {
-  const existing = getStoredProjects().find((p) => p.id === row.id);
-
-  let titleEn = row.title_en || existing?.titleEn || row.title || "";
-  let titlePt = row.title_pt || existing?.titlePt || row.title || "";
+  let titleEn = row.title_en || "";
+  let titlePt = row.title_pt || "";
   if (row.title && row.title.includes(BILINGUAL_SPLIT)) {
     const parts = row.title.split(BILINGUAL_SPLIT);
     titleEn = parts[0].trim();
     titlePt = parts[1].trim();
+  } else if (!titleEn && !titlePt && row.title) {
+    titleEn = row.title;
+    titlePt = row.title;
   }
 
-  let shortDescEn = row.short_description_en || existing?.shortDescriptionEn || row.short_description || "";
-  let shortDescPt = row.short_description_pt || existing?.shortDescriptionPt || row.short_description || "";
+  let shortDescEn = row.short_description_en || "";
+  let shortDescPt = row.short_description_pt || "";
   if (row.short_description && row.short_description.includes(BILINGUAL_SPLIT)) {
     const parts = row.short_description.split(BILINGUAL_SPLIT);
     shortDescEn = parts[0].trim();
     shortDescPt = parts[1].trim();
+  } else if (!shortDescEn && !shortDescPt && row.short_description) {
+    shortDescEn = row.short_description;
+    shortDescPt = row.short_description;
   }
 
-  let aboutEn = row.about_context_en || existing?.aboutContextEn || row.about_context || "";
-  let aboutPt = row.about_context_pt || existing?.aboutContextPt || row.about_context || "";
+  let aboutEn = row.about_context_en || "";
+  let aboutPt = row.about_context_pt || "";
   if (row.about_context && row.about_context.includes(BILINGUAL_SPLIT)) {
     const parts = row.about_context.split(BILINGUAL_SPLIT);
     aboutEn = parts[0].trim();
     aboutPt = parts[1].trim();
+  } else if (!aboutEn && !aboutPt && row.about_context) {
+    aboutEn = row.about_context;
+    aboutPt = row.about_context;
   }
 
-  let contentEn = row.content_en || existing?.contentEn || "";
-  let contentPt = row.content_pt || existing?.contentPt || "";
+  let contentEn = row.content_en || "";
+  let contentPt = row.content_pt || "";
   if (row.content && row.content.includes(BILINGUAL_SPLIT)) {
     const parts = row.content.split(BILINGUAL_SPLIT);
     contentEn = parts[0].trim();
@@ -115,8 +122,8 @@ export function mapDbWorkToProject(row) {
     googleDocsUrl: row.google_docs_url || "",
     pdfUrl: row.pdf_url || "",
     content: contentEn || row.content || "",
-    contentEn: contentEn || existing?.contentEn || row.content || "",
-    contentPt: contentPt || existing?.contentPt || row.content || "",
+    contentEn: contentEn || row.content || "",
+    contentPt: contentPt || row.content || "",
     relatedArticleId: row.related_article_id || "",
     displayOrder: row.display_order ?? 0,
     isPublished: row.is_published ?? true,
@@ -172,34 +179,41 @@ export function mapProjectToDbWork(item) {
 }
 
 export function mapDbArticle(row) {
-  const existing = getStoredArticles().find((a) => a.id === row.id);
-
-  let titleEn = row.title_en || existing?.titleEn || row.title || "";
-  let titlePt = row.title_pt || existing?.titlePt || row.title || "";
+  let titleEn = row.title_en || "";
+  let titlePt = row.title_pt || "";
   if (row.title && row.title.includes(BILINGUAL_SPLIT)) {
     const parts = row.title.split(BILINGUAL_SPLIT);
     titleEn = parts[0].trim();
     titlePt = parts[1].trim();
+  } else if (!titleEn && !titlePt && row.title) {
+    titleEn = row.title;
+    titlePt = row.title;
   }
 
-  let shortDescEn = row.short_description_en || existing?.shortDescriptionEn || row.short_description || "";
-  let shortDescPt = row.short_description_pt || existing?.shortDescriptionPt || row.short_description || "";
+  let shortDescEn = row.short_description_en || "";
+  let shortDescPt = row.short_description_pt || "";
   if (row.short_description && row.short_description.includes(BILINGUAL_SPLIT)) {
     const parts = row.short_description.split(BILINGUAL_SPLIT);
     shortDescEn = parts[0].trim();
     shortDescPt = parts[1].trim();
+  } else if (!shortDescEn && !shortDescPt && row.short_description) {
+    shortDescEn = row.short_description;
+    shortDescPt = row.short_description;
   }
 
-  let aboutEn = row.about_context_en || existing?.aboutContextEn || row.about_context || "";
-  let aboutPt = row.about_context_pt || existing?.aboutContextPt || row.about_context || "";
+  let aboutEn = row.about_context_en || "";
+  let aboutPt = row.about_context_pt || "";
   if (row.about_context && row.about_context.includes(BILINGUAL_SPLIT)) {
     const parts = row.about_context.split(BILINGUAL_SPLIT);
     aboutEn = parts[0].trim();
     aboutPt = parts[1].trim();
+  } else if (!aboutEn && !aboutPt && row.about_context) {
+    aboutEn = row.about_context;
+    aboutPt = row.about_context;
   }
 
-  let contentEn = row.content_en || existing?.contentEn || "";
-  let contentPt = row.content_pt || existing?.contentPt || "";
+  let contentEn = row.content_en || "";
+  let contentPt = row.content_pt || "";
   if (row.content && row.content.includes(BILINGUAL_SPLIT)) {
     const parts = row.content.split(BILINGUAL_SPLIT);
     contentEn = parts[0].trim();
@@ -209,8 +223,8 @@ export function mapDbArticle(row) {
     contentPt = row.content;
   }
 
-  let docsEn = row.google_docs_url_en || existing?.googleDocsUrlEn || "";
-  let docsPt = row.google_docs_url_pt || existing?.googleDocsUrlPt || "";
+  let docsEn = row.google_docs_url_en || "";
+  let docsPt = row.google_docs_url_pt || "";
   if (row.google_docs_url && row.google_docs_url.includes(BILINGUAL_SPLIT)) {
     const parts = row.google_docs_url.split(BILINGUAL_SPLIT);
     docsEn = parts[0].trim();
@@ -239,8 +253,8 @@ export function mapDbArticle(row) {
     googleDocsUrlPt: docsPt,
     pdfUrl: row.pdf_url || "",
     content: contentEn || row.content || "",
-    contentEn: contentEn || existing?.contentEn || row.content || "",
-    contentPt: contentPt || existing?.contentPt || row.content || "",
+    contentEn: contentEn || row.content || "",
+    contentPt: contentPt || row.content || "",
     relatedProjectId: row.related_work_id || "",
     displayOrder: row.display_order ?? 0,
     isPublished: row.is_published ?? true,
@@ -524,17 +538,8 @@ export async function fetchWorks(includeDrafts = false) {
       const { data, error } = await query;
       if (!error && Array.isArray(data)) {
         const mapped = data.map(mapDbWorkToProject);
-        // Garante que projetos essenciais (como o projeto do próprio portfólio) apareçam preservando edições locais
-        const remoteIds = new Set(mapped.map((p) => p.id));
-        const storedLocal = getStoredProjects();
-        const missingDefaults = DEFAULT_PROJECTS.filter((p) => !remoteIds.has(p.id)).map((def) => {
-          const locallyEdited = storedLocal.find((l) => l.id === def.id);
-          return locallyEdited || def;
-        });
-        const combined = [...mapped, ...missingDefaults];
-
-        saveProjects(combined); // Mantém cache offline sincronizado
-        return combined;
+        saveProjects(mapped); // Mantém cache offline sincronizado
+        return mapped;
       }
       if (error) {
         console.warn("Supabase fetchWorks avisou:", error.message);
@@ -1500,6 +1505,7 @@ export async function persistBlogGatewayConfig(config) {
 
 export const DEFAULT_NOTFOUND_CONFIG = {
   errorCode: "404",
+  statusCode: "404",
   badgePt: "Rota Não Encontrada",
   badgeEn: "Route Not Found",
   titlePt: "Você caiu em um vácuo cósmico",
@@ -1509,14 +1515,67 @@ export const DEFAULT_NOTFOUND_CONFIG = {
   mascotImage: "/wolf(2).png",
   backHomeTextPt: "Voltar para o Início",
   backHomeTextEn: "Back to Home",
+  buttonHomePt: "Voltar para o Início",
+  buttonHomeEn: "Back to Home",
   askAlomyrTextPt: "Perguntar ao Alomyr 💬",
   askAlomyrTextEn: "Ask Alomyr 💬",
+  buttonAskAlomyrPt: "Perguntar ao Alomyr 💬",
+  buttonAskAlomyrEn: "Ask Alomyr 💬",
   exploreWorksTextPt: "Ver Projetos & Artigos",
   exploreWorksTextEn: "Explore Projects & Papers",
+  buttonProjectsPt: "Ver Projetos & Artigos",
+  buttonProjectsEn: "Explore Projects & Papers",
   alomyrPromptPt: "Olá Alomyr! Me perdi em uma rota inexistente (404). Quais são os principais projetos do Matheus e como navego pelo portfólio?",
   alomyrPromptEn: "Hi Alomyr! I got lost on a 404 page. What are Matheus's main projects and how do I navigate the portfolio?",
+  askAlomyrPromptPt: "Olá Alomyr! Me perdi em uma rota inexistente (404). Quais são os principais projetos do Matheus e como navego pelo portfólio?",
+  askAlomyrPromptEn: "Hi Alomyr! I got lost on a 404 page. What are Matheus's main projects and how do I navigate the portfolio?",
   updatedAt: "2026-11-11"
 };
+
+export function normalizeNotFoundConfig(raw) {
+  if (!raw || typeof raw !== "object") return { ...DEFAULT_NOTFOUND_CONFIG };
+
+  const errorCode = raw.errorCode || raw.statusCode || DEFAULT_NOTFOUND_CONFIG.errorCode;
+  const backHomePt = raw.buttonHomePt || raw.backHomeTextPt || DEFAULT_NOTFOUND_CONFIG.backHomeTextPt;
+  const backHomeEn = raw.buttonHomeEn || raw.backHomeTextEn || DEFAULT_NOTFOUND_CONFIG.backHomeTextEn;
+  const askPt = raw.buttonAskAlomyrPt || raw.askAlomyrTextPt || DEFAULT_NOTFOUND_CONFIG.askAlomyrTextPt;
+  const askEn = raw.buttonAskAlomyrEn || raw.askAlomyrTextEn || DEFAULT_NOTFOUND_CONFIG.askAlomyrTextEn;
+  const explorePt = raw.buttonProjectsPt || raw.exploreWorksTextPt || DEFAULT_NOTFOUND_CONFIG.exploreWorksTextPt;
+  const exploreEn = raw.buttonProjectsEn || raw.exploreWorksTextEn || DEFAULT_NOTFOUND_CONFIG.exploreWorksTextEn;
+  const promptPt = raw.askAlomyrPromptPt || raw.alomyrPromptPt || DEFAULT_NOTFOUND_CONFIG.alomyrPromptPt;
+  const promptEn = raw.askAlomyrPromptEn || raw.alomyrPromptEn || DEFAULT_NOTFOUND_CONFIG.alomyrPromptEn;
+
+  return {
+    ...DEFAULT_NOTFOUND_CONFIG,
+    ...raw,
+    errorCode,
+    statusCode: errorCode,
+    badgePt: raw.badgePt || DEFAULT_NOTFOUND_CONFIG.badgePt,
+    badgeEn: raw.badgeEn || DEFAULT_NOTFOUND_CONFIG.badgeEn,
+    titlePt: raw.titlePt || DEFAULT_NOTFOUND_CONFIG.titlePt,
+    titleEn: raw.titleEn || DEFAULT_NOTFOUND_CONFIG.titleEn,
+    subtitlePt: raw.subtitlePt || DEFAULT_NOTFOUND_CONFIG.subtitlePt,
+    subtitleEn: raw.subtitleEn || DEFAULT_NOTFOUND_CONFIG.subtitleEn,
+    mascotImage: (typeof raw.mascotImage === "string" && raw.mascotImage.trim()) ? raw.mascotImage.trim() : DEFAULT_NOTFOUND_CONFIG.mascotImage,
+    backHomeTextPt: backHomePt,
+    backHomeTextEn: backHomeEn,
+    buttonHomePt: backHomePt,
+    buttonHomeEn: backHomeEn,
+    askAlomyrTextPt: askPt,
+    askAlomyrTextEn: askEn,
+    buttonAskAlomyrPt: askPt,
+    buttonAskAlomyrEn: askEn,
+    exploreWorksTextPt: explorePt,
+    exploreWorksTextEn: exploreEn,
+    buttonProjectsPt: explorePt,
+    buttonProjectsEn: exploreEn,
+    alomyrPromptPt: promptPt,
+    alomyrPromptEn: promptEn,
+    askAlomyrPromptPt: promptPt,
+    askAlomyrPromptEn: promptEn,
+    updatedAt: raw.updatedAt || new Date().toISOString()
+  };
+}
 
 export function getStoredNotFoundConfig() {
   try {
@@ -1524,7 +1583,7 @@ export function getStoredNotFoundConfig() {
     if (raw) {
       const parsed = JSON.parse(raw);
       if (parsed && typeof parsed === "object") {
-        return { ...DEFAULT_NOTFOUND_CONFIG, ...parsed };
+        return normalizeNotFoundConfig(parsed);
       }
     }
   } catch (e) {
@@ -1535,7 +1594,8 @@ export function getStoredNotFoundConfig() {
 
 export function saveNotFoundConfig(config) {
   try {
-    localStorage.setItem("portfolio_notfound_config", JSON.stringify(config));
+    const normalized = normalizeNotFoundConfig(config);
+    localStorage.setItem("portfolio_notfound_config", JSON.stringify(normalized));
   } catch (e) {
     console.error("Erro ao salvar configuracao de 404:", e);
   }
@@ -1552,7 +1612,7 @@ export async function fetchNotFoundConfig() {
         .maybeSingle();
 
       if (!error && data?.notfound_config) {
-        const merged = { ...DEFAULT_NOTFOUND_CONFIG, ...data.notfound_config };
+        const merged = normalizeNotFoundConfig(data.notfound_config);
         saveNotFoundConfig(merged);
         return merged;
       }
@@ -1561,7 +1621,7 @@ export async function fetchNotFoundConfig() {
       if (data?.system_prompt) {
         const meta = extractMetadataFromPrompt(data.system_prompt, "NOTFOUND_CONFIG");
         if (meta) {
-          const merged = { ...DEFAULT_NOTFOUND_CONFIG, ...meta };
+          const merged = normalizeNotFoundConfig(meta);
           saveNotFoundConfig(merged);
           return merged;
         }
@@ -1574,7 +1634,8 @@ export async function fetchNotFoundConfig() {
 }
 
 export async function persistNotFoundConfig(config) {
-  saveNotFoundConfig(config);
+  const normalized = normalizeNotFoundConfig(config);
+  saveNotFoundConfig(normalized);
   if (isSupabaseConfigured && supabase) {
     try {
       // 1. Tenta upsert na coluna dedicada
@@ -1583,7 +1644,7 @@ export async function persistNotFoundConfig(config) {
         .upsert(
           {
             id: "production",
-            notfound_config: config,
+            notfound_config: normalized,
             updated_at: new Date().toISOString()
           },
           { onConflict: "id" }
@@ -1598,7 +1659,7 @@ export async function persistNotFoundConfig(config) {
         .maybeSingle();
 
       const basePrompt = agentRes.data?.system_prompt || "";
-      const updatedPrompt = embedMetadataInPrompt(basePrompt, "NOTFOUND_CONFIG", config);
+      const updatedPrompt = embedMetadataInPrompt(basePrompt, "NOTFOUND_CONFIG", normalized);
 
       const retry = await supabase
         .from("agent_configs")

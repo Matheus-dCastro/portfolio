@@ -1131,32 +1131,8 @@ export function getStoredProjects() {
     const raw = localStorage.getItem(STORAGE_KEYS.PROJECTS);
     if (raw !== null) {
       const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed) && parsed.length > 0) {
-        const merged = parsed.map((item) => {
-          const defaultItem = DEFAULT_PROJECTS.find((p) => p.id === item.id);
-          if (!defaultItem) return item;
-          return {
-            ...defaultItem,
-            ...item,
-            contentEn: item.contentEn || defaultItem.contentEn,
-            contentPt: item.contentPt || defaultItem.contentPt,
-            titleEn: item.titleEn || defaultItem.titleEn,
-            titlePt: item.titlePt || defaultItem.titlePt,
-            shortDescriptionEn: item.shortDescriptionEn || defaultItem.shortDescriptionEn,
-            shortDescriptionPt: item.shortDescriptionPt || defaultItem.shortDescriptionPt,
-            aboutContextEn: item.aboutContextEn || defaultItem.aboutContextEn,
-            aboutContextPt: item.aboutContextPt || defaultItem.aboutContextPt
-          };
-        });
-
-        // Garantir que novos projetos adicionados em DEFAULT_PROJECTS apareçam mesmo com cache existente
-        DEFAULT_PROJECTS.forEach((dp) => {
-          if (!merged.some((p) => p.id === dp.id)) {
-            merged.push(dp);
-          }
-        });
-
-        return merged;
+      if (Array.isArray(parsed)) {
+        return parsed;
       }
     }
   } catch (e) {

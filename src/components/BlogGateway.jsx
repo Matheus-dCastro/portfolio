@@ -1,12 +1,24 @@
 // src/components/BlogGateway.jsx
 // Split Gateway Intermediary Screen (/blog/?)
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useLanguage } from "../context/useLanguage";
 import LanguageSwitcher from "./LanguageSwitcher";
+import { getStoredBlogGatewayConfig, fetchBlogGatewayConfig } from "../lib/supabaseService";
 import "./BlogGateway.css";
 
-export default function BlogGateway({ config = {}, onSelectChannel, onBackToHome }) {
+export default function BlogGateway({ config: propConfig, onSelectChannel, onBackToHome }) {
   const { t, lang } = useLanguage();
+  const [config, setConfig] = useState(() => propConfig || getStoredBlogGatewayConfig());
+
+  useEffect(() => {
+    if (propConfig) {
+      setConfig(propConfig);
+      return;
+    }
+    fetchBlogGatewayConfig().then((loaded) => {
+      if (loaded) setConfig(loaded);
+    });
+  }, [propConfig]);
 
   const topBadge =
     lang === "en"

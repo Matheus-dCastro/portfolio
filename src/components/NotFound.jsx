@@ -36,24 +36,24 @@ export default function NotFound({ onBackToHome, onExploreWorks, previewConfig }
 
   const activeBackHome =
     lang === "en"
-      ? config.backHomeTextEn || t("notfound.back_home")
-      : config.backHomeTextPt || t("notfound.back_home");
+      ? config.buttonHomeEn || config.backHomeTextEn || t("notfound.back_home")
+      : config.buttonHomePt || config.backHomeTextPt || t("notfound.back_home");
 
   const activeAskAlomyr =
     lang === "en"
-      ? config.askAlomyrTextEn || t("notfound.ask_alomyr")
-      : config.askAlomyrTextPt || t("notfound.ask_alomyr");
+      ? config.buttonAskAlomyrEn || config.askAlomyrTextEn || t("notfound.ask_alomyr")
+      : config.buttonAskAlomyrPt || config.askAlomyrTextPt || t("notfound.ask_alomyr");
 
   const activeExploreWorks =
     lang === "en"
-      ? config.exploreWorksTextEn || t("notfound.explore_works")
-      : config.exploreWorksTextPt || t("notfound.explore_works");
+      ? config.buttonProjectsEn || config.exploreWorksTextEn || t("notfound.explore_works")
+      : config.buttonProjectsPt || config.exploreWorksTextPt || t("notfound.explore_works");
 
   const handleAskAlomyr = () => {
     const promptToSend =
       lang === "en"
-        ? config.alomyrPromptEn || "Hi Alomyr! I got lost on a 404 page. What are Matheus's main projects and how do I navigate the portfolio?"
-        : config.alomyrPromptPt || "Olá Alomyr! Me perdi em uma rota inexistente (404). Quais são os principais projetos do Matheus e como navego pelo portfólio?";
+        ? config.askAlomyrPromptEn || config.alomyrPromptEn || "Hi Alomyr! I got lost on a 404 page. What are Matheus's main projects and how do I navigate the portfolio?"
+        : config.askAlomyrPromptPt || config.alomyrPromptPt || "Olá Alomyr! Me perdi em uma rota inexistente (404). Quais são os principais projetos do Matheus e como navego pelo portfólio?";
 
     window.dispatchEvent(
       new CustomEvent("open-alomyr-chat", {
@@ -109,7 +109,7 @@ export default function NotFound({ onBackToHome, onExploreWorks, previewConfig }
           </div>
 
           {/* Big Error Number & Title */}
-          <h1 className="notfound-code">{config.errorCode || "404"}</h1>
+          <h1 className="notfound-code">{config.statusCode || config.errorCode || "404"}</h1>
           <h2 className="notfound-title">{activeTitle}</h2>
           <p className="notfound-subtitle">{activeSubtitle}</p>
 
