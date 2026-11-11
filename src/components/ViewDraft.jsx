@@ -517,110 +517,31 @@ export default function ViewDraft({ project: propProject, onBackToHome, onSelect
           </div>
         )}
 
-        {/* Contextual Alomyr Assistant Section - Panoramic & Rich Horizontal Banner */}
-        <section className="view-alomyr-contextual-section">
-          <div className="alomyr-context-card">
-            {/* Top Row: Mascot Identity & Direct Chat Action */}
-            <div className="alomyr-context-top-bar">
-              <div className="alomyr-context-identity">
-                <div className="alomyr-context-avatar">
-                  <img src="/wolf(2).png" alt="Alomyr" className="alomyr-banner-wolf-img" />
-                  <span className="avatar-status-ring"></span>
-                </div>
-                <div className="alomyr-context-headings">
-                  <div className="alomyr-context-badge">
-                    <span className="badge-dot"></span>
-                    <span>{t("view.alomyr_badge")}</span>
-                  </div>
-                  <h3 className="alomyr-context-title">
-                    {t("view.alomyr_title").replace("{type}", itemTypeName)}
-                  </h3>
-                  <p className="alomyr-context-desc">
-                    {t("view.alomyr_subtitle")}
-                  </p>
-                </div>
-              </div>
-
-              <div className="alomyr-context-top-actions">
-                <button
-                  type="button"
-                  className="alomyr-open-full-chat-btn"
-                  onClick={() => handleAskAlomyr()}
-                  title={t("view.alomyr_open_btn")}
-                >
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-                  </svg>
-                  <span>{t("view.alomyr_open_btn")}</span>
-                </button>
-              </div>
-            </div>
-
-            {/* Middle Section: 3 Horizontal Full-Span Prompt Cards */}
-            <div className="alomyr-context-suggestions-area">
-              <span className="suggestions-label">
-                {lang === "en" ? "Suggested contextual inquiries:" : "Perguntas sugeridas sobre este conteúdo:"}
-              </span>
-              <div className="alomyr-context-cards-grid">
-                {contextualQuestions.map((q, idx) => (
-                  <button
-                    key={idx}
-                    type="button"
-                    className="alomyr-prompt-card-btn"
-                    onClick={() => handleAskAlomyr(`[Sobre o ${itemTypeName} "${projectTitle}"]: ${q}`)}
-                  >
-                    <div className="prompt-card-header">
-                      <span className="prompt-card-tag">#{idx + 1}</span>
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="prompt-card-arrow">
-                        <line x1="5" y1="12" x2="19" y2="12"></line>
-                        <polyline points="12 5 19 12 12 19"></polyline>
-                      </svg>
-                    </div>
-                    <span className="prompt-card-text">{q}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Bottom Section: Full-Width Search/Prompt Bar */}
-            <form
-              className="alomyr-context-form"
-              onSubmit={(e) => {
-                e.preventDefault();
-                if (!inlineQuestion.trim()) return;
-                handleAskAlomyr(
-                  `[Sobre o ${itemTypeName} "${projectTitle}"]: ${inlineQuestion.trim()}`
-                );
-                setInlineQuestion("");
-              }}
-            >
-              <div className="alomyr-input-container">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="input-search-icon">
-                  <circle cx="11" cy="11" r="8"></circle>
-                  <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                </svg>
-                <input
-                  type="text"
-                  className="alomyr-context-input"
-                  value={inlineQuestion}
-                  onChange={(e) => setInlineQuestion(e.target.value)}
-                  placeholder={t("view.alomyr_input_placeholder").replace("{type}", itemTypeName)}
-                />
-                <button
-                  type="submit"
-                  className="alomyr-context-submit-btn"
-                  disabled={!inlineQuestion.trim()}
-                >
-                  <span>{t("view.alomyr_ask_btn")}</span>
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <line x1="22" y1="2" x2="11" y2="13"></line>
-                    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-                  </svg>
-                </button>
-              </div>
-            </form>
+        {/* Contextual Alomyr Assistant Banner - Same structure & CSS as linked-item-banner to prevent responsive breaking */}
+        <div className="linked-item-banner alomyr-linked-banner bottom-highlight">
+          <div className="linked-banner-icon alomyr-banner-icon" style={{ borderColor: "rgba(139, 92, 246, 0.4)", color: "#c084fc", background: "rgba(139, 92, 246, 0.15)", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center", width: "48px", height: "48px", borderRadius: "12px", flexShrink: 0 }}>
+            <img src="/wolf(2).png" alt="Alomyr" style={{ width: "28px", height: "28px", objectFit: "contain" }} />
           </div>
-        </section>
+          <div className="linked-banner-info">
+            <span className="linked-banner-tag" style={{ color: "#c084fc" }}>
+              {t("view.alomyr_badge") || "Assistente IA Alomyr"}
+            </span>
+            <h4 className="linked-banner-title">
+              {t("view.alomyr_title").replace("{type}", itemTypeName)}
+            </h4>
+            <p className="linked-banner-desc">
+              {t("view.alomyr_subtitle") || "Dúvidas técnicas, métricas ou detalhes de implementação sobre este conteúdo."}
+            </p>
+          </div>
+          <button
+            type="button"
+            className="btn-open-linked"
+            style={{ borderColor: "#8b5cf6", background: "linear-gradient(135deg, rgba(139, 92, 246, 0.3), rgba(124, 58, 237, 0.4))", color: "#fff", whiteSpace: "nowrap" }}
+            onClick={() => handleAskAlomyr(`[Sobre o ${itemTypeName} "${projectTitle}"]: Olá Alomyr, pode me apresentar os pontos centrais e diferenciais técnicos deste conteúdo?`)}
+          >
+            {t("view.alomyr_open_btn") || "Perguntar ao Alomyr 💬"}
+          </button>
+        </div>
 
         {/* Next / Prev Project Navigation - Minimalist Arrow Design */}
         <section className="minimal-navigation-footer">

@@ -1,16 +1,40 @@
 /* src/components/BlogPage.css */
-/* Modern Cyber-Minimal Dual-Blog Styling */
+/* Visual Aesthetics strictly aligned with Matheus de Castro Portfolio */
 
 .blog-page-root {
   min-height: 100vh;
   width: 100%;
-  background-color: #0b0c10;
-  color: #e2e8f0;
+  color: #f1f5f9;
   position: relative;
   overflow-x: hidden;
-  font-family: inherit;
+  font-family: "Inter", sans-serif;
   display: flex;
   flex-direction: column;
+
+  /* Sistema Estelar Cósmico Idêntico ao Portfólio */
+  background-color: #030306;
+  background-image: 
+    radial-gradient(1.5px 1.5px at 40px 60px, #ffffff 100%, transparent),
+    radial-gradient(2px 2px at 180px 290px, #ffffff 100%, transparent),
+    radial-gradient(1.5px 1.5px at 320px 120px, #ffffff 100%, transparent),
+    radial-gradient(3.5px 3.5px at 100px 210px, #ffffff 10%, #8b5cf6 40%, rgba(139, 92, 246, 0) 100%),
+    radial-gradient(2.5px 2.5px at 290px 350px, #a78bfa 30%, rgba(167, 139, 250, 0.2) 80%, transparent),
+    radial-gradient(3px 3px at 220px 150px, #8b5cf6 20%, rgba(139, 92, 246, 0.15) 70%, transparent),
+    radial-gradient(1px 1px at 75px 110px, rgba(255, 255, 255, 0.85), transparent),
+    radial-gradient(1.2px 1.2px at 240px 50px, rgba(167, 139, 250, 0.7), transparent),
+    radial-gradient(1px 1px at 260px 230px, rgba(255, 255, 255, 0.9), transparent),
+    radial-gradient(1.5px 1.5px at 130px 380px, rgba(255, 255, 255, 0.6), transparent);
+  background-size:
+    480px 480px,
+    420px 420px,
+    370px 370px,
+    480px 480px,
+    420px 420px,
+    370px 370px,
+    480px 480px,
+    420px 420px,
+    370px 370px;
+  background-attachment: fixed;
 }
 
 /* Ambient glow */
@@ -28,11 +52,11 @@
 }
 
 .blog-ambient-glow.tech {
-  background: radial-gradient(circle, #06b6d4 0%, #3b82f6 50%, transparent 70%);
+  background: radial-gradient(circle, #8b5cf6 0%, #3b82f6 50%, transparent 70%);
 }
 
 .blog-ambient-glow.alomyr {
-  background: radial-gradient(circle, #8b5cf6 0%, #ec4899 50%, transparent 70%);
+  background: radial-gradient(circle, #8b5cf6 0%, #a78bfa 50%, transparent 70%);
 }
 
 /* Navbar */
@@ -43,10 +67,10 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 1.35rem 3rem;
-  background: rgba(11, 12, 16, 0.88);
+  padding: 1.2rem 3rem;
+  background: rgba(3, 3, 6, 0.88);
   backdrop-filter: blur(18px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  border-bottom: 1px solid rgba(139, 92, 246, 0.18);
 }
 
 .blog-nav-left,

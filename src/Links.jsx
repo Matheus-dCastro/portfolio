@@ -1,14 +1,23 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import HeadSite from "./components/HeadSite";
 import Rodape from "./components/Rodape";
 import fotoAlomyr from "./assets/img/alomyr.jpeg";
 import logoWolf from "./assets/img/wolf(2).png";
 import "./style.css";
 import { useLanguage } from "./context/useLanguage";
+import { getStoredProfileConfig } from "./data/projectsData";
+import { fetchProfileConfig } from "./lib/supabaseService";
 
 function Links({ onBackToHome }) {
   const { t, lang } = useLanguage();
   const [showToast, setShowToast] = useState(false);
+  const [profilePhoto, setProfilePhoto] = useState(() => getStoredProfileConfig()?.photoUrl || fotoAlomyr);
+
+  useEffect(() => {
+    fetchProfileConfig().then((cfg) => {
+      if (cfg?.photoUrl) setProfilePhoto(cfg.photoUrl);
+    });
+  }, []);
 
   const handleEmailClick = (e, email) => {
     e.preventDefault();
@@ -26,7 +35,7 @@ function Links({ onBackToHome }) {
   };
   const imageWolf = logoWolf;
   const descriptionPerfil = t("hero.subtitle");
-  const fotoPerfil = fotoAlomyr;
+  const fotoPerfil = profilePhoto;
   const Contatos = {
     instagram: "@MatheusdCastro._",
     instagram_link: "https://www.instagram.com/matheusdcastro._/",

@@ -1137,6 +1137,21 @@
 
 /* Responsive */
 @media (max-width: 768px) {
+  .linked-item-banner {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 1.25rem 1rem;
+    gap: 1rem;
+  }
+  .linked-banner-info {
+    width: 100%;
+    min-width: 0;
+  }
+  .btn-open-linked {
+    width: 100%;
+    text-align: center;
+    justify-content: center;
+  }
   .alomyr-context-card {
     padding: 1.5rem 1.25rem;
     border-radius: 16px;

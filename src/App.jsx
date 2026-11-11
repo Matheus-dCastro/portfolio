@@ -11,9 +11,16 @@ import BlogGateway from "./components/BlogGateway";
 import BlogPage from "./components/BlogPage";
 import ChatWidget from "./components/ChatWidget";
 import { getStoredProjects, getStoredArticles, getStoredThoughts } from "./data/projectsData";
-import { getCurrentUser, onAuthChange, isAuthorizedAdmin } from "./lib/supabaseService";
+import { getCurrentUser, onAuthChange, isAuthorizedAdmin, getStoredBlogGatewayConfig, fetchBlogGatewayConfig } from "./lib/supabaseService";
 
 function App() {
+  const [gatewayConfig, setGatewayConfig] = useState(() => getStoredBlogGatewayConfig());
+
+  useEffect(() => {
+    fetchBlogGatewayConfig().then((cfg) => {
+      if (cfg) setGatewayConfig(cfg);
+    });
+  }, []);
   const [selectedProject, setSelectedProject] = useState(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const projectId = urlParams.get("project") || urlParams.get("id");
@@ -318,6 +325,7 @@ function App() {
     return (
       <>
         <BlogGateway
+          config={gatewayConfig}
           onSelectChannel={handleSelectBlogChannel}
           onBackToHome={() => {
             setCurrentPage("home");

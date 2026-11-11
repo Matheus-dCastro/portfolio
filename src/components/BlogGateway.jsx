@@ -5,8 +5,24 @@ import { useLanguage } from "../context/useLanguage";
 import LanguageSwitcher from "./LanguageSwitcher";
 import "./BlogGateway.css";
 
-export default function BlogGateway({ onSelectChannel, onBackToHome }) {
+export default function BlogGateway({ config = {}, onSelectChannel, onBackToHome }) {
   const { t, lang } = useLanguage();
+
+  const gatewayTitle =
+    lang === "en"
+      ? config.gatewayTitleEn || t("blog.gateway_title")
+      : config.gatewayTitlePt || t("blog.gateway_title");
+
+  const gatewaySubtitle =
+    lang === "en"
+      ? config.gatewaySubtitleEn || t("blog.gateway_subtitle")
+      : config.gatewaySubtitlePt || t("blog.gateway_subtitle");
+
+  const showWipNotice = config.wipNoticeVisible !== false;
+  const wipNoticeText =
+    lang === "en"
+      ? config.wipNoticeTextEn || "Please note: The engineering blog and Alomyr lab feeds are currently under active development. Layouts, media embeds, and publications are being refined."
+      : config.wipNoticeTextPt || "Atenção: Os canais do Blog de Engenharia e do Laboratório Alomyr estão atualmente em fase ativa de refinamento e publicação contínua.";
 
   const handleSelect = (channel, path) => {
     if (onSelectChannel) {
@@ -66,21 +82,19 @@ export default function BlogGateway({ onSelectChannel, onBackToHome }) {
             <span className="badge-pulse"></span>
             {t("blog.gateway_badge")}
           </div>
-          <h1 className="gateway-title">{t("blog.gateway_title")}</h1>
-          <p className="gateway-subtitle">{t("blog.gateway_subtitle")}</p>
+          <h1 className="gateway-title">{gatewayTitle}</h1>
+          <p className="gateway-subtitle">{gatewaySubtitle}</p>
 
           {/* Active Construction & Preview Notice */}
-          <div className="gateway-wip-notice">
-            <div className="wip-notice-badge">
-              <span className="wip-dot"></span>
-              <span>{lang === "en" ? "WORK IN PROGRESS • EXPERIMENTAL PREVIEW" : "EM CONSTRUÇÃO • PRÉVIA EXPERIMENTAL"}</span>
+          {showWipNotice && (
+            <div className="gateway-wip-notice">
+              <div className="wip-notice-badge">
+                <span className="wip-dot"></span>
+                <span>{lang === "en" ? "ACTIVE REFINEMENT • EDITORIAL PREVIEW" : "EM REFINAMENTO • PRÉVIA EDITORIAL"}</span>
+              </div>
+              <p className="wip-notice-text">{wipNoticeText}</p>
             </div>
-            <p className="wip-notice-text">
-              {lang === "en"
-                ? "Please note: The engineering blog and Alomyr lab feeds are currently under active development. Layouts, media embeds, and publications are being refined and are not yet in final production use."
-                : "Atenção: Os canais do Blog de Engenharia e do Laboratório Alomyr estão atualmente em fase ativa de construção. Os layouts, mídias e postagens estão sendo refinados e ainda não estão em uso definitivo."}
-            </p>
-          </div>
+          )}
         </div>
 
         {/* Portals Split Cards */}

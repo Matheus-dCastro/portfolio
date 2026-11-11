@@ -778,9 +778,53 @@ export async function persistCustomHobby(hobbyData) {
   return { success: true, cloud: false };
 }
 
+export function mapDbHobby(row) {
+  return {
+    id: row.id,
+    category: row.category || "Hobby",
+    layout: row.layout || "",
+    titlePt: row.title_pt || "",
+    titleEn: row.title_en || "",
+    descriptionPt: row.description_pt || "",
+    descriptionEn: row.description_en || "",
+    photoUrl: row.photo_url || "",
+    displayOrder: typeof row.display_order === "number" ? row.display_order : 0,
+    isPublished: row.is_published !== false
+  };
+}
+
+export function mapHobbyToDb(hobby) {
+  return {
+    id: hobby.id || `hobby-${Date.now()}`,
+    category: hobby.category || "Hobby",
+    layout: hobby.layout || "",
+    title_pt: hobby.titlePt || "",
+    title_en: hobby.titleEn || "",
+    description_pt: hobby.descriptionPt || "",
+    description_en: hobby.descriptionEn || "",
+    photo_url: hobby.photoUrl || "",
+    display_order: typeof hobby.displayOrder === "number" ? hobby.displayOrder : 0,
+    is_published: hobby.isPublished !== false,
+    updated_at: new Date().toISOString()
+  };
+}
+
 export async function fetchHobbies() {
   if (isSupabaseConfigured && supabase) {
     try {
+      // 1. Tenta buscar direto da tabela public.hobbies
+      const { data: hobbiesData, error: hobbiesErr } = await supabase
+        .from("hobbies")
+        .select("*")
+        .order("display_order", { ascending: true });
+
+      if (!hobbiesErr && Array.isArray(hobbiesData) && hobbiesData.length > 0) {
+        const mapped = hobbiesData.map(mapDbHobby);
+        saveHobbies(mapped);
+        return mapped;
+      }
+
+      // 2. Fallback: buscar de agent_configs.custom_hobby_json
       const { data, error } = await supabase
         .from("agent_configs")
         .select("custom_hobby_json")
@@ -788,10 +832,10 @@ export async function fetchHobbies() {
         .maybeSingle();
 
       if (!error && data?.custom_hobby_json) {
-        if (Array.isArray(data.custom_hobby_json)) {
+        if (Array.isArray(data.custom_hobby_json) && data.custom_hobby_json.length > 0) {
           saveHobbies(data.custom_hobby_json);
           return data.custom_hobby_json;
-        } else if (data.custom_hobby_json?.hobbiesList && Array.isArray(data.custom_hobby_json.hobbiesList)) {
+        } else if (data.custom_hobby_json?.hobbiesList && Array.isArray(data.custom_hobby_json.hobbiesList) && data.custom_hobby_json.hobbiesList.length > 0) {
           saveHobbies(data.custom_hobby_json.hobbiesList);
           return data.custom_hobby_json.hobbiesList;
         }
@@ -805,33 +849,116 @@ export async function fetchHobbies() {
 
 export async function persistHobbies(hobbiesList) {
   saveHobbies(hobbiesList);
+  let isCloud = false;
   if (isSupabaseConfigured && supabase) {
     try {
-      const payload = {
-        hobbiesList,
-        updatedAt: new Date().toISOString()
-      };
-      const { error } = await supabase
-        .from("agent_configs")
-        .upsert(
-          {
-            id: "production",
-            custom_hobby_json: payload,
-            updated_at: new Date().toISOString()
-          },
-          { onConflict: "id" }
-        );
-      if (error && error.message && error.message.includes("custom_hobby_json")) {
-        return { success: true, cloud: false };
+      // 1. Upsert na tabela public.hobbies
+      const dbPayloads = hobbiesList.map(mapHobbyToDb);
+      const { error: hobbiesErr } = await supabase
+        .from("hobbies")
+        .upsert(dbPayloads, { onConflict: "id" });
+
+      if (!hobbiesErr) {
+        isCloud = true;
       }
-      if (error) throw error;
-      return { success: true, cloud: true };
+
+      // 2. Backup redundante em agent_configs
+      try {
+        const payload = {
+          hobbiesList,
+          updatedAt: new Date().toISOString()
+        };
+        await supabase
+          .from("agent_configs")
+          .upsert(
+            {
+              id: "production",
+              custom_hobby_json: payload,
+              updated_at: new Date().toISOString()
+            },
+            { onConflict: "id" }
+          );
+        isCloud = true;
+      } catch (e) {}
+
+      return { success: true, cloud: isCloud };
     } catch (err) {
       console.error("Erro ao persistir hobbies no Supabase:", err);
       return { success: true, cloud: false, error: err.message };
     }
   }
   return { success: true, cloud: false };
+}
+
+export async function removeHobby(id) {
+  const current = getStoredHobbies();
+  const updated = current.filter((h) => h.id !== id);
+  saveHobbies(updated);
+
+  let isCloud = false;
+  if (isSupabaseConfigured && supabase) {
+    try {
+      const { error } = await supabase.from("hobbies").delete().eq("id", id);
+      if (!error) isCloud = true;
+
+      try {
+        await supabase.from("agent_configs").upsert(
+          {
+            id: "production",
+            custom_hobby_json: { hobbiesList: updated, updatedAt: new Date().toISOString() },
+            updated_at: new Date().toISOString()
+          },
+          { onConflict: "id" }
+        );
+        isCloud = true;
+      } catch (e) {}
+    } catch (err) {
+      console.warn("Erro ao excluir hobby:", err);
+    }
+  }
+  return { success: true, cloud: isCloud };
+}
+
+export async function uploadHobbyImage(file) {
+  if (!file) throw new Error("Nenhum arquivo de imagem fornecido.");
+
+  if (isSupabaseConfigured && supabase) {
+    const bucketsToTry = ["images", "documents"];
+    for (const b of bucketsToTry) {
+      try {
+        const timestamp = Date.now();
+        const cleanName = (file.name || "hobby.webp").replace(/[^a-zA-Z0-9._-]/g, "_");
+        const filePath = `hobbies/${timestamp}-${cleanName}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from(b)
+          .upload(filePath, file, {
+            cacheControl: "3600",
+            upsert: true,
+            contentType: file.type || "image/webp"
+          });
+
+        if (!uploadError) {
+          const { data: publicUrlData } = supabase.storage
+            .from(b)
+            .getPublicUrl(filePath);
+
+          if (publicUrlData?.publicUrl) {
+            return { success: true, publicUrl: publicUrlData.publicUrl, cloud: true };
+          }
+        }
+      } catch (err) {
+        console.warn(`Tentativa no bucket ${b} para hobby avisou:`, err.message);
+      }
+    }
+  }
+
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve({ success: true, publicUrl: reader.result, cloud: false, fallback: true });
+    reader.onerror = (err) => reject(err);
+    reader.readAsDataURL(file);
+  });
 }
 
 // ==========================================
@@ -1017,39 +1144,240 @@ export async function uploadBlogImage(file) {
   if (!file) throw new Error("Nenhum arquivo de imagem fornecido.");
 
   if (isSupabaseConfigured && supabase) {
-    try {
-      const timestamp = Date.now();
-      const cleanName = (file.name || "post_img.webp").replace(/[^a-zA-Z0-9._-]/g, "_");
-      const filePath = `blog/${timestamp}-${cleanName}`;
+    const bucketsToTry = ["images", "documents"];
+    for (const b of bucketsToTry) {
+      try {
+        const timestamp = Date.now();
+        const cleanName = (file.name || "post_img.webp").replace(/[^a-zA-Z0-9._-]/g, "_");
+        const filePath = `blog/${timestamp}-${cleanName}`;
 
-      const { error: uploadError } = await supabase.storage
-        .from("documents")
-        .upload(filePath, file, {
-          cacheControl: "3600",
-          upsert: true,
-          contentType: file.type || "image/webp"
-        });
+        const { error: uploadError } = await supabase.storage
+          .from(b)
+          .upload(filePath, file, {
+            cacheControl: "3600",
+            upsert: true,
+            contentType: file.type || "image/webp"
+          });
 
-      if (!uploadError) {
-        const { data: publicUrlData } = supabase.storage
-          .from("documents")
-          .getPublicUrl(filePath);
+        if (!uploadError) {
+          const { data: publicUrlData } = supabase.storage
+            .from(b)
+            .getPublicUrl(filePath);
 
-        if (publicUrlData?.publicUrl) {
-          return { success: true, publicUrl: publicUrlData.publicUrl, cloud: true };
+          if (publicUrlData?.publicUrl) {
+            return { success: true, publicUrl: publicUrlData.publicUrl, cloud: true };
+          }
         }
+      } catch (err) {
+        console.warn(`Upload imagem blog no bucket ${b} avisou:`, err.message);
       }
-    } catch (err) {
-      console.warn("Falha de rede ao subir imagem de blog no Supabase Storage:", err);
     }
   }
 
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
-    reader.onload = (e) => resolve({ success: true, publicUrl: e.target.result, cloud: false });
+    reader.onload = (e) => resolve({ success: true, publicUrl: e.target.result, cloud: false, fallback: true });
     reader.onerror = () => reject(new Error("Erro ao ler imagem localmente"));
     reader.readAsDataURL(file);
   });
+}
+
+export const DEFAULT_BLOG_GATEWAY_CONFIG = {
+  defaultRoute: "gateway", // "gateway" (/blog/?), "tech" (/blog), "alomyr" (/blog/alomyr)
+  topBadgePt: "Ecossistema Matheus de Castro",
+  topBadgeEn: "Matheus de Castro Ecosystem",
+  gatewayTitlePt: "Blog & Laboratório Criativo",
+  gatewayTitleEn: "Blog & Creative Laboratory",
+  gatewaySubtitlePt: "Escolha qual dimensão do ecossistema você deseja explorar:",
+  gatewaySubtitleEn: "Choose which dimension of the ecosystem you wish to explore:",
+  wipNoticeVisible: true,
+  wipNoticeBadgePt: "Em Refinamento • Prévia Editorial",
+  wipNoticeBadgeEn: "Active Refinement • Editorial Preview",
+  wipNoticeTextPt: "Atenção: Os canais do Blog de Engenharia e do Laboratório Alomyr estão atualmente em fase ativa de refinamento.",
+  wipNoticeTextEn: "Notice: The Engineering Blog and Alomyr Lab channels are currently under active refinement.",
+
+  // Card 1: Engenharia
+  cardTechBadgePt: "Canal de Engenharia",
+  cardTechBadgeEn: "Engineering Channel",
+  cardTechTitlePt: "Blog de Engenharia & IA",
+  cardTechTitleEn: "Engineering & AI Blog",
+  cardTechDescPt: "Artigos técnicos aprofundados, arquitetura de sistemas, pipelines de telemetria, visão computacional e processos de backend.",
+  cardTechDescEn: "In-depth technical papers, system architecture, telemetry pipelines, computer vision, and backend systems.",
+  cardTechTags: ["#FastAPI", "#PyTorch", "#TimescaleDB", "#Telemetry", "#DevOps"],
+  cardTechBtnPt: "Explorar Engenharia ↗",
+  cardTechBtnEn: "Explore Engineering ↗",
+
+  // Card 2: Alomyr
+  cardAlomyrBadgePt: "Laboratório Geek & Artístico",
+  cardAlomyrBadgeEn: "Geek & Creative Laboratory",
+  cardAlomyrTitlePt: "Laboratório Alomyr",
+  cardAlomyrTitleEn: "Alomyr Laboratory",
+  cardAlomyrDescPt: "Ensaios filosóficos, arte do hiper-realismo em grafite, cultura pop/nerd, retrogaming e configurações de sistema.",
+  cardAlomyrDescEn: "Philosophical essays, graphite hyper-realism art, pop/nerd culture, retrogaming, and system customization.",
+  cardAlomyrTags: ["#Hiper-realismo", "#Retrogaming", "#Marvel", "#Filosofia", "#Linux"],
+  cardAlomyrBtnPt: "Entrar no Laboratório ↗",
+  cardAlomyrBtnEn: "Enter Laboratory ↗",
+
+  // Footer Note
+  footerNotePt: "Ambos os canais contam com links bidirecionais para os projetos técnicos e alternância rápida.",
+  footerNoteEn: "Both channels offer bidirectional links to technical projects and seamless switching.",
+  updatedAt: "2026-11-11"
+};
+
+export function getStoredBlogGatewayConfig() {
+  try {
+    const raw = localStorage.getItem("portfolio_blog_gateway_config");
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed && typeof parsed === "object") {
+        return { ...DEFAULT_BLOG_GATEWAY_CONFIG, ...parsed };
+      }
+    }
+  } catch (e) {
+    console.warn("Falha ao ler configuracao de blog gateway:", e);
+  }
+  return DEFAULT_BLOG_GATEWAY_CONFIG;
+}
+
+export function saveBlogGatewayConfig(config) {
+  try {
+    localStorage.setItem("portfolio_blog_gateway_config", JSON.stringify(config));
+  } catch (e) {
+    console.error("Erro ao salvar configuracao de blog gateway:", e);
+  }
+}
+
+export async function fetchBlogGatewayConfig() {
+  if (isSupabaseConfigured && supabase) {
+    try {
+      const { data, error } = await supabase
+        .from("agent_configs")
+        .select("blog_gateway_config")
+        .eq("id", "production")
+        .maybeSingle();
+
+      if (!error && data?.blog_gateway_config) {
+        const merged = { ...DEFAULT_BLOG_GATEWAY_CONFIG, ...data.blog_gateway_config };
+        saveBlogGatewayConfig(merged);
+        return merged;
+      }
+    } catch (err) {
+      console.warn("Falha ao buscar blog_gateway_config do Supabase:", err);
+    }
+  }
+  return getStoredBlogGatewayConfig();
+}
+
+export async function persistBlogGatewayConfig(config) {
+  saveBlogGatewayConfig(config);
+  if (isSupabaseConfigured && supabase) {
+    try {
+      const { error } = await supabase
+        .from("agent_configs")
+        .upsert(
+          {
+            id: "production",
+            blog_gateway_config: config,
+            updated_at: new Date().toISOString()
+          },
+          { onConflict: "id" }
+        );
+      if (!error) return { success: true, cloud: true };
+    } catch (err) {
+      console.warn("Erro ao salvar blog_gateway_config no Supabase:", err);
+    }
+  }
+  return { success: true, cloud: false };
+}
+
+// ==========================================
+// CONFIGURAÇÕES DA PÁGINA 404 PERSONALIZÁVEL
+// ==========================================
+
+export const DEFAULT_NOTFOUND_CONFIG = {
+  errorCode: "404",
+  badgePt: "Rota Não Encontrada",
+  badgeEn: "Route Not Found",
+  titlePt: "Você caiu em um vácuo cósmico",
+  titleEn: "Lost in the cosmic void",
+  subtitlePt: "A página ou recurso que você tentou acessar não existe, foi movida ou está temporariamente offline. Mas não se preocupe, nosso assistente Alomyr está a postos para te guiar!",
+  subtitleEn: "The page or resource you requested doesn't exist, was relocated, or is temporarily offline. But don't worry, Alomyr is ready to guide you back!",
+  mascotImage: "/wolf(2).png",
+  backHomeTextPt: "Voltar para o Início",
+  backHomeTextEn: "Back to Home",
+  askAlomyrTextPt: "Perguntar ao Alomyr 💬",
+  askAlomyrTextEn: "Ask Alomyr 💬",
+  exploreWorksTextPt: "Ver Projetos & Artigos",
+  exploreWorksTextEn: "Explore Projects & Papers",
+  alomyrPromptPt: "Olá Alomyr! Me perdi em uma rota inexistente (404). Quais são os principais projetos do Matheus e como navego pelo portfólio?",
+  alomyrPromptEn: "Hi Alomyr! I got lost on a 404 page. What are Matheus's main projects and how do I navigate the portfolio?",
+  updatedAt: "2026-11-11"
+};
+
+export function getStoredNotFoundConfig() {
+  try {
+    const raw = localStorage.getItem("portfolio_notfound_config");
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed && typeof parsed === "object") {
+        return { ...DEFAULT_NOTFOUND_CONFIG, ...parsed };
+      }
+    }
+  } catch (e) {
+    console.warn("Falha ao ler configuracao de 404:", e);
+  }
+  return DEFAULT_NOTFOUND_CONFIG;
+}
+
+export function saveNotFoundConfig(config) {
+  try {
+    localStorage.setItem("portfolio_notfound_config", JSON.stringify(config));
+  } catch (e) {
+    console.error("Erro ao salvar configuracao de 404:", e);
+  }
+}
+
+export async function fetchNotFoundConfig() {
+  if (isSupabaseConfigured && supabase) {
+    try {
+      const { data, error } = await supabase
+        .from("agent_configs")
+        .select("notfound_config")
+        .eq("id", "production")
+        .maybeSingle();
+
+      if (!error && data?.notfound_config) {
+        const merged = { ...DEFAULT_NOTFOUND_CONFIG, ...data.notfound_config };
+        saveNotFoundConfig(merged);
+        return merged;
+      }
+    } catch (err) {
+      console.warn("Falha ao buscar notfound_config do Supabase:", err);
+    }
+  }
+  return getStoredNotFoundConfig();
+}
+
+export async function persistNotFoundConfig(config) {
+  saveNotFoundConfig(config);
+  if (isSupabaseConfigured && supabase) {
+    try {
+      const { error } = await supabase
+        .from("agent_configs")
+        .upsert(
+          {
+            id: "production",
+            notfound_config: config,
+            updated_at: new Date().toISOString()
+          },
+          { onConflict: "id" }
+        );
+      if (!error) return { success: true, cloud: true };
+    } catch (err) {
+      console.warn("Erro ao salvar notfound_config no Supabase:", err);
+    }
+  }
+  return { success: true, cloud: false };
 }
 
 // ==========================================
@@ -1302,56 +1630,62 @@ export async function uploadCvPdf(file, lang = "en") {
   }
 
   const cleanLang = (lang === "pt" ? "pt" : "en");
+  let publicUrl = null;
+  let isCloud = false;
 
   if (isSupabaseConfigured && supabase) {
-    const timestamp = Date.now();
-    const cleanName = (file.name || `curriculo_${cleanLang}.pdf`).replace(/[^a-zA-Z0-9._-]/g, "_");
-    const filePath = `cv/${timestamp}-${cleanLang}-${cleanName}`;
+    const bucketsToTry = ["documents", "images"];
+    for (const b of bucketsToTry) {
+      try {
+        const timestamp = Date.now();
+        const cleanName = (file.name || `curriculo_${cleanLang}.pdf`).replace(/[^a-zA-Z0-9._-]/g, "_");
+        const filePath = `cv/${timestamp}-${cleanLang}-${cleanName}`;
 
-    const { error: uploadError } = await supabase.storage
-      .from("documents")
-      .upload(filePath, file, {
-        cacheControl: "3600",
-        upsert: true,
-        contentType: "application/pdf"
-      });
+        const { error: uploadError } = await supabase.storage
+          .from(b)
+          .upload(filePath, file, {
+            cacheControl: "3600",
+            upsert: true,
+            contentType: "application/pdf"
+          });
 
-    if (uploadError) {
-      console.error("Erro no upload do PDF para o Supabase Storage:", uploadError);
-      throw new Error(`Falha no Supabase Storage: ${uploadError.message || "Certifique-se de que o bucket 'documents' está criado no Supabase."}`);
+        if (!uploadError) {
+          const { data: publicUrlData } = supabase.storage
+            .from(b)
+            .getPublicUrl(filePath);
+
+          if (publicUrlData?.publicUrl) {
+            publicUrl = publicUrlData.publicUrl;
+            isCloud = true;
+            break;
+          }
+        }
+      } catch (err) {
+        console.warn(`Upload PDF no bucket ${b} avisou:`, err.message);
+      }
     }
-
-    const { data: publicUrlData } = supabase.storage
-      .from("documents")
-      .getPublicUrl(filePath);
-
-    const publicUrl = publicUrlData?.publicUrl;
-    if (!publicUrl) {
-      throw new Error("Arquivo enviado, mas não foi possível obter a URL pública no Supabase.");
-    }
-
-    const currentConfig = getStoredCvConfig();
-    const updatedConfig = {
-      ...currentConfig,
-      pdfUrl: publicUrl,
-      [cleanLang === "pt" ? "pdfUrlPt" : "pdfUrlEn"]: publicUrl,
-      updatedAt: new Date().toISOString().split("T")[0]
-    };
-
-    await persistCvConfig(updatedConfig);
-    return { success: true, publicUrl, config: updatedConfig, cloud: true, lang: cleanLang };
-  } else {
-    const localUrl = URL.createObjectURL(file);
-    const currentConfig = getStoredCvConfig();
-    const updatedConfig = {
-      ...currentConfig,
-      pdfUrl: localUrl,
-      [cleanLang === "pt" ? "pdfUrlPt" : "pdfUrlEn"]: localUrl,
-      updatedAt: new Date().toISOString().split("T")[0]
-    };
-    saveCvConfig(updatedConfig);
-    return { success: true, publicUrl: localUrl, config: updatedConfig, cloud: false, lang: cleanLang };
   }
+
+  // Se o upload para o Storage falhar (ex: bucket inexistente), converte para Data URL persistente
+  if (!publicUrl) {
+    publicUrl = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = (err) => reject(err);
+      reader.readAsDataURL(file);
+    });
+  }
+
+  const currentConfig = getStoredCvConfig();
+  const updatedConfig = {
+    ...currentConfig,
+    pdfUrl: publicUrl,
+    [cleanLang === "pt" ? "pdfUrlPt" : "pdfUrlEn"]: publicUrl,
+    updatedAt: new Date().toISOString().split("T")[0]
+  };
+
+  await persistCvConfig(updatedConfig);
+  return { success: true, publicUrl, config: updatedConfig, cloud: isCloud, lang: cleanLang };
 }
 
 export async function persistDrawing(item) {
@@ -1445,40 +1779,41 @@ export async function uploadProfileImage(file) {
   if (!file) throw new Error("Nenhum arquivo de imagem fornecido.");
 
   if (isSupabaseConfigured && supabase) {
-    try {
-      const timestamp = Date.now();
-      const cleanName = (file.name || "profile.webp").replace(/[^a-zA-Z0-9._-]/g, "_");
-      const filePath = `avatars/${timestamp}-${cleanName}`;
+    const bucketsToTry = ["images", "documents"];
+    for (const b of bucketsToTry) {
+      try {
+        const timestamp = Date.now();
+        const cleanName = (file.name || "profile.webp").replace(/[^a-zA-Z0-9._-]/g, "_");
+        const filePath = `avatars/${timestamp}-${cleanName}`;
 
-      const { error: uploadError } = await supabase.storage
-        .from("documents")
-        .upload(filePath, file, {
-          cacheControl: "3600",
-          upsert: true,
-          contentType: file.type || "image/webp"
-        });
+        const { error: uploadError } = await supabase.storage
+          .from(b)
+          .upload(filePath, file, {
+            cacheControl: "3600",
+            upsert: true,
+            contentType: file.type || "image/webp"
+          });
 
-      if (!uploadError) {
-        const { data: publicUrlData } = supabase.storage
-          .from("documents")
-          .getPublicUrl(filePath);
+        if (!uploadError) {
+          const { data: publicUrlData } = supabase.storage
+            .from(b)
+            .getPublicUrl(filePath);
 
-        if (publicUrlData?.publicUrl) {
-          return { success: true, publicUrl: publicUrlData.publicUrl, cloud: true };
+          if (publicUrlData?.publicUrl) {
+            return { success: true, publicUrl: publicUrlData.publicUrl, cloud: true };
+          }
         }
-      } else {
-        console.warn("Upload de foto de perfil avisou:", uploadError.message);
+      } catch (err) {
+        console.warn(`Upload foto de perfil no bucket ${b} avisou:`, err.message);
       }
-    } catch (err) {
-      console.warn("Falha de rede ao subir foto de perfil:", err);
     }
   }
 
-  // Fallback em Base64 para funcionamento offline transparente
+  // Fallback em Base64 para funcionamento transparente
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => {
-      resolve({ success: true, publicUrl: reader.result, cloud: false });
+      resolve({ success: true, publicUrl: reader.result, cloud: false, fallback: true });
     };
     reader.onerror = (err) => reject(err);
     reader.readAsDataURL(file);
@@ -1486,11 +1821,88 @@ export async function uploadProfileImage(file) {
 }
 
 export async function fetchProfileConfig() {
+  if (isSupabaseConfigured && supabase) {
+    try {
+      // 1. Tenta tabela public.profile_configs
+      const { data, error } = await supabase
+        .from("profile_configs")
+        .select("*")
+        .eq("id", "production")
+        .maybeSingle();
+
+      if (!error && data?.photo_url) {
+        const config = { photoUrl: data.photo_url, updatedAt: data.updated_at };
+        saveProfileConfig(config);
+        return config;
+      }
+
+      // 2. Fallback: tenta buscar de agent_configs
+      const { data: agentData } = await supabase
+        .from("agent_configs")
+        .select("custom_hobby_json")
+        .eq("id", "production")
+        .maybeSingle();
+
+      if (agentData?.custom_hobby_json?.profilePhoto) {
+        const config = {
+          photoUrl: agentData.custom_hobby_json.profilePhoto,
+          updatedAt: agentData.custom_hobby_json.updatedAt || new Date().toISOString()
+        };
+        saveProfileConfig(config);
+        return config;
+      }
+    } catch (err) {
+      console.warn("Falha ao buscar profile config do Supabase:", err);
+    }
+  }
   return getStoredProfileConfig();
 }
 
 export async function persistProfileConfig(config) {
   saveProfileConfig(config);
+  let isCloud = false;
+
+  if (isSupabaseConfigured && supabase) {
+    try {
+      // 1. Tenta salvar na tabela public.profile_configs
+      const { error: profErr } = await supabase.from("profile_configs").upsert(
+        {
+          id: "production",
+          photo_url: config.photoUrl,
+          updated_at: new Date().toISOString()
+        },
+        { onConflict: "id" }
+      );
+
+      if (!profErr) {
+        isCloud = true;
+      }
+
+      // 2. Backup redundante em agent_configs
+      try {
+        const agentRes = await supabase
+          .from("agent_configs")
+          .select("custom_hobby_json")
+          .eq("id", "production")
+          .maybeSingle();
+        const existing = agentRes.data?.custom_hobby_json || {};
+        await supabase.from("agent_configs").upsert(
+          {
+            id: "production",
+            custom_hobby_json: { ...existing, profilePhoto: config.photoUrl, updatedAt: new Date().toISOString() },
+            updated_at: new Date().toISOString()
+          },
+          { onConflict: "id" }
+        );
+        isCloud = true;
+      } catch (e) {}
+
+      return { success: true, cloud: isCloud };
+    } catch (err) {
+      console.warn("Erro ao salvar perfil no Supabase:", err);
+      return { success: true, cloud: false, error: err.message };
+    }
+  }
   return { success: true, cloud: false };
 }
 

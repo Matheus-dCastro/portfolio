@@ -7,7 +7,8 @@ import LanguageSwitcher from "./LanguageSwitcher";
 import ShareButton from "./ShareButton";
 import {
   fetchBlogPosts,
-  persistBlogPost
+  persistBlogPost,
+  fetchProfileConfig
 } from "../lib/supabaseService";
 import {
   getStoredBlogPosts,
@@ -15,6 +16,7 @@ import {
   BLOG_CHANNELS
 } from "../data/blogData";
 import { getStoredProjects, getStoredArticles, getStoredProfileConfig } from "../data/projectsData";
+import fotoAlomyr from "../assets/img/alomyr.jpeg";
 import "./BlogPage.css";
 
 export default function BlogPage({
@@ -32,6 +34,7 @@ export default function BlogPage({
   const [selectedTag, setSelectedTag] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [lightboxImg, setLightboxImg] = useState(null);
+  const [profilePhoto, setProfilePhoto] = useState(() => getStoredProfileConfig()?.photoUrl || fotoAlomyr);
 
   // Sync props
   useEffect(() => {
@@ -50,6 +53,9 @@ export default function BlogPage({
       if (Array.isArray(loaded) && loaded.length > 0) {
         setPosts(loaded);
       }
+    });
+    fetchProfileConfig().then((cfg) => {
+      if (cfg?.photoUrl) setProfilePhoto(cfg.photoUrl);
     });
   }, []);
 
@@ -311,7 +317,7 @@ export default function BlogPage({
 
             <div className="reader-author-bar">
               <img
-                src={getStoredProfileConfig()?.photoUrl || "/perfil.webp"}
+                src={profilePhoto || fotoAlomyr}
                 alt="Matheus de Castro"
                 className="reader-author-avatar"
               />

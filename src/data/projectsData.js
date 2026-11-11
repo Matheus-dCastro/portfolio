@@ -1374,10 +1374,7 @@ export function getStoredHobbies() {
     if (raw) {
       const parsed = JSON.parse(raw);
       if (Array.isArray(parsed) && parsed.length > 0) {
-        return DEFAULT_HOBBIES_LIST.map((defHobby) => {
-          const match = parsed.find((p) => p.id === defHobby.id);
-          return match ? { ...defHobby, ...match } : defHobby;
-        });
+        return parsed;
       }
     }
   } catch (e) {

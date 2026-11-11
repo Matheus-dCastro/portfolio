@@ -53,7 +53,17 @@ function Intereceses({ mensagem, capa1, capa2, capa3, capa4, capa5, capa6 }) {
                 key={hobby.id || index}
                 className={`hobby-card ${hobby.layout || ""}`}
               >
-                <img src={cover} alt={title} loading="lazy" />
+                <img
+                  src={cover}
+                  alt={title}
+                  loading="lazy"
+                  onError={(e) => {
+                    const fallback = fallbackCovers[index % fallbackCovers.length];
+                    if (e.target.src !== fallback) {
+                      e.target.src = fallback;
+                    }
+                  }}
+                />
                 <div className="hobby-content">
                   <span className="hobby-category">{hobby.category || "Hobby"}</span>
                   <h3>{title}</h3>

@@ -1,20 +1,63 @@
 // src/components/NotFound.jsx
+import { useState, useEffect } from "react";
 import { useLanguage } from "../context/useLanguage";
 import LanguageSwitcher from "./LanguageSwitcher";
+import { getStoredNotFoundConfig, fetchNotFoundConfig } from "../lib/supabaseService";
 import "./NotFound.css";
 
-export default function NotFound({ onBackToHome, onExploreWorks }) {
+export default function NotFound({ onBackToHome, onExploreWorks, previewConfig }) {
   const { t, lang } = useLanguage();
+  const [config, setConfig] = useState(() => previewConfig || getStoredNotFoundConfig());
+
+  useEffect(() => {
+    if (previewConfig) {
+      setConfig(previewConfig);
+      return;
+    }
+    fetchNotFoundConfig().then((loaded) => {
+      if (loaded) setConfig(loaded);
+    });
+  }, [previewConfig]);
+
+  const activeBadge =
+    lang === "en"
+      ? config.badgeEn || t("notfound.badge")
+      : config.badgePt || t("notfound.badge");
+
+  const activeTitle =
+    lang === "en"
+      ? config.titleEn || t("notfound.title")
+      : config.titlePt || t("notfound.title");
+
+  const activeSubtitle =
+    lang === "en"
+      ? config.subtitleEn || t("notfound.subtitle")
+      : config.subtitlePt || t("notfound.subtitle");
+
+  const activeBackHome =
+    lang === "en"
+      ? config.backHomeTextEn || t("notfound.back_home")
+      : config.backHomeTextPt || t("notfound.back_home");
+
+  const activeAskAlomyr =
+    lang === "en"
+      ? config.askAlomyrTextEn || t("notfound.ask_alomyr")
+      : config.askAlomyrTextPt || t("notfound.ask_alomyr");
+
+  const activeExploreWorks =
+    lang === "en"
+      ? config.exploreWorksTextEn || t("notfound.explore_works")
+      : config.exploreWorksTextPt || t("notfound.explore_works");
 
   const handleAskAlomyr = () => {
+    const promptToSend =
+      lang === "en"
+        ? config.alomyrPromptEn || "Hi Alomyr! I got lost on a 404 page. What are Matheus's main projects and how do I navigate the portfolio?"
+        : config.alomyrPromptPt || "Olá Alomyr! Me perdi em uma rota inexistente (404). Quais são os principais projetos do Matheus e como navego pelo portfólio?";
+
     window.dispatchEvent(
       new CustomEvent("open-alomyr-chat", {
-        detail: {
-          prompt:
-            lang === "en"
-              ? "Hi Alomyr! I got lost on a 404 page. What are Matheus's main projects and how do I navigate the portfolio?"
-              : "Olá Alomyr! Me perdi em uma rota inexistente (404). Quais são os principais projetos do Matheus e como navego pelo portfólio?"
-        }
+        detail: { prompt: promptToSend }
       })
     );
   };
@@ -49,9 +92,12 @@ export default function NotFound({ onBackToHome, onExploreWorks }) {
               <span className="orbit-star s3">✦</span>
             </div>
             <img
-              src="/wolf(2).png"
+              src={config.mascotImage || "/wolf(2).png"}
               alt="Cute Cyber Wolf"
               className="notfound-wolf-mascot"
+              onError={(e) => {
+                e.target.src = "/wolf(2).png";
+              }}
             />
             <div className="notfound-mascot-shadow"></div>
           </div>
@@ -59,13 +105,13 @@ export default function NotFound({ onBackToHome, onExploreWorks }) {
           {/* Badge */}
           <div className="notfound-badge">
             <span className="pulse-spark">✦</span>
-            <span>{t("notfound.badge")}</span>
+            <span>{activeBadge}</span>
           </div>
 
           {/* Big Error Number & Title */}
-          <h1 className="notfound-code">404</h1>
-          <h2 className="notfound-title">{t("notfound.title")}</h2>
-          <p className="notfound-subtitle">{t("notfound.subtitle")}</p>
+          <h1 className="notfound-code">{config.errorCode || "404"}</h1>
+          <h2 className="notfound-title">{activeTitle}</h2>
+          <p className="notfound-subtitle">{activeSubtitle}</p>
 
           {/* Action Buttons */}
           <div className="notfound-actions">
@@ -74,7 +120,7 @@ export default function NotFound({ onBackToHome, onExploreWorks }) {
               className="notfound-btn primary"
               onClick={onBackToHome}
             >
-              <span>{t("notfound.back_home")}</span>
+              <span>{activeBackHome}</span>
             </button>
 
             <button
@@ -82,7 +128,7 @@ export default function NotFound({ onBackToHome, onExploreWorks }) {
               className="notfound-btn secondary"
               onClick={handleAskAlomyr}
             >
-              <span>{t("notfound.ask_alomyr")}</span>
+              <span>{activeAskAlomyr}</span>
             </button>
 
             <button
@@ -90,7 +136,7 @@ export default function NotFound({ onBackToHome, onExploreWorks }) {
               className="notfound-btn tertiary"
               onClick={onExploreWorks}
             >
-              <span>{t("notfound.explore_works")}</span>
+              <span>{activeExploreWorks}</span>
             </button>
           </div>
         </div>

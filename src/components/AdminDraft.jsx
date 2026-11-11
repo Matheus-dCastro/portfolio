@@ -30,6 +30,9 @@ import {
   fetchAgentConfig,
   fetchCustomHobby,
   fetchHobbies,
+  persistHobbies,
+  removeHobby,
+  uploadHobbyImage,
   persistWork,
   removeWork,
   persistArticle,
@@ -48,12 +51,19 @@ import {
   fetchProfileConfig,
   persistAgentConfig,
   persistCustomHobby,
-  persistHobbies,
   persistBatchOrder,
   fetchBlogPosts,
   persistBlogPost,
   removeBlogPost,
   uploadBlogImage,
+  fetchBlogGatewayConfig,
+  persistBlogGatewayConfig,
+  getStoredBlogGatewayConfig,
+  DEFAULT_BLOG_GATEWAY_CONFIG,
+  fetchNotFoundConfig,
+  persistNotFoundConfig,
+  getStoredNotFoundConfig,
+  DEFAULT_NOTFOUND_CONFIG,
   getCurrentUser,
   logoutUser
 } from "../lib/supabaseService";
@@ -189,10 +199,23 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
   const [draggedDrawingIdx, setDraggedDrawingIdx] = useState(null);
   const drawingFileInputRef = useRef(null);
 
-  // Hobbies / Interests Cards States (Todos os 7 Cards)
+  // Hobbies / Interests Cards States (Dinâmicos com CRUD completo)
   const [hobbiesList, setHobbiesList] = useState(() => getStoredHobbies());
-  const [selectedHobbyId, setSelectedHobbyId] = useState("hobby-1");
+  const [selectedHobbyId, setSelectedHobbyId] = useState(() => getStoredHobbies()[0]?.id || "hobby-1");
   const [hobbyActiveLang, setHobbyActiveLang] = useState("pt");
+  const [isUploadingHobbyPhoto, setIsUploadingHobbyPhoto] = useState(false);
+  const hobbyPhotoInputRef = useRef(null);
+
+  // Blog Gateway Configuration (/blog/?)
+  const [blogGatewayConfig, setBlogGatewayConfig] = useState(() => getStoredBlogGatewayConfig());
+  const [isSavingGatewayConfig, setIsSavingGatewayConfig] = useState(false);
+
+  // 404 Error Page Customization States
+  const [notfoundConfig, setNotfoundConfig] = useState(() => getStoredNotFoundConfig());
+  const [notfoundActiveLang, setNotfoundActiveLang] = useState("pt");
+  const [isSavingNotFoundConfig, setIsSavingNotFoundConfig] = useState(false);
+  const [isUploadingNotFoundMascot, setIsUploadingNotFoundMascot] = useState(false);
+  const notfoundMascotInputRef = useRef(null);
 
   // Dual-Blog Moderation States (/blog and /blog/alomyr)
   const [blogPosts, setBlogPosts] = useState(() => getStoredBlogPosts());
@@ -348,6 +371,13 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
         if (Array.isArray(list) && list.length > 0) {
           setBlogPosts(list);
         }
+      });
+      fetchBlogGatewayConfig().then((cfg) => {
+        if (cfg) setBlogGatewayConfig(cfg);
+      });
+    } else if (activeTab === "notfound") {
+      fetchNotFoundConfig().then((cfg) => {
+        if (cfg) setNotfoundConfig(cfg);
       });
     }
   }, [activeTab]);
@@ -610,7 +640,7 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
 
   const handleTabChange = (tab) => {
     setActiveTab(tab);
-    if (tab === "agent" || tab === "cv" || tab === "customHobby") return;
+    if (tab === "agent" || tab === "cv" || tab === "customHobby" || tab === "notfound") return;
     if (tab === "blog") {
       if (blogPosts.length > 0 && !selectedBlogId) {
         handleSelectBlogPost(blogPosts[0]);
@@ -1398,22 +1428,93 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
     );
   };
 
+  const handleAddNewHobby = () => {
+    const newId = `hobby-${Date.now()}`;
+    const newHobby = {
+      id: newId,
+      category: "Novo Interesse",
+      layout: "",
+      titlePt: "Novo Card de Interesse",
+      titleEn: "New Interest Card",
+      descriptionPt: "Conte a história ou reflexão deste interesse...",
+      descriptionEn: "Describe this interest in English...",
+      photoUrl: "",
+      isPublished: true,
+      displayOrder: hobbiesList.length
+    };
+    const updated = [...hobbiesList, newHobby];
+    setHobbiesList(updated);
+    setSelectedHobbyId(newId);
+    showToast("Novo card criado! Preencha as informações e clique em Salvar.");
+  };
+
+  const handleDeleteHobby = async (hobbyId) => {
+    if (!window.confirm("Tem certeza que deseja excluir permanentemente este card de interesse?")) return;
+    await removeHobby(hobbyId);
+    const updated = hobbiesList.filter((h) => h.id !== hobbyId);
+    setHobbiesList(updated);
+    if (selectedHobbyId === hobbyId) {
+      setSelectedHobbyId(updated[0]?.id || "");
+    }
+    showToast("Card de interesse excluído com sucesso!");
+  };
+
+  const handleUploadHobbyPhoto = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setIsUploadingHobbyPhoto(true);
+    try {
+      const res = await uploadHobbyImage(file);
+      if (res?.publicUrl) {
+        updateSelectedHobbyField("photoUrl", res.publicUrl);
+        showToast(res.cloud ? "Foto do card enviada para o Supabase Storage!" : "Foto do card carregada localmente!");
+      }
+    } catch (err) {
+      alert("Erro ao enviar foto do card: " + err.message);
+    } finally {
+      setIsUploadingHobbyPhoto(false);
+      if (hobbyPhotoInputRef.current) hobbyPhotoInputRef.current.value = "";
+    }
+  };
+
   const handleSaveHobbiesList = async (e) => {
     if (e && e.preventDefault) e.preventDefault();
     const res = await persistHobbies(hobbiesList);
     showToast(
       res.cloud
-        ? "Todos os 7 cards de interesses foram salvos e sincronizados no Supabase!"
-        : "Cards de interesses salvos com sucesso no armazenamento local!",
+        ? `Todos os ${hobbiesList.length} cards de interesses foram sincronizados no Supabase!`
+        : `Cards de interesses salvos com sucesso no armazenamento local!`,
       "success"
     );
   };
 
   const handleResetHobbiesList = () => {
-    if (window.confirm("Deseja restaurar os 7 cards de interesses para os textos e fotos padrões originais?")) {
+    if (window.confirm("Deseja restaurar os cards de interesses para os textos e fotos padrões originais?")) {
       setHobbiesList(DEFAULT_HOBBIES_LIST);
       persistHobbies(DEFAULT_HOBBIES_LIST);
+      setSelectedHobbyId(DEFAULT_HOBBIES_LIST[0]?.id || "hobby-1");
       showToast("Cards restaurados para o padrão original!", "info");
+    }
+  };
+
+  const handleSaveBlogGatewayConfig = async (e) => {
+    if (e && e.preventDefault) e.preventDefault();
+    setIsSavingGatewayConfig(true);
+    try {
+      const res = await persistBlogGatewayConfig({
+        ...blogGatewayConfig,
+        updatedAt: new Date().toISOString()
+      });
+      showToast(
+        res.cloud
+          ? "Configurações da rota /blog/? e Gateway sincronizadas no Supabase!"
+          : "Configurações do Gateway salvas localmente!",
+        "success"
+      );
+    } catch (err) {
+      alert("Erro ao salvar configurações do gateway: " + err.message);
+    } finally {
+      setIsSavingGatewayConfig(false);
     }
   };
 
@@ -1645,7 +1746,7 @@ DIRETRIZ MÁXIMA DE CONCISÃO:
               className={`cat-btn ${activeTab === "customHobby" ? "active" : ""}`}
               onClick={() => handleTabChange("customHobby")}
             >
-              Interesses (7 Cards)
+              Interesses ({hobbiesList.length} Cards)
             </button>
             <button
               type="button"
@@ -2085,24 +2186,50 @@ DIRETRIZ MÁXIMA DE CONCISÃO:
             <div className="cv-card-section">
               <div className="cv-section-header">
                 <div>
-                  <h2>Gestão dos Cards de Interesses &amp; Hobbies (7 Cards)</h2>
+                  <h2>Gestão dos Cards de Interesses &amp; Hobbies ({hobbiesList.length} Cards)</h2>
                   <p className="cv-section-subtitle">
-                    Personalize qualquer um dos 7 cards exibidos na vitrine de Interesses (Arte, Jogos, IA, Leitura, Fitness, Café e Destaque). Altere títulos, textos, fotos e visibilidade.
+                    Gerencie dinamicamente os cards de interesses exibidos na vitrine de Hobbies (/hobbies). Você pode adicionar novos cards, editar títulos, textos, layouts, fazer upload de imagens e excluir cards.
                   </p>
                 </div>
+                <button
+                  type="button"
+                  onClick={handleAddNewHobby}
+                  style={{
+                    background: "#8b5cf6",
+                    color: "#ffffff",
+                    border: "none",
+                    padding: "9px 16px",
+                    borderRadius: "8px",
+                    fontWeight: "700",
+                    fontSize: "0.86rem",
+                    cursor: "pointer",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "6px",
+                    boxShadow: "0 4px 12px rgba(139, 92, 246, 0.35)",
+                    whiteSpace: "nowrap"
+                  }}
+                >
+                  <span>+ Novo Card</span>
+                </button>
               </div>
 
-              {/* Selector Bar: 7 Cards */}
+              {/* Selector Bar with Cards and + Add Button */}
               <div style={{ marginBottom: "16px" }}>
-                <label style={{ display: "block", fontSize: "0.85rem", fontWeight: "700", color: "#c4b5fd", marginBottom: "8px" }}>
-                  Selecione o Card para Editar:
-                </label>
-                <div style={{ display: "flex", gap: "8px", overflowX: "auto", paddingBottom: "8px" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
+                  <label style={{ fontSize: "0.85rem", fontWeight: "700", color: "#c4b5fd" }}>
+                    Selecione o Card para Editar ({hobbiesList.length} cadastrados):
+                  </label>
+                  <span style={{ fontSize: "0.78rem", color: "#94a3b8" }}>
+                    Arraste ou clique para alternar
+                  </span>
+                </div>
+                <div style={{ display: "flex", gap: "8px", overflowX: "auto", paddingBottom: "8px", alignItems: "center" }}>
                   {hobbiesList.map((h, idx) => {
                     const isSelected = selectedHobby.id === h.id;
                     return (
                       <button
-                        key={h.id}
+                        key={h.id || idx}
                         type="button"
                         onClick={() => setSelectedHobbyId(h.id)}
                         style={{
@@ -2122,10 +2249,27 @@ DIRETRIZ MÁXIMA DE CONCISÃO:
                         }}
                       >
                         <span style={{ color: "#a78bfa", fontWeight: "bold" }}>#{idx + 1}</span>
-                        <span>{h.titlePt || h.category}</span>
+                        <span>{h.titlePt || h.category || "Card"}</span>
                       </button>
                     );
                   })}
+                  <button
+                    type="button"
+                    onClick={handleAddNewHobby}
+                    style={{
+                      padding: "8px 14px",
+                      borderRadius: "8px",
+                      border: "1px dashed rgba(139, 92, 246, 0.6)",
+                      background: "rgba(139, 92, 246, 0.1)",
+                      color: "#c4b5fd",
+                      fontWeight: "600",
+                      fontSize: "0.82rem",
+                      cursor: "pointer",
+                      whiteSpace: "nowrap"
+                    }}
+                  >
+                    + Adicionar
+                  </button>
                 </div>
               </div>
 
@@ -2148,16 +2292,32 @@ DIRETRIZ MÁXIMA DE CONCISÃO:
               </div>
 
               <form onSubmit={handleSaveHobbiesList}>
-                <div className="form-group" style={{ marginBottom: "16px" }}>
-                  <label htmlFor="hobby-cat-input">Categoria / Tag do Card:</label>
-                  <input
-                    id="hobby-cat-input"
-                    type="text"
-                    value={selectedHobby.category || ""}
-                    onChange={(e) => updateSelectedHobbyField("category", e.target.value)}
-                    placeholder="Ex: Art, Gaming, Future, Coffee, Lifestyle..."
-                    style={{ width: "100%", padding: "10px", background: "#0d0f17", border: "1px solid #1f293d", borderRadius: "8px", color: "#fff" }}
-                  />
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "16px" }}>
+                  <div className="form-group">
+                    <label htmlFor="hobby-cat-input">Categoria / Tag do Card:</label>
+                    <input
+                      id="hobby-cat-input"
+                      type="text"
+                      value={selectedHobby.category || ""}
+                      onChange={(e) => updateSelectedHobbyField("category", e.target.value)}
+                      placeholder="Ex: Art, Gaming, Future, Coffee, Lifestyle..."
+                      style={{ width: "100%", padding: "10px", background: "#0d0f17", border: "1px solid #1f293d", borderRadius: "8px", color: "#fff" }}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="hobby-layout-select">Layout Visual na Grade:</label>
+                    <select
+                      id="hobby-layout-select"
+                      value={selectedHobby.layout || ""}
+                      onChange={(e) => updateSelectedHobbyField("layout", e.target.value)}
+                      style={{ width: "100%", padding: "10px", background: "#0d0f17", border: "1px solid #1f293d", borderRadius: "8px", color: "#fff" }}
+                    >
+                      <option value="">Padrão (1x1)</option>
+                      <option value="tall">Destaque Alto (tall)</option>
+                      <option value="wide">Destaque Largo (wide)</option>
+                      <option value="custom-hobby-card">Estilo Especial (custom-hobby-card)</option>
+                    </select>
+                  </div>
                 </div>
 
                 {hobbyActiveLang === "pt" ? (
@@ -2230,7 +2390,7 @@ DIRETRIZ MÁXIMA DE CONCISÃO:
                         color: "#c4b5fd",
                         padding: "10px 16px",
                         borderRadius: "8px",
-                        cursor: "pointer",
+                        cursor: isUploadingHobbyPhoto ? "wait" : "pointer",
                         fontWeight: "600",
                         display: "inline-flex",
                         alignItems: "center",
@@ -2239,19 +2399,14 @@ DIRETRIZ MÁXIMA DE CONCISÃO:
                         whiteSpace: "nowrap"
                       }}
                     >
-                      📁 Upload Foto
+                      {isUploadingHobbyPhoto ? "Enviando..." : "📁 Upload Foto"}
                       <input
+                        ref={hobbyPhotoInputRef}
                         type="file"
                         accept="image/*"
                         style={{ display: "none" }}
-                        onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          if (file) {
-                            const reader = new FileReader();
-                            reader.onload = () => updateSelectedHobbyField("photoUrl", reader.result);
-                            reader.readAsDataURL(file);
-                          }
-                        }}
+                        disabled={isUploadingHobbyPhoto}
+                        onChange={handleUploadHobbyPhoto}
                       />
                     </label>
                   </div>
@@ -2264,44 +2419,65 @@ DIRETRIZ MÁXIMA DE CONCISÃO:
                       checked={selectedHobby.isPublished !== false}
                       onChange={(e) => updateSelectedHobbyField("isPublished", e.target.checked)}
                     />
-                    Card Ativo e Visível na Vitrine
+                    Card Ativo e Visível na Vitrine (/hobbies)
                   </label>
                 </div>
 
-                <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", alignItems: "center" }}>
-                  <button
-                    type="submit"
-                    style={{
-                      background: "#8b5cf6",
-                      color: "#fff",
-                      border: "none",
-                      padding: "12px 24px",
-                      borderRadius: "8px",
-                      fontWeight: "700",
-                      cursor: "pointer",
-                      fontSize: "0.9rem",
-                      boxShadow: "0 4px 14px rgba(139, 92, 246, 0.4)"
-                    }}
-                  >
-                    💾 Salvar Todos os Interesses (7 Cards)
-                  </button>
+                <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between" }}>
+                  <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", alignItems: "center" }}>
+                    <button
+                      type="submit"
+                      style={{
+                        background: "#8b5cf6",
+                        color: "#fff",
+                        border: "none",
+                        padding: "12px 24px",
+                        borderRadius: "8px",
+                        fontWeight: "700",
+                        cursor: "pointer",
+                        fontSize: "0.9rem",
+                        boxShadow: "0 4px 14px rgba(139, 92, 246, 0.4)"
+                      }}
+                    >
+                      💾 Salvar Todos os Interesses ({hobbiesList.length} Cards)
+                    </button>
 
-                  <button
-                    type="button"
-                    onClick={handleResetHobbiesList}
-                    style={{
-                      background: "transparent",
-                      color: "#9ca3af",
-                      border: "1px solid #374151",
-                      padding: "12px 18px",
-                      borderRadius: "8px",
-                      fontWeight: "600",
-                      cursor: "pointer",
-                      fontSize: "0.85rem"
-                    }}
-                  >
-                    ↺ Restaurar Padrões Originais
-                  </button>
+                    <button
+                      type="button"
+                      onClick={handleResetHobbiesList}
+                      style={{
+                        background: "transparent",
+                        color: "#9ca3af",
+                        border: "1px solid #374151",
+                        padding: "12px 18px",
+                        borderRadius: "8px",
+                        fontWeight: "600",
+                        cursor: "pointer",
+                        fontSize: "0.85rem"
+                      }}
+                    >
+                      ↺ Restaurar Padrões
+                    </button>
+                  </div>
+
+                  {hobbiesList.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteHobby(selectedHobby.id)}
+                      style={{
+                        background: "rgba(248, 81, 73, 0.12)",
+                        color: "#f85149",
+                        border: "1px solid rgba(248, 81, 73, 0.4)",
+                        padding: "10px 16px",
+                        borderRadius: "8px",
+                        fontWeight: "600",
+                        cursor: "pointer",
+                        fontSize: "0.85rem"
+                      }}
+                    >
+                      🗑️ Excluir Este Card
+                    </button>
+                  )}
                 </div>
               </form>
             </div>
@@ -4025,6 +4201,140 @@ DIRETRIZ MÁXIMA DE CONCISÃO:
                   </button>
                 </div>
               </form>
+
+              {/* SECTION: CONFIGURAÇÕES DA ROTA /blog/? & GATEWAY */}
+              <div className="blog-section-card" style={{ marginTop: "40px", borderTop: "2px solid rgba(139, 92, 246, 0.3)", paddingTop: "24px" }}>
+                <div className="blog-section-card-title" style={{ justifyContent: "space-between" }}>
+                  <div>
+                    <span style={{ fontSize: "1.1rem", fontWeight: "700", color: "#fff" }}>
+                      🌐 Configurações de Roteamento da URL <code>/blog/?</code>
+                    </span>
+                    <p style={{ margin: "4px 0 0", fontSize: "0.82rem", color: "#94a3b8" }}>
+                      Controle o que os visitantes veem ao acessar <code>https://matheusdecastro.com/blog/?</code> ou <code>/blog</code>.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleSaveBlogGatewayConfig}
+                    disabled={isSavingGatewayConfig}
+                    className="save-btn"
+                    style={{ background: "#8b5cf6", padding: "8px 20px", borderRadius: "8px", cursor: "pointer" }}
+                  >
+                    {isSavingGatewayConfig ? "Salvando..." : "Salvar Configurações da URL ✓"}
+                  </button>
+                </div>
+
+                <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: "16px", marginTop: "16px" }}>
+                  <div>
+                    <label style={{ display: "block", fontSize: "13px", fontWeight: "600", color: "#c4b5fd", marginBottom: "6px" }}>
+                      Comportamento de Destino Padrão ao Acessar /blog:
+                    </label>
+                    <select
+                      value={blogGatewayConfig.defaultRoute || "gateway"}
+                      onChange={(e) => setBlogGatewayConfig({ ...blogGatewayConfig, defaultRoute: e.target.value })}
+                      style={{ width: "100%", padding: "10px", background: "#0d1117", border: "1px solid #30363d", borderRadius: "8px", color: "#fff", fontSize: "13px" }}
+                    >
+                      <option value="gateway">Exibir Tela de Entrada Dividida (Gateway - /blog/?)</option>
+                      <option value="tech">Redirecionar Direto para Blog de Engenharia &amp; IA (/blog)</option>
+                      <option value="alomyr">Redirecionar Direto para Laboratório Alomyr (/blog/alomyr)</option>
+                    </select>
+                  </div>
+
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+                    <div>
+                      <label style={{ display: "block", fontSize: "12px", color: "#8b949e", marginBottom: "4px" }}>
+                        Título do Gateway (PT)
+                      </label>
+                      <input
+                        type="text"
+                        className="drawings-input"
+                        value={blogGatewayConfig.gatewayTitlePt || ""}
+                        onChange={(e) => setBlogGatewayConfig({ ...blogGatewayConfig, gatewayTitlePt: e.target.value })}
+                        placeholder="Blog & Laboratório Criativo"
+                      />
+                    </div>
+                    <div>
+                      <label style={{ display: "block", fontSize: "12px", color: "#8b949e", marginBottom: "4px" }}>
+                        Gateway Title (EN)
+                      </label>
+                      <input
+                        type="text"
+                        className="drawings-input"
+                        value={blogGatewayConfig.gatewayTitleEn || ""}
+                        onChange={(e) => setBlogGatewayConfig({ ...blogGatewayConfig, gatewayTitleEn: e.target.value })}
+                        placeholder="Blog & Creative Laboratory"
+                      />
+                    </div>
+                  </div>
+
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+                    <div>
+                      <label style={{ display: "block", fontSize: "12px", color: "#8b949e", marginBottom: "4px" }}>
+                        Subtítulo do Gateway (PT)
+                      </label>
+                      <input
+                        type="text"
+                        className="drawings-input"
+                        value={blogGatewayConfig.gatewaySubtitlePt || ""}
+                        onChange={(e) => setBlogGatewayConfig({ ...blogGatewayConfig, gatewaySubtitlePt: e.target.value })}
+                        placeholder="Escolha qual dimensão você deseja explorar..."
+                      />
+                    </div>
+                    <div>
+                      <label style={{ display: "block", fontSize: "12px", color: "#8b949e", marginBottom: "4px" }}>
+                        Gateway Subtitle (EN)
+                      </label>
+                      <input
+                        type="text"
+                        className="drawings-input"
+                        value={blogGatewayConfig.gatewaySubtitleEn || ""}
+                        onChange={(e) => setBlogGatewayConfig({ ...blogGatewayConfig, gatewaySubtitleEn: e.target.value })}
+                        placeholder="Choose which dimension you wish to explore..."
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label style={{ display: "inline-flex", alignItems: "center", gap: "8px", cursor: "pointer", color: "#e2e8f0", fontSize: "13px" }}>
+                      <input
+                        type="checkbox"
+                        checked={blogGatewayConfig.wipNoticeVisible !== false}
+                        onChange={(e) => setBlogGatewayConfig({ ...blogGatewayConfig, wipNoticeVisible: e.target.checked })}
+                      />
+                      Exibir Banner de Aviso de Construção / Refinamento no topo do Gateway
+                    </label>
+                  </div>
+
+                  {blogGatewayConfig.wipNoticeVisible !== false && (
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+                      <div>
+                        <label style={{ display: "block", fontSize: "12px", color: "#8b949e", marginBottom: "4px" }}>
+                          Texto do Aviso (PT)
+                        </label>
+                        <textarea
+                          rows="2"
+                          className="drawings-input"
+                          value={blogGatewayConfig.wipNoticeTextPt || ""}
+                          onChange={(e) => setBlogGatewayConfig({ ...blogGatewayConfig, wipNoticeTextPt: e.target.value })}
+                          placeholder="Aviso em português..."
+                        />
+                      </div>
+                      <div>
+                        <label style={{ display: "block", fontSize: "12px", color: "#8b949e", marginBottom: "4px" }}>
+                          Notice Text (EN)
+                        </label>
+                        <textarea
+                          rows="2"
+                          className="drawings-input"
+                          value={blogGatewayConfig.wipNoticeTextEn || ""}
+                          onChange={(e) => setBlogGatewayConfig({ ...blogGatewayConfig, wipNoticeTextEn: e.target.value })}
+                          placeholder="Notice in English..."
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
           </main>
         </div>

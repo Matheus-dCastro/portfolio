@@ -1994,6 +1994,20 @@ footer {
   margin-bottom: 24px;
 }
 
+.hobby-card.custom-hobby-card {
+  border: 1px solid rgba(167, 139, 250, 0.4);
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(15, 15, 21, 0.85) 100%);
+  box-shadow: 0 0 25px rgba(139, 92, 246, 0.25);
+}
+
+@media (min-width: 641px) and (max-width: 1024px) {
+  .hobbies-grid {
+    grid-template-columns: repeat(2, 1fr);
+    grid-auto-rows: 260px;
+    gap: 18px;
+  }
+}
+
 #art-gallery {
   background: rgba(5, 5, 8, 0.75);
   backdrop-filter: blur(10px);
