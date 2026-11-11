@@ -304,6 +304,12 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
       fetchWorks(true).then((data) => {
         if (Array.isArray(data)) {
           setItems(data);
+          if (data.length > 0) {
+            const match = data.find((p) => p.id === selectedId) || data[0];
+            loadItemIntoForm(match);
+          } else {
+            clearForm();
+          }
           if (currentUser) {
             const portfolioProj = data.find((p) => p.id === "portfolio-ecosystem");
             if (portfolioProj) {
@@ -317,7 +323,8 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
         if (Array.isArray(data)) {
           setItems(data);
           if (data.length > 0) {
-            loadItemIntoForm(data[0]);
+            const match = data.find((a) => a.id === selectedId) || data[0];
+            loadItemIntoForm(match);
           } else {
             clearForm();
           }
@@ -328,7 +335,8 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
         if (Array.isArray(data)) {
           setItems(data);
           if (data.length > 0) {
-            loadItemIntoForm(data[0]);
+            const match = data.find((t) => t.id === selectedId) || data[0];
+            loadItemIntoForm(match);
           } else {
             clearForm();
           }
@@ -339,7 +347,8 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
         if (Array.isArray(data)) {
           setItems(data);
           if (data.length > 0) {
-            loadItemIntoForm(data[0]);
+            const match = data.find((e) => e.id === selectedId) || data[0];
+            loadItemIntoForm(match);
           } else {
             clearForm();
           }
@@ -350,7 +359,8 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
         if (Array.isArray(data)) {
           setItems(data);
           if (data.length > 0) {
-            loadDrawingIntoForm(data[0]);
+            const match = data.find((d) => d.id === selectedId) || data[0];
+            loadDrawingIntoForm(match);
           } else {
             clearDrawingForm();
           }
@@ -1442,11 +1452,13 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
       }
     } else {
       const res = await persistThought(updatedItem);
-      showToast(
-        res.cloud
-          ? "Pensamento salvo no Supabase!"
-          : "Pensamento salvo localmente (offline)!"
-      );
+      if (res.cloud) {
+        showToast("Pensamento salvo no Supabase Cloud!");
+      } else if (res.error) {
+        showToast("Salvo localmente. Erro na nuvem: " + res.error);
+      } else {
+        showToast("Pensamento salvo localmente (offline)!");
+      }
     }
   };
 
