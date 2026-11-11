@@ -491,16 +491,34 @@ export function mapExperienceToDb(item) {
 }
 
 export function mapDbDrawing(row) {
-  const existing = getStoredDrawings().find((d) => d.id === row.id);
+  let descEn = "";
+  let descPt = "";
+  if (row.description && row.description.includes(BILINGUAL_SPLIT)) {
+    const parts = row.description.split(BILINGUAL_SPLIT);
+    descEn = parts[0].trim();
+    descPt = parts[1].trim();
+  } else if (row.description) {
+    descEn = row.description;
+    descPt = row.description;
+  }
+
+  let titleEn = row.title || "";
+  let titlePt = row.title || "";
+  if (row.title && row.title.includes(BILINGUAL_SPLIT)) {
+    const parts = row.title.split(BILINGUAL_SPLIT);
+    titleEn = parts[0].trim();
+    titlePt = parts[1].trim();
+  }
+
   return {
     id: row.id,
     title: row.title,
-    titleEn: row.title_en || existing?.titleEn || row.title,
-    titlePt: row.title_pt || existing?.titlePt || row.title,
+    titleEn: row.title_en || titleEn || row.title,
+    titlePt: row.title_pt || titlePt || row.title,
     src: row.image_url || row.src || "",
-    description: row.description || "",
-    descriptionEn: row.description_en || existing?.descriptionEn || row.description || "",
-    descriptionPt: row.description_pt || existing?.descriptionPt || row.description || "",
+    description: descEn || row.description || "",
+    descriptionEn: descEn || row.description || "",
+    descriptionPt: descPt || row.description || "",
     displayOrder: row.display_order ?? 0,
     isPublished: row.is_published ?? true,
     updatedAt: row.updated_at ? row.updated_at.split("T")[0] : ""
