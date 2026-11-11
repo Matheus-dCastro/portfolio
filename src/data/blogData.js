@@ -330,16 +330,9 @@ const BLOG_STORAGE_KEY = "portfolio_blog_posts_v1";
 export function getStoredBlogPosts() {
   try {
     const raw = localStorage.getItem(BLOG_STORAGE_KEY);
-    if (raw) {
+    if (raw !== null) {
       const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed) && parsed.length > 0) {
-        const existingIds = new Set(parsed.map((p) => p.id));
-        const missing = DEFAULT_BLOG_POSTS.filter((p) => !existingIds.has(p.id));
-        if (missing.length > 0) {
-          const merged = [...parsed, ...missing];
-          saveBlogPosts(merged);
-          return merged;
-        }
+      if (Array.isArray(parsed)) {
         return parsed;
       }
     }

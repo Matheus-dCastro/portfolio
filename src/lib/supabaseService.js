@@ -141,10 +141,13 @@ export function mapProjectToDbWork(item) {
     ? `${item.contentEn.trim()}\n\n${BILINGUAL_SPLIT}\n\n${item.contentPt.trim()}`
     : (item.contentEn || item.content || "");
 
+  const VALID_CATEGORIES = ["Profissional", "Pessoal", "Acadêmico"];
+  const categoryToSave = VALID_CATEGORIES.includes(item.category) ? item.category : "Profissional";
+
   return {
     id: item.id,
     title: titleToSave,
-    category: item.category || "Profissional",
+    category: categoryToSave,
     tags: Array.isArray(item.tags)
       ? item.tags
       : typeof item.tags === "string"
@@ -264,10 +267,17 @@ export function mapArticleToDb(item) {
     ? `${item.googleDocsUrlEn.trim()} ${BILINGUAL_SPLIT} ${item.googleDocsUrlPt.trim()}`
     : (item.googleDocsUrlEn || item.googleDocsUrlPt || item.googleDocsUrl || "");
 
+  const VALID_CATEGORIES = ["Profissional", "Pessoal", "Acadêmico"];
+  const categoryToSave = VALID_CATEGORIES.includes(item.category) ? item.category : "Acadêmico";
+  const validProjects = getStoredProjects();
+  const relatedWorkId = (item.relatedProjectId && validProjects.some((w) => w.id === item.relatedProjectId))
+    ? item.relatedProjectId
+    : null;
+
   return {
     id: item.id,
     title: titleToSave,
-    category: item.category || "Acadêmico",
+    category: categoryToSave,
     tags: Array.isArray(item.tags)
       ? item.tags
       : typeof item.tags === "string"
@@ -279,7 +289,7 @@ export function mapArticleToDb(item) {
     google_docs_url: docsToSave,
     pdf_url: item.pdfUrl || "",
     content: contentToSave,
-    related_work_id: item.relatedProjectId ? item.relatedProjectId : null,
+    related_work_id: relatedWorkId,
     display_order: item.displayOrder ?? 0,
     is_published: item.isPublished !== false
   };
@@ -692,6 +702,33 @@ export async function fetchCvConfig() {
   return getStoredCvConfig();
 }
 
+export function embedMetadataInPrompt(basePrompt, tag, data) {
+  if (!basePrompt || typeof basePrompt !== "string") basePrompt = "";
+  const regex = new RegExp(`<!--\\s*${tag}:\\s*([\\s\\S]*?)\\s*-->\\n?`, "g");
+  const encoded = encodeURIComponent(JSON.stringify(data));
+  const newTag = `<!-- ${tag}: ${encoded} -->\n`;
+  if (regex.test(basePrompt)) {
+    return basePrompt.replace(regex, newTag);
+  }
+  return `${newTag}${basePrompt}`;
+}
+
+export function extractMetadataFromPrompt(prompt, tag) {
+  if (!prompt || typeof prompt !== "string") return null;
+  const regex = new RegExp(`<!--\\s*${tag}:\\s*([\\s\\S]*?)\\s*-->`);
+  const match = prompt.match(regex);
+  if (!match) return null;
+  try {
+    return JSON.parse(decodeURIComponent(match[1]));
+  } catch (e) {
+    try {
+      return JSON.parse(match[1]);
+    } catch (err) {
+      return null;
+    }
+  }
+}
+
 export function extractKeyFromPrompt(prompt) {
   if (!prompt || typeof prompt !== "string") return "";
   const match = prompt.match(/<!--\s*AGENT_KEY:\s*([^\s>]+)\s*-->/);
@@ -700,7 +737,7 @@ export function extractKeyFromPrompt(prompt) {
 
 export function cleanPromptFromKey(prompt) {
   if (!prompt || typeof prompt !== "string") return "";
-  return prompt.replace(/<!--\s*AGENT_KEY:\s*[^\s>]+\s*-->\n?/, "").trim();
+  return prompt.replace(/<!--\s*[A-Z_]+:\s*[\s\S]*?-->\n?/g, "").trim();
 }
 
 export async function fetchAgentConfig() {
@@ -824,10 +861,10 @@ export async function fetchHobbies() {
         return mapped;
       }
 
-      // 2. Fallback: buscar de agent_configs.custom_hobby_json
+      // 2. Fallback: buscar de agent_configs.custom_hobby_json ou system_prompt
       const { data, error } = await supabase
         .from("agent_configs")
-        .select("custom_hobby_json")
+        .select("custom_hobby_json, system_prompt")
         .eq("id", "production")
         .maybeSingle();
 
@@ -838,6 +875,14 @@ export async function fetchHobbies() {
         } else if (data.custom_hobby_json?.hobbiesList && Array.isArray(data.custom_hobby_json.hobbiesList) && data.custom_hobby_json.hobbiesList.length > 0) {
           saveHobbies(data.custom_hobby_json.hobbiesList);
           return data.custom_hobby_json.hobbiesList;
+        }
+      }
+
+      if (data?.system_prompt) {
+        const meta = extractMetadataFromPrompt(data.system_prompt, "HOBBIES_LIST");
+        if (Array.isArray(meta) && meta.length > 0) {
+          saveHobbies(meta);
+          return meta;
         }
       }
     } catch (err) {
@@ -862,13 +907,19 @@ export async function persistHobbies(hobbiesList) {
         isCloud = true;
       }
 
-      // 2. Backup redundante em agent_configs
+      // 2. Backup redundante em agent_configs.custom_hobby_json
+      const configRes = await supabase
+        .from("agent_configs")
+        .select("system_prompt")
+        .eq("id", "production")
+        .maybeSingle();
+
       try {
         const payload = {
           hobbiesList,
           updatedAt: new Date().toISOString()
         };
-        await supabase
+        const tryJson = await supabase
           .from("agent_configs")
           .upsert(
             {
@@ -878,7 +929,28 @@ export async function persistHobbies(hobbiesList) {
             },
             { onConflict: "id" }
           );
-        isCloud = true;
+        if (!tryJson.error) {
+          isCloud = true;
+        }
+      } catch (e) {}
+
+      // 3. Backup redundante em system_prompt
+      try {
+        const basePrompt = configRes.data?.system_prompt || "";
+        const updatedPrompt = embedMetadataInPrompt(basePrompt, "HOBBIES_LIST", hobbiesList);
+        const tryPrompt = await supabase
+          .from("agent_configs")
+          .upsert(
+            {
+              id: "production",
+              system_prompt: updatedPrompt,
+              updated_at: new Date().toISOString()
+            },
+            { onConflict: "id" }
+          );
+        if (!tryPrompt.error) {
+          isCloud = true;
+        }
       } catch (e) {}
 
       return { success: true, cloud: isCloud };
@@ -1030,13 +1102,21 @@ export async function fetchBlogPosts() {
 
       const { data: configData, error: configErr } = await supabase
         .from("agent_configs")
-        .select("custom_hobby_json")
+        .select("custom_hobby_json, system_prompt")
         .eq("id", "production")
         .maybeSingle();
 
       if (!configErr && configData?.custom_hobby_json?.blogPosts && Array.isArray(configData.custom_hobby_json.blogPosts)) {
         saveBlogPosts(configData.custom_hobby_json.blogPosts);
         return configData.custom_hobby_json.blogPosts;
+      }
+
+      if (configData?.system_prompt) {
+        const meta = extractMetadataFromPrompt(configData.system_prompt, "BLOG_POSTS");
+        if (Array.isArray(meta) && meta.length > 0) {
+          saveBlogPosts(meta);
+          return meta;
+        }
       }
     } catch (err) {
       console.warn("Falha ao buscar posts do blog no Supabase, usando local:", err);
@@ -1062,30 +1142,13 @@ export async function persistBlogPost(post) {
       const dbPayload = mapBlogPostToDb(post);
       const { error } = await supabase.from("blog_posts").upsert(dbPayload, { onConflict: "id" });
       if (!error) {
+        persistBlogPostsBatch(updatedList).catch(() => {});
         return { success: true, cloud: true };
       }
-
-      const configRes = await supabase
-        .from("agent_configs")
-        .select("custom_hobby_json")
-        .eq("id", "production")
-        .maybeSingle();
-
-      const existingConfig = configRes.data?.custom_hobby_json || {};
-      const mergedConfig = {
-        ...existingConfig,
-        blogPosts: updatedList,
-        updatedAt: new Date().toISOString()
-      };
-
-      await supabase.from("agent_configs").upsert(
-        { id: "production", custom_hobby_json: mergedConfig, updated_at: new Date().toISOString() },
-        { onConflict: "id" }
-      );
-      return { success: true, cloud: true };
+      return await persistBlogPostsBatch(updatedList);
     } catch (err) {
-      console.warn("Erro ao persistir post no Supabase (mantido em local):", err);
-      return { success: true, cloud: false, error: err.message };
+      console.warn("Erro ao persistir post no Supabase (usando batch fallback):", err);
+      return await persistBlogPostsBatch(updatedList);
     }
   }
   return { success: true, cloud: false };
@@ -1097,7 +1160,7 @@ export async function persistBlogPostsBatch(posts) {
     try {
       const configRes = await supabase
         .from("agent_configs")
-        .select("custom_hobby_json")
+        .select("custom_hobby_json, system_prompt")
         .eq("id", "production")
         .maybeSingle();
 
@@ -1108,13 +1171,24 @@ export async function persistBlogPostsBatch(posts) {
         updatedAt: new Date().toISOString()
       };
 
-      await supabase.from("agent_configs").upsert(
+      const tryJson = await supabase.from("agent_configs").upsert(
         { id: "production", custom_hobby_json: mergedConfig, updated_at: new Date().toISOString() },
         { onConflict: "id" }
       );
-      return { success: true, cloud: true };
+      if (!tryJson.error) return { success: true, cloud: true };
+
+      // Fallback em system_prompt
+      const basePrompt = configRes.data?.system_prompt || "";
+      const updatedPrompt = embedMetadataInPrompt(basePrompt, "BLOG_POSTS", posts);
+      const tryPrompt = await supabase.from("agent_configs").upsert(
+        { id: "production", system_prompt: updatedPrompt, updated_at: new Date().toISOString() },
+        { onConflict: "id" }
+      );
+      if (!tryPrompt.error) return { success: true, cloud: true };
+      return { success: true, cloud: false, error: tryPrompt.error.message };
     } catch (err) {
       console.warn("Erro ao salvar batch de posts do blog:", err);
+      return { success: true, cloud: false, error: err.message };
     }
   }
   return { success: true, cloud: false };
@@ -1128,13 +1202,14 @@ export async function removeBlogPost(id) {
   if (isSupabaseConfigured && supabase) {
     try {
       const { error } = await supabase.from("blog_posts").delete().eq("id", id);
-      if (error && error.message && error.message.includes("does not exist")) {
+      if (!error) {
         await persistBlogPostsBatch(updated);
+        return { success: true, cloud: true };
       }
-      return { success: true, cloud: true };
+      return await persistBlogPostsBatch(updated);
     } catch (err) {
       console.warn("Erro ao excluir post no Supabase:", err);
-      return { success: true, cloud: false, error: err.message };
+      return await persistBlogPostsBatch(updated);
     }
   }
   return { success: true, cloud: false };
@@ -1252,7 +1327,7 @@ export async function fetchBlogGatewayConfig() {
     try {
       const { data, error } = await supabase
         .from("agent_configs")
-        .select("blog_gateway_config")
+        .select("blog_gateway_config, system_prompt")
         .eq("id", "production")
         .maybeSingle();
 
@@ -1260,6 +1335,15 @@ export async function fetchBlogGatewayConfig() {
         const merged = { ...DEFAULT_BLOG_GATEWAY_CONFIG, ...data.blog_gateway_config };
         saveBlogGatewayConfig(merged);
         return merged;
+      }
+
+      if (data?.system_prompt) {
+        const meta = extractMetadataFromPrompt(data.system_prompt, "GATEWAY_CONFIG");
+        if (meta) {
+          const merged = { ...DEFAULT_BLOG_GATEWAY_CONFIG, ...meta };
+          saveBlogGatewayConfig(merged);
+          return merged;
+        }
       }
     } catch (err) {
       console.warn("Falha ao buscar blog_gateway_config do Supabase:", err);
@@ -1272,6 +1356,7 @@ export async function persistBlogGatewayConfig(config) {
   saveBlogGatewayConfig(config);
   if (isSupabaseConfigured && supabase) {
     try {
+      // 1. Tenta upsert na coluna dedicada
       const { error } = await supabase
         .from("agent_configs")
         .upsert(
@@ -1283,8 +1368,33 @@ export async function persistBlogGatewayConfig(config) {
           { onConflict: "id" }
         );
       if (!error) return { success: true, cloud: true };
+
+      // 2. Fallback redundante no system_prompt
+      const agentRes = await supabase
+        .from("agent_configs")
+        .select("system_prompt")
+        .eq("id", "production")
+        .maybeSingle();
+
+      const basePrompt = agentRes.data?.system_prompt || "";
+      const updatedPrompt = embedMetadataInPrompt(basePrompt, "GATEWAY_CONFIG", config);
+
+      const retry = await supabase
+        .from("agent_configs")
+        .upsert(
+          {
+            id: "production",
+            system_prompt: updatedPrompt,
+            updated_at: new Date().toISOString()
+          },
+          { onConflict: "id" }
+        );
+
+      if (!retry.error) return { success: true, cloud: true };
+      return { success: true, cloud: false, error: retry.error.message };
     } catch (err) {
       console.warn("Erro ao salvar blog_gateway_config no Supabase:", err);
+      return { success: true, cloud: false, error: err.message };
     }
   }
   return { success: true, cloud: false };
@@ -1340,9 +1450,10 @@ export function saveNotFoundConfig(config) {
 export async function fetchNotFoundConfig() {
   if (isSupabaseConfigured && supabase) {
     try {
+      // 1. Tenta buscar coluna dedicada notfound_config
       const { data, error } = await supabase
         .from("agent_configs")
-        .select("notfound_config")
+        .select("notfound_config, system_prompt")
         .eq("id", "production")
         .maybeSingle();
 
@@ -1350,6 +1461,16 @@ export async function fetchNotFoundConfig() {
         const merged = { ...DEFAULT_NOTFOUND_CONFIG, ...data.notfound_config };
         saveNotFoundConfig(merged);
         return merged;
+      }
+
+      // 2. Fallback: extrai da tag de metadados do system_prompt
+      if (data?.system_prompt) {
+        const meta = extractMetadataFromPrompt(data.system_prompt, "NOTFOUND_CONFIG");
+        if (meta) {
+          const merged = { ...DEFAULT_NOTFOUND_CONFIG, ...meta };
+          saveNotFoundConfig(merged);
+          return merged;
+        }
       }
     } catch (err) {
       console.warn("Falha ao buscar notfound_config do Supabase:", err);
@@ -1362,6 +1483,7 @@ export async function persistNotFoundConfig(config) {
   saveNotFoundConfig(config);
   if (isSupabaseConfigured && supabase) {
     try {
+      // 1. Tenta upsert na coluna dedicada
       const { error } = await supabase
         .from("agent_configs")
         .upsert(
@@ -1373,8 +1495,33 @@ export async function persistNotFoundConfig(config) {
           { onConflict: "id" }
         );
       if (!error) return { success: true, cloud: true };
+
+      // 2. Fallback redundante no system_prompt
+      const agentRes = await supabase
+        .from("agent_configs")
+        .select("system_prompt")
+        .eq("id", "production")
+        .maybeSingle();
+
+      const basePrompt = agentRes.data?.system_prompt || "";
+      const updatedPrompt = embedMetadataInPrompt(basePrompt, "NOTFOUND_CONFIG", config);
+
+      const retry = await supabase
+        .from("agent_configs")
+        .upsert(
+          {
+            id: "production",
+            system_prompt: updatedPrompt,
+            updated_at: new Date().toISOString()
+          },
+          { onConflict: "id" }
+        );
+
+      if (!retry.error) return { success: true, cloud: true };
+      return { success: true, cloud: false, error: retry.error.message };
     } catch (err) {
       console.warn("Erro ao salvar notfound_config no Supabase:", err);
+      return { success: true, cloud: false, error: err.message };
     }
   }
   return { success: true, cloud: false };

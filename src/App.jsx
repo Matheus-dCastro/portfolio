@@ -12,6 +12,7 @@ import BlogPage from "./components/BlogPage";
 import ChatWidget from "./components/ChatWidget";
 import { getStoredProjects, getStoredArticles, getStoredThoughts } from "./data/projectsData";
 import { getCurrentUser, onAuthChange, isAuthorizedAdmin, getStoredBlogGatewayConfig, fetchBlogGatewayConfig } from "./lib/supabaseService";
+import { supabase } from "./lib/supabaseClient";
 
 function App() {
   const [gatewayConfig, setGatewayConfig] = useState(() => getStoredBlogGatewayConfig());
@@ -48,7 +49,6 @@ function App() {
       const hash = window.location.hash || "";
       // Se vier de autenticação OAuth com access_token na hash ou redirecionamento com /#
       if (hash.includes("access_token") || hash.includes("refresh_token") || hash === "#" || hash === "#/") {
-        window.history.replaceState({}, "", "/4dm1n");
         return "admin";
       }
       const rawPath = window.location.pathname.replace(/\/$/, "");
@@ -126,9 +126,32 @@ function App() {
   const [authChecked, setAuthChecked] = useState(false);
 
   useEffect(() => {
+    // Suporte ao fluxo PKCE do OAuth (parâmetro ?code=...)
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const code = params.get("code");
+      if (code && supabase) {
+        supabase.auth.exchangeCodeForSession(code).then(({ data, error }) => {
+          if (!error && data?.user) {
+            setCurrentUser(data.user);
+            if (isAuthorizedAdmin(data.user)) {
+              setCurrentPage("admin");
+              window.history.replaceState({}, "", "/4dm1n");
+            }
+          }
+        });
+      }
+    }
+
     getCurrentUser().then((user) => {
       setCurrentUser(user);
       setAuthChecked(true);
+      if (typeof window !== "undefined") {
+        const hash = window.location.hash || "";
+        if (hash.includes("access_token") || hash.includes("refresh_token")) {
+          window.history.replaceState({}, "", "/4dm1n");
+        }
+      }
     });
 
     const sub = onAuthChange((event, session) => {
