@@ -11,7 +11,16 @@ import BlogGateway from "./components/BlogGateway";
 import BlogPage from "./components/BlogPage";
 import ChatWidget from "./components/ChatWidget";
 import { getStoredProjects, getStoredArticles, getStoredThoughts } from "./data/projectsData";
-import { getCurrentUser, onAuthChange, isAuthorizedAdmin, getStoredBlogGatewayConfig, fetchBlogGatewayConfig } from "./lib/supabaseService";
+import {
+  getCurrentUser,
+  onAuthChange,
+  isAuthorizedAdmin,
+  getStoredBlogGatewayConfig,
+  fetchBlogGatewayConfig,
+  fetchWorks,
+  fetchArticles,
+  fetchThoughts
+} from "./lib/supabaseService";
 import { supabase } from "./lib/supabaseClient";
 
 function App() {
@@ -51,6 +60,18 @@ function App() {
     }
     return null;
   });
+
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const projId = urlParams.get("project") || urlParams.get("id");
+    if (projId) {
+      Promise.all([fetchWorks(true), fetchArticles(true), fetchThoughts(true)]).then(([w, a, t]) => {
+        const all = [...(w || []), ...(a || []), ...(t || [])];
+        const match = all.find((item) => item.id === projId);
+        if (match) setSelectedProject(match);
+      });
+    }
+  }, []);
 
   const [selectedBlogPostId, setSelectedBlogPostId] = useState(() => {
     if (typeof window !== "undefined") {
