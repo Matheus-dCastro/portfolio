@@ -19,7 +19,23 @@ function App() {
 
   useEffect(() => {
     fetchBlogGatewayConfig().then((cfg) => {
-      if (cfg) setGatewayConfig(cfg);
+      if (cfg) {
+        setGatewayConfig(cfg);
+        const rawPath = window.location.pathname.replace(/\/$/, "");
+        if (rawPath.endsWith("/blog") || rawPath.endsWith("/blog/")) {
+          const hasGatewayQuery =
+            window.location.search === "?" ||
+            window.location.search.includes("gateway") ||
+            window.location.href.includes("/blog/?");
+          if (hasGatewayQuery || cfg.defaultRoute === "gateway") {
+            setCurrentPage("blog-gateway");
+          } else if (cfg.defaultRoute === "alomyr") {
+            setCurrentPage("blog-alomyr");
+          } else {
+            setCurrentPage("blog-tech");
+          }
+        }
+      }
     });
   }, []);
   const [selectedProject, setSelectedProject] = useState(() => {
@@ -74,7 +90,11 @@ function App() {
         return "blog-alomyr";
       }
       if (rawPath.endsWith("/blog") || rawPath.endsWith("/blog/")) {
-        if (window.location.search === "?" || window.location.search.includes("gateway")) {
+        const hasGatewayQuery =
+          window.location.search === "?" ||
+          window.location.search.includes("gateway") ||
+          window.location.href.includes("/blog/?");
+        if (hasGatewayQuery) {
           return "blog-gateway";
         }
         const cfg = getStoredBlogGatewayConfig();

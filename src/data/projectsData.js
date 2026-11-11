@@ -896,7 +896,46 @@ Possibilita a geração de combinações de palavras aleatórias baseadas em lis
   }
 ];
 
-export const DEFAULT_ARTICLES = [];
+export const DEFAULT_ARTICLES = [
+  {
+    id: "item-1793880787430",
+    title: "(Concept Paper) Architectural Proposal of the 3D Reconstruction via Wi-Fi Project",
+    titleEn: "(Concept Paper) Architectural Proposal of the 3D Reconstruction via Wi-Fi Project",
+    titlePt: "(Proposta Arquitetural) Prototipagem idealista do Projeto Reconstrução 3D via Wi-Fi",
+    category: "Acadêmico",
+    tags: ["Visão Computacional", "Wi-Fi CSI", "IA Generativa", "MLOps"],
+    shortDescription: "This article presents the conceptual architecture of a 3D Radio-Frequency Semantic Scanner. The project proposes a computer vision pipeline that utilizes the Channel State Information (CSI) matrix from commercial Wi-Fi signals, combined with generative artificial intelligence, to perform the vector reconstruction of objects.",
+    shortDescriptionEn: "This article presents the conceptual architecture of a 3D Radio-Frequency Semantic Scanner. The project proposes a computer vision pipeline that utilizes the Channel State Information (CSI) matrix from commercial Wi-Fi signals, combined with generative artificial intelligence, to perform the vector reconstruction of objects.",
+    shortDescriptionPt: "Este artigo apresenta a arquitetura conceitual de um Scanner Semântico 3D de Radiofrequência. O projeto propõe um pipeline de Visão Computacional que utiliza a Matriz CSI de sinais Wi-Fi comerciais aliada à Inteligência Artificial Generativa para realizar a reconstrução vetorial de objetos.",
+    aboutContext: "This article presents the conceptual architecture of a 3D Radio-Frequency Semantic Scanner. The project proposes a computer vision pipeline that utilizes the Channel State Information (CSI) matrix from commercial Wi-Fi signals, combined with generative artificial intelligence, to perform the vector reconstruction of objects.",
+    aboutContextEn: "This article presents the conceptual architecture of a 3D Radio-Frequency Semantic Scanner. The project proposes a computer vision pipeline that utilizes the Channel State Information (CSI) matrix from commercial Wi-Fi signals, combined with generative artificial intelligence, to perform the vector reconstruction of objects.",
+    aboutContextPt: "Este artigo apresenta a arquitetura conceitual de um Scanner Semântico 3D de Radiofrequência. O projeto propõe um pipeline de Visão Computacional que utiliza a Matriz CSI de sinais Wi-Fi comerciais aliada à Inteligência Artificial Generativa para realizar a reconstrução vetorial de objetos.",
+    contentType: "markdown",
+    googleDocsUrl: "",
+    googleDocsUrlEn: "",
+    googleDocsUrlPt: "",
+    pdfUrl: "",
+    updatedAt: "2026-11-05",
+    content: `### Project Status: Phase 1 (Foundations and Architecture)
+
+- **Phase 1:** Theoretical proof of concept, state-of-the-art review, and MLOps architecture design.
+- **Phase 2:** Development of a Python-based mock-up and tensor plotting tests.
+- **Phase 3:** Minimum Viable Physical Prototype (1 router + 2 ESP32 units) for CSI extractor validation.`,
+    contentEn: `### Project Status: Phase 1 (Foundations and Architecture)
+
+- **Phase 1:** Theoretical proof of concept, state-of-the-art review, and MLOps architecture design.
+- **Phase 2:** Development of a Python-based mock-up and tensor plotting tests.
+- **Phase 3:** Minimum Viable Physical Prototype (1 router + 2 ESP32 units) for CSI extractor validation.`,
+    contentPt: `### Status do Projeto: Fase 1 (Fundamentação e Arquitetura)
+
+- **Fase 1:** Prova de conceito teórica, levantamento do estado da arte e desenho da arquitetura MLOps.
+- **Fase 2:** Desenvolvimento do Mock em Python e testes de plotagem de tensores.
+- **Fase 3:** Prototipagem física mínima viável (1 Roteador + 2 ESP32) para validação do extrator CSI.`,
+    relatedProjectId: "",
+    displayOrder: 0,
+    isPublished: true
+  }
+];
 
 export const DEFAULT_THOUGHTS = [
   {

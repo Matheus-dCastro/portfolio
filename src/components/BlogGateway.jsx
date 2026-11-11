@@ -10,46 +10,66 @@ export default function BlogGateway({ config = {}, onSelectChannel, onBackToHome
 
   const topBadge =
     lang === "en"
-      ? config.topBadgeEn || t("blog.gateway_badge") || "MATHEUS DE CASTRO ECOSYSTEM"
-      : config.topBadgePt || t("blog.gateway_badge") || "ECOSSISTEMA MATHEUS DE CASTRO";
+      ? config.topBadgeEn || config.topBadge || t("blog.gateway_badge") || "MATHEUS DE CASTRO ECOSYSTEM"
+      : config.topBadgePt || config.topBadge || t("blog.gateway_badge") || "ECOSSISTEMA MATHEUS DE CASTRO";
 
   const gatewayTitle =
     lang === "en"
-      ? config.gatewayTitleEn || t("blog.gateway_title")
-      : config.gatewayTitlePt || t("blog.gateway_title");
+      ? config.gatewayTitleEn || config.mainTitleEn || config.titleEn || t("blog.gateway_title")
+      : config.gatewayTitlePt || config.mainTitlePt || config.titlePt || t("blog.gateway_title");
 
   const gatewaySubtitle =
     lang === "en"
-      ? config.gatewaySubtitleEn || t("blog.gateway_subtitle")
-      : config.gatewaySubtitlePt || t("blog.gateway_subtitle");
+      ? config.gatewaySubtitleEn || config.subtitleEn || config.descEn || t("blog.gateway_subtitle")
+      : config.gatewaySubtitlePt || config.subtitlePt || config.descPt || t("blog.gateway_subtitle");
 
-  const showWipNotice = config.wipNoticeVisible !== false;
+  const showWipNotice = config.wipNoticeVisible !== false && config.showBanner !== false;
   const wipNoticeBadge =
     lang === "en"
-      ? config.wipNoticeBadgeEn || "ACTIVE REFINEMENT • EDITORIAL PREVIEW"
-      : config.wipNoticeBadgePt || "EM REFINAMENTO • PRÉVIA EDITORIAL";
+      ? config.wipNoticeBadgeEn || config.bannerBadgeEn || "ACTIVE REFINEMENT • EDITORIAL PREVIEW"
+      : config.wipNoticeBadgePt || config.bannerBadgePt || "EM REFINAMENTO • PRÉVIA EDITORIAL";
   const wipNoticeText =
     lang === "en"
-      ? config.wipNoticeTextEn || "Notice: The Engineering Blog and Alomyr Lab channels are currently under active refinement."
-      : config.wipNoticeTextPt || "Atenção: Os canais do Blog de Engenharia e do Laboratório Alomyr estão atualmente em fase ativa de refinamento.";
+      ? config.wipNoticeTextEn || config.bannerTextEn || "Notice: The Engineering Blog and Alomyr Lab channels are currently under active refinement."
+      : config.wipNoticeTextPt || config.bannerTextPt || "Atenção: Os canais do Blog de Engenharia e do Laboratório Alomyr estão atualmente em fase ativa de refinamento.";
 
   // Card Tech
-  const techBadge = lang === "en" ? config.cardTechBadgeEn || t("blog.portal_tech_tag") : config.cardTechBadgePt || t("blog.portal_tech_tag");
-  const techTitle = lang === "en" ? config.cardTechTitleEn || t("blog.portal_tech_title") : config.cardTechTitlePt || t("blog.portal_tech_title");
-  const techDesc = lang === "en" ? config.cardTechDescEn || t("blog.portal_tech_desc") : config.cardTechDescPt || t("blog.portal_tech_desc");
-  const techTags = Array.isArray(config.cardTechTags) && config.cardTechTags.length > 0
+  const techBadge = lang === "en" 
+    ? config.cardTechBadgeEn || config.card1BadgeEn || t("blog.portal_tech_tag") 
+    : config.cardTechBadgePt || config.card1BadgePt || t("blog.portal_tech_tag");
+  const techTitle = lang === "en" 
+    ? config.cardTechTitleEn || config.card1TitleEn || t("blog.portal_tech_title") 
+    : config.cardTechTitlePt || config.card1TitlePt || t("blog.portal_tech_title");
+  const techDesc = lang === "en" 
+    ? config.cardTechDescEn || config.card1DescEn || t("blog.portal_tech_desc") 
+    : config.cardTechDescPt || config.card1DescPt || t("blog.portal_tech_desc");
+  const techTags = (Array.isArray(config.cardTechTags) && config.cardTechTags.length > 0)
     ? config.cardTechTags
-    : ["#FastAPI", "#PyTorch", "#TimescaleDB", "#Telemetry", "#DevOps"];
-  const techBtn = lang === "en" ? config.cardTechBtnEn || t("blog.portal_tech_btn") : config.cardTechBtnPt || t("blog.portal_tech_btn");
+    : (Array.isArray(config.card1Tags) && config.card1Tags.length > 0)
+      ? config.card1Tags
+      : ["#FastAPI", "#PyTorch", "#TimescaleDB", "#Telemetry", "#DevOps"];
+  const techBtn = lang === "en" 
+    ? config.cardTechBtnEn || config.card1BtnEn || t("blog.portal_tech_btn") 
+    : config.cardTechBtnPt || config.card1BtnPt || t("blog.portal_tech_btn");
 
   // Card Alomyr
-  const alomyrBadge = lang === "en" ? config.cardAlomyrBadgeEn || t("blog.portal_alomyr_tag") : config.cardAlomyrBadgePt || t("blog.portal_alomyr_tag");
-  const alomyrTitle = lang === "en" ? config.cardAlomyrTitleEn || t("blog.portal_alomyr_title") : config.cardAlomyrTitlePt || t("blog.portal_alomyr_title");
-  const alomyrDesc = lang === "en" ? config.cardAlomyrDescEn || t("blog.portal_alomyr_desc") : config.cardAlomyrDescPt || t("blog.portal_alomyr_desc");
-  const alomyrTags = Array.isArray(config.cardAlomyrTags) && config.cardAlomyrTags.length > 0
+  const alomyrBadge = lang === "en" 
+    ? config.cardAlomyrBadgeEn || config.card2BadgeEn || t("blog.portal_alomyr_tag") 
+    : config.cardAlomyrBadgePt || config.card2BadgePt || t("blog.portal_alomyr_tag");
+  const alomyrTitle = lang === "en" 
+    ? config.cardAlomyrTitleEn || config.card2TitleEn || t("blog.portal_alomyr_title") 
+    : config.cardAlomyrTitlePt || config.card2TitlePt || t("blog.portal_alomyr_title");
+  const alomyrDesc = lang === "en" 
+    ? config.cardAlomyrDescEn || config.card2DescEn || t("blog.portal_alomyr_desc") 
+    : config.cardAlomyrDescPt || config.card2DescPt || t("blog.portal_alomyr_desc");
+  const alomyrTags = (Array.isArray(config.cardAlomyrTags) && config.cardAlomyrTags.length > 0)
     ? config.cardAlomyrTags
-    : ["#Hiper-realismo", "#Retrogaming", "#Marvel", "#Filosofia", "#Linux"];
-  const alomyrBtn = lang === "en" ? config.cardAlomyrBtnEn || t("blog.portal_alomyr_btn") : config.cardAlomyrBtnPt || t("blog.portal_alomyr_btn");
+    : (Array.isArray(config.card2Tags) && config.card2Tags.length > 0)
+      ? config.card2Tags
+      : ["#Hiper-realismo", "#Retrogaming", "#Marvel", "#Filosofia", "#Linux"];
+  const alomyrBtn = lang === "en" 
+    ? config.cardAlomyrBtnEn || config.card2BtnEn || t("blog.portal_alomyr_btn") 
+    : config.cardAlomyrBtnPt || config.card2BtnPt || t("blog.portal_alomyr_btn");
 
   // Footer Note
   const footerNote = lang === "en"

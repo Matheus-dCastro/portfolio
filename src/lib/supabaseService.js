@@ -125,9 +125,10 @@ export function mapDbWorkToProject(row) {
 }
 
 export function mapProjectToDbWork(item) {
-  const titleToSave = (item.titleEn && item.titlePt && item.titleEn !== item.titlePt)
+  const rawTitle = (item.titleEn && item.titlePt && item.titleEn !== item.titlePt)
     ? `${item.titleEn.trim()} ${BILINGUAL_SPLIT} ${item.titlePt.trim()}`
     : (item.titleEn || item.title || "");
+  const titleToSave = rawTitle.slice(0, 255);
 
   const shortDescToSave = (item.shortDescriptionEn && item.shortDescriptionPt && item.shortDescriptionEn !== item.shortDescriptionPt)
     ? `${item.shortDescriptionEn.trim()} ${BILINGUAL_SPLIT} ${item.shortDescriptionPt.trim()}`
@@ -143,6 +144,9 @@ export function mapProjectToDbWork(item) {
 
   const VALID_CATEGORIES = ["Profissional", "Pessoal", "Acadêmico"];
   const categoryToSave = VALID_CATEGORIES.includes(item.category) ? item.category : "Profissional";
+  const relatedArticleId = (item.relatedArticleId && typeof item.relatedArticleId === "string" && item.relatedArticleId.trim())
+    ? item.relatedArticleId.trim()
+    : null;
 
   return {
     id: item.id,
@@ -161,9 +165,7 @@ export function mapProjectToDbWork(item) {
     google_docs_url: item.googleDocsUrl || "",
     pdf_url: item.pdfUrl || "",
     content: contentToSave,
-    related_article_id: (item.relatedArticleId && Array.isArray(getStoredArticles()) && getStoredArticles().some((a) => a.id === item.relatedArticleId))
-      ? item.relatedArticleId
-      : null,
+    related_article_id: relatedArticleId,
     display_order: item.displayOrder ?? 0,
     is_published: item.isPublished !== false
   };
@@ -247,9 +249,10 @@ export function mapDbArticle(row) {
 }
 
 export function mapArticleToDb(item) {
-  const titleToSave = (item.titleEn && item.titlePt && item.titleEn !== item.titlePt)
+  const rawTitle = (item.titleEn && item.titlePt && item.titleEn !== item.titlePt)
     ? `${item.titleEn.trim()} ${BILINGUAL_SPLIT} ${item.titlePt.trim()}`
     : (item.titleEn || item.title || "");
+  const titleToSave = rawTitle.slice(0, 255);
 
   const shortDescToSave = (item.shortDescriptionEn && item.shortDescriptionPt && item.shortDescriptionEn !== item.shortDescriptionPt)
     ? `${item.shortDescriptionEn.trim()} ${BILINGUAL_SPLIT} ${item.shortDescriptionPt.trim()}`
@@ -269,9 +272,8 @@ export function mapArticleToDb(item) {
 
   const VALID_CATEGORIES = ["Profissional", "Pessoal", "Acadêmico"];
   const categoryToSave = VALID_CATEGORIES.includes(item.category) ? item.category : "Acadêmico";
-  const validProjects = getStoredProjects();
-  const relatedWorkId = (item.relatedProjectId && validProjects.some((w) => w.id === item.relatedProjectId))
-    ? item.relatedProjectId
+  const relatedWorkId = (item.relatedProjectId && typeof item.relatedProjectId === "string" && item.relatedProjectId.trim())
+    ? item.relatedProjectId.trim()
     : null;
 
   return {
@@ -1321,13 +1323,81 @@ export const DEFAULT_BLOG_GATEWAY_CONFIG = {
   updatedAt: "2026-11-11"
 };
 
+export function normalizeBlogGatewayConfig(config) {
+  if (!config || typeof config !== "object") return DEFAULT_BLOG_GATEWAY_CONFIG;
+  return {
+    ...DEFAULT_BLOG_GATEWAY_CONFIG,
+    ...config,
+    gatewayTitlePt: config.gatewayTitlePt || config.mainTitlePt || "Blog & Laboratório Criativo",
+    gatewayTitleEn: config.gatewayTitleEn || config.mainTitleEn || "Blog & Creative Laboratory",
+    mainTitlePt: config.gatewayTitlePt || config.mainTitlePt || "Blog & Laboratório Criativo",
+    mainTitleEn: config.gatewayTitleEn || config.mainTitleEn || "Blog & Creative Laboratory",
+    gatewaySubtitlePt: config.gatewaySubtitlePt || config.subtitlePt || "Selecione a dimensão que deseja explorar:",
+    gatewaySubtitleEn: config.gatewaySubtitleEn || config.subtitleEn || "Select the dimension you want to explore:",
+    subtitlePt: config.gatewaySubtitlePt || config.subtitlePt || "Selecione a dimensão que deseja explorar:",
+    subtitleEn: config.gatewaySubtitleEn || config.subtitleEn || "Select the dimension you want to explore:",
+    topBadgePt: config.topBadgePt || "ECOSSISTEMA MATHEUS DE CASTRO",
+    topBadgeEn: config.topBadgeEn || "MATHEUS DE CASTRO ECOSYSTEM",
+    wipNoticeVisible: config.wipNoticeVisible !== false && config.showBanner !== false,
+    showBanner: config.wipNoticeVisible !== false && config.showBanner !== false,
+    wipNoticeBadgePt: config.wipNoticeBadgePt || config.bannerBadgePt || "EM REFINAMENTO • PRÉVIA EDITORIAL",
+    wipNoticeBadgeEn: config.wipNoticeBadgeEn || config.bannerBadgeEn || "UNDER REFINEMENT • EDITORIAL PREVIEW",
+    bannerBadgePt: config.wipNoticeBadgePt || config.bannerBadgePt || "EM REFINAMENTO • PRÉVIA EDITORIAL",
+    bannerBadgeEn: config.wipNoticeBadgeEn || config.bannerBadgeEn || "UNDER REFINEMENT • EDITORIAL PREVIEW",
+    wipNoticeTextPt: config.wipNoticeTextPt || config.bannerTextPt || "Esta seção reúne ensaios de arquitetura, Machine Learning e artigos autorais de arte/retrogaming.",
+    wipNoticeTextEn: config.wipNoticeTextEn || config.bannerTextEn || "This section brings together architecture essays, Machine Learning, and personal art/retrogaming articles.",
+    bannerTextPt: config.wipNoticeTextPt || config.bannerTextPt || "Esta seção reúne ensaios de arquitetura, Machine Learning e artigos autorais de arte/retrogaming.",
+    bannerTextEn: config.wipNoticeTextEn || config.bannerTextEn || "This section brings together architecture essays, Machine Learning, and personal art/retrogaming articles.",
+    cardTechBadgePt: config.cardTechBadgePt || config.card1BadgePt || "ENGENHARIA, BACKEND & IA",
+    cardTechBadgeEn: config.cardTechBadgeEn || config.card1BadgeEn || "ENGINEERING, BACKEND & AI",
+    card1BadgePt: config.cardTechBadgePt || config.card1BadgePt || "ENGENHARIA, BACKEND & IA",
+    card1BadgeEn: config.cardTechBadgeEn || config.card1BadgeEn || "ENGINEERING, BACKEND & AI",
+    cardTechTitlePt: config.cardTechTitlePt || config.card1TitlePt || "Blog Técnico de Engenharia",
+    cardTechTitleEn: config.cardTechTitleEn || config.card1TitleEn || "Technical Engineering Blog",
+    card1TitlePt: config.cardTechTitlePt || config.card1TitlePt || "Blog Técnico de Engenharia",
+    card1TitleEn: config.cardTechTitleEn || config.card1TitleEn || "Technical Engineering Blog",
+    cardTechDescPt: config.cardTechDescPt || config.card1DescPt || "Artigos profundos de telemetria de LLMs, visão computacional, microsserviços em FastAPI e arquiteturas de alta vazão.",
+    cardTechDescEn: config.cardTechDescEn || config.card1DescEn || "In-depth articles on LLM telemetry, computer vision, FastAPI microservices, and high-throughput architectures.",
+    card1DescPt: config.cardTechDescPt || config.card1DescPt || "Artigos profundos de telemetria de LLMs, visão computacional, microsserviços em FastAPI e arquiteturas de alta vazão.",
+    card1DescEn: config.cardTechDescEn || config.card1DescEn || "In-depth articles on LLM telemetry, computer vision, FastAPI microservices, and high-throughput architectures.",
+    cardTechTags: (Array.isArray(config.cardTechTags) && config.cardTechTags.length > 0) ? config.cardTechTags : ((Array.isArray(config.card1Tags) && config.card1Tags.length > 0) ? config.card1Tags : ["#FastAPI", "#PyTorch", "#AI-Agents", "#Docker", "#TimescaleDB", "#Python"]),
+    card1Tags: (Array.isArray(config.cardTechTags) && config.cardTechTags.length > 0) ? config.cardTechTags : ((Array.isArray(config.card1Tags) && config.card1Tags.length > 0) ? config.card1Tags : ["#FastAPI", "#PyTorch", "#AI-Agents", "#Docker", "#TimescaleDB", "#Python"]),
+    cardTechBtnPt: config.cardTechBtnPt || config.card1BtnPt || "Acessar Artigos Técnicos →",
+    cardTechBtnEn: config.cardTechBtnEn || config.card1BtnEn || "Explore Technical Articles →",
+    card1BtnPt: config.cardTechBtnPt || config.card1BtnPt || "Acessar Artigos Técnicos →",
+    card1BtnEn: config.cardTechBtnEn || config.card1BtnEn || "Explore Technical Articles →",
+    cardAlomyrBadgePt: config.cardAlomyrBadgePt || config.card2BadgePt || "ARTE, RETROGAMIN & FILOSOFIA",
+    cardAlomyrBadgeEn: config.cardAlomyrBadgeEn || config.card2BadgeEn || "ART, RETROGAMING & PHILOSOPHY",
+    card2BadgePt: config.cardAlomyrBadgePt || config.card2BadgePt || "ARTE, RETROGAMIN & FILOSOFIA",
+    card2BadgeEn: config.cardAlomyrBadgeEn || config.card2BadgeEn || "ART, RETROGAMING & PHILOSOPHY",
+    cardAlomyrTitlePt: config.cardAlomyrTitlePt || config.card2TitlePt || "Laboratório Criativo Alomyr",
+    cardAlomyrTitleEn: config.cardAlomyrTitleEn || config.card2TitleEn || "Alomyr Creative Laboratory",
+    card2TitlePt: config.cardAlomyrTitlePt || config.card2TitlePt || "Laboratório Criativo Alomyr",
+    card2TitleEn: config.cardAlomyrTitleEn || config.card2TitleEn || "Alomyr Creative Laboratory",
+    cardAlomyrDescPt: config.cardAlomyrDescPt || config.card2DescPt || "O processo meticuloso do desenho hiper-realista a grafite, preservação e emulação retrô no Linux e ensaios sobre código e mente.",
+    cardAlomyrDescEn: config.cardAlomyrDescEn || config.card2DescEn || "The meticulous process of hyper-realistic graphite drawing, Linux retro preservation/emulation, and essays on code and mind.",
+    card2DescPt: config.cardAlomyrDescPt || config.card2DescPt || "O processo meticuloso do desenho hiper-realista a grafite, preservação e emulação retrô no Linux e ensaios sobre código e mente.",
+    card2DescEn: config.cardAlomyrDescEn || config.card2DescEn || "The meticulous process of hyper-realistic graphite drawing, Linux retro preservation/emulation, and essays on code and mind.",
+    cardAlomyrTags: (Array.isArray(config.cardAlomyrTags) && config.cardAlomyrTags.length > 0) ? config.cardAlomyrTags : ((Array.isArray(config.card2Tags) && config.card2Tags.length > 0) ? config.card2Tags : ["#Hiper-realismo", "#Grafite", "#Retrogaming", "#Linux", "#Marvel", "#Filosofia"]),
+    card2Tags: (Array.isArray(config.cardAlomyrTags) && config.cardAlomyrTags.length > 0) ? config.cardAlomyrTags : ((Array.isArray(config.card2Tags) && config.card2Tags.length > 0) ? config.card2Tags : ["#Hiper-realismo", "#Grafite", "#Retrogaming", "#Linux", "#Marvel", "#Filosofia"]),
+    cardAlomyrBtnPt: config.cardAlomyrBtnPt || config.card2BtnPt || "Entrar no Laboratório Alomyr →",
+    cardAlomyrBtnEn: config.cardAlomyrBtnEn || config.card2BtnEn || "Enter Alomyr Laboratory →",
+    card2BtnPt: config.cardAlomyrBtnPt || config.card2BtnPt || "Entrar no Laboratório Alomyr →",
+    card2BtnEn: config.cardAlomyrBtnEn || config.card2BtnEn || "Enter Alomyr Laboratory →",
+    footerNotePt: config.footerNotePt || "Ambos os canais possuem links bidirecionais com os projetos práticos e permitem alternância rápida.",
+    footerNoteEn: config.footerNoteEn || "Both channels offer bidirectional links to technical projects and seamless switching.",
+    defaultRoute: config.defaultRoute || "gateway",
+    updatedAt: new Date().toISOString()
+  };
+}
+
 export function getStoredBlogGatewayConfig() {
   try {
     const raw = localStorage.getItem("portfolio_blog_gateway_config");
     if (raw) {
       const parsed = JSON.parse(raw);
       if (parsed && typeof parsed === "object") {
-        return { ...DEFAULT_BLOG_GATEWAY_CONFIG, ...parsed };
+        return normalizeBlogGatewayConfig(parsed);
       }
     }
   } catch (e) {
@@ -1338,7 +1408,8 @@ export function getStoredBlogGatewayConfig() {
 
 export function saveBlogGatewayConfig(config) {
   try {
-    localStorage.setItem("portfolio_blog_gateway_config", JSON.stringify(config));
+    const normalized = normalizeBlogGatewayConfig(config);
+    localStorage.setItem("portfolio_blog_gateway_config", JSON.stringify(normalized));
   } catch (e) {
     console.error("Erro ao salvar configuracao de blog gateway:", e);
   }
@@ -1354,7 +1425,7 @@ export async function fetchBlogGatewayConfig() {
         .maybeSingle();
 
       if (!error && data?.blog_gateway_config) {
-        const merged = { ...DEFAULT_BLOG_GATEWAY_CONFIG, ...data.blog_gateway_config };
+        const merged = normalizeBlogGatewayConfig(data.blog_gateway_config);
         saveBlogGatewayConfig(merged);
         return merged;
       }
@@ -1362,7 +1433,7 @@ export async function fetchBlogGatewayConfig() {
       if (data?.system_prompt) {
         const meta = extractMetadataFromPrompt(data.system_prompt, "GATEWAY_CONFIG");
         if (meta) {
-          const merged = { ...DEFAULT_BLOG_GATEWAY_CONFIG, ...meta };
+          const merged = normalizeBlogGatewayConfig(meta);
           saveBlogGatewayConfig(merged);
           return merged;
         }
@@ -1375,7 +1446,8 @@ export async function fetchBlogGatewayConfig() {
 }
 
 export async function persistBlogGatewayConfig(config) {
-  saveBlogGatewayConfig(config);
+  const normalized = normalizeBlogGatewayConfig(config);
+  saveBlogGatewayConfig(normalized);
   if (isSupabaseConfigured && supabase) {
     try {
       // 1. Tenta upsert na coluna dedicada
@@ -1384,7 +1456,7 @@ export async function persistBlogGatewayConfig(config) {
         .upsert(
           {
             id: "production",
-            blog_gateway_config: config,
+            blog_gateway_config: normalized,
             updated_at: new Date().toISOString()
           },
           { onConflict: "id" }
@@ -1399,7 +1471,7 @@ export async function persistBlogGatewayConfig(config) {
         .maybeSingle();
 
       const basePrompt = agentRes.data?.system_prompt || "";
-      const updatedPrompt = embedMetadataInPrompt(basePrompt, "GATEWAY_CONFIG", config);
+      const updatedPrompt = embedMetadataInPrompt(basePrompt, "GATEWAY_CONFIG", normalized);
 
       const retry = await supabase
         .from("agent_configs")
@@ -1601,6 +1673,10 @@ export async function removeWork(id) {
 
   if (isSupabaseConfigured && supabase) {
     try {
+      // 1. Remove qualquer vínculo de foreign key antes de deletar o projeto
+      await supabase.from("articles").update({ related_work_id: null }).eq("related_work_id", id);
+      await supabase.from("blog_posts").update({ related_project_id: null }).eq("related_project_id", id);
+
       const { error } = await supabase.from("works").delete().eq("id", id);
       if (error) throw error;
       return { success: true, cloud: true };
@@ -1627,7 +1703,13 @@ export async function persistArticle(item) {
   if (isSupabaseConfigured && supabase) {
     try {
       const payload = mapArticleToDb(item);
-      const { error } = await supabase.from("articles").upsert(payload, { onConflict: "id" });
+      let { error } = await supabase.from("articles").upsert(payload, { onConflict: "id" });
+      if (error && error.message && error.message.includes("violates foreign key constraint")) {
+        console.warn("FK de related_work_id violada no artigo, limpando vínculo:", error.message);
+        payload.related_work_id = null;
+        const retry = await supabase.from("articles").upsert(payload, { onConflict: "id" });
+        error = retry.error;
+      }
       if (error) throw error;
       return { success: true, cloud: true };
     } catch (err) {
@@ -1658,6 +1740,10 @@ export async function removeArticle(id) {
 
   if (isSupabaseConfigured && supabase) {
     try {
+      // 1. Remove qualquer vínculo de foreign key antes de deletar o artigo
+      await supabase.from("works").update({ related_article_id: null }).eq("related_article_id", id);
+      await supabase.from("blog_posts").update({ related_article_id: null }).eq("related_article_id", id);
+
       const { error } = await supabase.from("articles").delete().eq("id", id);
       if (error) throw error;
       return { success: true, cloud: true };

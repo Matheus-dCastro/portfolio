@@ -314,19 +314,47 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
       });
     } else if (activeTab === "articles") {
       fetchArticles(true).then((data) => {
-        if (Array.isArray(data)) setItems(data);
+        if (Array.isArray(data)) {
+          setItems(data);
+          if (data.length > 0) {
+            loadItemIntoForm(data[0]);
+          } else {
+            clearForm();
+          }
+        }
       });
     } else if (activeTab === "thoughts") {
       fetchThoughts(true).then((data) => {
-        if (Array.isArray(data)) setItems(data);
+        if (Array.isArray(data)) {
+          setItems(data);
+          if (data.length > 0) {
+            loadItemIntoForm(data[0]);
+          } else {
+            clearForm();
+          }
+        }
       });
     } else if (activeTab === "experiences") {
       fetchExperiences(true).then((data) => {
-        if (Array.isArray(data)) setItems(data);
+        if (Array.isArray(data)) {
+          setItems(data);
+          if (data.length > 0) {
+            loadItemIntoForm(data[0]);
+          } else {
+            clearForm();
+          }
+        }
       });
     } else if (activeTab === "drawings") {
       fetchDrawings(true).then((data) => {
-        if (Array.isArray(data)) setItems(data);
+        if (Array.isArray(data)) {
+          setItems(data);
+          if (data.length > 0) {
+            loadDrawingIntoForm(data[0]);
+          } else {
+            clearDrawingForm();
+          }
+        }
       });
     } else if (activeTab === "cv") {
       fetchCvConfig().then((cfg) => {
@@ -1267,18 +1295,19 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
     if (!window.confirm("Deseja realmente remover este item?")) return;
     const newItems = items.filter((it) => it.id !== id);
     setItems(newItems);
+    let res;
     if (activeTab === "projects") {
       saveProjects(newItems);
-      await removeWork(id);
+      res = await removeWork(id);
     } else if (activeTab === "articles") {
       saveArticles(newItems);
-      await removeArticle(id);
+      res = await removeArticle(id);
     } else if (activeTab === "experiences") {
       saveExperiences(newItems);
-      await removeExperience(id);
+      res = await removeExperience(id);
     } else {
       saveThoughts(newItems);
-      await removeThought(id);
+      res = await removeThought(id);
     }
 
     if (newItems.length > 0) {
@@ -1286,7 +1315,13 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
     } else {
       clearForm();
     }
-    showToast("Item removido com sucesso.");
+    if (res?.cloud) {
+      showToast("Item removido do Supabase Cloud!");
+    } else if (res?.error) {
+      showToast("Removido localmente. Aviso na nuvem: " + res.error);
+    } else {
+      showToast("Item removido localmente.");
+    }
   };
 
   // Save Item
@@ -1398,11 +1433,13 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
       }
     } else if (activeTab === "articles") {
       const res = await persistArticle(updatedItem);
-      showToast(
-        res.cloud
-          ? "Artigo técnico salvo no Supabase!"
-          : "Artigo técnico salvo localmente (offline)!"
-      );
+      if (res.cloud) {
+        showToast("Artigo técnico salvo no Supabase Cloud!");
+      } else if (res.error) {
+        showToast("Salvo localmente. Erro na nuvem: " + res.error);
+      } else {
+        showToast("Artigo técnico salvo localmente (offline)!");
+      }
     } else {
       const res = await persistThought(updatedItem);
       showToast(
