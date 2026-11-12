@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   getStoredProjects,
   getStoredArticles,
@@ -10,6 +10,7 @@ import { useLanguage } from "../context/useLanguage";
 import LanguageSwitcher from "./LanguageSwitcher";
 import ShareButton from "./ShareButton";
 import CategoryIcon from "./CategoryIcon";
+import BlogReaderDock from "./BlogReaderDock";
 import "./ProjectDetail.css";
 
 function getInitialProject(propProject) {
@@ -34,6 +35,17 @@ export default function ProjectDetail({ project: propProject, onBackToHome, onSe
   const { t, lang } = useLanguage();
   const [internalProject, setInternalProject] = useState(() => getInitialProject(propProject));
   const [activeContentTab, setActiveContentTab] = useState("auto"); // 'auto' | 'readme' | 'gdocs' | 'pdf'
+  const [fontScale, setFontScale] = useState(1);
+  const [zenMode, setZenMode] = useState(false);
+
+  useEffect(() => {
+    if (zenMode) {
+      document.body.classList.add("blog-zen-mode");
+    } else {
+      document.body.classList.remove("blog-zen-mode");
+    }
+    return () => document.body.classList.remove("blog-zen-mode");
+  }, [zenMode]);
 
   const project = propProject || internalProject;
 
@@ -386,7 +398,7 @@ export default function ProjectDetail({ project: propProject, onBackToHome, onSe
         )}
 
         {/* CONTENT RENDERER */}
-        <div className="article-body-area">
+        <div className="article-body-area" style={{ fontSize: `${fontScale}rem` }}>
           {/* Format 1: Google Docs Embed */}
           {currentFormat === "gdocs" && embedGDocsUrl && (
             <div className="gdocs-reader-wrapper">
@@ -575,6 +587,48 @@ export default function ProjectDetail({ project: propProject, onBackToHome, onSe
           </div>
         </section>
       </main>
+
+      {/* DOCK INTERATIVO DO PROJETO / ARTIGO (ABRAÇA O BOTÃO DO AGENTE ALOMYR) */}
+      <BlogReaderDock
+        activePost={{
+          id: project.id,
+          titlePt: project.titlePt || project.title,
+          titleEn: project.titleEn || project.title
+        }}
+        isTech={true}
+        fontScale={fontScale}
+        setFontScale={setFontScale}
+        zenMode={zenMode}
+        setZenMode={setZenMode}
+        onBackToFeed={onBackToHome}
+        prevPost={
+          prevProject
+            ? {
+                id: prevProject.id,
+                titlePt: prevProject.titlePt || prevProject.title,
+                titleEn: prevProject.titleEn || prevProject.title
+              }
+            : null
+        }
+        nextPost={
+          nextProject
+            ? {
+                id: nextProject.id,
+                titlePt: nextProject.titlePt || nextProject.title,
+                titleEn: nextProject.titleEn || nextProject.title
+              }
+            : null
+        }
+        onSelectPost={(targetItem) => {
+          const found = activeCollection.find((p) => p.id === targetItem.id);
+          if (found) {
+            if (onSelectProject) onSelectProject(found);
+            else setInternalProject(found);
+            window.scrollTo({ top: 0, behavior: "smooth" });
+          }
+        }}
+        customType={isThought ? "ensaio" : isArticle ? "artigo" : "projeto"}
+      />
     </div>
   );
 }

@@ -410,7 +410,7 @@ function App() {
             window.scrollTo({ top: 0, behavior: "smooth" });
           }}
         />
-        <ChatWidget />
+        <ChatWidget showFloatingButton={false} />
       </>
     );
   }
@@ -430,7 +430,7 @@ function App() {
           onSwitchChannel={(newChan) => handleSelectBlogChannel(newChan)}
           onOpenProject={handleOpenProject}
         />
-        <ChatWidget />
+        <ChatWidget showFloatingButton={false} />
       </>
     );
   }
@@ -450,7 +450,7 @@ function App() {
           onSwitchChannel={(newChan) => handleSelectBlogChannel(newChan)}
           onOpenProject={handleOpenProject}
         />
-        <ChatWidget />
+        <ChatWidget showFloatingButton={false} />
       </>
     );
   }
@@ -463,7 +463,7 @@ function App() {
           onOpenThought={handleOpenProject}
           onNavigateToBlog={handleNavigateToBlogGateway}
         />
-        <ChatWidget />
+        <ChatWidget showFloatingButton={true} />
       </>
     );
   }
@@ -567,7 +567,7 @@ function App() {
           }}
           onNavigateToBlogPost={handleOpenBlogPost}
         />
-        <ChatWidget />
+        <ChatWidget showFloatingButton={false} />
       </>
     );
   }
@@ -592,7 +592,7 @@ function App() {
             }, 150);
           }}
         />
-        <ChatWidget />
+        <ChatWidget showFloatingButton={false} />
       </>
     );
   }
@@ -612,7 +612,7 @@ function App() {
         onNavigateToBlog={handleNavigateToBlogGateway}
         onNavigateToBlogPost={handleOpenBlogPost}
       />
-      <ChatWidget />
+      <ChatWidget showFloatingButton={true} />
     </>
   );
 }

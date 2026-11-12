@@ -118,7 +118,7 @@ function FormattedMessage({ text }) {
   return <div className="formatted-chat-content">{renderedBlocks}</div>;
 }
 
-export default function ChatWidget() {
+export default function ChatWidget({ showFloatingButton = true }) {
   const { t, lang } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
   const [inputText, setInputText] = useState("");
@@ -221,8 +221,8 @@ export default function ChatWidget() {
 
   return (
     <>
-      {/* Floating Trigger Button */}
-      {!isOpen && (
+      {/* Floating Trigger Button (Apenas visível nas telas autorizadas: Home e Hobbies) */}
+      {!isOpen && showFloatingButton && (
         <button
           type="button"
           className="chat-widget-floating-btn"

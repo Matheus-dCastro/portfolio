@@ -1,11 +1,11 @@
 // src/components/BlogReaderDock.jsx
-// Interactive Reader Dock (Ferramentas de Leitura: Marca-texto, Bloco de Notas, Impressão, Gatilhos de IA e Tipografia)
+// Interactive Reader Dock (Abraça o Botão do Agente Alomyr + Ferramentas de Leitura para Blog e Detalhe de Projeto)
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import "./BlogReaderDock.css";
 
 export default function BlogReaderDock({
-  activePost,
+  activePost = null,
   isTech = true,
   fontScale = 1,
   setFontScale,
@@ -14,7 +14,9 @@ export default function BlogReaderDock({
   onBackToFeed,
   prevPost = null,
   nextPost = null,
-  onSelectPost
+  onSelectPost,
+  customType = "artigo",
+  isFeedMode = false
 }) {
   const [isHighlighterOn, setIsHighlighterOn] = useState(false);
   const [highlightCount, setHighlightCount] = useState(0);
@@ -22,7 +24,7 @@ export default function BlogReaderDock({
   const [isAiMenuOpen, setIsAiMenuOpen] = useState(false);
   const [sessionNotes, setSessionNotes] = useState(() => {
     try {
-      return sessionStorage.getItem(`blog_notes_${activePost?.id}`) || "";
+      return sessionStorage.getItem(`blog_notes_${activePost?.id || "general"}`) || "";
     } catch {
       return "";
     }
@@ -50,7 +52,7 @@ export default function BlogReaderDock({
 
   // Handle Text Selection for Highlighter (Mouse & Touch on Mobile)
   useEffect(() => {
-    if (!isHighlighterOn) return;
+    if (!isHighlighterOn || isFeedMode) return;
 
     const handleSelection = () => {
       const selection = window.getSelection();
@@ -60,7 +62,10 @@ export default function BlogReaderDock({
       if (selectedText.length < 2) return;
 
       const range = selection.getRangeAt(0);
-      const articleEl = document.querySelector(".blog-reader-view");
+      const articleEl =
+        document.querySelector(".blog-reader-view") ||
+        document.querySelector(".article-body-area") ||
+        document.querySelector(".view-content-wrapper");
       if (!articleEl || !articleEl.contains(range.commonAncestorContainer)) return;
 
       try {
@@ -93,7 +98,7 @@ export default function BlogReaderDock({
       document.removeEventListener("mouseup", handleSelection);
       document.removeEventListener("touchend", handleSelection);
     };
-  }, [isHighlighterOn, isTech, triggerToast]);
+  }, [isHighlighterOn, isTech, isFeedMode, triggerToast]);
 
   // Clear all highlights in current article
   const handleClearHighlights = () => {
@@ -124,8 +129,8 @@ export default function BlogReaderDock({
     triggerToast(`Tamanho da fonte: ${Math.round(scales[nextIndex] * 100)}%`);
   };
 
-  // Trigger Alomyr Assistant with pre-formatted prompts
-  const triggerAiAssistant = (promptText) => {
+  // Trigger Alomyr Assistant with pre-formatted prompts or empty chat
+  const triggerAiAssistant = (promptText = "") => {
     setIsAiMenuOpen(false);
     window.dispatchEvent(
       new CustomEvent("open-alomyr-chat", {
@@ -148,8 +153,51 @@ export default function BlogReaderDock({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const postTitle = activePost?.titlePt || activePost?.titleEn || "este artigo";
+  const postTitle = activePost?.titlePt || activePost?.titleEn || `este ${customType}`;
 
+  // ==========================================
+  // FEED MODE COMPACT DOCK (Apenas Feed do Blog)
+  // ==========================================
+  if (isFeedMode) {
+    return (
+      <aside className="blog-reader-dock-container" ref={dockRef} aria-label="Navegação e Assistente Alomyr">
+        <nav className="reader-dock-pill dock-feed-mode">
+          <button
+            type="button"
+            className="dock-alomyr-embraced-btn"
+            onClick={() => triggerAiAssistant("")}
+            title="Falar com Alomyr (Assistente IA)"
+          >
+            <img src="/wolf(2).png" alt="Alomyr" className="dock-alomyr-logo-img" />
+            <span className="dock-alomyr-label">Ask Alomyr (AI)</span>
+            <span className="dock-alomyr-glow-dot"></span>
+          </button>
+
+          {onBackToFeed && (
+            <>
+              <div className="dock-divider"></div>
+              <button
+                type="button"
+                className="dock-action-btn"
+                onClick={onBackToFeed}
+                title="Voltar ao Portfólio Principal"
+              >
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                  <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                </svg>
+                <span className="dock-btn-label">Portfólio</span>
+              </button>
+            </>
+          )}
+        </nav>
+      </aside>
+    );
+  }
+
+  // ==========================================
+  // FULL READING DOCK (Artigo / Matéria / Saiba Mais)
+  // ==========================================
   return (
     <aside className="blog-reader-dock-container" ref={dockRef} aria-label="Ferramentas de Leitura">
       {/* Backdrop Dimmer para Mobile Bottom Sheet */}
@@ -197,7 +245,7 @@ export default function BlogReaderDock({
           </p>
           <textarea
             className="dock-notes-textarea"
-            placeholder="Anote reflexões, citações ou ideias enquanto lê este artigo..."
+            placeholder={`Anote reflexões, citações ou ideias enquanto lê este ${customType}...`}
             value={sessionNotes}
             onChange={(e) => setSessionNotes(e.target.value)}
             rows={5}
@@ -226,10 +274,8 @@ export default function BlogReaderDock({
           <div className="sheet-drag-handle" aria-hidden="true"></div>
           <div className="dock-ai-header">
             <div className="dock-ai-title">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-              </svg>
-              <span>Consultar Assistente Alomyr</span>
+              <img src="/wolf(2).png" alt="Alomyr" className="dock-ai-wolf-img" />
+              <span>Assistente Alomyr (IA)</span>
             </div>
             <button
               type="button"
@@ -240,18 +286,19 @@ export default function BlogReaderDock({
               ✕
             </button>
           </div>
+
           <div className="dock-ai-options">
+            {/* Direct full chat trigger */}
             <button
               type="button"
-              className="dock-ai-option-btn"
-              onClick={() =>
-                triggerAiAssistant(
-                  `Por favor, elabore um resumo conciso com os 3 principais insights do artigo "${postTitle}".`
-                )
-              }
+              className="dock-ai-direct-chat-btn"
+              onClick={() => triggerAiAssistant("")}
             >
-              <span className="option-title">Resumo em 3 Pontos</span>
-              <span className="option-desc">Extrai os tópicos centrais e lições práticas</span>
+              <div className="direct-chat-left">
+                <span className="direct-chat-dot"></span>
+                <span className="direct-chat-title">Abrir Conversa Livre com Alomyr</span>
+              </div>
+              <span className="direct-chat-badge">Chat IA</span>
             </button>
 
             <button
@@ -259,12 +306,12 @@ export default function BlogReaderDock({
               className="dock-ai-option-btn"
               onClick={() =>
                 triggerAiAssistant(
-                  `Poderia explicar os conceitos técnicos do artigo "${postTitle}" de forma simples e didática para um iniciante?`
+                  `Por favor, elabore um resumo conciso com os 3 principais insights de "${postTitle}".`
                 )
               }
             >
-              <span className="option-title">Explicar para Iniciante</span>
-              <span className="option-desc">Conceitos técnicos mastigados sem jargões</span>
+              <span className="option-title">Resumo em 3 Pontos Centrais</span>
+              <span className="option-desc">Extrai os tópicos principais e lições práticas</span>
             </button>
 
             <button
@@ -272,12 +319,12 @@ export default function BlogReaderDock({
               className="dock-ai-option-btn"
               onClick={() =>
                 triggerAiAssistant(
-                  `Quais são as limitações, desafios reais e melhores práticas associadas ao tema discutido em "${postTitle}"?`
+                  `Poderia explicar os conceitos técnicos de "${postTitle}" de forma simples e didática para um iniciante?`
                 )
               }
             >
-              <span className="option-title">Análise Crítica & Desafios</span>
-              <span className="option-desc">Perspectiva prática de engenharia e produção</span>
+              <span className="option-title">Explicar para Iniciante (Sem Jargões)</span>
+              <span className="option-desc">Conceitos técnicos mastigados de forma acessível</span>
             </button>
 
             <button
@@ -285,12 +332,12 @@ export default function BlogReaderDock({
               className="dock-ai-option-btn"
               onClick={() =>
                 triggerAiAssistant(
-                  `Gostaria de fazer uma pergunta sobre o artigo "${postTitle}": `
+                  `Quais são as limitações, desafios reais de engenharia e diferenciais técnicos em "${postTitle}"?`
                 )
               }
             >
-              <span className="option-title">Fazer Pergunta Personalizada</span>
-              <span className="option-desc">Abrir diálogo livre no contexto do post</span>
+              <span className="option-title">Análise Crítica & Desafios Técnicos</span>
+              <span className="option-desc">Visão realista de arquitetura e implementação</span>
             </button>
           </div>
         </div>
@@ -298,6 +345,23 @@ export default function BlogReaderDock({
 
       {/* Barra Flutuante Estilo Dock */}
       <nav className={`reader-dock-pill ${isHighlighterOn ? "highlighter-engaged" : ""}`}>
+        {/* BOTÃO DO AGENTE ALOMYR EMBRACED NA DOCK */}
+        <button
+          type="button"
+          className={`dock-alomyr-embraced-btn ${isAiMenuOpen ? "active" : ""}`}
+          onClick={() => {
+            setIsAiMenuOpen(!isAiMenuOpen);
+            setIsNotesOpen(false);
+          }}
+          title="Falar com Alomyr (Assistente IA)"
+        >
+          <img src="/wolf(2).png" alt="Alomyr" className="dock-alomyr-logo-img" />
+          <span className="dock-alomyr-label">Ask Alomyr (AI)</span>
+          <span className="dock-alomyr-glow-dot"></span>
+        </button>
+
+        <div className="dock-divider"></div>
+
         {/* Marca-Texto Tool */}
         <div className="dock-tool-group">
           <button
@@ -327,7 +391,7 @@ export default function BlogReaderDock({
               type="button"
               className="dock-mini-clear-btn"
               onClick={handleClearHighlights}
-              title="Limpar todos os destaques do artigo"
+              title="Limpar todos os destaques deste conteúdo"
             >
               ✕
             </button>
@@ -357,22 +421,6 @@ export default function BlogReaderDock({
           {sessionNotes && <span className="dock-dot-indicator"></span>}
         </button>
 
-        {/* Gatilhos do Agente IA */}
-        <button
-          type="button"
-          className={`dock-action-btn dock-ai-btn ${isAiMenuOpen ? "active" : ""}`}
-          onClick={() => {
-            setIsAiMenuOpen(!isAiMenuOpen);
-            setIsNotesOpen(false);
-          }}
-          title="Pedir resumo ou tirar dúvidas com o Assistente Alomyr"
-        >
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-          </svg>
-          <span className="dock-btn-label">Perguntar à IA</span>
-        </button>
-
         <div className="dock-divider"></div>
 
         {/* Tamanho da Fonte */}
@@ -380,7 +428,7 @@ export default function BlogReaderDock({
           type="button"
           className="dock-action-btn"
           onClick={handleCycleFont}
-          title="Ajustar tamanho da fonte do artigo"
+          title="Ajustar tamanho da fonte do texto"
         >
           <span style={{ fontWeight: 700, fontSize: "0.95rem" }}>Aa</span>
           <span className="dock-btn-label">{Math.round(fontScale * 100)}%</span>
@@ -406,12 +454,12 @@ export default function BlogReaderDock({
           </button>
         )}
 
-        {/* Botão de Imprimir Revista */}
+        {/* Botão de Imprimir */}
         <button
           type="button"
           className="dock-action-btn"
           onClick={handlePrint}
-          title="Imprimir ou Salvar Artigo em PDF (Formato Revista Limpa)"
+          title="Imprimir ou Salvar em PDF (Formato Limpo de Revista)"
         >
           <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <polyline points="6 9 6 2 18 2 18 9"></polyline>
@@ -421,7 +469,7 @@ export default function BlogReaderDock({
           <span className="dock-btn-label">Imprimir</span>
         </button>
 
-        {/* Navegação Entre Artigos */}
+        {/* Navegação Entre Itens */}
         {(prevPost || nextPost) && (
           <>
             <div className="dock-divider"></div>
@@ -430,7 +478,7 @@ export default function BlogReaderDock({
                 type="button"
                 className="dock-action-btn nav-arrow"
                 onClick={() => onSelectPost && onSelectPost(prevPost)}
-                title={`Artigo Anterior: ${prevPost.titlePt || prevPost.titleEn}`}
+                title={`Anterior: ${prevPost.titlePt || prevPost.titleEn}`}
               >
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <polyline points="15 18 9 12 15 6"></polyline>
@@ -442,7 +490,7 @@ export default function BlogReaderDock({
                 type="button"
                 className="dock-action-btn nav-arrow"
                 onClick={() => onSelectPost && onSelectPost(nextPost)}
-                title={`Próximo Artigo: ${nextPost.titlePt || nextPost.titleEn}`}
+                title={`Próximo: ${nextPost.titlePt || nextPost.titleEn}`}
               >
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <polyline points="9 18 15 12 9 6"></polyline>
@@ -452,7 +500,7 @@ export default function BlogReaderDock({
           </>
         )}
 
-        {/* Voltar ao Feed */}
+        {/* Voltar / Fechar */}
         {onBackToFeed && (
           <>
             <div className="dock-divider"></div>
@@ -460,7 +508,7 @@ export default function BlogReaderDock({
               type="button"
               className="dock-action-btn dock-back-feed"
               onClick={onBackToFeed}
-              title="Fechar leitura e retornar ao Feed do Blog"
+              title="Voltar / Fechar Leitura"
             >
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <line x1="18" y1="6" x2="6" y2="18"></line>

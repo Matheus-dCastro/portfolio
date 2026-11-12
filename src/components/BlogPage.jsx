@@ -1092,8 +1092,8 @@ export default function BlogPage({
         </button>
       )}
 
-      {/* DOCK INTERATIVO DO LEITOR (REVISTA & PAPEL DIGITAL) */}
-      {activePost && (
+      {/* DOCK INTERATIVO DO BLOG (ABRAÇA O AGENTE ALOMYR EM MODO LEITOR OU FEED) */}
+      {activePost ? (
         <BlogReaderDock
           activePost={activePost}
           isTech={isTech}
@@ -1105,6 +1105,13 @@ export default function BlogPage({
           prevPost={prevPost}
           nextPost={nextPost}
           onSelectPost={handleSelectPost}
+        />
+      ) : (
+        <BlogReaderDock
+          activePost={null}
+          isTech={isTech}
+          onBackToFeed={onBackToHome}
+          isFeedMode={true}
         />
       )}
     </div>
