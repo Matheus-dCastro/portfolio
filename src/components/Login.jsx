@@ -7,9 +7,9 @@ import {
   logoutUser,
   isAuthorizedAdmin
 } from "../lib/supabaseService";
-import "./LoginDraft.css";
+import "./Login.css";
 
-export default function LoginDraft({ onNavigateToAdmin, onBackToHome }) {
+export default function Login({ onNavigateToAdmin, onBackToHome }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [notice, setNotice] = useState("");

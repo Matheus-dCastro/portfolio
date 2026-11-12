@@ -165,7 +165,7 @@
   max-width: 1080px;
   width: 100%;
   margin: 0 auto;
-  padding: 2.5rem 2rem 5rem;
+  padding: 2.5rem 2rem 7.5rem;
   flex: 1;
   box-sizing: border-box;
 }
@@ -193,9 +193,9 @@
 }
 
 .category-badge.cat-profissional {
-  background: rgba(59, 130, 246, 0.15);
-  color: #60a5fa;
-  border: 1px solid rgba(59, 130, 246, 0.3);
+  background: rgba(139, 92, 246, 0.15);
+  color: #c084fc;
+  border: 1px solid rgba(139, 92, 246, 0.3);
 }
 
 .category-badge.cat-academico {
@@ -1195,5 +1195,52 @@
   .gdocs-full-iframe,
   .pdf-full-iframe {
     height: 500px;
+  }
+}
+
+/* ==========================================================================
+   BOTÃO FLUTUANTE VOLTAR AO TOPO (LADO ESQUERDO)
+   ========================================================================== */
+.blog-floating-back-to-top {
+  position: fixed;
+  bottom: 28px;
+  left: 28px;
+  right: auto;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(10, 10, 14, 0.85);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(139, 92, 246, 0.35);
+  color: #cbd5e1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 999;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  transition: all 0.25s ease;
+}
+
+.blog-floating-back-to-top svg {
+  width: 18px;
+  height: 18px;
+}
+
+.blog-floating-back-to-top:hover {
+  transform: translateY(-3px);
+  color: #ffffff;
+  border-color: #c084fc;
+  box-shadow: 0 12px 28px rgba(139, 92, 246, 0.5);
+}
+
+@media (max-width: 900px) {
+  .blog-floating-back-to-top {
+    bottom: calc(76px + env(safe-area-inset-bottom, 0px));
+    left: 16px;
+    right: auto;
+    width: 42px;
+    height: 42px;
   }
 }

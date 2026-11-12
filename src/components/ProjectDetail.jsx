@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   getStoredProjects,
   getStoredArticles,
@@ -10,7 +10,8 @@ import { useLanguage } from "../context/useLanguage";
 import LanguageSwitcher from "./LanguageSwitcher";
 import ShareButton from "./ShareButton";
 import CategoryIcon from "./CategoryIcon";
-import "./ViewDraft.css";
+import BlogReaderDock from "./BlogReaderDock";
+import "./ProjectDetail.css";
 
 function getInitialProject(propProject) {
   if (propProject) return propProject;
@@ -30,11 +31,30 @@ function getInitialProject(propProject) {
   return allItems.length > 0 ? allItems[0] : null;
 }
 
-export default function ViewDraft({ project: propProject, onBackToHome, onSelectProject, onNavigateToBlogPost }) {
+export default function ProjectDetail({ project: propProject, onBackToHome, onSelectProject, onNavigateToBlogPost }) {
   const { t, lang } = useLanguage();
   const [internalProject, setInternalProject] = useState(() => getInitialProject(propProject));
   const [activeContentTab, setActiveContentTab] = useState("auto"); // 'auto' | 'readme' | 'gdocs' | 'pdf'
-  const [inlineQuestion, setInlineQuestion] = useState("");
+  const [fontScale, setFontScale] = useState(1);
+  const [zenMode, setZenMode] = useState(false);
+  const [showBackToTop, setShowBackToTop] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowBackToTop(window.scrollY > 300);
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  useEffect(() => {
+    if (zenMode) {
+      document.body.classList.add("blog-zen-mode");
+    } else {
+      document.body.classList.remove("blog-zen-mode");
+    }
+    return () => document.body.classList.remove("blog-zen-mode");
+  }, [zenMode]);
 
   const project = propProject || internalProject;
 
@@ -124,24 +144,6 @@ export default function ViewDraft({ project: propProject, onBackToHome, onSelect
     : isArticle
     ? (lang === "en" ? "article" : "artigo")
     : (lang === "en" ? "project" : "projeto");
-
-  const contextualQuestions = isThought
-    ? [
-        lang === "en" ? "What is the central insight?" : "Qual é a reflexão central deste texto?",
-        lang === "en" ? "How does this connect to tech vision?" : "Como se relaciona com a visão técnica?",
-        lang === "en" ? "What inspired this reflection?" : "O que motivou e inspirou este ensaio?"
-      ]
-    : isArticle
-    ? [
-        lang === "en" ? "What is the core thesis?" : "Qual é a tese principal deste artigo?",
-        lang === "en" ? "Which methodologies were used?" : "Quais metodologias foram abordadas?",
-        lang === "en" ? "Provide an executive summary." : "Faça um resumo executivo dos pontos-chave."
-      ]
-    : [
-        lang === "en" ? "How was this architected?" : "Como este projeto foi arquitetado?",
-        lang === "en" ? "What stack and models were used?" : "Quais tecnologias e modelos foram usados?",
-        lang === "en" ? "What practical metrics were achieved?" : "Quais resultados e métricas foram alcançados?"
-      ];
 
   const handleAskAlomyr = (questionText) => {
     window.dispatchEvent(
@@ -405,7 +407,7 @@ export default function ViewDraft({ project: propProject, onBackToHome, onSelect
         )}
 
         {/* CONTENT RENDERER */}
-        <div className="article-body-area">
+        <div className="article-body-area" style={{ fontSize: `${fontScale}rem` }}>
           {/* Format 1: Google Docs Embed */}
           {currentFormat === "gdocs" && embedGDocsUrl && (
             <div className="gdocs-reader-wrapper">
@@ -594,6 +596,63 @@ export default function ViewDraft({ project: propProject, onBackToHome, onSelect
           </div>
         </section>
       </main>
+
+      {/* Botão Flutuante Voltar ao Topo (Lado Esquerdo) */}
+      {showBackToTop && (
+        <button
+          type="button"
+          className="blog-floating-back-to-top"
+          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+          title={lang === "en" ? "Scroll to top" : "Voltar ao topo"}
+          aria-label="Scroll to top"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="18 15 12 9 6 15"></polyline>
+          </svg>
+        </button>
+      )}
+
+      {/* DOCK INTERATIVO DO PROJETO / ARTIGO (ABRAÇA O BOTÃO DO AGENTE ALOMYR) */}
+      <BlogReaderDock
+        activePost={{
+          id: project.id,
+          titlePt: project.titlePt || project.title,
+          titleEn: project.titleEn || project.title
+        }}
+        isTech={true}
+        fontScale={fontScale}
+        setFontScale={setFontScale}
+        zenMode={zenMode}
+        setZenMode={setZenMode}
+        onBackToFeed={onBackToHome}
+        prevPost={
+          prevProject
+            ? {
+                id: prevProject.id,
+                titlePt: prevProject.titlePt || prevProject.title,
+                titleEn: prevProject.titleEn || prevProject.title
+              }
+            : null
+        }
+        nextPost={
+          nextProject
+            ? {
+                id: nextProject.id,
+                titlePt: nextProject.titlePt || nextProject.title,
+                titleEn: nextProject.titleEn || nextProject.title
+              }
+            : null
+        }
+        onSelectPost={(targetItem) => {
+          const found = activeCollection.find((p) => p.id === targetItem.id);
+          if (found) {
+            if (onSelectProject) onSelectProject(found);
+            else setInternalProject(found);
+            window.scrollTo({ top: 0, behavior: "smooth" });
+          }
+        }}
+        customType={isThought ? "ensaio" : isArticle ? "artigo" : "projeto"}
+      />
     </div>
   );
 }

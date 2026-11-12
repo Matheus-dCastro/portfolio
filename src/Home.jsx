@@ -65,7 +65,6 @@ function Home({
   };
   const imageWolf = logoWolf;
   const descriptionPerfil = t("hero.subtitle");
-  const fotoPerfil = fotoAlomyr;
   const cv = cvMatheus;
   const descriptionP1About = t("about.p1");
   const descriptionP2About = t("about.p2");

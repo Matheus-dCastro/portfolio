@@ -87,9 +87,13 @@ Abaixo está o comparativo detalhado da evolução estrutural e de segurança do
 │   ├── ultrawide_onda_roxa.png   # Arte de fundo ultrawide
 │   └── wolf(2).png               # Mascote Alomyr em alta resolução
 ├── supabase/                     # Infraestrutura serverless Supabase
-│   └── functions/
-│       └── chat-qwen/
-│           └── index.ts          # Edge Function de inferência protegida da IA
+│   ├── functions/
+│   │   └── chat-qwen/
+│   │       └── index.ts          # Edge Function de inferência protegida da IA
+│   ├── migrations/               # Migrações SQL e scripts de blindagem RLS
+│   └── schema.sql                # Schema DDL central do PostgreSQL com RLS
+├── coisas_securtycastro.md       # Guia de ações manuais do proprietário
+├── CHECKLIST_SEGURANCA_ARQUITETURA.md # Checklist de acompanhamento do ecossistema
 ├── src/
 │   ├── assets/img/               # Galeria de desenhos e imagens de projetos
 │   ├── components/               # Módulos reutilizáveis de interface

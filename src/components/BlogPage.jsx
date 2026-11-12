@@ -1,22 +1,21 @@
 // src/components/BlogPage.jsx
 // Dual-Blog Channel Page (Handles both /blog and /blog/alomyr with full reading view)
 
-import React, { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useLanguage } from "../context/useLanguage";
 import LanguageSwitcher from "./LanguageSwitcher";
 import ShareButton from "./ShareButton";
 import {
   fetchBlogPosts,
-  persistBlogPost,
   fetchProfileConfig
 } from "../lib/supabaseService";
 import {
   getStoredBlogPosts,
-  getYoutubeEmbedUrl,
-  BLOG_CHANNELS
+  getYoutubeEmbedUrl
 } from "../data/blogData";
 import { getStoredProjects, getStoredArticles, getStoredProfileConfig } from "../data/projectsData";
 import fotoAlomyr from "../assets/img/alomyr.jpeg";
+import BlogReaderDock from "./BlogReaderDock";
 import "./BlogPage.css";
 
 export default function BlogPage({
@@ -35,6 +34,34 @@ export default function BlogPage({
   const [searchQuery, setSearchQuery] = useState("");
   const [lightboxImg, setLightboxImg] = useState(null);
   const [profilePhoto, setProfilePhoto] = useState(() => getStoredProfileConfig()?.photoUrl || fotoAlomyr);
+  const [readProgress, setReadProgress] = useState(0);
+  const [showBackToTop, setShowBackToTop] = useState(false);
+  const [fontScale, setFontScale] = useState(1);
+  const [zenMode, setZenMode] = useState(false);
+
+  // Sync Zen Mode class on body
+  useEffect(() => {
+    if (zenMode) {
+      document.body.classList.add("blog-zen-mode");
+    } else {
+      document.body.classList.remove("blog-zen-mode");
+    }
+    return () => document.body.classList.remove("blog-zen-mode");
+  }, [zenMode]);
+
+  // Monitor scroll for reading progress and back-to-top button
+  useEffect(() => {
+    const handleScroll = () => {
+      const totalHeight = document.documentElement.scrollHeight - window.innerHeight;
+      if (totalHeight > 0) {
+        const current = window.scrollY;
+        setReadProgress(Math.min(100, Math.max(0, (current / totalHeight) * 100)));
+        setShowBackToTop(current > 420);
+      }
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   // Sync props
   useEffect(() => {
@@ -65,7 +92,7 @@ export default function BlogPage({
       const base = chan === "alomyr" ? "/blog/alomyr" : "/blog";
       const query = postId ? `?post=${encodeURIComponent(postId)}` : "";
       window.history.pushState({}, "", `${base}${query}`);
-    } catch (e) {
+    } catch {
       // Ignore in non-standard environments
     }
   };
@@ -199,48 +226,73 @@ export default function BlogPage({
       {/* Background glow effects */}
       <div className={`blog-ambient-glow ${isTech ? "tech" : "alomyr"}`}></div>
 
-      {/* Top Navbar */}
-      <header className="blog-navbar">
-        <div className="blog-nav-left">
-          <button
-            type="button"
-            className="blog-nav-btn back-portfolio"
-            onClick={onBackToHome}
+      {/* Top Navbar: Estilo Pílula Flutuante Idêntico ao Portfólio */}
+      <header className="site-header blog-site-header">
+        <div className="blog-brand-wrapper">
+          <a
+            href="/"
+            onClick={(e) => {
+              e.preventDefault();
+              if (onBackToHome) onBackToHome();
+              else window.location.href = "/";
+            }}
+            className="logo"
+          >
+            <img src="/wolf(2).png" className="logo-icon" alt="Lobo" />
+            <span className="first-name">Matheus</span>{" "}
+            <span className="last-name">de Castro</span>
+          </a>
+          <div className="blog-channel-tag-container">
+            <span className="blog-channel-slash">/</span>
+            <span className={`blog-channel-indicator-badge ${isTech ? "tech" : "alomyr"}`}>
+              {isTech ? "TECH & IA" : "LAB ALOMYR"}
+            </span>
+          </div>
+        </div>
+
+        <nav className="blog-pill-nav">
+          <a
+            href="/"
+            onClick={(e) => {
+              e.preventDefault();
+              if (onBackToHome) onBackToHome();
+              else window.location.href = "/";
+            }}
+            className="blog-nav-item home-pill-link"
             title={t("blog.back_to_portfolio")}
           >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="19" y1="12" x2="5" y2="12"></line>
-              <polyline points="12 19 5 12 12 5"></polyline>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+              <polyline points="9 22 9 12 15 12 15 22"></polyline>
             </svg>
-            <span>{t("blog.back_to_portfolio")}</span>
-          </button>
+            <span>{t("nav.home") || "Início"}</span>
+          </a>
 
           <button
             type="button"
-            className="blog-nav-btn gateway-shortcut"
+            className="blog-nav-item gateway-pill-link"
             onClick={onNavigateToGateway}
-            title="Escolher entre canais"
+            title={lang === "en" ? "Explore Channels Gateway" : "Explorar Canais Gateway"}
           >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <rect x="3" y="3" width="7" height="7"></rect>
               <rect x="14" y="3" width="7" height="7"></rect>
               <rect x="14" y="14" width="7" height="7"></rect>
               <rect x="3" y="14" width="7" height="7"></rect>
             </svg>
-            <span>Split Gateway</span>
+            <span>Gateway</span>
           </button>
-        </div>
 
-        {/* Center Brand */}
-        <div className="blog-nav-center">
-          <img src="/wolf(2).png" alt="Wolf" className="blog-nav-wolf" />
-          <span className="blog-nav-title">
-            {isTech ? "Blog de Engenharia & IA" : "Laboratório Alomyr"}
-          </span>
-        </div>
+          <button
+            type="button"
+            className={`blog-nav-item channel-switch-pill ${isTech ? "switch-alomyr" : "switch-tech"}`}
+            onClick={() => handleSwitchChannel(isTech ? "alomyr" : "tech")}
+            title={isTech ? t("blog.switch_to_alomyr") : t("blog.switch_to_tech")}
+          >
+            <span className="channel-switch-dot"></span>
+            <span>{isTech ? "Lab Alomyr" : "Engenharia Tech"}</span>
+          </button>
 
-        {/* Right Actions */}
-        <div className="blog-nav-right">
           <a
             href="/#about"
             onClick={(e) => {
@@ -249,44 +301,65 @@ export default function BlogPage({
               setTimeout(() => {
                 const el = document.getElementById("about");
                 if (el) el.scrollIntoView({ behavior: "smooth" });
-              }, 100);
+              }, 120);
             }}
-            className="blog-nav-btn about-me-link"
+            className="blog-nav-item about-pill-link"
           >
-            {lang === "en" ? "About Me" : "Sobre Mim"}
+            {lang === "en" ? "About" : "Sobre"}
           </a>
 
-          {/* Switch Channel Button */}
-          <button
-            type="button"
-            className={`blog-nav-btn channel-toggle-btn ${isTech ? "switch-to-alomyr" : "switch-to-tech"}`}
-            onClick={() => handleSwitchChannel(isTech ? "alomyr" : "tech")}
-          >
-            <span>{isTech ? t("blog.switch_to_alomyr") : t("blog.switch_to_tech")}</span>
-          </button>
-
           <LanguageSwitcher />
-        </div>
+        </nav>
+
+        {/* Barra sutil de progresso de leitura integrada ao contorno da pílula */}
+        {activePost && (
+          <div
+            className={`header-reading-bar ${isTech ? "tech" : "alomyr"}`}
+            style={{ width: `${readProgress}%` }}
+          />
+        )}
       </header>
 
       {/* RENDER VIEW: SINGLE POST READER VS FEED GRID */}
       {activePost ? (
         <article className="blog-reader-view">
           {/* Breadcrumb & Navigation Top */}
-          <div className="reader-top-bar">
-            <button
-              type="button"
-              className="reader-back-feed-btn"
-              onClick={() => handleSelectPost(null)}
-            >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="19" y1="12" x2="5" y2="12"></line>
-                <polyline points="12 19 5 12 12 5"></polyline>
-              </svg>
-              <span>{t("blog.back_to_feed")}</span>
-            </button>
+          <div className="reader-top-nav-row">
+            <div className="reader-breadcrumbs">
+              <button
+                type="button"
+                className="breadcrumb-crumb"
+                onClick={onBackToHome}
+              >
+                {t("nav.home") || "Portfólio"}
+              </button>
+              <span className="breadcrumb-sep">/</span>
+              <button
+                type="button"
+                className="breadcrumb-crumb"
+                onClick={() => handleSelectPost(null)}
+              >
+                {isTech ? "Engenharia & IA" : "Laboratório Alomyr"}
+              </button>
+              <span className="breadcrumb-sep">/</span>
+              <span className="breadcrumb-current">
+                {lang === "en" ? activePost.titleEn : activePost.titlePt}
+              </span>
+            </div>
 
-            <div className="reader-actions-group">
+            <div className="reader-top-actions">
+              <button
+                type="button"
+                className="reader-back-feed-btn"
+                onClick={() => handleSelectPost(null)}
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="19" y1="12" x2="5" y2="12"></line>
+                  <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+                <span>{t("blog.back_to_feed")}</span>
+              </button>
+
               <ShareButton
                 title={lang === "en" ? activePost.titleEn : activePost.titlePt}
                 text={lang === "en" ? activePost.summaryEn : activePost.summaryPt}
@@ -304,7 +377,13 @@ export default function BlogPage({
               <span className="reader-date">
                 {t("blog.published_on")} {activePost.publishedAt}
               </span>
-              <span className="reader-readtime">⏱ {activePost.readTime}</span>
+              <span className="reader-readtime">
+                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ verticalAlign: "-2px", marginRight: "4px" }}>
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <polyline points="12 6 12 12 16 14"></polyline>
+                </svg>
+                {activePost.readTime}
+              </span>
             </div>
 
             <h1 className="reader-title">
@@ -471,7 +550,7 @@ export default function BlogPage({
           )}
 
           {/* MAIN POST CONTENT (RICH MARKDOWN) */}
-          <div className="reader-markdown-body">
+          <div className="reader-markdown-body" style={{ fontSize: `${fontScale}rem` }}>
             <BlogMarkdownRenderer
               content={
                 lang === "en"
@@ -617,6 +696,27 @@ export default function BlogPage({
                 )}
               </div>
             </div>
+
+            {/* Active Filters / Result Counter Badge */}
+            {(searchQuery.trim() || selectedTag) && (
+              <div className="active-filters-bar" style={{ marginTop: "1rem", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "0.8rem", width: "100%", maxWidth: "620px", background: "rgba(139, 92, 246, 0.12)", border: "1px solid rgba(139, 92, 246, 0.3)", borderRadius: "12px", padding: "0.6rem 1rem", fontSize: "0.85rem", color: "#e2e8f0" }}>
+                <span>
+                  {filteredPosts.length} {filteredPosts.length === 1 ? (lang === "en" ? "post found" : "publicação encontrada") : (lang === "en" ? "posts found" : "publicações encontradas")}
+                  {selectedTag && ` • Tag: ${selectedTag}`}
+                  {searchQuery.trim() && ` • "${searchQuery}"`}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearchQuery("");
+                    setSelectedTag(null);
+                  }}
+                  style={{ background: "transparent", border: "none", color: "#a78bfa", textDecoration: "underline", cursor: "pointer", fontSize: "0.82rem", fontWeight: "600" }}
+                >
+                  {lang === "en" ? "Clear Filters" : "Limpar Filtros"}
+                </button>
+              </div>
+            )}
           </section>
 
           {/* EI NERD STYLE: TRENDING TOPICS (TÓPICOS EM ALTA) BAR */}
@@ -976,6 +1076,43 @@ export default function BlogPage({
             <img src={lightboxImg} alt="Visualização em alta resolução" className="blog-lightbox-img" />
           </div>
         </div>
+      )}
+      {/* Botão Flutuante Voltar ao Topo */}
+      {showBackToTop && (
+        <button
+          type="button"
+          className={`blog-floating-back-to-top ${isTech ? "tech" : "alomyr"}`}
+          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+          title={lang === "en" ? "Scroll to top" : "Voltar ao topo"}
+          aria-label="Scroll to top"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="18 15 12 9 6 15"></polyline>
+          </svg>
+        </button>
+      )}
+
+      {/* DOCK INTERATIVO DO BLOG (ABRAÇA O AGENTE ALOMYR EM MODO LEITOR OU FEED) */}
+      {activePost ? (
+        <BlogReaderDock
+          activePost={activePost}
+          isTech={isTech}
+          fontScale={fontScale}
+          setFontScale={setFontScale}
+          zenMode={zenMode}
+          setZenMode={setZenMode}
+          onBackToFeed={() => handleSelectPost(null)}
+          prevPost={prevPost}
+          nextPost={nextPost}
+          onSelectPost={handleSelectPost}
+        />
+      ) : (
+        <BlogReaderDock
+          activePost={null}
+          isTech={isTech}
+          onBackToFeed={onBackToHome}
+          isFeedMode={true}
+        />
       )}
     </div>
   );

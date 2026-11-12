@@ -1,0 +1,696 @@
+/* src/components/BlogReaderDock.css */
+/* Interactive Reader Dock (Magazine & Paper Tools) */
+
+.blog-reader-dock-container {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 998;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  pointer-events: none;
+}
+
+/* Toast Pill */
+.dock-toast-pill {
+  pointer-events: auto;
+  margin-bottom: 12px;
+  padding: 8px 18px;
+  background: rgba(10, 10, 14, 0.92);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(139, 92, 246, 0.45);
+  border-radius: 100px;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: #f1f5f9;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+  animation: dockToastIn 0.25s ease-out;
+}
+
+@keyframes dockToastIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Dock Pill Capsule */
+.reader-dock-pill {
+  pointer-events: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 16px;
+  background: rgba(10, 10, 14, 0.78);
+  -webkit-backdrop-filter: blur(20px) saturate(190%);
+  backdrop-filter: blur(20px) saturate(190%);
+  border: 1px solid rgba(139, 92, 246, 0.35);
+  border-radius: 100px;
+  box-shadow:
+    0 16px 40px rgba(0, 0, 0, 0.65),
+    inset 0 1px 1px rgba(255, 255, 255, 0.08);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.reader-dock-pill:hover {
+  border-color: rgba(139, 92, 246, 0.6);
+  box-shadow:
+    0 20px 45px rgba(0, 0, 0, 0.75),
+    0 0 20px rgba(139, 92, 246, 0.15);
+}
+
+.reader-dock-pill.highlighter-engaged {
+  border-color: #f59e0b;
+  box-shadow:
+    0 16px 40px rgba(0, 0, 0, 0.65),
+    0 0 25px rgba(245, 158, 11, 0.25);
+}
+
+/* Botão do Agente Alomyr Abraçado na Dock */
+.dock-alomyr-embraced-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 15px;
+  border-radius: 50px;
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.4), rgba(124, 58, 237, 0.6));
+  border: 1px solid rgba(192, 132, 252, 0.65);
+  color: #ffffff;
+  font-size: 0.84rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow:
+    0 0 16px rgba(139, 92, 246, 0.45),
+    inset 0 1px 1px rgba(255, 255, 255, 0.2);
+  white-space: nowrap;
+}
+
+.dock-alomyr-embraced-btn:hover {
+  transform: translateY(-2px);
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.6), rgba(124, 58, 237, 0.8));
+  border-color: #c084fc;
+  box-shadow:
+    0 0 24px rgba(139, 92, 246, 0.7),
+    0 6px 16px rgba(0, 0, 0, 0.4);
+}
+
+.dock-alomyr-embraced-btn.active {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.7), rgba(124, 58, 237, 0.9));
+  border-color: #e9d5ff;
+  box-shadow: 0 0 25px rgba(139, 92, 246, 0.85);
+}
+
+.dock-alomyr-logo-img {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 6px rgba(192, 132, 252, 0.8));
+}
+
+/* Tool Group */
+.dock-tool-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+/* Dock Action Buttons */
+.dock-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 12px;
+  border-radius: 50px;
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  font-size: 0.82rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.dock-action-btn svg {
+  flex-shrink: 0;
+}
+
+.dock-action-btn:hover {
+  color: #ffffff;
+  background: rgba(139, 92, 246, 0.18);
+  transform: translateY(-1px);
+}
+
+.dock-action-btn.active {
+  background: rgba(139, 92, 246, 0.3);
+  color: #ffffff;
+  border: 1px solid rgba(139, 92, 246, 0.5);
+}
+
+.dock-action-btn.dock-ai-btn:hover {
+  background: rgba(139, 92, 246, 0.2);
+  color: #c084fc;
+}
+
+.dock-action-btn.dock-ai-btn.active {
+  background: rgba(139, 92, 246, 0.35);
+  border-color: #c084fc;
+  color: #ffffff;
+}
+
+.dock-badge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  background: #f59e0b;
+  color: #000;
+  border-radius: 999px;
+  padding: 1px 6px;
+  line-height: 1.2;
+}
+
+.dock-mini-clear-btn {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  font-size: 0.75rem;
+  padding: 4px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.dock-mini-clear-btn:hover {
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.15);
+}
+
+.dock-dot-indicator {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #8b5cf6;
+  box-shadow: 0 0 6px #8b5cf6;
+}
+
+.dock-divider {
+  width: 1px;
+  height: 20px;
+  background: rgba(255, 255, 255, 0.12);
+  margin: 0 4px;
+}
+
+.dock-action-btn.nav-arrow {
+  padding: 7px 9px;
+}
+
+.dock-action-btn.dock-back-feed {
+  padding: 7px 9px;
+  color: #64748b;
+}
+
+.dock-action-btn.dock-back-feed:hover {
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.12);
+}
+
+/* Popover: Caderno de Notas */
+.dock-notes-popover {
+  pointer-events: auto;
+  width: 380px;
+  max-width: calc(100vw - 32px);
+  margin-bottom: 12px;
+  padding: 16px;
+  background: rgba(10, 10, 14, 0.94);
+  -webkit-backdrop-filter: blur(24px);
+  backdrop-filter: blur(24px);
+  border: 1px solid rgba(139, 92, 246, 0.4);
+  border-radius: 20px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
+  animation: dockPopoverIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dock-notes-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.dock-notes-title {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #f1f5f9;
+}
+
+.dock-notes-close {
+  background: transparent;
+  border: none;
+  color: #64748b;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+}
+
+.dock-notes-close:hover {
+  color: #fff;
+}
+
+.dock-notes-hint {
+  font-size: 0.74rem;
+  color: #64748b;
+  margin: 0 0 10px;
+  line-height: 1.4;
+}
+
+.dock-notes-textarea {
+  width: 100%;
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 10px 12px;
+  font-size: 0.85rem;
+  color: #e2e8f0;
+  font-family: inherit;
+  resize: vertical;
+  min-height: 90px;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.dock-notes-textarea:focus {
+  border-color: #8b5cf6;
+  box-shadow: 0 0 12px rgba(139, 92, 246, 0.25);
+}
+
+.dock-notes-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 8px;
+  font-size: 0.75rem;
+  color: #64748b;
+}
+
+.dock-notes-clear-btn {
+  background: transparent;
+  border: none;
+  color: #a78bfa;
+  cursor: pointer;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+.dock-notes-clear-btn:hover {
+  color: #ef4444;
+}
+
+/* Popover: Gatilhos do Agente de IA */
+.dock-ai-popover {
+  pointer-events: auto;
+  width: 420px;
+  max-width: calc(100vw - 32px);
+  margin-bottom: 12px;
+  padding: 16px;
+  background: rgba(10, 10, 14, 0.96);
+  -webkit-backdrop-filter: blur(24px);
+  backdrop-filter: blur(24px);
+  border: 1px solid rgba(139, 92, 246, 0.45);
+  border-radius: 20px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 30px rgba(139, 92, 246, 0.15);
+  animation: dockPopoverIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes dockPopoverIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.dock-ai-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.dock-ai-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #c084fc;
+}
+
+.dock-ai-wolf-img {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+}
+
+.dock-ai-close {
+  background: transparent;
+  border: none;
+  color: #64748b;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.dock-ai-close:hover {
+  color: #fff;
+}
+
+.dock-ai-options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Direct Chat Trigger Button */
+.dock-ai-direct-chat-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 11px 14px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.35), rgba(124, 58, 237, 0.5)) !important;
+  border: 1px solid rgba(192, 132, 252, 0.55) !important;
+  color: #ffffff !important;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  margin-bottom: 4px;
+  box-shadow: 0 4px 14px rgba(139, 92, 246, 0.25);
+}
+
+.dock-ai-direct-chat-btn:hover {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.5), rgba(124, 58, 237, 0.75)) !important;
+  border-color: #e9d5ff !important;
+  box-shadow: 0 0 20px rgba(139, 92, 246, 0.5);
+  transform: translateY(-1px);
+}
+
+.direct-chat-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.direct-chat-title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.direct-chat-badge {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 2px 7px;
+  border-radius: 100px;
+  background: rgba(167, 139, 250, 0.25);
+  border: 1px solid rgba(192, 132, 252, 0.5);
+  color: #f3e8ff;
+}
+
+.dock-ai-option-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  width: 100%;
+  padding: 11px 14px;
+  border-radius: 12px;
+  background: rgba(20, 16, 32, 0.92) !important;
+  border: 1px solid rgba(139, 92, 246, 0.28) !important;
+  color: #f1f5f9 !important;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.dock-ai-option-btn:hover {
+  background: rgba(139, 92, 246, 0.22) !important;
+  border-color: rgba(192, 132, 252, 0.6) !important;
+  transform: translateX(3px);
+  box-shadow: 0 4px 16px rgba(139, 92, 246, 0.25);
+}
+
+.dock-ai-option-btn .option-title {
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: #ffffff !important;
+  margin-bottom: 3px;
+  line-height: 1.3;
+}
+
+.dock-ai-option-btn .option-desc {
+  font-size: 0.74rem;
+  color: #c4b5fd !important;
+  line-height: 1.35;
+}
+
+/* Destaque Fluorescente no Texto (Marca-Texto ao Vivo) */
+mark.reader-live-highlight {
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 4px;
+  transition: background-color 0.2s ease, opacity 0.2s ease;
+}
+
+mark.reader-live-highlight.tech {
+  background-color: rgba(245, 158, 11, 0.32);
+  color: inherit;
+  border-bottom: 2px solid #f59e0b;
+}
+
+mark.reader-live-highlight.tech:hover {
+  background-color: rgba(245, 158, 11, 0.5);
+}
+
+mark.reader-live-highlight.alomyr {
+  background-color: rgba(168, 85, 247, 0.32);
+  color: inherit;
+  border-bottom: 2px solid #a855f7;
+}
+
+mark.reader-live-highlight.alomyr:hover {
+  background-color: rgba(168, 85, 247, 0.5);
+}
+
+/* Modo Foco / Zen */
+body.blog-zen-mode .site-header,
+body.blog-zen-mode .blog-ambient-glow,
+body.blog-zen-mode .reader-top-nav-row,
+body.blog-zen-mode .reader-related-project-box,
+body.blog-zen-mode .reader-alomyr-banner,
+body.blog-zen-mode .reader-footer-nav {
+  opacity: 0.15;
+  transition: opacity 0.4s ease;
+}
+
+body.blog-zen-mode .site-header:hover,
+body.blog-zen-mode .reader-top-nav-row:hover {
+  opacity: 1;
+}
+
+/* Sheet Drag Handle (Discreet native mobile indicator) */
+.sheet-drag-handle {
+  display: none;
+  width: 40px;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 4px;
+  margin: 0 auto 14px;
+}
+
+/* Backdrop Overlay para Mobile Bottom Sheet */
+.dock-backdrop-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  z-index: 1001;
+  pointer-events: auto;
+  animation: backdropFadeIn 0.25s ease-out;
+}
+
+@keyframes backdropFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUpSheet {
+  from {
+    transform: translateY(100%);
+    opacity: 0.8;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Responsive Dock: Experiência Mobile Nativa */
+@media (max-width: 768px) {
+  .blog-reader-dock-container {
+    bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+    width: 100%;
+    padding: 0 16px;
+  }
+
+  .dock-backdrop-overlay {
+    display: block;
+  }
+
+  .sheet-drag-handle {
+    display: block;
+  }
+
+  .reader-dock-pill {
+    padding: 6px 10px;
+    max-width: calc(100vw - 28px);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+  }
+
+  .reader-dock-pill::-webkit-scrollbar {
+    display: none;
+  }
+
+  .dock-btn-label {
+    display: none;
+  }
+
+  .dock-action-btn {
+    padding: 8px 10px;
+    min-height: 40px;
+    min-width: 40px;
+    justify-content: center;
+  }
+
+  .dock-action-btn:active {
+    transform: scale(0.92);
+  }
+
+  /* Transformação em Bottom Sheet Nativo no Mobile */
+  .dock-notes-popover,
+  .dock-ai-popover {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    max-width: 100vw;
+    margin-bottom: 0;
+    border-radius: 24px 24px 0 0;
+    padding: 16px 20px calc(24px + env(safe-area-inset-bottom, 16px));
+    box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.9);
+    border-left: none;
+    border-right: none;
+    border-bottom: none;
+    z-index: 1002;
+    animation: slideUpSheet 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .dock-ai-options {
+    max-height: 52vh;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 8px;
+  }
+}
+
+/* ==========================================================================
+   ESTILOS DE IMPRESSÃO EDITORIAL (REVISTA / JORNAL LIMPO)
+   ========================================================================== */
+@media print {
+  body {
+    background: #ffffff !important;
+    color: #111827 !important;
+  }
+
+  .site-header,
+  .blog-ambient-glow,
+  .blog-reader-dock-container,
+  .blog-floating-back-to-top,
+  .reader-top-nav-row,
+  .reader-actions-group,
+  .reader-alomyr-banner,
+  .reader-footer-nav,
+  .blog-nav-left,
+  .blog-nav-right {
+    display: none !important;
+  }
+
+  .blog-page-root {
+    background: #ffffff !important;
+  }
+
+  .blog-reader-view {
+    max-width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    color: #111827 !important;
+  }
+
+  .reader-title {
+    color: #111827 !important;
+    font-size: 24pt !important;
+    margin-bottom: 12pt !important;
+  }
+
+  .reader-lead-summary {
+    color: #4b5563 !important;
+    font-size: 13pt !important;
+    border-left: 3pt solid #8b5cf6 !important;
+    padding-left: 10pt !important;
+  }
+
+  .blog-markdown-content {
+    color: #111827 !important;
+    font-size: 11pt !important;
+    line-height: 1.6 !important;
+  }
+
+  .blog-markdown-content h2,
+  .blog-markdown-content h3 {
+    color: #111827 !important;
+    page-break-after: avoid;
+  }
+
+  .blog-code-block {
+    background: #f3f4f6 !important;
+    border: 1pt solid #e5e7eb !important;
+    color: #1f2937 !important;
+    page-break-inside: avoid;
+  }
+
+  mark.reader-live-highlight {
+    background-color: #fef08a !important;
+    color: #000000 !important;
+  }
+}

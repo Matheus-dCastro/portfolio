@@ -2,10 +2,10 @@ import { useState, useEffect } from "react";
 import Home from "./Home";
 import Hobbies from "./Hobbies";
 import Links from "./Links";
-import AdminDraft from "./components/AdminDraft";
-import ViewDraft from "./components/ViewDraft";
-import OrderDraft from "./components/OrderDraft";
-import LoginDraft from "./components/LoginDraft";
+import AdminDashboard from "./components/AdminDashboard";
+import ProjectDetail from "./components/ProjectDetail";
+import OrderManager from "./components/OrderManager";
+import Login from "./components/Login";
 import NotFound from "./components/NotFound";
 import BlogGateway from "./components/BlogGateway";
 import BlogPage from "./components/BlogPage";
@@ -410,7 +410,7 @@ function App() {
             window.scrollTo({ top: 0, behavior: "smooth" });
           }}
         />
-        <ChatWidget />
+        <ChatWidget showFloatingButton={false} />
       </>
     );
   }
@@ -430,7 +430,7 @@ function App() {
           onSwitchChannel={(newChan) => handleSelectBlogChannel(newChan)}
           onOpenProject={handleOpenProject}
         />
-        <ChatWidget />
+        <ChatWidget showFloatingButton={false} />
       </>
     );
   }
@@ -450,7 +450,7 @@ function App() {
           onSwitchChannel={(newChan) => handleSelectBlogChannel(newChan)}
           onOpenProject={handleOpenProject}
         />
-        <ChatWidget />
+        <ChatWidget showFloatingButton={false} />
       </>
     );
   }
@@ -463,7 +463,7 @@ function App() {
           onOpenThought={handleOpenProject}
           onNavigateToBlog={handleNavigateToBlogGateway}
         />
-        <ChatWidget />
+        <ChatWidget showFloatingButton={true} />
       </>
     );
   }
@@ -474,7 +474,7 @@ function App() {
 
   if (currentPage === "login") {
     return (
-      <LoginDraft
+      <Login
         onBackToHome={handleBackToHome}
         onNavigateToAdmin={() => {
           setCurrentPage("admin");
@@ -486,9 +486,17 @@ function App() {
 
   if (currentPage === "admin") {
     // Bloqueia acesso a usuários não autenticados ou não autorizados
-    if (authChecked && (!currentUser || !isAuthorizedAdmin(currentUser))) {
+    if (!authChecked) {
       return (
-        <LoginDraft
+        <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#0a0b10", color: "#a5b4fc" }}>
+          <p>Verificando credenciais de acesso...</p>
+        </div>
+      );
+    }
+
+    if (!currentUser || !isAuthorizedAdmin(currentUser)) {
+      return (
+        <Login
           onBackToHome={handleBackToHome}
           onNavigateToAdmin={() => {
             setCurrentPage("admin");
@@ -499,7 +507,7 @@ function App() {
     }
 
     return (
-      <AdminDraft
+      <AdminDashboard
         onBackToHome={handleBackToHome}
         onOpenProjectDetail={handleOpenProject}
         onNavigateToOrder={() => {
@@ -511,9 +519,17 @@ function App() {
   }
 
   if (currentPage === "order-draft") {
-    if (authChecked && (!currentUser || !isAuthorizedAdmin(currentUser))) {
+    if (!authChecked) {
       return (
-        <LoginDraft
+        <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#0a0b10", color: "#a5b4fc" }}>
+          <p>Verificando credenciais de acesso...</p>
+        </div>
+      );
+    }
+
+    if (!currentUser || !isAuthorizedAdmin(currentUser)) {
+      return (
+        <Login
           onBackToHome={handleBackToHome}
           onNavigateToAdmin={() => {
             setCurrentPage("admin");
@@ -524,7 +540,7 @@ function App() {
     }
 
     return (
-      <OrderDraft
+      <OrderManager
         onBackToHome={handleBackToHome}
         onOpenProjectDetail={handleOpenProject}
         onNavigateToAdmin={() => {
@@ -538,7 +554,7 @@ function App() {
   if (currentPage === "view-draft" || currentPage === "project-detail") {
     return (
       <>
-        <ViewDraft
+        <ProjectDetail
           project={selectedProject}
           onBackToHome={handleBackToHome}
           onSelectProject={(proj) => {
@@ -551,7 +567,7 @@ function App() {
           }}
           onNavigateToBlogPost={handleOpenBlogPost}
         />
-        <ChatWidget />
+        <ChatWidget showFloatingButton={false} />
       </>
     );
   }
@@ -576,7 +592,7 @@ function App() {
             }, 150);
           }}
         />
-        <ChatWidget />
+        <ChatWidget showFloatingButton={false} />
       </>
     );
   }
@@ -596,7 +612,7 @@ function App() {
         onNavigateToBlog={handleNavigateToBlogGateway}
         onNavigateToBlogPost={handleOpenBlogPost}
       />
-      <ChatWidget />
+      <ChatWidget showFloatingButton={true} />
     </>
   );
 }

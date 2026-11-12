@@ -12,13 +12,10 @@ import {
   getStoredCvConfig,
   saveCvConfig,
   DEFAULT_CV_CONFIG,
-  getStoredCustomHobby,
   getStoredHobbies,
-  saveHobbies,
   DEFAULT_HOBBIES_LIST,
   convertGoogleDocsToEmbedUrl,
-  getStoredProfileConfig,
-  saveProfileConfig
+  getStoredProfileConfig
 } from "../data/projectsData";
 import {
   fetchWorks,
@@ -28,7 +25,6 @@ import {
   fetchDrawings,
   fetchCvConfig,
   fetchAgentConfig,
-  fetchCustomHobby,
   fetchHobbies,
   persistHobbies,
   removeHobby,
@@ -50,7 +46,6 @@ import {
   persistProfileConfig,
   fetchProfileConfig,
   persistAgentConfig,
-  persistCustomHobby,
   persistBatchOrder,
   fetchBlogPosts,
   persistBlogPost,
@@ -65,19 +60,19 @@ import {
   getStoredNotFoundConfig,
   DEFAULT_NOTFOUND_CONFIG,
   getCurrentUser,
-  logoutUser
+  logoutUser,
+  isAuthorizedAdmin
 } from "../lib/supabaseService";
 import {
   getStoredBlogPosts,
-  getYoutubeEmbedUrl,
-  BLOG_CHANNELS
+  getYoutubeEmbedUrl
 } from "../data/blogData";
 import { isSupabaseConfigured } from "../lib/supabaseClient";
 import { DOCUMENT_TEMPLATES } from "../data/templatesData";
-import { sendChatMessage, getGroqApiKey } from "../lib/llmService";
+import { sendChatMessage } from "../lib/llmService";
 import NotFound from "./NotFound";
 import BlogGateway from "./BlogGateway";
-import "./AdminDraft.css";
+import "./AdminDashboard.css";
 
 const generateUniqueId = () => `item-${Date.now()}`;
 
@@ -98,8 +93,16 @@ Seu objetivo é orientar visitantes, recrutadores, pesquisadores e parceiros té
 4. PROIBIDO ALUCINAR: Nunca invente experiências ou projetos que não constem no portfólio.
 5. LINKS E REFERÊNCIAS: Sempre que falar de um projeto, direcione o usuário para o botão "Saber mais" ou para o GitHub oficial: https://github.com/Matheus-dCastro`;
 
-export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNavigateToOrder }) {
+export default function AdminDashboard({ onBackToHome, onOpenProjectDetail, onNavigateToOrder }) {
+  const getCategoryFromTab = (tab) => {
+    if (["projects", "articles", "thoughts", "blog"].includes(tab)) return "content";
+    if (["experiences", "cv", "drawings", "customHobby"].includes(tab)) return "media";
+    return "system";
+  };
+
   const [activeTab, setActiveTab] = useState("projects"); // 'projects' | 'articles' | 'thoughts' | 'agent'
+  const [activeCategory, setActiveCategory] = useState(() => getCategoryFromTab("projects"));
+  const [toastObj, setToastObj] = useState(null);
   const [items, setItems] = useState(() => getStoredProjects());
 
   const initialItem = items.length > 0 ? items[0] : null;
@@ -107,7 +110,6 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
   const [selectedId, setSelectedId] = useState(() => initialItem?.id || null);
   const [viewMode, setViewMode] = useState("split"); // 'editor' | 'split' | 'preview'
   const [selectedTemplate, setSelectedTemplate] = useState("");
-  const [notification, setNotification] = useState("");
   const [showShortcutsModal, setShowShortcutsModal] = useState(false);
   const [showRelationModal, setShowRelationModal] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -159,9 +161,9 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
   const [agentTemperature, setAgentTemperature] = useState(0.3);
   const [agentMaxTokens, setAgentMaxTokens] = useState(800);
   const [agentGuardrailsActive, setAgentGuardrailsActive] = useState(true);
-  const [agentApiKey, setAgentApiKey] = useState(() => getGroqApiKey() || "");
+  const [agentApiKey, setAgentApiKey] = useState("");
   const [showApiKey, setShowApiKey] = useState(false);
-  const [hasSavedApiKey, setHasSavedApiKey] = useState(() => Boolean(getGroqApiKey()));
+  const [hasSavedApiKey, setHasSavedApiKey] = useState(false);
   const [testChatMessage, setTestChatMessage] = useState("");
   const [isChatLoading, setIsChatLoading] = useState(false);
   const [chatMessages, setChatMessages] = useState([
@@ -249,6 +251,7 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
   const blogGalleryInputRef = useRef(null);
 
   const [currentUser, setCurrentUser] = useState(null);
+  const [isVerifying, setIsVerifying] = useState(true);
   const [profilePhotoUrl, setProfilePhotoUrl] = useState(() => getStoredProfileConfig()?.photoUrl || "");
   const [isUploadingProfilePhoto, setIsUploadingProfilePhoto] = useState(false);
   const profilePhotoInputRef = useRef(null);
@@ -296,7 +299,14 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
 
   useEffect(() => {
     getCurrentUser().then((u) => {
-      if (u) setCurrentUser(u);
+      if (!u || !isAuthorizedAdmin(u)) {
+        if (typeof window !== "undefined") {
+          window.location.replace("/login");
+        }
+      } else {
+        setCurrentUser(u);
+      }
+      setIsVerifying(false);
     });
   }, []);
 
@@ -397,8 +407,6 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
         if (cfg?.hasApiKey) setHasSavedApiKey(true);
         if (cfg?.groqApiKey) {
           setAgentApiKey(cfg.groqApiKey);
-        } else if (getGroqApiKey()) {
-          setAgentApiKey(getGroqApiKey());
         }
       });
     } else if (activeTab === "customHobby") {
@@ -431,13 +439,40 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
     await logoutUser();
     setCurrentUser(null);
     showToast("Você encerrou a sessão de administrador.");
+    if (typeof window !== "undefined") {
+      window.location.replace("/login");
+    }
   };
 
   const textareaRef = useRef(null);
 
-  const showToast = (msg) => {
-    setNotification(msg);
-    setTimeout(() => setNotification(""), 3500);
+  const showToast = (msg, type = "success") => {
+    const isError =
+      type === "error" ||
+      (typeof msg === "string" &&
+        (msg.toLowerCase().includes("erro") ||
+          msg.toLowerCase().includes("falha") ||
+          msg.toLowerCase().includes("aviso")));
+    const resolvedType = isError ? "error" : type;
+    setToastObj({
+      message: typeof msg === "string" ? msg : String(msg),
+      type: resolvedType,
+      id: Date.now()
+    });
+    setTimeout(() => {
+      setToastObj((prev) => (prev?.message === msg ? null : prev));
+    }, 4000);
+  };
+
+  const handleCategorySelect = (catKey) => {
+    setActiveCategory(catKey);
+    if (catKey === "content" && !["projects", "articles", "thoughts", "blog"].includes(activeTab)) {
+      handleTabChange("projects");
+    } else if (catKey === "media" && !["experiences", "cv", "drawings", "customHobby"].includes(activeTab)) {
+      handleTabChange("experiences");
+    } else if (catKey === "system" && !["agent", "gateway", "notfound"].includes(activeTab)) {
+      handleTabChange("agent");
+    }
   };
 
   // Blog Handlers
@@ -692,6 +727,7 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
 
   const handleTabChange = (tab) => {
     setActiveTab(tab);
+    setActiveCategory(getCategoryFromTab(tab));
     if (tab === "agent" || tab === "cv" || tab === "customHobby" || tab === "notfound" || tab === "gateway") return;
     if (tab === "blog") {
       if (blogPosts.length > 0 && !selectedBlogId) {
@@ -1762,168 +1798,271 @@ DIRETRIZ MÁXIMA DE CONCISÃO:
     updatedAt: "Recém Editado"
   };
 
+  if (isVerifying || !currentUser || !isAuthorizedAdmin(currentUser)) {
+    return (
+      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#0a0b10", color: "#a5b4fc" }}>
+        <p>Verificando credenciais de acesso...</p>
+      </div>
+    );
+  }
+
   return (
     <div className="admin-editor-layout">
-      {/* Toast Notification (Bottom positioned, never overlaps navigation) */}
-      {notification && (
-        <div className="admin-toast">
-          <span>{notification}</span>
+      {/* Toast Notification Dinâmico Glassmorphic */}
+      {toastObj && (
+        <div className={`admin-toast ${toastObj.type || "success"}`}>
+          <div className="toast-content-row">
+            {toastObj.type === "error" ? (
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#f87171" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+              </svg>
+            ) : (
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+              </svg>
+            )}
+            <span>{toastObj.message}</span>
+          </div>
+          <button
+            type="button"
+            className="toast-close-btn"
+            onClick={() => setToastObj(null)}
+            aria-label="Fechar notificação"
+          >
+            ✕
+          </button>
         </div>
       )}
 
-      {/* Top Header Navigation */}
+      {/* Top Header Navigation com Categorias Elegantes e Sem Rolagem Excessiva */}
       <nav className="admin-top-nav">
-        <div className="nav-left">
-          <div className="admin-badge" title="Status de persistência do banco">
-            {isSupabaseConfigured ? "Supabase Cloud" : "Modo Offline"}
-          </div>
-          {currentUser ? (
-            <div style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "12px", color: "#8b949e", background: "#161b22", padding: "4px 10px", borderRadius: "6px", border: "1px solid #30363d" }}>
-              <span>{currentUser.email}</span>
-              <button
-                type="button"
-                onClick={handleLogout}
+        <div className="admin-nav-primary-row">
+          <div className="nav-left">
+            <div className="admin-badge" title="Status de persistência do banco">
+              {isSupabaseConfigured ? "Supabase Cloud" : "Modo Offline"}
+            </div>
+            {currentUser ? (
+              <div style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "12px", color: "#8b949e", background: "#161b22", padding: "4px 10px", borderRadius: "6px", border: "1px solid #30363d" }}>
+                <span>{currentUser.email}</span>
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  style={{
+                    background: "#21262d",
+                    border: "1px solid #484f58",
+                    color: "#f85149",
+                    borderRadius: "4px",
+                    padding: "2px 6px",
+                    cursor: "pointer",
+                    fontSize: "11px"
+                  }}
+                >
+                  Sair
+                </button>
+              </div>
+            ) : (
+              <a
+                href="/l0g1n"
                 style={{
-                  background: "#21262d",
-                  border: "1px solid #484f58",
-                  color: "#f85149",
-                  borderRadius: "4px",
-                  padding: "2px 6px",
-                  cursor: "pointer",
-                  fontSize: "11px"
+                  fontSize: "12px",
+                  color: "#58a6ff",
+                  textDecoration: "none",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "4px",
+                  background: "#161b22",
+                  padding: "4px 10px",
+                  borderRadius: "6px",
+                  border: "1px solid #30363d"
                 }}
               >
-                Sair
+                Login Supabase
+              </a>
+            )}
+
+            {/* SELETOR DE CATEGORIAS PRINCIPAIS */}
+            <div className="admin-category-pills">
+              <button
+                type="button"
+                className={`admin-cat-pill ${activeCategory === "content" ? "active" : ""}`}
+                onClick={() => handleCategorySelect("content")}
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                  <polyline points="14 2 14 8 20 8"></polyline>
+                  <line x1="16" y1="13" x2="8" y2="13"></line>
+                  <line x1="16" y1="17" x2="8" y2="17"></line>
+                </svg>
+                <span>Conteúdo &amp; Obras</span>
+              </button>
+
+              <button
+                type="button"
+                className={`admin-cat-pill ${activeCategory === "media" ? "active" : ""}`}
+                onClick={() => handleCategorySelect("media")}
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                  <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                  <polyline points="21 15 16 10 5 21"></polyline>
+                </svg>
+                <span>Mídia &amp; Hobbies</span>
+              </button>
+
+              <button
+                type="button"
+                className={`admin-cat-pill ${activeCategory === "system" ? "active" : ""}`}
+                onClick={() => handleCategorySelect("system")}
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="3"></circle>
+                  <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                </svg>
+                <span>Sistema &amp; IA</span>
               </button>
             </div>
-          ) : (
-            <a
-              href="/l0g1n"
-              style={{
-                fontSize: "12px",
-                color: "#58a6ff",
-                textDecoration: "none",
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "4px",
-                background: "#161b22",
-                padding: "4px 10px",
-                borderRadius: "6px",
-                border: "1px solid #30363d"
+          </div>
+
+          <div className="nav-right">
+            <button
+              type="button"
+              className="order-manager-btn"
+              onClick={() => {
+                if (onNavigateToOrder) onNavigateToOrder();
+                else window.location.href = "/draft-order";
               }}
+              title="Acessar painel visual para reordenar a sequência de exibição dos projetos no portfólio"
             >
-              Login Supabase
-            </a>
-          )}
-          <div className="category-tabs">
-            <button
-              type="button"
-              className={`cat-btn ${activeTab === "projects" ? "active" : ""}`}
-              onClick={() => handleTabChange("projects")}
-            >
-              Projetos
+              Organizar Ordem ↗
             </button>
             <button
               type="button"
-              className={`cat-btn ${activeTab === "articles" ? "active" : ""}`}
-              onClick={() => handleTabChange("articles")}
+              className="preview-public-btn"
+              onClick={() => {
+                if (onOpenProjectDetail) {
+                  onOpenProjectDetail(currentItemObject);
+                } else {
+                  window.location.href = `/draft-view?id=${selectedId || ""}`;
+                }
+              }}
+              title="Abrir a página pública detalhada deste item em uma nova aba"
             >
-              Artigos
+              Visualizar no Site ↗
             </button>
             <button
               type="button"
-              className={`cat-btn ${activeTab === "thoughts" ? "active" : ""}`}
-              onClick={() => handleTabChange("thoughts")}
+              className="back-site-btn"
+              onClick={onBackToHome}
+              title="Sair do editor e retornar ao portfólio principal"
             >
-              Pensamentos
-            </button>
-            <button
-              type="button"
-              className={`cat-btn ${activeTab === "experiences" ? "active" : ""}`}
-              onClick={() => handleTabChange("experiences")}
-            >
-              Experiências
-            </button>
-            <button
-              type="button"
-              className={`cat-btn ${activeTab === "cv" ? "active" : ""}`}
-              onClick={() => handleTabChange("cv")}
-            >
-              Currículo & Perfil
-            </button>
-            <button
-              type="button"
-              className={`cat-btn ${activeTab === "drawings" ? "active" : ""}`}
-              onClick={() => handleTabChange("drawings")}
-            >
-            Desenhos
-            </button>
-            <button
-              type="button"
-              className={`cat-btn ${activeTab === "customHobby" ? "active" : ""}`}
-              onClick={() => handleTabChange("customHobby")}
-            >
-              Interesses ({hobbiesList.length} Cards)
-            </button>
-            <button
-              type="button"
-              className={`cat-btn agent-tab ${activeTab === "agent" ? "active" : ""}`}
-              onClick={() => handleTabChange("agent")}
-            >
-              Assistente IA (Alomyr)
-            </button>
-            <button
-              type="button"
-              className={`cat-btn blog-tab ${activeTab === "blog" ? "active" : ""}`}
-              onClick={() => handleTabChange("blog")}
-              style={{ color: activeTab === "blog" ? "#ffffff" : "#c4b5fd" }}
-            >
-              📝 Blog &amp; Lab
-            </button>
-            <button
-              type="button"
-              className={`cat-btn gateway-tab ${activeTab === "gateway" ? "active" : ""}`}
-              onClick={() => handleTabChange("gateway")}
-              style={{ color: activeTab === "gateway" ? "#ffffff" : "#c4b5fd" }}
-            >
-              🌐 Gateway (/blog/?)
-            </button>
-            <button
-              type="button"
-              className={`cat-btn notfound-tab ${activeTab === "notfound" ? "active" : ""}`}
-              onClick={() => handleTabChange("notfound")}
-              style={{ color: activeTab === "notfound" ? "#ffffff" : "#fca5a5" }}
-            >
-              🚀 Tela 404
+              Voltar ao Portfólio
             </button>
           </div>
         </div>
 
-        <div className="nav-right">
-          <button
-            type="button"
-            className="order-manager-btn"
-            onClick={() => {
-              if (onNavigateToOrder) onNavigateToOrder();
-              else window.location.href = "/draft-order";
-            }}
-            title="Ir para o organizador visual em cards das 3 sessões"
-          >
-            Organizar Vitrine por Tipo
-          </button>
-          {onOpenProjectDetail && activeTab !== "agent" && activeTab !== "cv" && activeTab !== "drawings" && activeTab !== "customHobby" && activeTab !== "blog" && activeTab !== "gateway" && activeTab !== "notfound" && (
-            <button
-              type="button"
-              className="preview-public-btn"
-              onClick={() => onOpenProjectDetail(currentItemObject)}
-              title="Abrir como o visitante vê na tela 'Saber Mais'"
-            >
-              Prévia Pública (Saber Mais)
-            </button>
+        {/* SUB-ABAS DA CATEGORIA SELECIONADA (SEM ROLAGEM HORIZONTAL DENSA) */}
+        <div className="admin-subtabs-row">
+          {activeCategory === "content" && (
+            <div className="category-subtabs">
+              <button
+                type="button"
+                className={`cat-btn ${activeTab === "projects" ? "active" : ""}`}
+                onClick={() => handleTabChange("projects")}
+              >
+                Projetos
+                <span className="cat-count-badge">{getStoredProjects().length}</span>
+              </button>
+              <button
+                type="button"
+                className={`cat-btn ${activeTab === "articles" ? "active" : ""}`}
+                onClick={() => handleTabChange("articles")}
+              >
+                Artigos
+                <span className="cat-count-badge">{getStoredArticles().length}</span>
+              </button>
+              <button
+                type="button"
+                className={`cat-btn ${activeTab === "thoughts" ? "active" : ""}`}
+                onClick={() => handleTabChange("thoughts")}
+              >
+                Pensamentos
+                <span className="cat-count-badge">{getStoredThoughts().length}</span>
+              </button>
+              <button
+                type="button"
+                className={`cat-btn blog-tab ${activeTab === "blog" ? "active" : ""}`}
+                onClick={() => handleTabChange("blog")}
+              >
+                Blog &amp; Lab
+                <span className="cat-count-badge">{blogPosts.length}</span>
+              </button>
+            </div>
           )}
-          <button type="button" className="back-site-btn" onClick={onBackToHome}>
-            ← Voltar ao Portfólio
-          </button>
+
+          {activeCategory === "media" && (
+            <div className="category-subtabs">
+              <button
+                type="button"
+                className={`cat-btn ${activeTab === "experiences" ? "active" : ""}`}
+                onClick={() => handleTabChange("experiences")}
+              >
+                Experiências
+                <span className="cat-count-badge">{getStoredExperiences().length}</span>
+              </button>
+              <button
+                type="button"
+                className={`cat-btn ${activeTab === "cv" ? "active" : ""}`}
+                onClick={() => handleTabChange("cv")}
+              >
+                Currículo &amp; Perfil
+              </button>
+              <button
+                type="button"
+                className={`cat-btn ${activeTab === "drawings" ? "active" : ""}`}
+                onClick={() => handleTabChange("drawings")}
+              >
+                Desenhos &amp; Arte
+                <span className="cat-count-badge">{getStoredDrawings().length}</span>
+              </button>
+              <button
+                type="button"
+                className={`cat-btn ${activeTab === "customHobby" ? "active" : ""}`}
+                onClick={() => handleTabChange("customHobby")}
+              >
+                Interesses
+                <span className="cat-count-badge">{hobbiesList.length}</span>
+              </button>
+            </div>
+          )}
+
+          {activeCategory === "system" && (
+            <div className="category-subtabs">
+              <button
+                type="button"
+                className={`cat-btn agent-tab ${activeTab === "agent" ? "active" : ""}`}
+                onClick={() => handleTabChange("agent")}
+              >
+                Assistente IA (Alomyr)
+              </button>
+              <button
+                type="button"
+                className={`cat-btn gateway-tab ${activeTab === "gateway" ? "active" : ""}`}
+                onClick={() => handleTabChange("gateway")}
+              >
+                Gateway (/blog/?)
+              </button>
+              <button
+                type="button"
+                className={`cat-btn notfound-tab ${activeTab === "notfound" ? "active" : ""}`}
+                onClick={() => handleTabChange("notfound")}
+              >
+                Tela 404
+              </button>
+            </div>
+          )}
         </div>
       </nav>
 
@@ -2048,11 +2187,11 @@ DIRETRIZ MÁXIMA DE CONCISÃO:
                 <div className="finetune-control-item" style={{ gridColumn: "1 / -1", background: "rgba(139, 92, 246, 0.05)", padding: "12px", borderRadius: "10px", border: "1px solid rgba(139, 92, 246, 0.15)" }}>
                   <label htmlFor="agent-api-key" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
                     <span style={{ color: "#e2e8f0", fontWeight: "600", fontSize: "0.82rem" }}>
-                      🔑 Chave Groq API (Armazenada com Segurança no Supabase Cloud):
+                      Chave Groq API (Armazenada com Segurança no Supabase Cloud):
                     </span>
                     {hasSavedApiKey && (
                       <span style={{ color: "#34d399", fontSize: "0.72rem", fontWeight: "600", background: "rgba(16, 185, 129, 0.15)", padding: "2px 8px", borderRadius: "4px" }}>
-                        ✓ Chave Vinculada na Nuvem
+                        Chave Vinculada na Nuvem
                       </span>
                     )}
                   </label>
@@ -2109,7 +2248,7 @@ DIRETRIZ MÁXIMA DE CONCISÃO:
                     </button>
                   </div>
                   <span style={{ fontSize: "0.7rem", color: "#94a3b8", marginTop: "6px", display: "block" }}>
-                    🔒 As chaves cadastradas aqui são gravadas no Supabase Cloud e injetadas na Edge Function sem expor nada no cliente público.
+                    As chaves cadastradas aqui são gravadas no Supabase Cloud e injetadas na Edge Function sem expor nada no cliente público.
                   </span>
                 </div>
 
@@ -2532,7 +2671,7 @@ DIRETRIZ MÁXIMA DE CONCISÃO:
                         whiteSpace: "nowrap"
                       }}
                     >
-                      {isUploadingHobbyPhoto ? "Enviando..." : "📁 Upload Foto"}
+                      {isUploadingHobbyPhoto ? "Enviando..." : "Upload Foto"}
                       <input
                         ref={hobbyPhotoInputRef}
                         type="file"
@@ -2572,7 +2711,7 @@ DIRETRIZ MÁXIMA DE CONCISÃO:
                         boxShadow: "0 4px 14px rgba(139, 92, 246, 0.4)"
                       }}
                     >
-                      💾 Salvar Todos os Interesses ({hobbiesList.length} Cards)
+                      Salvar Todos os Interesses ({hobbiesList.length} Cards)
                     </button>
 
                     <button
@@ -2589,7 +2728,7 @@ DIRETRIZ MÁXIMA DE CONCISÃO:
                         fontSize: "0.85rem"
                       }}
                     >
-                      ↺ Restaurar Padrões
+                      Restaurar Padrões
                     </button>
                   </div>
 
@@ -2608,7 +2747,7 @@ DIRETRIZ MÁXIMA DE CONCISÃO:
                         fontSize: "0.85rem"
                       }}
                     >
-                      🗑️ Excluir Este Card
+                      Excluir Este Card
                     </button>
                   )}
                 </div>
@@ -3226,7 +3365,7 @@ DIRETRIZ MÁXIMA DE CONCISÃO:
                         transition: "all 0.2s ease"
                       }}
                     >
-                      <span>🎨</span> Organizar em Grade (Drag &amp; Drop) ↗
+                      Organizar em Grade (Drag &amp; Drop) ↗
                     </button>
                   </div>
                   {items.map((drawing, idx) => {
@@ -3778,7 +3917,9 @@ DIRETRIZ MÁXIMA DE CONCISÃO:
                                 flexShrink: 0
                               }}
                             >
-                              {isTechChan ? "🧠" : "🎨"}
+                              <span style={{ fontSize: "11px", fontWeight: "700", color: "#fff" }}>
+                                {isTechChan ? "ML" : "ART"}
+                              </span>
                             </div>
                           )}
                           <div style={{ minWidth: 0, flex: 1 }}>
@@ -3789,15 +3930,15 @@ DIRETRIZ MÁXIMA DE CONCISÃO:
                                   fontWeight: "700",
                                   padding: "2px 5px",
                                   borderRadius: "4px",
-                                  background: isTechChan ? "rgba(6, 182, 212, 0.2)" : "rgba(139, 92, 246, 0.2)",
-                                  color: isTechChan ? "#38bdf8" : "#c4b5fd"
+                                  background: isTechChan ? "rgba(139, 92, 246, 0.2)" : "rgba(168, 85, 247, 0.2)",
+                                  color: isTechChan ? "#c084fc" : "#e9d5ff"
                                 }}
                               >
                                 {isTechChan ? "TECH" : "ALOMYR"}
                               </span>
                               {post.youtubeUrl && <span style={{ fontSize: "10px" }}>▶</span>}
                               {Array.isArray(post.galleryImages) && post.galleryImages.length > 0 && (
-                                <span style={{ fontSize: "10px" }}>🖼</span>
+                                <span style={{ fontSize: "10px", color: "#c4b5fd" }}>Galeria</span>
                               )}
                               <span style={{ fontSize: "10px", color: "#64748b" }}>{post.publishedAt}</span>
                             </div>
@@ -3883,9 +4024,9 @@ DIRETRIZ MÁXIMA DE CONCISÃO:
                     type="button"
                     className="save-btn"
                     onClick={handleSaveBlogPost}
-                    style={{ padding: "8px 22px", borderRadius: "8px", fontWeight: "700", cursor: "pointer", background: blogChannel === "tech" ? "#0284c7" : "#7c3aed" }}
+                    style={{ padding: "8px 22px", borderRadius: "8px", fontWeight: "700", cursor: "pointer", background: blogChannel === "tech" ? "#6d28d9" : "#7c3aed" }}
                   >
-                    Salvar Post ✓
+                    Salvar Post
                   </button>
                 </div>
               </div>
@@ -3902,15 +4043,15 @@ DIRETRIZ MÁXIMA DE CONCISÃO:
                       style={{
                         padding: "14px",
                         borderRadius: "10px",
-                        border: blogChannel === "tech" ? "2px solid #0284c7" : "1px solid #30363d",
-                        background: blogChannel === "tech" ? "rgba(2, 132, 199, 0.18)" : "#0d1117",
+                        border: blogChannel === "tech" ? "2px solid #8b5cf6" : "1px solid #30363d",
+                        background: blogChannel === "tech" ? "rgba(139, 92, 246, 0.18)" : "#0d1117",
                         cursor: "pointer",
                         transition: "all 0.2s ease"
                       }}
                     >
                       <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
-                        <span style={{ fontSize: "18px" }}>🧠</span>
-                        <strong style={{ color: blogChannel === "tech" ? "#38bdf8" : "#e2e8f0" }}>
+                        <span style={{ fontSize: "12px", fontWeight: "800", color: "#c084fc", background: "rgba(139, 92, 246, 0.2)", padding: "2px 6px", borderRadius: "4px" }}>ML</span>
+                        <strong style={{ color: blogChannel === "tech" ? "#c084fc" : "#e2e8f0" }}>
                           Blog de Engenharia &amp; IA (/blog)
                         </strong>
                       </div>
@@ -3931,7 +4072,7 @@ DIRETRIZ MÁXIMA DE CONCISÃO:
                       }}
                     >
                       <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
-                        <span style={{ fontSize: "18px" }}>🎨</span>
+                        <span style={{ fontSize: "12px", fontWeight: "800", color: "#e9d5ff", background: "rgba(168, 85, 247, 0.2)", padding: "2px 6px", borderRadius: "4px" }}>ART</span>
                         <strong style={{ color: blogChannel === "alomyr" ? "#c084fc" : "#e2e8f0" }}>
                           Laboratório Alomyr (/blog/alomyr)
                         </strong>
@@ -4128,7 +4269,7 @@ DIRETRIZ MÁXIMA DE CONCISÃO:
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginTop: "14px" }}>
                     <div style={{ background: "rgba(139, 92, 246, 0.08)", padding: "12px 14px", borderRadius: "10px", border: "1px solid rgba(139, 92, 246, 0.25)" }}>
                       <label style={{ display: "block", marginBottom: "4px" }}>
-                        <strong style={{ color: "#c4b5fd", fontSize: "13px" }}>🔗 Vínculo com Projeto do Portfólio</strong>
+                        <strong style={{ color: "#c4b5fd", fontSize: "13px" }}>Vínculo com Projeto do Portfólio</strong>
                       </label>
                       <p style={{ fontSize: "11px", color: "#94a3b8", margin: "0 0 8px" }}>
                         Vincula este post a um projeto prático.
@@ -4148,9 +4289,9 @@ DIRETRIZ MÁXIMA DE CONCISÃO:
                       </select>
                     </div>
 
-                    <div style={{ background: "rgba(6, 182, 212, 0.08)", padding: "12px 14px", borderRadius: "10px", border: "1px solid rgba(6, 182, 212, 0.25)" }}>
+                    <div style={{ background: "rgba(139, 92, 246, 0.08)", padding: "12px 14px", borderRadius: "10px", border: "1px solid rgba(139, 92, 246, 0.25)" }}>
                       <label style={{ display: "block", marginBottom: "4px" }}>
-                        <strong style={{ color: "#38bdf8", fontSize: "13px" }}>📄 Vínculo com Artigo Técnico</strong>
+                        <strong style={{ color: "#c4b5fd", fontSize: "13px" }}>Vínculo com Artigo Técnico</strong>
                       </label>
                       <p style={{ fontSize: "11px", color: "#94a3b8", margin: "0 0 8px" }}>
                         Vincula este post a um artigo acadêmico / conceitual.
@@ -4229,7 +4370,7 @@ DIRETRIZ MÁXIMA DE CONCISÃO:
                         className="drawings-test-url-btn"
                         style={{ whiteSpace: "nowrap" }}
                       >
-                        {isUploadingBlogCover ? "Enviando..." : "Subir Capa 📤"}
+                        {isUploadingBlogCover ? "Enviando..." : "Subir Capa"}
                       </button>
                     </div>
                     {blogCoverImage && (
@@ -4270,7 +4411,7 @@ DIRETRIZ MÁXIMA DE CONCISÃO:
                         disabled={isUploadingBlogGallery}
                         className="drawings-test-url-btn"
                       >
-                        {isUploadingBlogGallery ? "Enviando fotos..." : "+ Subir Fotos para Galeria 📤"}
+                        {isUploadingBlogGallery ? "Enviando fotos..." : "+ Subir Fotos para Galeria"}
                       </button>
                     </div>
                   </div>
@@ -4340,7 +4481,7 @@ DIRETRIZ MÁXIMA DE CONCISÃO:
                 <div className="blog-section-card-title" style={{ justifyContent: "space-between" }}>
                   <div>
                     <span style={{ fontSize: "1.1rem", fontWeight: "700", color: "#fff" }}>
-                      🌐 Configurações de Roteamento da URL <code>/blog/?</code>
+                      Configurações de Roteamento da URL <code>/blog/?</code>
                     </span>
                     <p style={{ margin: "4px 0 0", fontSize: "0.82rem", color: "#94a3b8" }}>
                       Controle o que os visitantes veem ao acessar <code>https://matheusdecastro.com/blog/?</code> ou <code>/blog</code>.
@@ -4353,7 +4494,7 @@ DIRETRIZ MÁXIMA DE CONCISÃO:
                     className="save-btn"
                     style={{ background: "#8b5cf6", padding: "8px 20px", borderRadius: "8px", cursor: "pointer" }}
                   >
-                    {isSavingGatewayConfig ? "Salvando..." : "Salvar Configurações da URL ✓"}
+                    {isSavingGatewayConfig ? "Salvando..." : "Salvar Configurações da URL"}
                   </button>
                 </div>
 
@@ -4478,7 +4619,7 @@ DIRETRIZ MÁXIMA DE CONCISÃO:
             <div className="cv-card-section">
               <div className="cv-section-header">
                 <div>
-                  <h2>🌐 Editor da Tela de Entrada do Blog (/blog/?)</h2>
+                  <h2>Editor da Tela de Entrada do Blog (/blog/?)</h2>
                   <p className="cv-section-subtitle">
                     Personalize todos os textos, badges, avisos, títulos, cards e chips da interface de seleção de canais do blog.
                   </p>
@@ -4534,7 +4675,7 @@ DIRETRIZ MÁXIMA DE CONCISÃO:
                       boxShadow: "0 4px 14px rgba(139, 92, 246, 0.4)"
                     }}
                   >
-                    {isSavingGatewayConfig ? "Salvando..." : "Salvar Gateway ✓"}
+                    {isSavingGatewayConfig ? "Salvando..." : "Salvar Gateway"}
                   </button>
                 </div>
               </div>
@@ -4577,7 +4718,7 @@ DIRETRIZ MÁXIMA DE CONCISÃO:
 
               {/* ROTEAMENTO GERAL */}
               <div className="blog-section-card">
-                <h4 className="blog-section-card-title">⚙️ Roteamento da URL /blog</h4>
+                <h4 className="blog-section-card-title">Roteamento da URL /blog</h4>
                 <div>
                   <label style={{ display: "block", fontSize: "12px", color: "#8b949e", marginBottom: "6px" }}>
                     Comportamento ao carregar /blog ou /blog/?:
@@ -4596,7 +4737,7 @@ DIRETRIZ MÁXIMA DE CONCISÃO:
 
               {/* CABEÇALHO & HERO */}
               <div className="blog-section-card">
-                <h4 className="blog-section-card-title">🌌 Cabeçalho Principal (Hero)</h4>
+                <h4 className="blog-section-card-title">Cabeçalho Principal (Hero)</h4>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: "12px" }}>
                   <div>
                     <label style={{ display: "block", fontSize: "12px", color: "#8b949e", marginBottom: "4px" }}>
@@ -4655,7 +4796,7 @@ DIRETRIZ MÁXIMA DE CONCISÃO:
               {/* BANNER DE REFINAMENTO */}
               <div className="blog-section-card">
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
-                  <h4 className="blog-section-card-title" style={{ margin: 0 }}>🚧 Banner de Refinamento & Prévia Editorial</h4>
+                  <h4 className="blog-section-card-title" style={{ margin: 0 }}>Banner de Refinamento & Prévia Editorial</h4>
                   <label style={{ display: "inline-flex", alignItems: "center", gap: "6px", fontSize: "12px", color: "#c4b5fd", cursor: "pointer" }}>
                     <input
                       type="checkbox"
@@ -4706,8 +4847,8 @@ DIRETRIZ MÁXIMA DE CONCISÃO:
               </div>
 
               {/* CARD 1: CANAL DE ENGENHARIA */}
-              <div className="blog-section-card" style={{ borderLeft: "3px solid #38bdf8" }}>
-                <h4 className="blog-section-card-title">⚡ Card 1: Canal de Engenharia & IA (/blog)</h4>
+              <div className="blog-section-card" style={{ borderLeft: "3px solid #8b5cf6" }}>
+                <h4 className="blog-section-card-title">Card 1: Canal de Engenharia & IA (/blog)</h4>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: "12px" }}>
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
                     <div>
@@ -4801,7 +4942,7 @@ DIRETRIZ MÁXIMA DE CONCISÃO:
 
               {/* CARD 2: LABORATÓRIO ALOMYR */}
               <div className="blog-section-card" style={{ borderLeft: "3px solid #c084fc" }}>
-                <h4 className="blog-section-card-title">🧪 Card 2: Laboratório Alomyr (/blog/alomyr)</h4>
+                <h4 className="blog-section-card-title">Card 2: Laboratório Alomyr (/blog/alomyr)</h4>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: "12px" }}>
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
                     <div>
@@ -4895,7 +5036,7 @@ DIRETRIZ MÁXIMA DE CONCISÃO:
 
               {/* RODAPÉ DO GATEWAY */}
               <div className="blog-section-card">
-                <h4 className="blog-section-card-title">📝 Nota de Rodapé</h4>
+                <h4 className="blog-section-card-title">Nota de Rodapé</h4>
                 <div>
                   <label style={{ display: "block", fontSize: "12px", color: "#8b949e", marginBottom: "4px" }}>
                     Texto do Rodapé ({gatewayActiveLang.toUpperCase()})
@@ -4922,7 +5063,7 @@ DIRETRIZ MÁXIMA DE CONCISÃO:
             <div className="cv-preview-card" style={{ padding: "0", overflow: "hidden", height: "calc(100vh - 120px)", display: "flex", flexDirection: "column" }}>
               <div style={{ background: "#0e1117", padding: "12px 18px", borderBottom: "1px solid #1f2737", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <span style={{ fontSize: "0.82rem", fontWeight: "700", color: "#c4b5fd" }}>
-                  👁️ Prévia em Tempo Real (/blog/?)
+                  Prévia em Tempo Real (/blog/?)
                 </span>
                 <span style={{ fontSize: "0.75rem", color: "#8b949e" }}>
                   Atualiza conforme você digita
@@ -4941,7 +5082,7 @@ DIRETRIZ MÁXIMA DE CONCISÃO:
             <div className="cv-card-section">
               <div className="cv-section-header">
                 <div>
-                  <h2>🚀 Editor da Página 404 (Rota Não Encontrada)</h2>
+                  <h2>Editor da Página 404 (Rota Não Encontrada)</h2>
                   <p className="cv-section-subtitle">
                     Personalize a experiência do usuário quando uma página inexistente for acessada, incluindo o mascote, textos, botões e o prompt que direciona o assistente Alomyr.
                   </p>
@@ -4997,7 +5138,7 @@ DIRETRIZ MÁXIMA DE CONCISÃO:
                       boxShadow: "0 4px 14px rgba(239, 68, 68, 0.4)"
                     }}
                   >
-                    {isSavingNotFoundConfig ? "Salvando..." : "Salvar 404 ✓"}
+                    {isSavingNotFoundConfig ? "Salvando..." : "Salvar 404"}
                   </button>
                 </div>
               </div>
@@ -5018,7 +5159,7 @@ DIRETRIZ MÁXIMA DE CONCISÃO:
                     cursor: "pointer"
                   }}
                 >
-                  🇧🇷 Editar Textos em Português
+                  PT (Português)
                 </button>
                 <button
                   type="button"
@@ -5034,13 +5175,13 @@ DIRETRIZ MÁXIMA DE CONCISÃO:
                     cursor: "pointer"
                   }}
                 >
-                  🇺🇸 Editar Textos em Inglês
+                  EN (English)
                 </button>
               </div>
 
               {/* IDENTIFICAÇÃO & TEXTOS PRINCIPAIS */}
               <div className="blog-section-card">
-                <h4 className="blog-section-card-title">💬 Títulos &amp; Mensagem de Erro</h4>
+                <h4 className="blog-section-card-title">Títulos &amp; Mensagem de Erro</h4>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: "12px" }}>
                   <div style={{ display: "grid", gridTemplateColumns: "120px 1fr", gap: "12px" }}>
                     <div>
@@ -5112,7 +5253,7 @@ DIRETRIZ MÁXIMA DE CONCISÃO:
 
               {/* MASCOTE & IMAGEM */}
               <div className="blog-section-card">
-                <h4 className="blog-section-card-title">🐺 Mascote / Ícone da 404</h4>
+                <h4 className="blog-section-card-title">Mascote / Ícone da 404</h4>
                 <div style={{ display: "flex", gap: "20px", alignItems: "center" }}>
                   <div
                     style={{
@@ -5150,7 +5291,7 @@ DIRETRIZ MÁXIMA DE CONCISÃO:
                         className="btn-upload-file"
                         style={{ padding: "8px 16px", fontSize: "0.82rem" }}
                       >
-                        {isUploadingNotFoundMascot ? "Enviando mascote..." : "📁 Fazer Upload de Imagem"}
+                        {isUploadingNotFoundMascot ? "Enviando mascote..." : "Fazer Upload de Imagem"}
                       </button>
                       <button
                         type="button"
@@ -5181,7 +5322,7 @@ DIRETRIZ MÁXIMA DE CONCISÃO:
 
               {/* BOTÕES DE AÇÃO */}
               <div className="blog-section-card">
-                <h4 className="blog-section-card-title">🔘 Textos dos Botões de Ação</h4>
+                <h4 className="blog-section-card-title">Textos dos Botões de Ação</h4>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: "12px" }}>
                   <div>
                     <label style={{ display: "block", fontSize: "12px", color: "#8b949e", marginBottom: "4px" }}>
@@ -5216,7 +5357,7 @@ DIRETRIZ MÁXIMA DE CONCISÃO:
                           [notfoundActiveLang === "pt" ? "buttonAskAlomyrPt" : "buttonAskAlomyrEn"]: e.target.value
                         })
                       }
-                      placeholder={notfoundActiveLang === "pt" ? "Perguntar ao Alomyr 💬" : "Ask Alomyr 💬"}
+                      placeholder={notfoundActiveLang === "pt" ? "Perguntar ao Alomyr" : "Ask Alomyr"}
                     />
                   </div>
                   <div>
@@ -5242,7 +5383,7 @@ DIRETRIZ MÁXIMA DE CONCISÃO:
 
               {/* PROMPT DO ASSISTENTE ALOMYR */}
               <div className="blog-section-card" style={{ borderLeft: "3px solid #8b5cf6" }}>
-                <h4 className="blog-section-card-title">🤖 Prompt Enviado ao Alomyr ao Clicar</h4>
+                <h4 className="blog-section-card-title">Prompt Enviado ao Alomyr ao Clicar</h4>
                 <p style={{ margin: "0 0 10px", fontSize: "0.8rem", color: "#94a3b8" }}>
                   Quando o visitante clica no botão "Perguntar ao Alomyr" na página 404, esta mensagem é automaticamente pré-carregada no chat para orientá-lo:
                 </p>
@@ -5272,7 +5413,7 @@ DIRETRIZ MÁXIMA DE CONCISÃO:
             <div className="cv-preview-card" style={{ padding: "0", overflow: "hidden", height: "calc(100vh - 120px)", display: "flex", flexDirection: "column" }}>
               <div style={{ background: "#0e1117", padding: "12px 18px", borderBottom: "1px solid #1f2737", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <span style={{ fontSize: "0.82rem", fontWeight: "700", color: "#f87171" }}>
-                  👁️ Prévia em Tempo Real da Tela 404
+                  Prévia em Tempo Real da Tela 404
                 </span>
                 <span style={{ fontSize: "0.75rem", color: "#8b949e" }}>
                   Atualiza conforme você digita

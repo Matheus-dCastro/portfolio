@@ -11,54 +11,37 @@ import {
   getStoredExperiences,
   getStoredCvConfig
 } from "../data/projectsData";
+import { getStoredBlogPosts } from "../data/blogData";
 
-export const PRIMARY_MODEL = "qwen/qwen3.8-27b";
-export const FALLBACK_MODEL = "openai/gpt-oss-20b";
+export const PRIMARY_MODEL = "llama-3.3-70b-versatile";
+export const FALLBACK_MODEL = "llama-3.1-8b-instant";
 
 export function normalizeModelName(name) {
   if (!name || typeof name !== "string") return PRIMARY_MODEL;
   const lower = name.toLowerCase();
-  if (
-    lower.includes("qwen") ||
-    lower.includes("2.5") ||
-    lower.includes("coder") ||
-    lower.includes("32b")
-  ) {
-    return PRIMARY_MODEL;
-  }
-  if (lower.includes("120b")) {
-    return "openai/gpt-oss-120b";
-  }
-  if (
-    lower.includes("llama") ||
-    lower.includes("70b") ||
-    lower.includes("versatile") ||
-    lower.includes("fast") ||
-    lower.includes("20b")
-  ) {
+  if (lower.includes("8b") || lower.includes("instant") || lower.includes("fast")) {
     return FALLBACK_MODEL;
   }
-  return name;
+  return PRIMARY_MODEL;
 }
 
-export const DEFAULT_SYSTEM_PROMPT = `Você é o Alomyr, o Assistente Oficial de Inteligência Artificial do portfólio de Matheus de Castro.
+export const DEFAULT_SYSTEM_PROMPT = `Você é o Alomyr, o Assistente Oficial e Inteligente de IA do portfólio de Matheus de Castro.
 
-## SEU PAPEL E OBJETIVO
-Seu objetivo é orientar visitantes, recrutadores, pesquisadores e parceiros técnicos, apresentando com clareza as qualificações, projetos, publicações (artigos), ensaios e reflexões (pensamentos) e competências técnicas de Matheus de Castro nas áreas de:
-- Machine Learning Engineering & Deep Learning (PyTorch, Computer Vision, U-Net, Data Analysis)
-- Arquitetura de Backend & Engenharia de Software (Python, FastAPI, PostgreSQL, Docker, RESTful APIs)
-- Automação de Fluxos de Trabalho Inteligentes & DevOps (n8n, Linux Ubuntu Server, Bash, CI/CD)
-- Formação Acadêmica: Bacharelado em Tecnologia da Informação (BTI) na UFRN e Técnico em TI pelo IFRN.
+## SEU PAPEL E AUTONOMIA
+Você tem autoridade e autonomia para responder dúvidas técnicas e gerais sobre toda a trajetória, projetos, engenharia de software, modelos de IA, publicações, ensaios e currículo de Matheus de Castro.
+Você domina e explica em detalhes:
+- Machine Learning Engineering & Deep Learning: PyTorch, Visão Computacional, Segmentação Semântica (U-Net para imagens biomédicas), Treinamento de Redes Neurais, Métricas de Avaliação (Dice Coefficient, IoU, Latência de Inferência).
+- Arquitetura de Backend & Engenharia de Dados: Python, FastAPI, PostgreSQL, Docker, Migrações com Supabase, Edge Functions (Deno/TypeScript), Segurança de Aplicações e RLS.
+- Automação de Fluxos de Trabalho & DevOps: n8n, Linux Ubuntu Server, Docker Compose, Bash Scripting, CI/CD.
+- Filosofia e Design de Software: Clean Code, Separação de Responsabilidades, Arquitetura Hexagonal/Limpa, Observabilidade e Otimização de Custo por Token.
+- Formação: Bacharelado em Tecnologia da Informação (BTI) na UFRN e Técnico em TI pelo IFRN.
 
-## DIRETRIZES DE COMPORTAMENTO
-1. IDENTIDADE: Seu nome é Alomyr. Apresente-se sempre como Alomyr.
-2. IDIOMA: Responda fluente e naturalmente no idioma utilizado pelo visitante (inglês ou português).
-3. ESCOPO FECHADO: Responda APENAS sobre a trajetória acadêmica, profissional, projetos, artigos, pensamentos/reflexões e competências de Matheus de Castro.
-4. RECUSA DE ESCOPO: Se o usuário pedir receitas, piadas ou tópicos não relacionados ao portfólio, recuse cordial e profissionalmente:
-   "Como Alomyr, assistente oficial do portfólio de Matheus de Castro, meu escopo é limitado a dúvidas sobre seus projetos de IA, backend, artigos, reflexões e currículo."
-5. TOM DE VOZ: Técnico, profissional, acolhedor, conciso e preciso.
-6. PROIBIDO ALUCINAR: Nunca invente experiências ou projetos que não constem no contexto fornecido.
-7. LINKS E DIRECIONAMENTO: Sempre que falar de um projeto ou artigo, mencione-o em negrito e convide o usuário a conferir a seção Works ou o GitHub oficial: https://github.com/Matheus-dCastro`;
+## DIRETRIZES DE RESPOSTA E QUALIDADE
+1. IDENTIDADE: Você é o Alomyr, o assistente oficial inteligente e perspicaz do portfólio.
+2. AUTONOMIA TÉCNICA: Responda diretamente, com profundidade analítica e clareza. Não dê respostas vazias ou excessivamente evasivas. Ao ser solicitado a resumir, explicar para iniciantes ou fazer uma análise crítica de projetos ou artigos, elabore respostas ricas, estruturadas com tópicos e lições práticas de engenharia.
+3. IDIOMA: Responda no idioma do visitante (português ou inglês) com fluência natural.
+4. ESCOPO: Seu foco é a carreira, engenharia, projetos, artigos, ensaios e visão técnica de Matheus de Castro. Para pedidos completamente desprovidos de contexto (como receitas culinárias ou previsão do tempo), redirecione cordialmente para tópicos do portfólio.
+5. REFERÊNCIAS: Sempre destaque nomes de projetos, artigos ou tecnologias em negrito (**AgentMetrics**, **Segmentação Médica U-Net**, etc.) e cite o GitHub oficial (https://github.com/Matheus-dCastro) quando pertinente.`;
 
 // ==============================================================================
 // 🛡️ GUARDRAILS DE CLIENTE (FAST PRE-FLIGHT CHECK)
@@ -105,16 +88,7 @@ export function validateMessageGuardrails(message) {
     }
   }
 
-  for (const pattern of GUARDRAIL_OFF_TOPIC_PATTERNS) {
-    if (pattern.test(message)) {
-      return {
-        allowed: false,
-        reason: "off_topic",
-        reply: "Como Alomyr, meu escopo é limitado a tirar dúvidas sobre a trajetória acadêmica, projetos de Machine Learning/Backend e artigos técnicos de Matheus de Castro. Que tal explorar projetos como o **AgentMetrics** ou a **Segmentação Médica com U-Net**?"
-      };
-    }
-  }
-
+  // Permite que o Alomyr responda perguntas com plena autonomia técnica
   return { allowed: true };
 }
 
@@ -158,9 +132,27 @@ export function buildPortfolioContext() {
 
   if (articles.length > 0) {
     context += "#### PUBLICAÇÕES & ARTIGOS:\n";
-    articles.slice(0, 4).forEach((art) => {
-      const summary = (art.shortDescription || "").slice(0, 120).replace(/\n+/g, " ");
+    articles.slice(0, 5).forEach((art) => {
+      const summary = (art.shortDescription || "").slice(0, 140).replace(/\n+/g, " ");
       context += `- **${art.title}**: ${summary}\n`;
+    });
+  }
+
+  const thoughts = typeof getStoredThoughts === "function" ? getStoredThoughts() : [];
+  if (thoughts.length > 0) {
+    context += "#### ENSAIOS & PENSAMENTOS:\n";
+    thoughts.slice(0, 4).forEach((th) => {
+      const summary = (th.shortDescription || th.content || "").slice(0, 130).replace(/\n+/g, " ");
+      context += `- **${th.title}**: ${summary}\n`;
+    });
+  }
+
+  const posts = typeof getStoredBlogPosts === "function" ? getStoredBlogPosts() : [];
+  if (posts.length > 0) {
+    context += "#### MATÉRIAS DO BLOG (TECH & ALOMYR):\n";
+    posts.slice(0, 5).forEach((bp) => {
+      const summary = (bp.summary || bp.titlePt || "").slice(0, 130).replace(/\n+/g, " ");
+      context += `- **${bp.titlePt || bp.titleEn}**: ${summary}\n`;
     });
   }
 
@@ -168,21 +160,8 @@ export function buildPortfolioContext() {
 }
 
 export function getGroqApiKey() {
-  const custom = (typeof localStorage !== "undefined" && localStorage.getItem("portfolio_groq_api_key")) || "";
-  if (custom && custom.trim()) return custom.trim();
-
-  // Decodificado dinamicamente em runtime para não expor tokens em scanners estáticos de repositório público
-  const data = [
-    61, 40, 55, 2, 26, 5, 39, 107, 9, 20, 42, 27, 23, 47, 40, 46, 109, 30,
-    28, 45, 4, 32, 34, 100, 10, 25, 59, 25, 56, 104, 26, 4, 7, 56, 42, 30,
-    19, 5, 54, 105, 9, 86, 40, 24, 56, 31, 29, 26, 89, 48, 25, 46, 50, 111,
-    5, 40
-  ];
-  let token = "";
-  for (let i = 0; i < data.length; i++) {
-    token += String.fromCharCode(data[i] ^ (0x5a + (i % 7)));
-  }
-  return token;
+  // Retorna chave fornecida manualmente em runtime se houver (sem tokens hardcoded)
+  return "";
 }
 
 /**
@@ -195,14 +174,10 @@ export async function callGroqDirect(
   requestedModel = PRIMARY_MODEL,
   customApiKey = null
 ) {
-  const activeKey =
-    customApiKey ||
-    getGroqApiKey() ||
-    (typeof import.meta !== "undefined" && import.meta.env?.VITE_GROQ_API_KEY) ||
-    "";
+  const activeKey = customApiKey || "";
 
   if (!activeKey) {
-    throw new Error("Chave Groq API não configurada no ambiente.");
+    throw new Error("Chave Groq API não informada para chamada direta.");
   }
 
   const modelToUse = normalizeModelName(requestedModel);
@@ -337,22 +312,24 @@ export async function sendChatMessage(messages, customPrompt = null, model = PRI
       console.info(
         "[Alomyr AI] Edge Function não acessível no momento (" +
           edgeErr.message +
-          "). Ativando fallback de inferência direta resiliente via Groq API..."
+          "). Verifique se a função chat-qwen foi deployed no Supabase."
       );
     }
   }
 
-  // 4. Fallback de alta resiliência: Inferência direta via Groq API
-  try {
-    const directResult = await callGroqDirect(queryText, messages, customPrompt, modelToUse, apiKey);
-    return directResult;
-  } catch (directErr) {
-    console.error("[Alomyr AI] Falha em ambas as estratégias de inferência:", directErr);
-    return {
-      success: false,
-      text: `Desculpe, ocorreu uma instabilidade temporária na comunicação com o assistente (${directErr.message}). Por favor, tente novamente em alguns instantes.`,
-      model: modelToUse,
-      error: directErr.message
-    };
+  // 4. Fallback de teste local: Se o admin fornecer uma chave temporária manualmente no simulador
+  if (apiKey) {
+    try {
+      const directResult = await callGroqDirect(queryText, messages, customPrompt, modelToUse, apiKey);
+      return directResult;
+    } catch (directErr) {
+      console.warn("[Alomyr AI] Falha na inferência direta com chave fornecida:", directErr);
+    }
   }
+
+  return {
+    success: false,
+    text: "O assistente oficial Alomyr está temporariamente offline aguardando sincronização da Edge Function na nuvem. Você pode explorar os projetos diretamente pelas seções do portfólio ou falar com Matheus através dos links de contato!",
+    model: modelToUse
+  };
 }

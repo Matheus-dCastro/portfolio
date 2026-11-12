@@ -122,11 +122,101 @@
 .chat-widget-subtitle {
   margin: 0;
   font-size: 0.72rem;
-  color: #38bdf8;
+  color: #c084fc;
   font-weight: 600;
   display: flex;
   align-items: center;
   gap: 4px;
+}
+
+.chat-widget-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.chat-widget-header-btn {
+  background: rgba(139, 92, 246, 0.15);
+  border: 1px solid rgba(139, 92, 246, 0.35);
+  color: #e9d5ff;
+  border-radius: 8px;
+  padding: 5px 10px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  transition: all 0.2s ease;
+}
+
+.chat-widget-header-btn:hover {
+  background: rgba(139, 92, 246, 0.3);
+  border-color: #c084fc;
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+.chat-widget-header-btn.restore {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.3), rgba(124, 58, 237, 0.45));
+  border-color: rgba(192, 132, 252, 0.5);
+  color: #ffffff;
+}
+
+.chat-widget-header-btn.restore:hover {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.5), rgba(124, 58, 237, 0.7));
+  box-shadow: 0 0 12px rgba(139, 92, 246, 0.4);
+}
+
+.chat-widget-header-btn.new {
+  color: #94a3b8;
+  border-color: rgba(255, 255, 255, 0.12);
+  background: transparent;
+}
+
+.chat-widget-header-btn.new:hover {
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* Banner de conversa anterior no corpo do chat */
+.chat-prev-convo-banner {
+  background: rgba(139, 92, 246, 0.12);
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  border-radius: 12px;
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+  animation: slideUpWidget 0.25s ease-out;
+}
+
+.chat-prev-convo-banner .banner-text {
+  font-size: 0.76rem;
+  color: #cbd5e1;
+  font-weight: 500;
+}
+
+.chat-prev-convo-banner .banner-action-btn {
+  background: rgba(139, 92, 246, 0.35);
+  border: 1px solid rgba(192, 132, 252, 0.5);
+  color: #ffffff;
+  font-size: 0.76rem;
+  font-weight: 700;
+  padding: 5px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.chat-prev-convo-banner .banner-action-btn:hover {
+  background: rgba(139, 92, 246, 0.6);
+  border-color: #e9d5ff;
+  box-shadow: 0 0 12px rgba(139, 92, 246, 0.4);
 }
 
 .chat-widget-close-btn {

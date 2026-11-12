@@ -11,10 +11,12 @@ import {
   fetchArticles,
   fetchThoughts,
   fetchDrawings,
-  persistBatchOrder
+  persistBatchOrder,
+  getCurrentUser,
+  isAuthorizedAdmin
 } from "../lib/supabaseService";
 import CategoryIcon from "./CategoryIcon";
-import "./OrderDraft.css";
+import "./OrderManager.css";
 
 const CATEGORIES = [
   {
@@ -40,7 +42,7 @@ const CATEGORIES = [
   }
 ];
 
-export default function OrderDraft({ onBackToHome, onOpenProjectDetail, onNavigateToAdmin }) {
+export default function OrderManager({ onBackToHome, onOpenProjectDetail, onNavigateToAdmin }) {
   const [activeTab, setActiveTab] = useState(() => {
     const urlParams = new URLSearchParams(window.location.search);
     return urlParams.get("tab") || "projects";
@@ -59,6 +61,16 @@ export default function OrderDraft({ onBackToHome, onOpenProjectDetail, onNaviga
   const [dragOverTargetId, setDragOverTargetId] = useState(null);
   const [notification, setNotification] = useState("");
   const [previewMode, setPreviewMode] = useState(false);
+
+  useEffect(() => {
+    getCurrentUser().then((u) => {
+      if (!u || !isAuthorizedAdmin(u)) {
+        if (typeof window !== "undefined") {
+          window.location.replace("/login");
+        }
+      }
+    });
+  }, []);
 
   // Switch tab and load corresponding items
   const handleTabChange = (tab) => {
