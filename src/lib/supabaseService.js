@@ -1307,43 +1307,7 @@ export async function uploadBlogImage(file) {
 export const DEFAULT_BLOG_GATEWAY_CONFIG = {
   defaultRoute: "gateway", // "gateway" (/blog/?), "tech" (/blog), "alomyr" (/blog/alomyr)
   topBadgePt: "Ecossistema Matheus de Castro",
-  topBadgeEn: "Matheus de Castro Ecosystem",
-  gatewayTitlePt: "Blog & Laboratório Criativo",
-  gatewayTitleEn: "Blog & Creative Laboratory",
-  gatewaySubtitlePt: "Escolha qual dimensão do ecossistema você deseja explorar:",
-  gatewaySubtitleEn: "Choose which dimension of the ecosystem you wish to explore:",
-  wipNoticeVisible: true,
-  wipNoticeBadgePt: "Em Refinamento • Prévia Editorial",
-  wipNoticeBadgeEn: "Active Refinement • Editorial Preview",
-  wipNoticeTextPt: "Atenção: Os canais do Blog de Engenharia e do Laboratório Alomyr estão atualmente em fase ativa de refinamento.",
-  wipNoticeTextEn: "Notice: The Engineering Blog and Alomyr Lab channels are currently under active refinement.",
-
-  // Card 1: Engenharia
-  cardTechBadgePt: "Canal de Engenharia",
-  cardTechBadgeEn: "Engineering Channel",
-  cardTechTitlePt: "Blog de Engenharia & IA",
-  cardTechTitleEn: "Engineering & AI Blog",
-  cardTechDescPt: "Artigos técnicos aprofundados, arquitetura de sistemas, pipelines de telemetria, visão computacional e processos de backend.",
-  cardTechDescEn: "In-depth technical papers, system architecture, telemetry pipelines, computer vision, and backend systems.",
-  cardTechTags: ["#FastAPI", "#PyTorch", "#TimescaleDB", "#Telemetry", "#DevOps"],
-  cardTechBtnPt: "Explorar Engenharia ↗",
-  cardTechBtnEn: "Explore Engineering ↗",
-
-  // Card 2: Alomyr
-  cardAlomyrBadgePt: "Laboratório Geek & Artístico",
-  cardAlomyrBadgeEn: "Geek & Creative Laboratory",
-  cardAlomyrTitlePt: "Laboratório Alomyr",
-  cardAlomyrTitleEn: "Alomyr Laboratory",
-  cardAlomyrDescPt: "Ensaios filosóficos, arte do hiper-realismo em grafite, cultura pop/nerd, retrogaming e configurações de sistema.",
-  cardAlomyrDescEn: "Philosophical essays, graphite hyper-realism art, pop/nerd culture, retrogaming, and system customization.",
-  cardAlomyrTags: ["#Hiper-realismo", "#Retrogaming", "#Marvel", "#Filosofia", "#Linux"],
-  cardAlomyrBtnPt: "Entrar no Laboratório ↗",
-  cardAlomyrBtnEn: "Enter Laboratory ↗",
-
-  // Footer Note
-  footerNotePt: "Ambos os canais contam com links bidirecionais para os projetos técnicos e alternância rápida.",
-  footerNoteEn: "Both channels offer bidirectional links to technical projects and seamless switching.",
-  updatedAt: "2026-11-11"
+  topBadgeEn: "Matheus de Castro Ecosystem"
 };
 
 export function normalizeBlogGatewayConfig(config) {
@@ -1523,31 +1487,7 @@ export async function persistBlogGatewayConfig(config) {
 
 export const DEFAULT_NOTFOUND_CONFIG = {
   errorCode: "404",
-  statusCode: "404",
-  badgePt: "Rota Não Encontrada",
-  badgeEn: "Route Not Found",
-  titlePt: "Você caiu em um vácuo cósmico",
-  titleEn: "Lost in the cosmic void",
-  subtitlePt: "A página ou recurso que você tentou acessar não existe, foi movida ou está temporariamente offline. Mas não se preocupe, nosso assistente Alomyr está a postos para te guiar!",
-  subtitleEn: "The page or resource you requested doesn't exist, was relocated, or is temporarily offline. But don't worry, Alomyr is ready to guide you back!",
-  mascotImage: "/wolf(2).png",
-  backHomeTextPt: "Voltar para o Início",
-  backHomeTextEn: "Back to Home",
-  buttonHomePt: "Voltar para o Início",
-  buttonHomeEn: "Back to Home",
-  askAlomyrTextPt: "Perguntar ao Alomyr 💬",
-  askAlomyrTextEn: "Ask Alomyr 💬",
-  buttonAskAlomyrPt: "Perguntar ao Alomyr 💬",
-  buttonAskAlomyrEn: "Ask Alomyr 💬",
-  exploreWorksTextPt: "Ver Projetos & Artigos",
-  exploreWorksTextEn: "Explore Projects & Papers",
-  buttonProjectsPt: "Ver Projetos & Artigos",
-  buttonProjectsEn: "Explore Projects & Papers",
-  alomyrPromptPt: "Olá Alomyr! Me perdi em uma rota inexistente (404). Quais são os principais projetos do Matheus e como navego pelo portfólio?",
-  alomyrPromptEn: "Hi Alomyr! I got lost on a 404 page. What are Matheus's main projects and how do I navigate the portfolio?",
-  askAlomyrPromptPt: "Olá Alomyr! Me perdi em uma rota inexistente (404). Quais são os principais projetos do Matheus e como navego pelo portfólio?",
-  askAlomyrPromptEn: "Hi Alomyr! I got lost on a 404 page. What are Matheus's main projects and how do I navigate the portfolio?",
-  updatedAt: "2026-11-11"
+  statusCode: "404"
 };
 
 export function normalizeNotFoundConfig(raw) {
