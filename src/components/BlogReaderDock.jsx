@@ -48,11 +48,11 @@ export default function BlogReaderDock({
     }
   }, [sessionNotes, activePost?.id]);
 
-  // Handle Text Selection for Highlighter
+  // Handle Text Selection for Highlighter (Mouse & Touch on Mobile)
   useEffect(() => {
     if (!isHighlighterOn) return;
 
-    const handleMouseUp = () => {
+    const handleSelection = () => {
       const selection = window.getSelection();
       if (!selection || selection.isCollapsed || !selection.rangeCount) return;
 
@@ -66,7 +66,7 @@ export default function BlogReaderDock({
       try {
         const mark = document.createElement("mark");
         mark.className = `reader-live-highlight ${isTech ? "tech" : "alomyr"}`;
-        mark.title = "Clique para remover este destaque";
+        mark.title = "Toque para remover este destaque";
         mark.onclick = (e) => {
           e.stopPropagation();
           const parent = mark.parentNode;
@@ -87,8 +87,12 @@ export default function BlogReaderDock({
       }
     };
 
-    document.addEventListener("mouseup", handleMouseUp);
-    return () => document.removeEventListener("mouseup", handleMouseUp);
+    document.addEventListener("mouseup", handleSelection);
+    document.addEventListener("touchend", handleSelection);
+    return () => {
+      document.removeEventListener("mouseup", handleSelection);
+      document.removeEventListener("touchend", handleSelection);
+    };
   }, [isHighlighterOn, isTech, triggerToast]);
 
   // Clear all highlights in current article
@@ -148,6 +152,18 @@ export default function BlogReaderDock({
 
   return (
     <aside className="blog-reader-dock-container" ref={dockRef} aria-label="Ferramentas de Leitura">
+      {/* Backdrop Dimmer para Mobile Bottom Sheet */}
+      {(isNotesOpen || isAiMenuOpen) && (
+        <div
+          className="dock-backdrop-overlay"
+          onClick={() => {
+            setIsNotesOpen(false);
+            setIsAiMenuOpen(false);
+          }}
+          aria-hidden="true"
+        />
+      )}
+
       {/* Toast Feedback */}
       {toastMessage && (
         <div className="dock-toast-pill" role="status">
@@ -155,9 +171,10 @@ export default function BlogReaderDock({
         </div>
       )}
 
-      {/* Popover: Caderno de Notas de Margem (Sessão Atual) */}
+      {/* Popover / Bottom Sheet: Caderno de Notas de Margem (Sessão Atual) */}
       {isNotesOpen && (
         <div className="dock-notes-popover">
+          <div className="sheet-drag-handle" aria-hidden="true"></div>
           <div className="dock-notes-header">
             <div className="dock-notes-title">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -203,9 +220,10 @@ export default function BlogReaderDock({
         </div>
       )}
 
-      {/* Popover: Gatilhos do Agente de IA */}
+      {/* Popover / Bottom Sheet: Gatilhos do Agente de IA */}
       {isAiMenuOpen && (
         <div className="dock-ai-popover">
+          <div className="sheet-drag-handle" aria-hidden="true"></div>
           <div className="dock-ai-header">
             <div className="dock-ai-title">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

@@ -540,3 +540,17 @@ header.site-header.gateway-site-header:hover {
     gap: 0.8rem;
   }
 }
+
+@media (max-width: 380px) {
+  header.site-header.gateway-site-header {
+    padding: 8px 10px;
+  }
+
+  .gateway-site-header .logo-icon {
+    height: 18px;
+  }
+
+  .gateway-site-header .logo .first-name {
+    font-size: 0.84rem;
+  }
+}
