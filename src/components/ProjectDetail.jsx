@@ -10,7 +10,7 @@ import { useLanguage } from "../context/useLanguage";
 import LanguageSwitcher from "./LanguageSwitcher";
 import ShareButton from "./ShareButton";
 import CategoryIcon from "./CategoryIcon";
-import "./ViewDraft.css";
+import "./ProjectDetail.css";
 
 function getInitialProject(propProject) {
   if (propProject) return propProject;
@@ -30,11 +30,10 @@ function getInitialProject(propProject) {
   return allItems.length > 0 ? allItems[0] : null;
 }
 
-export default function ViewDraft({ project: propProject, onBackToHome, onSelectProject, onNavigateToBlogPost }) {
+export default function ProjectDetail({ project: propProject, onBackToHome, onSelectProject, onNavigateToBlogPost }) {
   const { t, lang } = useLanguage();
   const [internalProject, setInternalProject] = useState(() => getInitialProject(propProject));
   const [activeContentTab, setActiveContentTab] = useState("auto"); // 'auto' | 'readme' | 'gdocs' | 'pdf'
-  const [inlineQuestion, setInlineQuestion] = useState("");
 
   const project = propProject || internalProject;
 
@@ -124,24 +123,6 @@ export default function ViewDraft({ project: propProject, onBackToHome, onSelect
     : isArticle
     ? (lang === "en" ? "article" : "artigo")
     : (lang === "en" ? "project" : "projeto");
-
-  const contextualQuestions = isThought
-    ? [
-        lang === "en" ? "What is the central insight?" : "Qual é a reflexão central deste texto?",
-        lang === "en" ? "How does this connect to tech vision?" : "Como se relaciona com a visão técnica?",
-        lang === "en" ? "What inspired this reflection?" : "O que motivou e inspirou este ensaio?"
-      ]
-    : isArticle
-    ? [
-        lang === "en" ? "What is the core thesis?" : "Qual é a tese principal deste artigo?",
-        lang === "en" ? "Which methodologies were used?" : "Quais metodologias foram abordadas?",
-        lang === "en" ? "Provide an executive summary." : "Faça um resumo executivo dos pontos-chave."
-      ]
-    : [
-        lang === "en" ? "How was this architected?" : "Como este projeto foi arquitetado?",
-        lang === "en" ? "What stack and models were used?" : "Quais tecnologias e modelos foram usados?",
-        lang === "en" ? "What practical metrics were achieved?" : "Quais resultados e métricas foram alcançados?"
-      ];
 
   const handleAskAlomyr = (questionText) => {
     window.dispatchEvent(

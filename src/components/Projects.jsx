@@ -9,7 +9,7 @@ import CategoryIcon from "./CategoryIcon";
 export default function Projects({ onOpenProject, onNavigateToBlogPost }) {
   const { t, lang } = useLanguage();
   const [projects, setProjects] = useState(() => getStoredProjects());
-  const [blogPosts, setBlogPosts] = useState(() => getStoredBlogPosts());
+  const [blogPosts] = useState(() => getStoredBlogPosts());
   const [activeCategory, setActiveCategory] = useState("all");
 
   useEffect(() => {

@@ -7,7 +7,6 @@ import { supabase, isSupabaseConfigured } from "./supabaseClient";
 import {
   getStoredProjects,
   getStoredArticles,
-  getStoredThoughts,
   getStoredExperiences,
   getStoredCvConfig
 } from "../data/projectsData";
@@ -168,21 +167,8 @@ export function buildPortfolioContext() {
 }
 
 export function getGroqApiKey() {
-  const custom = (typeof localStorage !== "undefined" && localStorage.getItem("portfolio_groq_api_key")) || "";
-  if (custom && custom.trim()) return custom.trim();
-
-  // Decodificado dinamicamente em runtime para não expor tokens em scanners estáticos de repositório público
-  const data = [
-    61, 40, 55, 2, 26, 5, 39, 107, 9, 20, 42, 27, 23, 47, 40, 46, 109, 30,
-    28, 45, 4, 32, 34, 100, 10, 25, 59, 25, 56, 104, 26, 4, 7, 56, 42, 30,
-    19, 5, 54, 105, 9, 86, 40, 24, 56, 31, 29, 26, 89, 48, 25, 46, 50, 111,
-    5, 40
-  ];
-  let token = "";
-  for (let i = 0; i < data.length; i++) {
-    token += String.fromCharCode(data[i] ^ (0x5a + (i % 7)));
-  }
-  return token;
+  // Retorna chave fornecida manualmente em runtime se houver (sem tokens hardcoded)
+  return "";
 }
 
 /**
@@ -195,14 +181,10 @@ export async function callGroqDirect(
   requestedModel = PRIMARY_MODEL,
   customApiKey = null
 ) {
-  const activeKey =
-    customApiKey ||
-    getGroqApiKey() ||
-    (typeof import.meta !== "undefined" && import.meta.env?.VITE_GROQ_API_KEY) ||
-    "";
+  const activeKey = customApiKey || "";
 
   if (!activeKey) {
-    throw new Error("Chave Groq API não configurada no ambiente.");
+    throw new Error("Chave Groq API não informada para chamada direta.");
   }
 
   const modelToUse = normalizeModelName(requestedModel);
@@ -337,22 +319,24 @@ export async function sendChatMessage(messages, customPrompt = null, model = PRI
       console.info(
         "[Alomyr AI] Edge Function não acessível no momento (" +
           edgeErr.message +
-          "). Ativando fallback de inferência direta resiliente via Groq API..."
+          "). Verifique se a função chat-qwen foi deployed no Supabase."
       );
     }
   }
 
-  // 4. Fallback de alta resiliência: Inferência direta via Groq API
-  try {
-    const directResult = await callGroqDirect(queryText, messages, customPrompt, modelToUse, apiKey);
-    return directResult;
-  } catch (directErr) {
-    console.error("[Alomyr AI] Falha em ambas as estratégias de inferência:", directErr);
-    return {
-      success: false,
-      text: `Desculpe, ocorreu uma instabilidade temporária na comunicação com o assistente (${directErr.message}). Por favor, tente novamente em alguns instantes.`,
-      model: modelToUse,
-      error: directErr.message
-    };
+  // 4. Fallback de teste local: Se o admin fornecer uma chave temporária manualmente no simulador
+  if (apiKey) {
+    try {
+      const directResult = await callGroqDirect(queryText, messages, customPrompt, modelToUse, apiKey);
+      return directResult;
+    } catch (directErr) {
+      console.warn("[Alomyr AI] Falha na inferência direta com chave fornecida:", directErr);
+    }
   }
+
+  return {
+    success: false,
+    text: "O assistente oficial Alomyr está temporariamente offline aguardando sincronização da Edge Function na nuvem. Você pode explorar os projetos diretamente pelas seções do portfólio ou falar com Matheus através dos links de contato!",
+    model: modelToUse
+  };
 }

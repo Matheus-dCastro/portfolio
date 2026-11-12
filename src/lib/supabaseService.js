@@ -3,7 +3,6 @@
 
 import { supabase, isSupabaseConfigured } from "./supabaseClient.js";
 import {
-  DEFAULT_PROJECTS,
   getStoredProjects,
   saveProjects,
   getStoredArticles,
@@ -25,8 +24,7 @@ import {
 } from "../data/projectsData.js";
 import {
   getStoredBlogPosts,
-  saveBlogPosts,
-  DEFAULT_BLOG_POSTS
+  saveBlogPosts
 } from "../data/blogData.js";
 
 // ==========================================
@@ -771,20 +769,19 @@ export async function fetchAgentConfig() {
     try {
       const { data, error } = await supabase
         .from("agent_configs")
-        .select("*")
+        .select("id, model_name, system_prompt, max_tokens, temperature, updated_at")
         .eq("id", "production")
         .maybeSingle();
 
       if (!error && data) {
-        const groqApiKey = data.groq_api_key || extractKeyFromPrompt(data.system_prompt) || "";
         return {
           modelName: data.model_name,
           systemPrompt: cleanPromptFromKey(data.system_prompt),
           rawSystemPrompt: data.system_prompt,
           maxTokens: data.max_tokens,
           temperature: data.temperature,
-          hasApiKey: Boolean(groqApiKey),
-          groqApiKey: groqApiKey
+          hasApiKey: true,
+          groqApiKey: ""
         };
       }
     } catch (err) {
@@ -2249,7 +2246,7 @@ export async function persistAgentConfig(
   modelName = "qwen/qwen3.8-27b",
   temperature = 0.3,
   maxTokens = 800,
-  groqApiKey = null
+  _groqApiKey = null
 ) {
   const cleanPrompt = cleanPromptFromKey(systemPrompt);
   localStorage.setItem("portfolio_agent_system_prompt", cleanPrompt);
@@ -2257,10 +2254,6 @@ export async function persistAgentConfig(
 
   if (isSupabaseConfigured && supabase) {
     try {
-      const activeKey = (groqApiKey && typeof groqApiKey === "string" && groqApiKey.trim())
-        ? groqApiKey.trim()
-        : extractKeyFromPrompt(systemPrompt);
-
       // Preserva tags de metadados existentes no system_prompt (404, gateway, hobbies, posts)
       let metaBlock = "";
       try {
@@ -2274,8 +2267,8 @@ export async function persistAgentConfig(
         if (tags.length > 0) metaBlock = tags.join("\n") + "\n";
       } catch (_) {}
 
-      // Embed tag inside prompt so key persists even if column doesn't exist yet
-      const promptToStore = (activeKey ? `<!-- AGENT_KEY: ${activeKey} -->\n` : "") + metaBlock + cleanPrompt;
+      // Segurança: Chaves secretas nunca são concatenadas em texto plano no prompt público
+      const promptToStore = metaBlock + cleanPrompt;
 
       const payload = {
         id: "production",
@@ -2285,24 +2278,11 @@ export async function persistAgentConfig(
         max_tokens: Number(maxTokens),
         updated_at: new Date().toISOString()
       };
-      if (activeKey) {
-        payload.groq_api_key = activeKey;
-      }
 
-      let { error } = await supabase.from("agent_configs").upsert(
+      const { error } = await supabase.from("agent_configs").upsert(
         payload,
         { onConflict: "id" }
       );
-
-      // Se falhar porque a coluna groq_api_key ainda não existe no schema remoto, tenta sem ela mantendo o prompt com tag
-      if (error && error.message && error.message.includes("groq_api_key")) {
-        delete payload.groq_api_key;
-        const retry = await supabase.from("agent_configs").upsert(
-          payload,
-          { onConflict: "id" }
-        );
-        error = retry.error;
-      }
 
       if (error) throw error;
       return { success: true, cloud: true };

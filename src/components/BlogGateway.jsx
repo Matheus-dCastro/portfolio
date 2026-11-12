@@ -1,6 +1,6 @@
 // src/components/BlogGateway.jsx
 // Split Gateway Intermediary Screen (/blog/?)
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useLanguage } from "../context/useLanguage";
 import LanguageSwitcher from "./LanguageSwitcher";
 import { getStoredBlogGatewayConfig, fetchBlogGatewayConfig } from "../lib/supabaseService";

@@ -1,19 +1,17 @@
 // src/components/BlogPage.jsx
 // Dual-Blog Channel Page (Handles both /blog and /blog/alomyr with full reading view)
 
-import React, { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useLanguage } from "../context/useLanguage";
 import LanguageSwitcher from "./LanguageSwitcher";
 import ShareButton from "./ShareButton";
 import {
   fetchBlogPosts,
-  persistBlogPost,
   fetchProfileConfig
 } from "../lib/supabaseService";
 import {
   getStoredBlogPosts,
-  getYoutubeEmbedUrl,
-  BLOG_CHANNELS
+  getYoutubeEmbedUrl
 } from "../data/blogData";
 import { getStoredProjects, getStoredArticles, getStoredProfileConfig } from "../data/projectsData";
 import fotoAlomyr from "../assets/img/alomyr.jpeg";
@@ -65,7 +63,7 @@ export default function BlogPage({
       const base = chan === "alomyr" ? "/blog/alomyr" : "/blog";
       const query = postId ? `?post=${encodeURIComponent(postId)}` : "";
       window.history.pushState({}, "", `${base}${query}`);
-    } catch (e) {
+    } catch (_err) {
       // Ignore in non-standard environments
     }
   };
@@ -304,7 +302,13 @@ export default function BlogPage({
               <span className="reader-date">
                 {t("blog.published_on")} {activePost.publishedAt}
               </span>
-              <span className="reader-readtime">⏱ {activePost.readTime}</span>
+              <span className="reader-readtime">
+                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ verticalAlign: "-2px", marginRight: "4px" }}>
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <polyline points="12 6 12 12 16 14"></polyline>
+                </svg>
+                {activePost.readTime}
+              </span>
             </div>
 
             <h1 className="reader-title">
@@ -617,6 +621,27 @@ export default function BlogPage({
                 )}
               </div>
             </div>
+
+            {/* Active Filters / Result Counter Badge */}
+            {(searchQuery.trim() || selectedTag) && (
+              <div className="active-filters-bar" style={{ marginTop: "1rem", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "0.8rem", width: "100%", maxWidth: "620px", background: "rgba(139, 92, 246, 0.12)", border: "1px solid rgba(139, 92, 246, 0.3)", borderRadius: "12px", padding: "0.6rem 1rem", fontSize: "0.85rem", color: "#e2e8f0" }}>
+                <span>
+                  {filteredPosts.length} {filteredPosts.length === 1 ? (lang === "en" ? "post found" : "publicação encontrada") : (lang === "en" ? "posts found" : "publicações encontradas")}
+                  {selectedTag && ` • Tag: ${selectedTag}`}
+                  {searchQuery.trim() && ` • "${searchQuery}"`}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearchQuery("");
+                    setSelectedTag(null);
+                  }}
+                  style={{ background: "transparent", border: "none", color: "#a78bfa", textDecoration: "underline", cursor: "pointer", fontSize: "0.82rem", fontWeight: "600" }}
+                >
+                  {lang === "en" ? "Clear Filters" : "Limpar Filtros"}
+                </button>
+              </div>
+            )}
           </section>
 
           {/* EI NERD STYLE: TRENDING TOPICS (TÓPICOS EM ALTA) BAR */}

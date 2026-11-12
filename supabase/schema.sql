@@ -157,10 +157,23 @@ CREATE TRIGGER trg_agent_config_updated_at BEFORE UPDATE ON public.agent_configs
 -- ==============================================================================
 -- 🛡️ POLÍTICAS DE SEGURANÇA (ROW LEVEL SECURITY - RLS)
 -- ==============================================================================
--- Regra de Ouro:
 -- 1. Visitantes Anônimos ('anon'): podem apenas LER registros marcados como publicados (is_published = true).
--- 2. Administrador Autenticado ('authenticated'): possui controle total (SELECT, INSERT, UPDATE, DELETE).
--- 3. Nenhuma chave Service Role exposta no frontend.
+-- 2. Administrador Autenticado e Autorizado: apenas Matheus de Castro possui permissão de mutação (INSERT, UPDATE, DELETE).
+-- 3. Nenhuma chave secreta de serviço ou IA exposta no frontend.
+
+-- Função de validação de Administrador Autorizado (Email ou GitHub)
+CREATE OR REPLACE FUNCTION public.is_admin()
+RETURNS BOOLEAN
+LANGUAGE sql
+SECURITY DEFINER
+STABLE
+AS $$
+  SELECT (
+    lower(coalesce(auth.jwt() ->> 'email', '')) = 'matheus.vsf.castro.25@gmail.com'
+    OR lower(coalesce(auth.jwt() -> 'user_metadata' ->> 'user_name', '')) = 'matheus-dcastro'
+    OR lower(coalesce(auth.jwt() -> 'user_metadata' ->> 'preferred_username', '')) = 'matheus-dcastro'
+  );
+$$;
 
 ALTER TABLE public.works ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.articles ENABLE ROW LEVEL SECURITY;
@@ -172,67 +185,67 @@ ALTER TABLE public.agent_configs ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Public Read Works" ON public.works;
 CREATE POLICY "Public Read Works" ON public.works
     FOR SELECT TO anon, authenticated
-    USING (is_published = true OR auth.role() = 'authenticated');
+    USING (is_published = true OR public.is_admin());
 
 DROP POLICY IF EXISTS "Admin Insert Works" ON public.works;
 CREATE POLICY "Admin Insert Works" ON public.works
     FOR INSERT TO authenticated
-    WITH CHECK (auth.role() = 'authenticated');
+    WITH CHECK (public.is_admin());
 
 DROP POLICY IF EXISTS "Admin Update Works" ON public.works;
 CREATE POLICY "Admin Update Works" ON public.works
     FOR UPDATE TO authenticated
-    USING (auth.role() = 'authenticated')
-    WITH CHECK (auth.role() = 'authenticated');
+    USING (public.is_admin())
+    WITH CHECK (public.is_admin());
 
 DROP POLICY IF EXISTS "Admin Delete Works" ON public.works;
 CREATE POLICY "Admin Delete Works" ON public.works
     FOR DELETE TO authenticated
-    USING (auth.role() = 'authenticated');
+    USING (public.is_admin());
 
 -- ARTICLES POLICIES
 DROP POLICY IF EXISTS "Public Read Articles" ON public.articles;
 CREATE POLICY "Public Read Articles" ON public.articles
     FOR SELECT TO anon, authenticated
-    USING (is_published = true OR auth.role() = 'authenticated');
+    USING (is_published = true OR public.is_admin());
 
 DROP POLICY IF EXISTS "Admin Insert Articles" ON public.articles;
 CREATE POLICY "Admin Insert Articles" ON public.articles
     FOR INSERT TO authenticated
-    WITH CHECK (auth.role() = 'authenticated');
+    WITH CHECK (public.is_admin());
 
 DROP POLICY IF EXISTS "Admin Update Articles" ON public.articles;
 CREATE POLICY "Admin Update Articles" ON public.articles
     FOR UPDATE TO authenticated
-    USING (auth.role() = 'authenticated')
-    WITH CHECK (auth.role() = 'authenticated');
+    USING (public.is_admin())
+    WITH CHECK (public.is_admin());
 
 DROP POLICY IF EXISTS "Admin Delete Articles" ON public.articles;
 CREATE POLICY "Admin Delete Articles" ON public.articles
     FOR DELETE TO authenticated
-    USING (auth.role() = 'authenticated');
+    USING (public.is_admin());
 
 -- THOUGHTS POLICIES
 DROP POLICY IF EXISTS "Public Read Thoughts" ON public.thoughts;
 CREATE POLICY "Public Read Thoughts" ON public.thoughts
     FOR SELECT TO anon, authenticated
-    USING (is_published = true OR auth.role() = 'authenticated');
+    USING (is_published = true OR public.is_admin());
 
 DROP POLICY IF EXISTS "Admin Insert Thoughts" ON public.thoughts;
 CREATE POLICY "Admin Insert Thoughts" ON public.thoughts
     FOR INSERT TO authenticated
-    WITH CHECK (auth.role() = 'authenticated');
+    WITH CHECK (public.is_admin());
 
 DROP POLICY IF EXISTS "Admin Update Thoughts" ON public.thoughts;
 CREATE POLICY "Admin Update Thoughts" ON public.thoughts
     FOR UPDATE TO authenticated
-    USING (auth.role() = 'authenticated')
-    WITH CHECK (auth.role() = 'authenticated');
+    USING (public.is_admin())
+    WITH CHECK (public.is_admin());
 
 DROP POLICY IF EXISTS "Admin Delete Thoughts" ON public.thoughts;
 CREATE POLICY "Admin Delete Thoughts" ON public.thoughts
     FOR DELETE TO authenticated
-    USING (auth.role() = 'authenticated');
+    USING (public.is_admin());
 
 -- CV_CONFIGS POLICIES
 DROP POLICY IF EXISTS "Public Read CV Config" ON public.cv_configs;
@@ -243,8 +256,8 @@ CREATE POLICY "Public Read CV Config" ON public.cv_configs
 DROP POLICY IF EXISTS "Admin Manage CV Config" ON public.cv_configs;
 CREATE POLICY "Admin Manage CV Config" ON public.cv_configs
     FOR ALL TO authenticated
-    USING (auth.role() = 'authenticated')
-    WITH CHECK (auth.role() = 'authenticated');
+    USING (public.is_admin())
+    WITH CHECK (public.is_admin());
 
 -- AGENT_CONFIGS POLICIES
 DROP POLICY IF EXISTS "Public Read Agent Config" ON public.agent_configs;
@@ -255,8 +268,8 @@ CREATE POLICY "Public Read Agent Config" ON public.agent_configs
 DROP POLICY IF EXISTS "Admin Manage Agent Config" ON public.agent_configs;
 CREATE POLICY "Admin Manage Agent Config" ON public.agent_configs
     FOR ALL TO authenticated
-    USING (auth.role() = 'authenticated')
-    WITH CHECK (auth.role() = 'authenticated');
+    USING (public.is_admin())
+    WITH CHECK (public.is_admin());
 
 -- ==============================================================================
 -- 🔑 PERMISSÕES DE ACESSO (GRANTS PARA AS ROLES DO SUPABASE)
@@ -634,21 +647,28 @@ EXCEPTION WHEN duplicate_object THEN null;
 END $$;
 
 DO $$ BEGIN
+    DROP POLICY IF EXISTS "Admin Document Upload" ON storage.objects;
     CREATE POLICY "Admin Document Upload" ON storage.objects
-        FOR INSERT WITH CHECK (bucket_id = 'documents');
-EXCEPTION WHEN duplicate_object THEN null;
+        FOR INSERT TO authenticated
+        WITH CHECK (bucket_id = 'documents' AND public.is_admin());
+EXCEPTION WHEN undefined_table THEN null;
 END $$;
 
 DO $$ BEGIN
+    DROP POLICY IF EXISTS "Admin Document Update" ON storage.objects;
     CREATE POLICY "Admin Document Update" ON storage.objects
-        FOR UPDATE USING (bucket_id = 'documents');
-EXCEPTION WHEN duplicate_object THEN null;
+        FOR UPDATE TO authenticated
+        USING (bucket_id = 'documents' AND public.is_admin())
+        WITH CHECK (bucket_id = 'documents' AND public.is_admin());
+EXCEPTION WHEN undefined_table THEN null;
 END $$;
 
 DO $$ BEGIN
+    DROP POLICY IF EXISTS "Admin Document Delete" ON storage.objects;
     CREATE POLICY "Admin Document Delete" ON storage.objects
-        FOR DELETE USING (bucket_id = 'documents');
-EXCEPTION WHEN duplicate_object THEN null;
+        FOR DELETE TO authenticated
+        USING (bucket_id = 'documents' AND public.is_admin());
+EXCEPTION WHEN undefined_table THEN null;
 END $$;
 
 -- ==============================================================================
@@ -676,23 +696,23 @@ ALTER TABLE public.drawings ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Public Read Drawings" ON public.drawings;
 CREATE POLICY "Public Read Drawings" ON public.drawings
     FOR SELECT TO anon, authenticated
-    USING (is_published = true OR auth.role() = 'authenticated');
+    USING (is_published = true OR public.is_admin());
 
 DROP POLICY IF EXISTS "Admin Insert Drawings" ON public.drawings;
 CREATE POLICY "Admin Insert Drawings" ON public.drawings
     FOR INSERT TO authenticated
-    WITH CHECK (auth.role() = 'authenticated');
+    WITH CHECK (public.is_admin());
 
 DROP POLICY IF EXISTS "Admin Update Drawings" ON public.drawings;
 CREATE POLICY "Admin Update Drawings" ON public.drawings
     FOR UPDATE TO authenticated
-    USING (auth.role() = 'authenticated')
-    WITH CHECK (auth.role() = 'authenticated');
+    USING (public.is_admin())
+    WITH CHECK (public.is_admin());
 
 DROP POLICY IF EXISTS "Admin Delete Drawings" ON public.drawings;
 CREATE POLICY "Admin Delete Drawings" ON public.drawings
     FOR DELETE TO authenticated
-    USING (auth.role() = 'authenticated');
+    USING (public.is_admin());
 
 -- ==============================================================================
 -- 9. TABELA DE BLOG POSTS (CANAL TECH & CANAL ALOMYR)
@@ -733,20 +753,20 @@ ALTER TABLE public.blog_posts ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Public Read Blog Posts" ON public.blog_posts;
 CREATE POLICY "Public Read Blog Posts" ON public.blog_posts
     FOR SELECT TO anon, authenticated
-    USING (is_published = true OR auth.role() = 'authenticated');
+    USING (is_published = true OR public.is_admin());
 
 DROP POLICY IF EXISTS "Admin Insert Blog Posts" ON public.blog_posts;
 CREATE POLICY "Admin Insert Blog Posts" ON public.blog_posts
     FOR INSERT TO authenticated
-    WITH CHECK (auth.role() = 'authenticated');
+    WITH CHECK (public.is_admin());
 
 DROP POLICY IF EXISTS "Admin Update Blog Posts" ON public.blog_posts;
 CREATE POLICY "Admin Update Blog Posts" ON public.blog_posts
     FOR UPDATE TO authenticated
-    USING (auth.role() = 'authenticated')
-    WITH CHECK (auth.role() = 'authenticated');
+    USING (public.is_admin())
+    WITH CHECK (public.is_admin());
 
 DROP POLICY IF EXISTS "Admin Delete Blog Posts" ON public.blog_posts;
 CREATE POLICY "Admin Delete Blog Posts" ON public.blog_posts
     FOR DELETE TO authenticated
-    USING (auth.role() = 'authenticated');
+    USING (public.is_admin());

@@ -219,8 +219,14 @@ Mantenha um tom técnico, acolhedor e direto.`;
       { role: "user", content: trimmedMsg },
     ];
 
-    // Inference with Groq API
-    const groqApiKey = Deno.env.get("GROQ_API_KEY") || Deno.env.get("QWEN_API_KEY") || dbGroqApiKey || body.apiKey;
+    // Inference with Groq API (suporta GROQ_API_KEY, agent_key ou QWEN_API_KEY)
+    const groqApiKey =
+      Deno.env.get("GROQ_API_KEY") ||
+      Deno.env.get("agent_key") ||
+      Deno.env.get("AGENT_KEY") ||
+      Deno.env.get("QWEN_API_KEY") ||
+      dbGroqApiKey ||
+      body.apiKey;
 
     if (!groqApiKey) {
       return new Response(
@@ -235,22 +241,13 @@ Mantenha um tom técnico, acolhedor e direto.`;
       );
     }
 
-    // Map model names if needed
-    let modelToRequest = activeModelName;
-    if (
-      !activeModelName ||
-      activeModelName.includes("qwen") ||
-      activeModelName === "Qwen 2.5 Coder 32B-Instruct" ||
-      activeModelName === "qwen-2.5-coder-32b"
-    ) {
-      modelToRequest = "qwen/qwen3.8-27b";
-    } else if (activeModelName.includes("120b")) {
-      modelToRequest = "openai/gpt-oss-120b";
-    } else if (activeModelName.includes("20b") || activeModelName.includes("llama")) {
-      modelToRequest = "openai/gpt-oss-20b";
+    // Map model names to Groq official production models
+    let modelToRequest = "llama-3.3-70b-versatile";
+    if (activeModelName && (activeModelName.includes("8b") || activeModelName.includes("fast") || activeModelName.includes("instant"))) {
+      modelToRequest = "llama-3.1-8b-instant";
     }
 
-    const safeMaxTokens = Math.min(activeMaxTokens || 600, 600);
+    const safeMaxTokens = Math.min(activeMaxTokens || 600, 800);
 
     const groqResponse = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
@@ -268,7 +265,7 @@ Mantenha um tom técnico, acolhedor e direto.`;
 
     if (!groqResponse.ok) {
       const errData = await groqResponse.json().catch(() => ({}));
-      // Fallback para modelo secundário se limite de contexto ou rate limit
+      // Fallback para modelo rápido de 131k tokens se houver erro
       const retryResponse = await fetch("https://api.groq.com/openai/v1/chat/completions", {
         method: "POST",
         headers: {
@@ -276,7 +273,7 @@ Mantenha um tom técnico, acolhedor e direto.`;
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model: "openai/gpt-oss-20b",
+          model: "llama-3.1-8b-instant",
           messages,
           temperature: activeTemperature,
           max_tokens: 500,
@@ -294,7 +291,7 @@ Mantenha um tom técnico, acolhedor e direto.`;
           success: true,
           reply,
           text: reply,
-          model: "openai/gpt-oss-20b",
+          model: "llama-3.1-8b-instant",
           usage: retryData.usage,
         }),
         {

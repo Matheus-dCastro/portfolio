@@ -12,13 +12,10 @@ import {
   getStoredCvConfig,
   saveCvConfig,
   DEFAULT_CV_CONFIG,
-  getStoredCustomHobby,
   getStoredHobbies,
-  saveHobbies,
   DEFAULT_HOBBIES_LIST,
   convertGoogleDocsToEmbedUrl,
-  getStoredProfileConfig,
-  saveProfileConfig
+  getStoredProfileConfig
 } from "../data/projectsData";
 import {
   fetchWorks,
@@ -28,7 +25,6 @@ import {
   fetchDrawings,
   fetchCvConfig,
   fetchAgentConfig,
-  fetchCustomHobby,
   fetchHobbies,
   persistHobbies,
   removeHobby,
@@ -50,7 +46,6 @@ import {
   persistProfileConfig,
   fetchProfileConfig,
   persistAgentConfig,
-  persistCustomHobby,
   persistBatchOrder,
   fetchBlogPosts,
   persistBlogPost,
@@ -65,19 +60,19 @@ import {
   getStoredNotFoundConfig,
   DEFAULT_NOTFOUND_CONFIG,
   getCurrentUser,
-  logoutUser
+  logoutUser,
+  isAuthorizedAdmin
 } from "../lib/supabaseService";
 import {
   getStoredBlogPosts,
-  getYoutubeEmbedUrl,
-  BLOG_CHANNELS
+  getYoutubeEmbedUrl
 } from "../data/blogData";
 import { isSupabaseConfigured } from "../lib/supabaseClient";
 import { DOCUMENT_TEMPLATES } from "../data/templatesData";
-import { sendChatMessage, getGroqApiKey } from "../lib/llmService";
+import { sendChatMessage } from "../lib/llmService";
 import NotFound from "./NotFound";
 import BlogGateway from "./BlogGateway";
-import "./AdminDraft.css";
+import "./AdminDashboard.css";
 
 const generateUniqueId = () => `item-${Date.now()}`;
 
@@ -98,7 +93,7 @@ Seu objetivo é orientar visitantes, recrutadores, pesquisadores e parceiros té
 4. PROIBIDO ALUCINAR: Nunca invente experiências ou projetos que não constem no portfólio.
 5. LINKS E REFERÊNCIAS: Sempre que falar de um projeto, direcione o usuário para o botão "Saber mais" ou para o GitHub oficial: https://github.com/Matheus-dCastro`;
 
-export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNavigateToOrder }) {
+export default function AdminDashboard({ onBackToHome, onOpenProjectDetail, onNavigateToOrder }) {
   const [activeTab, setActiveTab] = useState("projects"); // 'projects' | 'articles' | 'thoughts' | 'agent'
   const [items, setItems] = useState(() => getStoredProjects());
 
@@ -159,9 +154,9 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
   const [agentTemperature, setAgentTemperature] = useState(0.3);
   const [agentMaxTokens, setAgentMaxTokens] = useState(800);
   const [agentGuardrailsActive, setAgentGuardrailsActive] = useState(true);
-  const [agentApiKey, setAgentApiKey] = useState(() => getGroqApiKey() || "");
+  const [agentApiKey, setAgentApiKey] = useState("");
   const [showApiKey, setShowApiKey] = useState(false);
-  const [hasSavedApiKey, setHasSavedApiKey] = useState(() => Boolean(getGroqApiKey()));
+  const [hasSavedApiKey, setHasSavedApiKey] = useState(false);
   const [testChatMessage, setTestChatMessage] = useState("");
   const [isChatLoading, setIsChatLoading] = useState(false);
   const [chatMessages, setChatMessages] = useState([
@@ -249,6 +244,7 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
   const blogGalleryInputRef = useRef(null);
 
   const [currentUser, setCurrentUser] = useState(null);
+  const [isVerifying, setIsVerifying] = useState(true);
   const [profilePhotoUrl, setProfilePhotoUrl] = useState(() => getStoredProfileConfig()?.photoUrl || "");
   const [isUploadingProfilePhoto, setIsUploadingProfilePhoto] = useState(false);
   const profilePhotoInputRef = useRef(null);
@@ -296,7 +292,14 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
 
   useEffect(() => {
     getCurrentUser().then((u) => {
-      if (u) setCurrentUser(u);
+      if (!u || !isAuthorizedAdmin(u)) {
+        if (typeof window !== "undefined") {
+          window.location.replace("/login");
+        }
+      } else {
+        setCurrentUser(u);
+      }
+      setIsVerifying(false);
     });
   }, []);
 
@@ -397,8 +400,6 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
         if (cfg?.hasApiKey) setHasSavedApiKey(true);
         if (cfg?.groqApiKey) {
           setAgentApiKey(cfg.groqApiKey);
-        } else if (getGroqApiKey()) {
-          setAgentApiKey(getGroqApiKey());
         }
       });
     } else if (activeTab === "customHobby") {
@@ -431,6 +432,9 @@ export default function AdminDraft({ onBackToHome, onOpenProjectDetail, onNaviga
     await logoutUser();
     setCurrentUser(null);
     showToast("Você encerrou a sessão de administrador.");
+    if (typeof window !== "undefined") {
+      window.location.replace("/login");
+    }
   };
 
   const textareaRef = useRef(null);
@@ -1761,6 +1765,14 @@ DIRETRIZ MÁXIMA DE CONCISÃO:
     relatedProjectId: activeTab === "articles" ? relatedProjectId : undefined,
     updatedAt: "Recém Editado"
   };
+
+  if (isVerifying || !currentUser || !isAuthorizedAdmin(currentUser)) {
+    return (
+      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#0a0b10", color: "#a5b4fc" }}>
+        <p>Verificando credenciais de acesso...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="admin-editor-layout">
