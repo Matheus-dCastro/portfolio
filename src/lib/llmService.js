@@ -11,33 +11,16 @@ import {
   getStoredCvConfig
 } from "../data/projectsData";
 
-export const PRIMARY_MODEL = "qwen/qwen3.8-27b";
-export const FALLBACK_MODEL = "openai/gpt-oss-20b";
+export const PRIMARY_MODEL = "llama-3.3-70b-versatile";
+export const FALLBACK_MODEL = "llama-3.1-8b-instant";
 
 export function normalizeModelName(name) {
   if (!name || typeof name !== "string") return PRIMARY_MODEL;
   const lower = name.toLowerCase();
-  if (
-    lower.includes("qwen") ||
-    lower.includes("2.5") ||
-    lower.includes("coder") ||
-    lower.includes("32b")
-  ) {
-    return PRIMARY_MODEL;
-  }
-  if (lower.includes("120b")) {
-    return "openai/gpt-oss-120b";
-  }
-  if (
-    lower.includes("llama") ||
-    lower.includes("70b") ||
-    lower.includes("versatile") ||
-    lower.includes("fast") ||
-    lower.includes("20b")
-  ) {
+  if (lower.includes("8b") || lower.includes("instant") || lower.includes("fast")) {
     return FALLBACK_MODEL;
   }
-  return name;
+  return PRIMARY_MODEL;
 }
 
 export const DEFAULT_SYSTEM_PROMPT = `Você é o Alomyr, o Assistente Oficial de Inteligência Artificial do portfólio de Matheus de Castro.

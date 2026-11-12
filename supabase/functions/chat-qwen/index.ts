@@ -202,28 +202,33 @@ serve(async (req) => {
 Responda exclusivamente sobre a carreira, projetos de Machine Learning/Backend, artigos e qualificações de Matheus de Castro.
 Mantenha um tom técnico, acolhedor e direto.`;
 
-    const cleanedBasePrompt = (systemPromptBase || defaultPrompt).replace(/<!--\s*[A-Z_]+:\s*[\s\S]*?-->\n?/g, "").trim();
-    const fullSystemPrompt = cleanedBasePrompt + dynamicContext;
+    // Garante que o prompt não estoure o limite de TPM/tokens da Groq
+    const cleanedBasePrompt = (systemPromptBase || defaultPrompt)
+      .replace(/<!--[\s\S]*?-->/g, "")
+      .trim()
+      .slice(0, 1200);
+
+    const fullSystemPrompt = cleanedBasePrompt + "\n" + dynamicContext.slice(0, 1200);
 
     // Build chat completion messages (keep recent turns, truncate lengths)
     const formattedHistory = Array.isArray(conversationHistory)
-      ? conversationHistory.slice(-6).map((m: any) => ({
+      ? conversationHistory.slice(-4).map((m: any) => ({
           role: m.sender === "user" || m.role === "user" ? "user" : "assistant",
-          content: String(m.text || m.content || "").slice(0, 350),
+          content: String(m.text || m.content || "").slice(0, 200),
         }))
       : [];
 
     const messages = [
       { role: "system", content: fullSystemPrompt },
       ...formattedHistory.filter((m: any) => m.content !== trimmedMsg),
-      { role: "user", content: trimmedMsg },
+      { role: "user", content: trimmedMsg.slice(0, 300) },
     ];
 
     // Inference with Groq API (suporta GROQ_API_KEY, agent_key ou QWEN_API_KEY)
     const groqApiKey =
       Deno.env.get("GROQ_API_KEY") ||
-      Deno.env.get("agent_key") ||
       Deno.env.get("AGENT_KEY") ||
+      Deno.env.get("agent_key") ||
       Deno.env.get("QWEN_API_KEY") ||
       dbGroqApiKey ||
       body.apiKey;
@@ -241,13 +246,15 @@ Mantenha um tom técnico, acolhedor e direto.`;
       );
     }
 
-    // Map model names to Groq official production models
-    let modelToRequest = "llama-3.3-70b-versatile";
-    if (activeModelName && (activeModelName.includes("8b") || activeModelName.includes("fast") || activeModelName.includes("instant"))) {
-      modelToRequest = "llama-3.1-8b-instant";
+    // Map model names to Groq official production models: qwen/qwen3.8-27b e openai/gpt-oss-20b
+    let modelToRequest = "qwen/qwen3.8-27b";
+    if (activeModelName && (activeModelName.includes("120b") || activeModelName.includes("large"))) {
+      modelToRequest = "openai/gpt-oss-120b";
+    } else if (activeModelName && (activeModelName.includes("20b") || activeModelName.includes("fast"))) {
+      modelToRequest = "openai/gpt-oss-20b";
     }
 
-    const safeMaxTokens = Math.min(activeMaxTokens || 600, 800);
+    const safeMaxTokens = Math.min(activeMaxTokens || 400, 500);
 
     const groqResponse = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
@@ -265,7 +272,7 @@ Mantenha um tom técnico, acolhedor e direto.`;
 
     if (!groqResponse.ok) {
       const errData = await groqResponse.json().catch(() => ({}));
-      // Fallback para modelo rápido de 131k tokens se houver erro
+      // Fallback para modelo secundario leve (openai/gpt-oss-20b)
       const retryResponse = await fetch("https://api.groq.com/openai/v1/chat/completions", {
         method: "POST",
         headers: {
@@ -273,15 +280,16 @@ Mantenha um tom técnico, acolhedor e direto.`;
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model: "llama-3.1-8b-instant",
+          model: "openai/gpt-oss-20b",
           messages,
           temperature: activeTemperature,
-          max_tokens: 500,
+          max_tokens: 350,
         }),
       });
 
       if (!retryResponse.ok) {
-        throw new Error(errData?.error?.message || `Erro da API da Groq: ${groqResponse.status}`);
+        const retryErr = await retryResponse.json().catch(() => ({}));
+        throw new Error(retryErr?.error?.message || errData?.error?.message || `Erro da API da Groq: ${groqResponse.status}`);
       }
 
       const retryData = await retryResponse.json();
@@ -291,7 +299,7 @@ Mantenha um tom técnico, acolhedor e direto.`;
           success: true,
           reply,
           text: reply,
-          model: "llama-3.1-8b-instant",
+          model: "openai/gpt-oss-20b",
           usage: retryData.usage,
         }),
         {
