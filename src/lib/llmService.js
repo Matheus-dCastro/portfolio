@@ -88,16 +88,7 @@ export function validateMessageGuardrails(message) {
     }
   }
 
-  for (const pattern of GUARDRAIL_OFF_TOPIC_PATTERNS) {
-    if (pattern.test(message)) {
-      return {
-        allowed: false,
-        reason: "off_topic",
-        reply: "Como Alomyr, meu escopo é limitado a tirar dúvidas sobre a trajetória acadêmica, projetos de Machine Learning/Backend e artigos técnicos de Matheus de Castro. Que tal explorar projetos como o **AgentMetrics** ou a **Segmentação Médica com U-Net**?"
-      };
-    }
-  }
-
+  // Permite que o Alomyr responda perguntas com plena autonomia técnica
   return { allowed: true };
 }
 

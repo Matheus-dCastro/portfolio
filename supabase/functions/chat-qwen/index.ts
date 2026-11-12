@@ -53,17 +53,7 @@ function checkGuardrails(userMessage: string): { blocked: boolean; reason?: stri
     }
   }
 
-  // Check Off-Topic Requests
-  for (const pattern of OFF_TOPIC_PATTERNS) {
-    if (pattern.test(userMessage)) {
-      return {
-        blocked: true,
-        reason: "off_topic",
-        reply: "Como Alomyr, meu escopo é limitado a tirar dúvidas sobre a trajetória acadêmica, projetos de Machine Learning/Backend e publicações técnicas de Matheus de Castro. Que tal explorar projetos como o AgentMetrics ou a segmentação médica com U-Net?",
-      };
-    }
-  }
-
+  // Autonomia ampliada: Alomyr responde perguntas gerais e técnicas com destreza e clareza
   return { blocked: false };
 }
 

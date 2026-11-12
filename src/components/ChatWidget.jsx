@@ -123,9 +123,52 @@ export default function ChatWidget({ showFloatingButton = true }) {
   const [isOpen, setIsOpen] = useState(false);
   const [inputText, setInputText] = useState("");
   const [isTyping, setIsTyping] = useState(false);
-  const [messages, setChatMessages] = useState([]);
+  
+  // Mensagens ativas com persistência entre rotas
+  const [messages, setChatMessages] = useState(() => {
+    try {
+      const saved = sessionStorage.getItem("alomyr_active_conversation");
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch {
+      // ignore
+    }
+    return [
+      {
+        sender: "bot",
+        text: t("agent.welcome_message")
+      }
+    ];
+  });
 
-  // Initialize or update initial message when language changes if no conversation took place yet
+  // Conversa anterior guardada para restauração imediata a qualquer momento
+  const [previousConversation, setPreviousConversation] = useState(() => {
+    try {
+      const saved = sessionStorage.getItem("alomyr_prev_conversation");
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 1) return parsed;
+      }
+    } catch {
+      // ignore
+    }
+    return null;
+  });
+
+  // Salva no sessionStorage para manter o chat durante a navegação
+  useEffect(() => {
+    try {
+      if (messages.length > 1) {
+        sessionStorage.setItem("alomyr_active_conversation", JSON.stringify(messages));
+      }
+    } catch {
+      // ignore
+    }
+  }, [messages]);
+
+  // Atualiza mensagem de boas-vindas se idioma mudar antes de iniciar conversa
   useEffect(() => {
     setChatMessages((prev) => {
       if (prev.length <= 1) {
@@ -155,6 +198,43 @@ export default function ChatWidget({ showFloatingButton = true }) {
       scrollToBottom();
     }
   }, [messages, isTyping, isOpen]);
+
+  // Inicia nova conversa salvando a atual como anterior
+  const handleNewConversation = () => {
+    if (messages.length > 1) {
+      setPreviousConversation(messages);
+      try {
+        sessionStorage.setItem("alomyr_prev_conversation", JSON.stringify(messages));
+      } catch {
+        // ignore
+      }
+    }
+    const welcome = [{ sender: "bot", text: t("agent.welcome_message") }];
+    setChatMessages(welcome);
+    try {
+      sessionStorage.removeItem("alomyr_active_conversation");
+    } catch {
+      // ignore
+    }
+  };
+
+  // Restaura a conversa anterior permitindo alternar entre elas
+  const handleRestorePrevious = () => {
+    if (!previousConversation || previousConversation.length === 0) return;
+    const currentActive = messages;
+    setChatMessages(previousConversation);
+    setPreviousConversation(currentActive.length > 1 ? currentActive : null);
+    try {
+      sessionStorage.setItem("alomyr_active_conversation", JSON.stringify(previousConversation));
+      if (currentActive.length > 1) {
+        sessionStorage.setItem("alomyr_prev_conversation", JSON.stringify(currentActive));
+      } else {
+        sessionStorage.removeItem("alomyr_prev_conversation");
+      }
+    } catch {
+      // ignore
+    }
+  };
 
   const handleSendMessage = async (textToSend) => {
     const query = (textToSend || inputText).trim();
@@ -202,6 +282,15 @@ export default function ChatWidget({ showFloatingButton = true }) {
       setIsOpen(true);
       const prompt = e.detail?.prompt;
       if (prompt) {
+        // Se havia uma conversa em andamento, preserva-a como conversa anterior
+        if (messagesRef.current && messagesRef.current.length > 1) {
+          setPreviousConversation(messagesRef.current);
+          try {
+            sessionStorage.setItem("alomyr_prev_conversation", JSON.stringify(messagesRef.current));
+          } catch {
+            // ignore
+          }
+        }
         setTimeout(() => {
           if (handleSendMessageRef.current) {
             handleSendMessageRef.current(prompt);
@@ -249,18 +338,58 @@ export default function ChatWidget({ showFloatingButton = true }) {
                 </p>
               </div>
             </div>
-            <button
-              type="button"
-              className="chat-widget-close-btn"
-              onClick={() => setIsOpen(false)}
-              title={t("agent.close_title")}
-            >
-              &times;
-            </button>
+            <div className="chat-widget-header-actions">
+              {previousConversation && previousConversation.length > 1 && (
+                <button
+                  type="button"
+                  className="chat-widget-header-btn restore"
+                  onClick={handleRestorePrevious}
+                  title="Restaurar / Voltar à conversa anterior"
+                >
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="1 4 1 10 7 10"></polyline>
+                    <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+                  </svg>
+                  <span>Voltar à conversa anterior</span>
+                </button>
+              )}
+              {messages.length > 1 && (
+                <button
+                  type="button"
+                  className="chat-widget-header-btn new"
+                  onClick={handleNewConversation}
+                  title="Iniciar nova conversa limpa"
+                >
+                  <span>Nova</span>
+                </button>
+              )}
+              <button
+                type="button"
+                className="chat-widget-close-btn"
+                onClick={() => setIsOpen(false)}
+                title={t("agent.close_title")}
+              >
+                &times;
+              </button>
+            </div>
           </div>
 
           {/* Messages Body */}
           <div className="chat-widget-body">
+            {/* Banner Flutuante: Botão explícito para voltar à conversa anterior se disponível */}
+            {previousConversation && previousConversation.length > 1 && messages.length <= 1 && (
+              <div className="chat-prev-convo-banner">
+                <span className="banner-text">Você possui uma conversa anterior salva.</span>
+                <button
+                  type="button"
+                  className="banner-action-btn"
+                  onClick={handleRestorePrevious}
+                >
+                  Voltar à conversa anterior ↺
+                </button>
+              </div>
+            )}
+
             {messages.map((msg, idx) => (
               <div key={idx} className={`chat-widget-bubble ${msg.sender}`}>
                 <span className="chat-widget-sender-tag">
