@@ -118,8 +118,13 @@ export function validateMessageGuardrails(message) {
   return { allowed: true };
 }
 
+export function cleanSystemPrompt(prompt) {
+  if (!prompt || typeof prompt !== "string") return "";
+  return prompt.replace(/<!--\s*[A-Z_]+:\s*[\s\S]*?-->\n?/g, "").trim();
+}
+
 /**
- * Constrói o contexto dinâmico do portfólio a partir dos dados do sistema
+ * Constrói o contexto dinâmico do portfólio em formato compacto e de alta densidade
  */
 export function buildPortfolioContext() {
   const projects = getStoredProjects();
@@ -127,72 +132,37 @@ export function buildPortfolioContext() {
   const experiences = getStoredExperiences();
   const cvConfig = getStoredCvConfig();
 
-  let context = "\n\n### BASE DE CONHECIMENTO OFICIAL DE MATHEUS DE CASTRO:\n\n";
+  let context = "\n\n### BASE DE CONHECIMENTO (MATHEUS DE CASTRO):\n";
+  context += "- Perfil: Bacharelando em TI (BTI) na UFRN e Técnico em TI pelo IFRN. Foco: Machine Learning Engineering (PyTorch, Deep Learning, Visão Computacional, U-Net) e Backend (Python, FastAPI, PostgreSQL, Docker).\n";
+  context += "- Links: GitHub (https://github.com/Matheus-dCastro) | LinkedIn (https://www.linkedin.com/in/matheus-dcastro) | Email: matheus.vsf.castro.25@gmail.com\n";
 
-  context += "#### PERFIL & FORMAÇÃO:\n";
-  context += "- Nome: Matheus de Castro\n";
-  context += "- Formação: Bacharelando em Tecnologia da Informação (BTI) na UFRN e Técnico em TI pelo IFRN.\n";
-  context += "- Foco: Machine Learning Engineering (PyTorch, U-Net, Visão Computacional), Backend Python (FastAPI/PostgreSQL) e Automações Linux/n8n.\n";
-  context += "- GitHub Oficial: https://github.com/Matheus-dCastro\n";
-  context += "- LinkedIn: https://www.linkedin.com/in/matheus-dcastro\n";
-  context += "- Email: matheus.vsf.castro.25@gmail.com\n\n";
+  if (cvConfig?.googleDocsUrl || cvConfig?.pdfUrl) {
+    context += `- Currículo: Google Docs (${cvConfig.googleDocsUrl || "no portfólio"}) | PDF (${cvConfig.pdfUrl || "no portfólio"})\n`;
+  }
 
   if (experiences.length > 0) {
-    context += "#### EXPERIÊNCIAS PROFISSIONAIS:\n";
-    experiences.forEach((exp) => {
-      context += `- ${exp.title} na ${exp.company} (${exp.time}):\n`;
-      if (Array.isArray(exp.bullets)) {
-        exp.bullets.forEach((b) => {
-          context += `  * ${b}\n`;
-        });
-      }
+    context += "#### EXPERIÊNCIAS PRINCIPAIS:\n";
+    experiences.slice(0, 3).forEach((exp) => {
+      context += `- ${exp.title} na ${exp.company} (${exp.time})\n`;
     });
-    context += "\n";
   }
 
   if (projects.length > 0) {
-    context += "#### PROJETOS NO PORTFÓLIO:\n";
-    projects.forEach((proj) => {
-      context += `- Projeto "${proj.title}" [${proj.category}]:\n`;
-      context += `  * Resumo: ${proj.shortDescription || proj.aboutContext || "Sem resumo"}\n`;
-      if (proj.tags && proj.tags.length > 0) {
-        context += `  * Tecnologias: ${proj.tags.join(", ")}\n`;
-      }
-      if (proj.github) context += `  * Repositório: ${proj.github}\n`;
-      if (proj.demo) context += `  * Demonstração: ${proj.demo}\n`;
+    context += "#### PROJETOS EM DESTAQUE:\n";
+    projects.slice(0, 8).forEach((proj) => {
+      const summary = (proj.shortDescription || proj.aboutContext || "").slice(0, 160).replace(/\n+/g, " ");
+      const tags = Array.isArray(proj.tags) ? proj.tags.slice(0, 4).join(", ") : "";
+      context += `- **${proj.title}** [${proj.category}]: ${summary} (Tech: ${tags})\n`;
     });
-    context += "\n";
   }
 
   if (articles.length > 0) {
-    context += "#### ARTIGOS & PUBLICAÇÕES:\n";
-    articles.forEach((art) => {
-      context += `- Artigo "${art.title}" [${art.category}]:\n`;
-      context += `  * Resumo: ${art.shortDescription || art.aboutContext || "Sem resumo"}\n`;
-      if (art.googleDocsUrl) context += `  * Link Google Docs: ${art.googleDocsUrl}\n`;
-      if (art.pdfUrl) context += `  * Link PDF: ${art.pdfUrl}\n`;
+    context += "#### PUBLICAÇÕES & ARTIGOS:\n";
+    articles.slice(0, 4).forEach((art) => {
+      const summary = (art.shortDescription || "").slice(0, 120).replace(/\n+/g, " ");
+      context += `- **${art.title}**: ${summary}\n`;
     });
-    context += "\n";
   }
-
-  const thoughts = getStoredThoughts();
-  if (thoughts.length > 0) {
-    context += "#### PENSAMENTOS & REFLEXÕES (ENSAIOS TÉCNICOS/FILOSÓFICOS):\n";
-    thoughts.forEach((th) => {
-      context += `- Pensamento/Ensaio "${th.title}" [${th.category}]:\n`;
-      context += `  * Resumo: ${th.shortDescription || th.aboutContext || "Sem resumo"}\n`;
-      if (th.content) {
-        context += `  * Trecho de conteúdo: ${th.content.slice(0, 300)}...\n`;
-      }
-      if (th.googleDocsUrl) context += `  * Link Google Docs: ${th.googleDocsUrl}\n`;
-    });
-    context += "\n";
-  }
-
-  context += "#### CURRÍCULO:\n";
-  context += `- Versão Interativa Google Docs: ${cvConfig.googleDocsUrl || "Disponível no site"}\n`;
-  context += `- Documento Oficial PDF: ${cvConfig.pdfUrl || "Disponível para download no Hero"}\n`;
-  context += `- Data de atualização: ${cvConfig.updatedAt || "Recente"}\n`;
 
   return context;
 }
@@ -216,7 +186,7 @@ export function getGroqApiKey() {
 }
 
 /**
- * Executa chamada direta à API da Groq com resiliência total
+ * Executa chamada direta à API da Groq com resiliência total e proteção de context-length
  */
 export async function callGroqDirect(
   queryText,
@@ -236,23 +206,29 @@ export async function callGroqDirect(
   }
 
   const modelToUse = normalizeModelName(requestedModel);
-  const basePrompt = customPrompt || DEFAULT_SYSTEM_PROMPT;
+  const basePrompt = cleanSystemPrompt(customPrompt || DEFAULT_SYSTEM_PROMPT);
   const fullSystemPrompt = basePrompt + buildPortfolioContext();
 
   const formattedHistory = Array.isArray(conversationHistory)
-    ? conversationHistory.slice(-8).map((m) => ({
-        role: m.sender === "user" || m.role === "user" ? "user" : "assistant",
-        content: m.text || m.content || ""
-      }))
+    ? conversationHistory
+        .slice(-6)
+        .filter((m) => {
+          const content = (m.text || m.content || "").trim();
+          return content && content !== queryText;
+        })
+        .map((m) => ({
+          role: m.sender === "user" || m.role === "user" ? "user" : "assistant",
+          content: (m.text || m.content || "").slice(0, 350)
+        }))
     : [];
 
-  const messages = [
-    { role: "system", content: fullSystemPrompt },
-    ...formattedHistory.filter((m) => m.content !== queryText),
+  const buildMessages = (sysPrompt) => [
+    { role: "system", content: sysPrompt },
+    ...formattedHistory,
     { role: "user", content: queryText }
   ];
 
-  const tryRequest = async (targetModel) => {
+  const tryRequest = async (targetModel, sysContent = fullSystemPrompt, maxTokensLimit = 600) => {
     const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -261,9 +237,9 @@ export async function callGroqDirect(
       },
       body: JSON.stringify({
         model: targetModel,
-        messages,
+        messages: buildMessages(sysContent),
         temperature: 0.3,
-        max_tokens: 800
+        max_tokens: maxTokensLimit
       })
     });
 
@@ -284,8 +260,20 @@ export async function callGroqDirect(
   try {
     return await tryRequest(modelToUse);
   } catch (err) {
-    console.warn(`Tentativa com ${modelToUse} falhou: ${err.message}. Ativando modelo fallback ${FALLBACK_MODEL}...`);
-    return await tryRequest(FALLBACK_MODEL);
+    console.warn(`[Alomyr AI] Tentativa com ${modelToUse} falhou: ${err.message}. Ativando modelo fallback...`);
+
+    // Se o erro for de tamanho de mensagem/contexto, tenta com prompt minimalista
+    const isLengthError = /reduce the length|too large|context_length|rate_limit|ITPM|OTPM|TPM/i.test(err.message);
+    const fallbackSys = isLengthError ? basePrompt : fullSystemPrompt;
+    const fallbackTokens = isLengthError ? 450 : 600;
+
+    try {
+      return await tryRequest(FALLBACK_MODEL, fallbackSys, fallbackTokens);
+    } catch (fallbackErr) {
+      // Último recurso: modelo de maior capacidade de contexto (gpt-oss-120b) com prompt enxuto
+      console.warn(`[Alomyr AI] Fallback 1 falhou: ${fallbackErr.message}. Tentando modelo alternativo...`);
+      return await tryRequest("openai/gpt-oss-120b", basePrompt, 400);
+    }
   }
 }
 
