@@ -170,7 +170,6 @@ export default function BlogReaderDock({
           >
             <img src="/wolf(2).png" alt="Alomyr" className="dock-alomyr-logo-img" />
             <span className="dock-alomyr-label">Ask Alomyr (AI)</span>
-            <span className="dock-alomyr-glow-dot"></span>
           </button>
 
           {onBackToFeed && (
@@ -295,7 +294,6 @@ export default function BlogReaderDock({
               onClick={() => triggerAiAssistant("")}
             >
               <div className="direct-chat-left">
-                <span className="direct-chat-dot"></span>
                 <span className="direct-chat-title">Abrir Conversa Livre com Alomyr</span>
               </div>
               <span className="direct-chat-badge">Chat IA</span>
@@ -357,7 +355,6 @@ export default function BlogReaderDock({
         >
           <img src="/wolf(2).png" alt="Alomyr" className="dock-alomyr-logo-img" />
           <span className="dock-alomyr-label">Ask Alomyr (AI)</span>
-          <span className="dock-alomyr-glow-dot"></span>
         </button>
 
         <div className="dock-divider"></div>

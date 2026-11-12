@@ -198,9 +198,9 @@ serve(async (req) => {
       }
     }
 
-    const defaultPrompt = `Você é o Alomyr, o Assistente Oficial de IA do portfólio de Matheus de Castro.
-Responda exclusivamente sobre a carreira, projetos de Machine Learning/Backend, artigos e qualificações de Matheus de Castro.
-Mantenha um tom técnico, acolhedor e direto.`;
+    const defaultPrompt = `Você é o Alomyr, o Assistente Oficial e Inteligente de IA do portfólio de Matheus de Castro.
+Você tem autonomia para explicar profundamente a arquitetura de backend, modelos de Machine Learning (PyTorch, U-Net, Visão Computacional), artigos e currículo técnico de Matheus.
+Mantenha um tom técnico, acolhedor, conciso e articulado, explicando com clareza lições práticas de engenharia e trade-offs.`;
 
     // Garante que o prompt não estoure o limite de TPM/tokens da Groq
     const cleanedBasePrompt = (systemPromptBase || defaultPrompt)
@@ -246,15 +246,17 @@ Mantenha um tom técnico, acolhedor e direto.`;
       );
     }
 
-    // Map model names to Groq official production models: qwen/qwen3.8-27b e openai/gpt-oss-20b
-    let modelToRequest = "qwen/qwen3.8-27b";
-    if (activeModelName && (activeModelName.includes("120b") || activeModelName.includes("large"))) {
-      modelToRequest = "openai/gpt-oss-120b";
-    } else if (activeModelName && (activeModelName.includes("20b") || activeModelName.includes("fast"))) {
-      modelToRequest = "openai/gpt-oss-20b";
+    // Map model names to Groq official production models: llama-3.3-70b-versatile e llama-3.1-8b-instant
+    let modelToRequest = "llama-3.3-70b-versatile";
+    if (activeModelName && (activeModelName.includes("8b") || activeModelName.includes("instant") || activeModelName.includes("fast"))) {
+      modelToRequest = "llama-3.1-8b-instant";
+    } else if (activeModelName && activeModelName.includes("70b")) {
+      modelToRequest = "llama-3.3-70b-versatile";
+    } else if (activeModelName && !activeModelName.includes("qwen") && !activeModelName.includes("oss")) {
+      modelToRequest = activeModelName;
     }
 
-    const safeMaxTokens = Math.min(activeMaxTokens || 400, 500);
+    const safeMaxTokens = Math.min(activeMaxTokens || 400, 600);
 
     const groqResponse = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
@@ -272,7 +274,7 @@ Mantenha um tom técnico, acolhedor e direto.`;
 
     if (!groqResponse.ok) {
       const errData = await groqResponse.json().catch(() => ({}));
-      // Fallback para modelo secundario leve (openai/gpt-oss-20b)
+      // Fallback transparente para modelo secundario ultrarrapido (llama-3.1-8b-instant)
       const retryResponse = await fetch("https://api.groq.com/openai/v1/chat/completions", {
         method: "POST",
         headers: {
@@ -280,10 +282,10 @@ Mantenha um tom técnico, acolhedor e direto.`;
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model: "openai/gpt-oss-20b",
+          model: "llama-3.1-8b-instant",
           messages,
           temperature: activeTemperature,
-          max_tokens: 350,
+          max_tokens: 400,
         }),
       });
 

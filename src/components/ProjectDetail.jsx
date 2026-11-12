@@ -37,6 +37,15 @@ export default function ProjectDetail({ project: propProject, onBackToHome, onSe
   const [activeContentTab, setActiveContentTab] = useState("auto"); // 'auto' | 'readme' | 'gdocs' | 'pdf'
   const [fontScale, setFontScale] = useState(1);
   const [zenMode, setZenMode] = useState(false);
+  const [showBackToTop, setShowBackToTop] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowBackToTop(window.scrollY > 300);
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   useEffect(() => {
     if (zenMode) {
@@ -587,6 +596,21 @@ export default function ProjectDetail({ project: propProject, onBackToHome, onSe
           </div>
         </section>
       </main>
+
+      {/* Botão Flutuante Voltar ao Topo (Lado Esquerdo) */}
+      {showBackToTop && (
+        <button
+          type="button"
+          className="blog-floating-back-to-top"
+          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+          title={lang === "en" ? "Scroll to top" : "Voltar ao topo"}
+          aria-label="Scroll to top"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="18 15 12 9 6 15"></polyline>
+          </svg>
+        </button>
+      )}
 
       {/* DOCK INTERATIVO DO PROJETO / ARTIGO (ABRAÇA O BOTÃO DO AGENTE ALOMYR) */}
       <BlogReaderDock
