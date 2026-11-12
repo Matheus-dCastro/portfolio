@@ -54,9 +54,11 @@ Documento de acompanhamento em tempo real das correcoes de seguranca, saneamento
   - `OrderDraft.jsx` / `.css` -> `OrderManager.jsx` / `.css`
   - `ViewDraft.jsx` / `.css` -> `ProjectDetail.jsx` / `.css`
 - [x] Refatoracao do Blog (`BlogPage.jsx` e `BlogGateway.jsx`):
-  - Barra ativa de contagem de publicacoes encontradas com botao "Limpar Filtros".
-  - Substituicao de emojis coloridos por icones vetoriais SVG monocromaticos.
-  - Otimizacao da navegacao de feed e do leitor de artigos.
+  - [x] Unificacao visual completa da topbar: adocao do menu estilo pilula flutuante de vidro fume (`site-header`) identico ao portfolio principal tanto no Blog quanto no Gateway de canais.
+  - [x] UX/UI aprimorada: barra dinamica de progresso de leitura integrada ao contorno da pilula, breadcrumbs estruturados no leitor e botao flutuante de retorno ao topo.
+  - [x] Barra ativa de contagem de publicacoes encontradas com botao "Limpar Filtros".
+  - [x] Substituicao de emojis coloridos por icones vetoriais SVG monocromaticos.
+  - [x] Otimizacao da navegacao de feed e do leitor de artigos.
 - [x] Sanitizacao de variaveis e imports: `npm run lint` passou com 0 erros.
-- [x] Compilacao de producao (`npm run build`) concluida com sucesso absoluto em 281ms.
-- [x] Deploy Gate: Aguardando confirmacao explicita ("ok") do usuario para subir em producao via GitHub Pages.
+- [x] Compilacao de producao (`npm run build`) concluida com sucesso absoluto em 263ms.
+- [x] Deploy Gate: Autorizado pelo usuario ("quando acabar faz commit e deploy ok"). Executando commit e deploy via GitHub Pages.

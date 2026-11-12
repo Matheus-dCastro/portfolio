@@ -102,41 +102,50 @@ export default function BlogGateway({ config: propConfig, onSelectChannel, onBac
       <div className="gateway-bg-gradient left"></div>
       <div className="gateway-bg-gradient right"></div>
 
-      {/* Top Header */}
-      <header className="gateway-header">
-        <a
-          href="/"
-          onClick={(e) => {
-            e.preventDefault();
-            if (onBackToHome) onBackToHome();
-            else window.location.href = "/";
-          }}
-          className="gateway-back-btn"
-          title={t("blog.back_to_portfolio")}
-        >
-          <svg
-            className="gateway-back-icon"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
+      {/* Top Header: Estilo Pílula Flutuante Idêntico ao Portfólio */}
+      <header className="site-header blog-site-header gateway-site-header">
+        <div className="blog-brand-wrapper">
+          <a
+            href="/"
+            onClick={(e) => {
+              e.preventDefault();
+              if (onBackToHome) onBackToHome();
+              else window.location.href = "/";
+            }}
+            className="logo"
           >
-            <line x1="19" y1="12" x2="5" y2="12"></line>
-            <polyline points="12 19 5 12 12 5"></polyline>
-          </svg>
-          <span>{t("blog.back_to_portfolio")}</span>
-        </a>
-
-        <div className="gateway-brand">
-          <img src="/wolf(2).png" alt="Wolf Logo" className="gateway-brand-logo" />
-          <span className="gateway-brand-name">Matheus de Castro</span>
+            <img src="/wolf(2).png" className="logo-icon" alt="Wolf Logo" />
+            <span className="first-name">Matheus</span>{" "}
+            <span className="last-name">de Castro</span>
+          </a>
+          <div className="blog-channel-tag-container">
+            <span className="blog-channel-slash">/</span>
+            <span className="blog-channel-indicator-badge gateway">
+              GATEWAY
+            </span>
+          </div>
         </div>
 
-        <div className="gateway-lang-wrapper">
+        <nav className="blog-pill-nav">
+          <a
+            href="/"
+            onClick={(e) => {
+              e.preventDefault();
+              if (onBackToHome) onBackToHome();
+              else window.location.href = "/";
+            }}
+            className="blog-nav-item home-pill-link"
+            title={t("blog.back_to_portfolio")}
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+              <polyline points="9 22 9 12 15 12 15 22"></polyline>
+            </svg>
+            <span>{t("nav.home") || "Início"}</span>
+          </a>
+
           <LanguageSwitcher />
-        </div>
+        </nav>
       </header>
 
       {/* Main Split Gateway Hero */}
