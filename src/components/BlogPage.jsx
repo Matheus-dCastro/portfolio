@@ -15,6 +15,7 @@ import {
 } from "../data/blogData";
 import { getStoredProjects, getStoredArticles, getStoredProfileConfig } from "../data/projectsData";
 import fotoAlomyr from "../assets/img/alomyr.jpeg";
+import BlogReaderDock from "./BlogReaderDock";
 import "./BlogPage.css";
 
 export default function BlogPage({
@@ -35,6 +36,18 @@ export default function BlogPage({
   const [profilePhoto, setProfilePhoto] = useState(() => getStoredProfileConfig()?.photoUrl || fotoAlomyr);
   const [readProgress, setReadProgress] = useState(0);
   const [showBackToTop, setShowBackToTop] = useState(false);
+  const [fontScale, setFontScale] = useState(1);
+  const [zenMode, setZenMode] = useState(false);
+
+  // Sync Zen Mode class on body
+  useEffect(() => {
+    if (zenMode) {
+      document.body.classList.add("blog-zen-mode");
+    } else {
+      document.body.classList.remove("blog-zen-mode");
+    }
+    return () => document.body.classList.remove("blog-zen-mode");
+  }, [zenMode]);
 
   // Monitor scroll for reading progress and back-to-top button
   useEffect(() => {
@@ -537,7 +550,7 @@ export default function BlogPage({
           )}
 
           {/* MAIN POST CONTENT (RICH MARKDOWN) */}
-          <div className="reader-markdown-body">
+          <div className="reader-markdown-body" style={{ fontSize: `${fontScale}rem` }}>
             <BlogMarkdownRenderer
               content={
                 lang === "en"
@@ -1077,6 +1090,22 @@ export default function BlogPage({
             <polyline points="18 15 12 9 6 15"></polyline>
           </svg>
         </button>
+      )}
+
+      {/* DOCK INTERATIVO DO LEITOR (REVISTA & PAPEL DIGITAL) */}
+      {activePost && (
+        <BlogReaderDock
+          activePost={activePost}
+          isTech={isTech}
+          fontScale={fontScale}
+          setFontScale={setFontScale}
+          zenMode={zenMode}
+          setZenMode={setZenMode}
+          onBackToFeed={() => handleSelectPost(null)}
+          prevPost={prevPost}
+          nextPost={nextPost}
+          onSelectPost={handleSelectPost}
+        />
       )}
     </div>
   );
