@@ -170,56 +170,52 @@ serve(async (req) => {
         .eq("id", "production")
         .maybeSingle();
 
-      // Monta injeção de conhecimento
-      dynamicContext += "\n\n### BASE DE CONHECIMENTO OFICIAL DE MATHEUS DE CASTRO:\n";
-      dynamicContext += "- Nome: Matheus de Castro\n";
-      dynamicContext += "- Formação: Bacharelando em Tecnologia da Informação (BTI) na UFRN e Técnico em TI pelo IFRN.\n";
-      dynamicContext += "- Especialidade: Machine Learning Engineering (PyTorch, Deep Learning, Computer Vision, U-Net) e Backend (Python, FastAPI, PostgreSQL, Docker).\n";
-      dynamicContext += "- GitHub: https://github.com/Matheus-dCastro\n";
-      dynamicContext += "- LinkedIn: https://www.linkedin.com/in/matheus-dcastro\n";
-      dynamicContext += "- Email: matheus.vsf.castro.25@gmail.com\n\n";
+      // Monta injeção de conhecimento compacta
+      dynamicContext += "\n\n### BASE DE CONHECIMENTO (MATHEUS DE CASTRO):\n";
+      dynamicContext += "- Formação: BTI na UFRN e Técnico em TI pelo IFRN. Foco: Machine Learning Engineering (PyTorch, Visão Computacional, U-Net) e Backend (Python, FastAPI, PostgreSQL, Docker).\n";
+      dynamicContext += "- Links: GitHub: https://github.com/Matheus-dCastro | LinkedIn: https://www.linkedin.com/in/matheus-dcastro | Email: matheus.vsf.castro.25@gmail.com\n";
 
       if (works && works.length > 0) {
         dynamicContext += "#### PROJETOS NO PORTFÓLIO:\n";
-        works.forEach((w) => {
-          dynamicContext += `- Projeto "${w.title}" [${w.category}]: ${w.short_description}. Tags: [${w.tags?.join(", ")}]. GitHub: ${w.github_url || "N/A"}. Demo: ${w.demo_url || "N/A"}\n`;
+        works.slice(0, 8).forEach((w: any) => {
+          const desc = (w.short_description || "").slice(0, 140).replace(/\n+/g, " ");
+          const tags = Array.isArray(w.tags) ? w.tags.slice(0, 4).join(", ") : "";
+          dynamicContext += `- **${w.title}** [${w.category}]: ${desc} (Tech: ${tags})\n`;
         });
-        dynamicContext += "\n";
       }
 
       if (articles && articles.length > 0) {
-        dynamicContext += "#### ARTIGOS TÉCNICOS & PUBLICAÇÕES:\n";
-        articles.forEach((a) => {
-          dynamicContext += `- Artigo "${a.title}" [${a.category}]: ${a.short_description}. Docs: ${a.google_docs_url || "N/A"}\n`;
+        dynamicContext += "#### ARTIGOS TÉCNICOS:\n";
+        articles.slice(0, 4).forEach((a: any) => {
+          const desc = (a.short_description || "").slice(0, 120).replace(/\n+/g, " ");
+          dynamicContext += `- **${a.title}**: ${desc}\n`;
         });
-        dynamicContext += "\n";
       }
 
       if (cvConfig) {
         dynamicContext += "#### CURRÍCULO:\n";
-        dynamicContext += `- Versão Google Docs: ${cvConfig.google_docs_url || "Disponível no site"}\n`;
-        dynamicContext += `- Documento PDF: ${cvConfig.pdf_url || "Disponível no site"}\n`;
+        dynamicContext += `- Google Docs: ${cvConfig.google_docs_url || "Disponível no site"} | PDF: ${cvConfig.pdf_url || "Disponível no site"}\n`;
       }
     }
 
     const defaultPrompt = `Você é o Alomyr, o Assistente Oficial de IA do portfólio de Matheus de Castro.
-Responda exclusivamente sobre a carreira, projetos de Machine Learning/Backend, artigos, pensamentos/reflexões e qualificações de Matheus de Castro.
-Mantenha um tom técnico, acolhedor e direto. Nunca alucine projetos inexistentes.
-Sempre que mencionar projetos, inclua o nome em destaque e convide o visitante a conferir no GitHub ou no portfólio.`;
+Responda exclusivamente sobre a carreira, projetos de Machine Learning/Backend, artigos e qualificações de Matheus de Castro.
+Mantenha um tom técnico, acolhedor e direto.`;
 
-    const fullSystemPrompt = (systemPromptBase || defaultPrompt) + dynamicContext;
+    const cleanedBasePrompt = (systemPromptBase || defaultPrompt).replace(/<!--\s*[A-Z_]+:\s*[\s\S]*?-->\n?/g, "").trim();
+    const fullSystemPrompt = cleanedBasePrompt + dynamicContext;
 
-    // Build chat completion messages
+    // Build chat completion messages (keep recent turns, truncate lengths)
     const formattedHistory = Array.isArray(conversationHistory)
-      ? conversationHistory.slice(-8).map((m: any) => ({
+      ? conversationHistory.slice(-6).map((m: any) => ({
           role: m.sender === "user" || m.role === "user" ? "user" : "assistant",
-          content: m.text || m.content || "",
+          content: String(m.text || m.content || "").slice(0, 350),
         }))
       : [];
 
     const messages = [
       { role: "system", content: fullSystemPrompt },
-      ...formattedHistory,
+      ...formattedHistory.filter((m: any) => m.content !== trimmedMsg),
       { role: "user", content: trimmedMsg },
     ];
 
@@ -254,6 +250,8 @@ Sempre que mencionar projetos, inclua o nome em destaque e convide o visitante a
       modelToRequest = "openai/gpt-oss-20b";
     }
 
+    const safeMaxTokens = Math.min(activeMaxTokens || 600, 600);
+
     const groqResponse = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -264,13 +262,45 @@ Sempre que mencionar projetos, inclua o nome em destaque e convide o visitante a
         model: modelToRequest,
         messages,
         temperature: activeTemperature,
-        max_tokens: activeMaxTokens,
+        max_tokens: safeMaxTokens,
       }),
     });
 
     if (!groqResponse.ok) {
       const errData = await groqResponse.json().catch(() => ({}));
-      throw new Error(errData?.error?.message || `Erro da API da Groq: ${groqResponse.status}`);
+      // Fallback para modelo secundário se limite de contexto ou rate limit
+      const retryResponse = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${groqApiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "openai/gpt-oss-20b",
+          messages,
+          temperature: activeTemperature,
+          max_tokens: 500,
+        }),
+      });
+
+      if (!retryResponse.ok) {
+        throw new Error(errData?.error?.message || `Erro da API da Groq: ${groqResponse.status}`);
+      }
+
+      const retryData = await retryResponse.json();
+      const reply = retryData.choices?.[0]?.message?.content || "Desculpe, ocorreu uma instabilidade ao processar a resposta.";
+      return new Response(
+        JSON.stringify({
+          success: true,
+          reply,
+          text: reply,
+          model: "openai/gpt-oss-20b",
+          usage: retryData.usage,
+        }),
+        {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
     }
 
     const groqData = await groqResponse.json();
