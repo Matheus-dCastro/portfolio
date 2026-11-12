@@ -775,28 +775,6 @@ h2 span {
   transform: scale(1.08); /* Leve pulo dinâmico */
 }
 
-.skill-item svg.skill-tech-icon {
-  width: 42px;
-  height: 42px;
-  color: #8b5cf6;
-  fill: currentColor;
-  transition: transform 0.3s var(--ease), color 0.3s var(--ease), fill 0.3s var(--ease);
-}
-
-.skill-item:hover svg.skill-tech-icon {
-  transform: scale(1.08);
-}
-
-.skill-item:hover svg.skill-ubuntu-icon {
-  color: #E95420;
-  fill: #E95420;
-}
-
-.skill-item:hover svg.skill-markdown-icon {
-  color: #FFFFFF;
-  fill: #FFFFFF;
-}
-
 /* O texto acende em branco puro no hover para contrastar com o ícone colorido */
 .skill-item:hover span {
   color: #ffffff;

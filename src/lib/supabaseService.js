@@ -820,14 +820,11 @@ export async function persistCustomHobby(hobbyData) {
     try {
       const { error } = await supabase
         .from("agent_configs")
-        .upsert(
-          {
-            id: "production",
-            custom_hobby_json: hobbyData,
-            updated_at: new Date().toISOString()
-          },
-          { onConflict: "id" }
-        );
+        .update({
+          custom_hobby_json: hobbyData,
+          updated_at: new Date().toISOString()
+        })
+        .eq("id", "production");
       if (error && error.message && error.message.includes("custom_hobby_json")) {
         return { success: true, cloud: false };
       }
@@ -947,14 +944,11 @@ export async function persistHobbies(hobbiesList) {
         };
         const tryJson = await supabase
           .from("agent_configs")
-          .upsert(
-            {
-              id: "production",
-              custom_hobby_json: payload,
-              updated_at: new Date().toISOString()
-            },
-            { onConflict: "id" }
-          );
+          .update({
+            custom_hobby_json: payload,
+            updated_at: new Date().toISOString()
+          })
+          .eq("id", "production");
         if (!tryJson.error) {
           isCloud = true;
         }
@@ -966,14 +960,11 @@ export async function persistHobbies(hobbiesList) {
         const updatedPrompt = embedMetadataInPrompt(basePrompt, "HOBBIES_LIST", hobbiesList);
         const tryPrompt = await supabase
           .from("agent_configs")
-          .upsert(
-            {
-              id: "production",
-              system_prompt: updatedPrompt,
-              updated_at: new Date().toISOString()
-            },
-            { onConflict: "id" }
-          );
+          .update({
+            system_prompt: updatedPrompt,
+            updated_at: new Date().toISOString()
+          })
+          .eq("id", "production");
         if (!tryPrompt.error) {
           isCloud = true;
         }
@@ -1000,14 +991,10 @@ export async function removeHobby(id) {
       if (!error) isCloud = true;
 
       try {
-        await supabase.from("agent_configs").upsert(
-          {
-            id: "production",
-            custom_hobby_json: { hobbiesList: updated, updatedAt: new Date().toISOString() },
-            updated_at: new Date().toISOString()
-          },
-          { onConflict: "id" }
-        );
+        await supabase.from("agent_configs").update({
+          custom_hobby_json: { hobbiesList: updated, updatedAt: new Date().toISOString() },
+          updated_at: new Date().toISOString()
+        }).eq("id", "production");
         isCloud = true;
       } catch (e) {}
     } catch (err) {
@@ -1218,19 +1205,17 @@ export async function persistBlogPostsBatch(posts) {
         updatedAt: new Date().toISOString()
       };
 
-      const tryJson = await supabase.from("agent_configs").upsert(
-        { id: "production", custom_hobby_json: mergedConfig, updated_at: new Date().toISOString() },
-        { onConflict: "id" }
-      );
+      const tryJson = await supabase.from("agent_configs").update(
+        { custom_hobby_json: mergedConfig, updated_at: new Date().toISOString() }
+      ).eq("id", "production");
       if (!tryJson.error) return { success: true, cloud: true };
 
       // Fallback em system_prompt
       const basePrompt = configRes.data?.system_prompt || "";
       const updatedPrompt = embedMetadataInPrompt(basePrompt, "BLOG_POSTS", posts);
-      const tryPrompt = await supabase.from("agent_configs").upsert(
-        { id: "production", system_prompt: updatedPrompt, updated_at: new Date().toISOString() },
-        { onConflict: "id" }
-      );
+      const tryPrompt = await supabase.from("agent_configs").update(
+        { system_prompt: updatedPrompt, updated_at: new Date().toISOString() }
+      ).eq("id", "production");
       if (!tryPrompt.error) return { success: true, cloud: true };
       return { success: true, cloud: false, error: tryPrompt.error.message };
     } catch (err) {
@@ -1312,69 +1297,109 @@ export const DEFAULT_BLOG_GATEWAY_CONFIG = {
 
 export function normalizeBlogGatewayConfig(config) {
   if (!config || typeof config !== "object") return DEFAULT_BLOG_GATEWAY_CONFIG;
+  const gwTitlePt = config.gatewayTitlePt || config.mainTitlePt || DEFAULT_BLOG_GATEWAY_CONFIG.gatewayTitlePt;
+  const gwTitleEn = config.gatewayTitleEn || config.mainTitleEn || DEFAULT_BLOG_GATEWAY_CONFIG.gatewayTitleEn;
+  const gwSubtitlePt = config.gatewaySubtitlePt || config.subtitlePt || DEFAULT_BLOG_GATEWAY_CONFIG.gatewaySubtitlePt;
+  const gwSubtitleEn = config.gatewaySubtitleEn || config.subtitleEn || DEFAULT_BLOG_GATEWAY_CONFIG.gatewaySubtitleEn;
+  const topBadgePt = config.topBadgePt || DEFAULT_BLOG_GATEWAY_CONFIG.topBadgePt;
+  const topBadgeEn = config.topBadgeEn || DEFAULT_BLOG_GATEWAY_CONFIG.topBadgeEn;
+  const isWipVisible = config.wipNoticeVisible !== false && config.showBanner !== false;
+  const wipBadgePt = config.wipNoticeBadgePt || config.bannerBadgePt || DEFAULT_BLOG_GATEWAY_CONFIG.wipNoticeBadgePt;
+  const wipBadgeEn = config.wipNoticeBadgeEn || config.bannerBadgeEn || DEFAULT_BLOG_GATEWAY_CONFIG.wipNoticeBadgeEn;
+  const wipTextPt = config.wipNoticeTextPt || config.bannerTextPt || DEFAULT_BLOG_GATEWAY_CONFIG.wipNoticeTextPt;
+  const wipTextEn = config.wipNoticeTextEn || config.bannerTextEn || DEFAULT_BLOG_GATEWAY_CONFIG.wipNoticeTextEn;
+
+  const cardTechBadgePt = config.cardTechBadgePt || config.card1BadgePt || DEFAULT_BLOG_GATEWAY_CONFIG.cardTechBadgePt;
+  const cardTechBadgeEn = config.cardTechBadgeEn || config.card1BadgeEn || DEFAULT_BLOG_GATEWAY_CONFIG.cardTechBadgeEn;
+  const cardTechTitlePt = config.cardTechTitlePt || config.card1TitlePt || DEFAULT_BLOG_GATEWAY_CONFIG.cardTechTitlePt;
+  const cardTechTitleEn = config.cardTechTitleEn || config.card1TitleEn || DEFAULT_BLOG_GATEWAY_CONFIG.cardTechTitleEn;
+  const cardTechDescPt = config.cardTechDescPt || config.card1DescPt || DEFAULT_BLOG_GATEWAY_CONFIG.cardTechDescPt;
+  const cardTechDescEn = config.cardTechDescEn || config.card1DescEn || DEFAULT_BLOG_GATEWAY_CONFIG.cardTechDescEn;
+  const cardTechTags = (Array.isArray(config.cardTechTags) && config.cardTechTags.length > 0)
+    ? config.cardTechTags
+    : ((Array.isArray(config.card1Tags) && config.card1Tags.length > 0) ? config.card1Tags : DEFAULT_BLOG_GATEWAY_CONFIG.cardTechTags);
+  const cardTechBtnPt = config.cardTechBtnPt || config.card1BtnPt || DEFAULT_BLOG_GATEWAY_CONFIG.cardTechBtnPt;
+  const cardTechBtnEn = config.cardTechBtnEn || config.card1BtnEn || DEFAULT_BLOG_GATEWAY_CONFIG.cardTechBtnEn;
+
+  const cardAlomyrBadgePt = config.cardAlomyrBadgePt || config.card2BadgePt || DEFAULT_BLOG_GATEWAY_CONFIG.cardAlomyrBadgePt;
+  const cardAlomyrBadgeEn = config.cardAlomyrBadgeEn || config.card2BadgeEn || DEFAULT_BLOG_GATEWAY_CONFIG.cardAlomyrBadgeEn;
+  const cardAlomyrTitlePt = config.cardAlomyrTitlePt || config.card2TitlePt || DEFAULT_BLOG_GATEWAY_CONFIG.cardAlomyrTitlePt;
+  const cardAlomyrTitleEn = config.cardAlomyrTitleEn || config.card2TitleEn || DEFAULT_BLOG_GATEWAY_CONFIG.cardAlomyrTitleEn;
+  const cardAlomyrDescPt = config.cardAlomyrDescPt || config.card2DescPt || DEFAULT_BLOG_GATEWAY_CONFIG.cardAlomyrDescPt;
+  const cardAlomyrDescEn = config.cardAlomyrDescEn || config.card2DescEn || DEFAULT_BLOG_GATEWAY_CONFIG.cardAlomyrDescEn;
+  const cardAlomyrTags = (Array.isArray(config.cardAlomyrTags) && config.cardAlomyrTags.length > 0)
+    ? config.cardAlomyrTags
+    : ((Array.isArray(config.card2Tags) && config.card2Tags.length > 0) ? config.card2Tags : DEFAULT_BLOG_GATEWAY_CONFIG.cardAlomyrTags);
+  const cardAlomyrBtnPt = config.cardAlomyrBtnPt || config.card2BtnPt || DEFAULT_BLOG_GATEWAY_CONFIG.cardAlomyrBtnPt;
+  const cardAlomyrBtnEn = config.cardAlomyrBtnEn || config.card2BtnEn || DEFAULT_BLOG_GATEWAY_CONFIG.cardAlomyrBtnEn;
+
+  const footerNotePt = config.footerNotePt || DEFAULT_BLOG_GATEWAY_CONFIG.footerNotePt;
+  const footerNoteEn = config.footerNoteEn || DEFAULT_BLOG_GATEWAY_CONFIG.footerNoteEn;
+  const defaultRoute = config.defaultRoute || DEFAULT_BLOG_GATEWAY_CONFIG.defaultRoute;
+
   return {
     ...DEFAULT_BLOG_GATEWAY_CONFIG,
     ...config,
-    gatewayTitlePt: config.gatewayTitlePt || config.mainTitlePt || "Blog & Laboratório Criativo",
-    gatewayTitleEn: config.gatewayTitleEn || config.mainTitleEn || "Blog & Creative Laboratory",
-    mainTitlePt: config.gatewayTitlePt || config.mainTitlePt || "Blog & Laboratório Criativo",
-    mainTitleEn: config.gatewayTitleEn || config.mainTitleEn || "Blog & Creative Laboratory",
-    gatewaySubtitlePt: config.gatewaySubtitlePt || config.subtitlePt || "Selecione a dimensão que deseja explorar:",
-    gatewaySubtitleEn: config.gatewaySubtitleEn || config.subtitleEn || "Select the dimension you want to explore:",
-    subtitlePt: config.gatewaySubtitlePt || config.subtitlePt || "Selecione a dimensão que deseja explorar:",
-    subtitleEn: config.gatewaySubtitleEn || config.subtitleEn || "Select the dimension you want to explore:",
-    topBadgePt: config.topBadgePt || "ECOSSISTEMA MATHEUS DE CASTRO",
-    topBadgeEn: config.topBadgeEn || "MATHEUS DE CASTRO ECOSYSTEM",
-    wipNoticeVisible: config.wipNoticeVisible !== false && config.showBanner !== false,
-    showBanner: config.wipNoticeVisible !== false && config.showBanner !== false,
-    wipNoticeBadgePt: config.wipNoticeBadgePt || config.bannerBadgePt || "EM REFINAMENTO • PRÉVIA EDITORIAL",
-    wipNoticeBadgeEn: config.wipNoticeBadgeEn || config.bannerBadgeEn || "UNDER REFINEMENT • EDITORIAL PREVIEW",
-    bannerBadgePt: config.wipNoticeBadgePt || config.bannerBadgePt || "EM REFINAMENTO • PRÉVIA EDITORIAL",
-    bannerBadgeEn: config.wipNoticeBadgeEn || config.bannerBadgeEn || "UNDER REFINEMENT • EDITORIAL PREVIEW",
-    wipNoticeTextPt: config.wipNoticeTextPt || config.bannerTextPt || "Esta seção reúne ensaios de arquitetura, Machine Learning e artigos autorais de arte/retrogaming.",
-    wipNoticeTextEn: config.wipNoticeTextEn || config.bannerTextEn || "This section brings together architecture essays, Machine Learning, and personal art/retrogaming articles.",
-    bannerTextPt: config.wipNoticeTextPt || config.bannerTextPt || "Esta seção reúne ensaios de arquitetura, Machine Learning e artigos autorais de arte/retrogaming.",
-    bannerTextEn: config.wipNoticeTextEn || config.bannerTextEn || "This section brings together architecture essays, Machine Learning, and personal art/retrogaming articles.",
-    cardTechBadgePt: config.cardTechBadgePt || config.card1BadgePt || "ENGENHARIA, BACKEND & IA",
-    cardTechBadgeEn: config.cardTechBadgeEn || config.card1BadgeEn || "ENGINEERING, BACKEND & AI",
-    card1BadgePt: config.cardTechBadgePt || config.card1BadgePt || "ENGENHARIA, BACKEND & IA",
-    card1BadgeEn: config.cardTechBadgeEn || config.card1BadgeEn || "ENGINEERING, BACKEND & AI",
-    cardTechTitlePt: config.cardTechTitlePt || config.card1TitlePt || "Blog Técnico de Engenharia",
-    cardTechTitleEn: config.cardTechTitleEn || config.card1TitleEn || "Technical Engineering Blog",
-    card1TitlePt: config.cardTechTitlePt || config.card1TitlePt || "Blog Técnico de Engenharia",
-    card1TitleEn: config.cardTechTitleEn || config.card1TitleEn || "Technical Engineering Blog",
-    cardTechDescPt: config.cardTechDescPt || config.card1DescPt || "Artigos profundos de telemetria de LLMs, visão computacional, microsserviços em FastAPI e arquiteturas de alta vazão.",
-    cardTechDescEn: config.cardTechDescEn || config.card1DescEn || "In-depth articles on LLM telemetry, computer vision, FastAPI microservices, and high-throughput architectures.",
-    card1DescPt: config.cardTechDescPt || config.card1DescPt || "Artigos profundos de telemetria de LLMs, visão computacional, microsserviços em FastAPI e arquiteturas de alta vazão.",
-    card1DescEn: config.cardTechDescEn || config.card1DescEn || "In-depth articles on LLM telemetry, computer vision, FastAPI microservices, and high-throughput architectures.",
-    cardTechTags: (Array.isArray(config.cardTechTags) && config.cardTechTags.length > 0) ? config.cardTechTags : ((Array.isArray(config.card1Tags) && config.card1Tags.length > 0) ? config.card1Tags : ["#FastAPI", "#PyTorch", "#AI-Agents", "#Docker", "#TimescaleDB", "#Python"]),
-    card1Tags: (Array.isArray(config.cardTechTags) && config.cardTechTags.length > 0) ? config.cardTechTags : ((Array.isArray(config.card1Tags) && config.card1Tags.length > 0) ? config.card1Tags : ["#FastAPI", "#PyTorch", "#AI-Agents", "#Docker", "#TimescaleDB", "#Python"]),
-    cardTechBtnPt: config.cardTechBtnPt || config.card1BtnPt || "Acessar Artigos Técnicos →",
-    cardTechBtnEn: config.cardTechBtnEn || config.card1BtnEn || "Explore Technical Articles →",
-    card1BtnPt: config.cardTechBtnPt || config.card1BtnPt || "Acessar Artigos Técnicos →",
-    card1BtnEn: config.cardTechBtnEn || config.card1BtnEn || "Explore Technical Articles →",
-    cardAlomyrBadgePt: config.cardAlomyrBadgePt || config.card2BadgePt || "ARTE, RETROGAMIN & FILOSOFIA",
-    cardAlomyrBadgeEn: config.cardAlomyrBadgeEn || config.card2BadgeEn || "ART, RETROGAMING & PHILOSOPHY",
-    card2BadgePt: config.cardAlomyrBadgePt || config.card2BadgePt || "ARTE, RETROGAMIN & FILOSOFIA",
-    card2BadgeEn: config.cardAlomyrBadgeEn || config.card2BadgeEn || "ART, RETROGAMING & PHILOSOPHY",
-    cardAlomyrTitlePt: config.cardAlomyrTitlePt || config.card2TitlePt || "Laboratório Criativo Alomyr",
-    cardAlomyrTitleEn: config.cardAlomyrTitleEn || config.card2TitleEn || "Alomyr Creative Laboratory",
-    card2TitlePt: config.cardAlomyrTitlePt || config.card2TitlePt || "Laboratório Criativo Alomyr",
-    card2TitleEn: config.cardAlomyrTitleEn || config.card2TitleEn || "Alomyr Creative Laboratory",
-    cardAlomyrDescPt: config.cardAlomyrDescPt || config.card2DescPt || "O processo meticuloso do desenho hiper-realista a grafite, preservação e emulação retrô no Linux e ensaios sobre código e mente.",
-    cardAlomyrDescEn: config.cardAlomyrDescEn || config.card2DescEn || "The meticulous process of hyper-realistic graphite drawing, Linux retro preservation/emulation, and essays on code and mind.",
-    card2DescPt: config.cardAlomyrDescPt || config.card2DescPt || "O processo meticuloso do desenho hiper-realista a grafite, preservação e emulação retrô no Linux e ensaios sobre código e mente.",
-    card2DescEn: config.cardAlomyrDescEn || config.card2DescEn || "The meticulous process of hyper-realistic graphite drawing, Linux retro preservation/emulation, and essays on code and mind.",
-    cardAlomyrTags: (Array.isArray(config.cardAlomyrTags) && config.cardAlomyrTags.length > 0) ? config.cardAlomyrTags : ((Array.isArray(config.card2Tags) && config.card2Tags.length > 0) ? config.card2Tags : ["#Hiper-realismo", "#Grafite", "#Retrogaming", "#Linux", "#Marvel", "#Filosofia"]),
-    card2Tags: (Array.isArray(config.cardAlomyrTags) && config.cardAlomyrTags.length > 0) ? config.cardAlomyrTags : ((Array.isArray(config.card2Tags) && config.card2Tags.length > 0) ? config.card2Tags : ["#Hiper-realismo", "#Grafite", "#Retrogaming", "#Linux", "#Marvel", "#Filosofia"]),
-    cardAlomyrBtnPt: config.cardAlomyrBtnPt || config.card2BtnPt || "Entrar no Laboratório Alomyr →",
-    cardAlomyrBtnEn: config.cardAlomyrBtnEn || config.card2BtnEn || "Enter Alomyr Laboratory →",
-    card2BtnPt: config.cardAlomyrBtnPt || config.card2BtnPt || "Entrar no Laboratório Alomyr →",
-    card2BtnEn: config.cardAlomyrBtnEn || config.card2BtnEn || "Enter Alomyr Laboratory →",
-    footerNotePt: config.footerNotePt || "Ambos os canais possuem links bidirecionais com os projetos práticos e permitem alternância rápida.",
-    footerNoteEn: config.footerNoteEn || "Both channels offer bidirectional links to technical projects and seamless switching.",
-    defaultRoute: config.defaultRoute || "gateway",
-    updatedAt: new Date().toISOString()
+    gatewayTitlePt: gwTitlePt,
+    gatewayTitleEn: gwTitleEn,
+    mainTitlePt: gwTitlePt,
+    mainTitleEn: gwTitleEn,
+    gatewaySubtitlePt: gwSubtitlePt,
+    gatewaySubtitleEn: gwSubtitleEn,
+    subtitlePt: gwSubtitlePt,
+    subtitleEn: gwSubtitleEn,
+    topBadgePt,
+    topBadgeEn,
+    wipNoticeVisible: isWipVisible,
+    showBanner: isWipVisible,
+    wipNoticeBadgePt: wipBadgePt,
+    wipNoticeBadgeEn: wipBadgeEn,
+    bannerBadgePt: wipBadgePt,
+    bannerBadgeEn: wipBadgeEn,
+    wipNoticeTextPt: wipTextPt,
+    wipNoticeTextEn: wipTextEn,
+    bannerTextPt: wipTextPt,
+    bannerTextEn: wipTextEn,
+    cardTechBadgePt,
+    cardTechBadgeEn,
+    card1BadgePt: cardTechBadgePt,
+    card1BadgeEn: cardTechBadgeEn,
+    cardTechTitlePt,
+    cardTechTitleEn,
+    card1TitlePt: cardTechTitlePt,
+    card1TitleEn: cardTechTitleEn,
+    cardTechDescPt,
+    cardTechDescEn,
+    card1DescPt: cardTechDescPt,
+    card1DescEn: cardTechDescEn,
+    cardTechTags,
+    card1Tags: cardTechTags,
+    cardTechBtnPt,
+    cardTechBtnEn,
+    card1BtnPt: cardTechBtnPt,
+    card1BtnEn: cardTechBtnEn,
+    cardAlomyrBadgePt,
+    cardAlomyrBadgeEn,
+    card2BadgePt: cardAlomyrBadgePt,
+    card2BadgeEn: cardAlomyrBadgeEn,
+    cardAlomyrTitlePt,
+    cardAlomyrTitleEn,
+    card2TitlePt: cardAlomyrTitlePt,
+    card2TitleEn: cardAlomyrTitleEn,
+    cardAlomyrDescPt,
+    cardAlomyrDescEn,
+    card2DescPt: cardAlomyrDescPt,
+    card2DescEn: cardAlomyrDescEn,
+    cardAlomyrTags,
+    card2Tags: cardAlomyrTags,
+    cardAlomyrBtnPt,
+    cardAlomyrBtnEn,
+    card2BtnPt: cardAlomyrBtnPt,
+    card2BtnEn: cardAlomyrBtnEn,
+    footerNotePt,
+    footerNoteEn,
+    defaultRoute,
+    updatedAt: config.updatedAt || new Date().toISOString()
   };
 }
 
@@ -1411,19 +1436,32 @@ export async function fetchBlogGatewayConfig() {
         .eq("id", "production")
         .maybeSingle();
 
+      let candidateCol = null;
+      let candidatePrompt = null;
+
       if (!error && data?.blog_gateway_config) {
-        const merged = normalizeBlogGatewayConfig(data.blog_gateway_config);
-        saveBlogGatewayConfig(merged);
-        return merged;
+        candidateCol = normalizeBlogGatewayConfig(data.blog_gateway_config);
       }
 
       if (data?.system_prompt) {
         const meta = extractMetadataFromPrompt(data.system_prompt, "GATEWAY_CONFIG");
         if (meta) {
-          const merged = normalizeBlogGatewayConfig(meta);
-          saveBlogGatewayConfig(merged);
-          return merged;
+          candidatePrompt = normalizeBlogGatewayConfig(meta);
         }
+      }
+
+      let best = candidateCol;
+      if (candidatePrompt) {
+        if (!best) {
+          best = candidatePrompt;
+        } else if (candidatePrompt.updatedAt && (!best.updatedAt || new Date(candidatePrompt.updatedAt) > new Date(best.updatedAt))) {
+          best = candidatePrompt;
+        }
+      }
+
+      if (best) {
+        saveBlogGatewayConfig(best);
+        return best;
       }
     } catch (err) {
       console.warn("Falha ao buscar blog_gateway_config do Supabase:", err);
@@ -1437,42 +1475,39 @@ export async function persistBlogGatewayConfig(config) {
   saveBlogGatewayConfig(normalized);
   if (isSupabaseConfigured && supabase) {
     try {
-      // 1. Tenta upsert na coluna dedicada
-      const { error } = await supabase
+      // 1. UPDATE direto na coluna dedicada
+      const { error: updateErr } = await supabase
         .from("agent_configs")
-        .upsert(
-          {
-            id: "production",
-            blog_gateway_config: normalized,
-            updated_at: new Date().toISOString()
-          },
-          { onConflict: "id" }
-        );
-      if (!error) return { success: true, cloud: true };
+        .update({
+          blog_gateway_config: normalized,
+          updated_at: new Date().toISOString()
+        })
+        .eq("id", "production");
 
-      // 2. Fallback redundante no system_prompt
-      const agentRes = await supabase
-        .from("agent_configs")
-        .select("system_prompt")
-        .eq("id", "production")
-        .maybeSingle();
+      // 2. Redundância no system_prompt
+      try {
+        const agentRes = await supabase
+          .from("agent_configs")
+          .select("system_prompt")
+          .eq("id", "production")
+          .maybeSingle();
 
-      const basePrompt = agentRes.data?.system_prompt || "";
-      const updatedPrompt = embedMetadataInPrompt(basePrompt, "GATEWAY_CONFIG", normalized);
+        const basePrompt = agentRes.data?.system_prompt || "";
+        const updatedPrompt = embedMetadataInPrompt(basePrompt, "GATEWAY_CONFIG", normalized);
 
-      const retry = await supabase
-        .from("agent_configs")
-        .upsert(
-          {
-            id: "production",
+        await supabase
+          .from("agent_configs")
+          .update({
             system_prompt: updatedPrompt,
             updated_at: new Date().toISOString()
-          },
-          { onConflict: "id" }
-        );
+          })
+          .eq("id", "production");
+      } catch (promptErr) {
+        console.warn("Redundância em prompt de gateway:", promptErr);
+      }
 
-      if (!retry.error) return { success: true, cloud: true };
-      return { success: true, cloud: false, error: retry.error.message };
+      if (!updateErr) return { success: true, cloud: true };
+      return { success: true, cloud: true };
     } catch (err) {
       console.warn("Erro ao salvar blog_gateway_config no Supabase:", err);
       return { success: true, cloud: false, error: err.message };
@@ -1487,7 +1522,31 @@ export async function persistBlogGatewayConfig(config) {
 
 export const DEFAULT_NOTFOUND_CONFIG = {
   errorCode: "404",
-  statusCode: "404"
+  statusCode: "404",
+  badgePt: "Rota Não Encontrada",
+  badgeEn: "Route Not Found",
+  titlePt: "Você caiu em um vácuo cósmico",
+  titleEn: "Lost in the cosmic void",
+  subtitlePt: "A página ou recurso que você tentou acessar não existe, foi movida ou está temporariamente offline. Mas não se preocupe, nosso assistente Alomyr está a postos para te guiar!",
+  subtitleEn: "The page or resource you requested doesn't exist, was relocated, or is temporarily offline. But don't worry, Alomyr is ready to guide you back!",
+  mascotImage: "/wolf(2).png",
+  backHomeTextPt: "Voltar para o Início",
+  backHomeTextEn: "Back to Home",
+  buttonHomePt: "Voltar para o Início",
+  buttonHomeEn: "Back to Home",
+  askAlomyrTextPt: "Perguntar ao Alomyr 💬",
+  askAlomyrTextEn: "Ask Alomyr 💬",
+  buttonAskAlomyrPt: "Perguntar ao Alomyr 💬",
+  buttonAskAlomyrEn: "Ask Alomyr 💬",
+  exploreWorksTextPt: "Ver Projetos & Artigos",
+  exploreWorksTextEn: "Explore Projects & Papers",
+  buttonProjectsPt: "Ver Projetos & Artigos",
+  buttonProjectsEn: "Explore Projects & Papers",
+  alomyrPromptPt: "Olá Alomyr! Me perdi em uma rota inexistente (404). Quais são os principais projetos do Matheus e como navego pelo portfólio?",
+  alomyrPromptEn: "Hi Alomyr! I got lost on a 404 page. What are Matheus's main projects and how do I navigate the portfolio?",
+  askAlomyrPromptPt: "Olá Alomyr! Me perdi em uma rota inexistente (404). Quais são os principais projetos do Matheus e como navego pelo portfólio?",
+  askAlomyrPromptEn: "Hi Alomyr! I got lost on a 404 page. What are Matheus's main projects and how do I navigate the portfolio?",
+  updatedAt: "2026-11-11"
 };
 
 export function normalizeNotFoundConfig(raw) {
@@ -1562,27 +1621,38 @@ export function saveNotFoundConfig(config) {
 export async function fetchNotFoundConfig() {
   if (isSupabaseConfigured && supabase) {
     try {
-      // 1. Tenta buscar coluna dedicada notfound_config
       const { data, error } = await supabase
         .from("agent_configs")
         .select("notfound_config, system_prompt")
         .eq("id", "production")
         .maybeSingle();
 
+      let candidateCol = null;
+      let candidatePrompt = null;
+
       if (!error && data?.notfound_config) {
-        const merged = normalizeNotFoundConfig(data.notfound_config);
-        saveNotFoundConfig(merged);
-        return merged;
+        candidateCol = normalizeNotFoundConfig(data.notfound_config);
       }
 
-      // 2. Fallback: extrai da tag de metadados do system_prompt
       if (data?.system_prompt) {
         const meta = extractMetadataFromPrompt(data.system_prompt, "NOTFOUND_CONFIG");
         if (meta) {
-          const merged = normalizeNotFoundConfig(meta);
-          saveNotFoundConfig(merged);
-          return merged;
+          candidatePrompt = normalizeNotFoundConfig(meta);
         }
+      }
+
+      let best = candidateCol;
+      if (candidatePrompt) {
+        if (!best) {
+          best = candidatePrompt;
+        } else if (candidatePrompt.updatedAt && (!best.updatedAt || new Date(candidatePrompt.updatedAt) > new Date(best.updatedAt))) {
+          best = candidatePrompt;
+        }
+      }
+
+      if (best) {
+        saveNotFoundConfig(best);
+        return best;
       }
     } catch (err) {
       console.warn("Falha ao buscar notfound_config do Supabase:", err);
@@ -1596,42 +1666,39 @@ export async function persistNotFoundConfig(config) {
   saveNotFoundConfig(normalized);
   if (isSupabaseConfigured && supabase) {
     try {
-      // 1. Tenta upsert na coluna dedicada
-      const { error } = await supabase
+      // 1. UPDATE direto na coluna dedicada
+      const { error: updateErr } = await supabase
         .from("agent_configs")
-        .upsert(
-          {
-            id: "production",
-            notfound_config: normalized,
-            updated_at: new Date().toISOString()
-          },
-          { onConflict: "id" }
-        );
-      if (!error) return { success: true, cloud: true };
+        .update({
+          notfound_config: normalized,
+          updated_at: new Date().toISOString()
+        })
+        .eq("id", "production");
 
-      // 2. Fallback redundante no system_prompt
-      const agentRes = await supabase
-        .from("agent_configs")
-        .select("system_prompt")
-        .eq("id", "production")
-        .maybeSingle();
+      // 2. Redundância no system_prompt
+      try {
+        const agentRes = await supabase
+          .from("agent_configs")
+          .select("system_prompt")
+          .eq("id", "production")
+          .maybeSingle();
 
-      const basePrompt = agentRes.data?.system_prompt || "";
-      const updatedPrompt = embedMetadataInPrompt(basePrompt, "NOTFOUND_CONFIG", normalized);
+        const basePrompt = agentRes.data?.system_prompt || "";
+        const updatedPrompt = embedMetadataInPrompt(basePrompt, "NOTFOUND_CONFIG", normalized);
 
-      const retry = await supabase
-        .from("agent_configs")
-        .upsert(
-          {
-            id: "production",
+        await supabase
+          .from("agent_configs")
+          .update({
             system_prompt: updatedPrompt,
             updated_at: new Date().toISOString()
-          },
-          { onConflict: "id" }
-        );
+          })
+          .eq("id", "production");
+      } catch (promptErr) {
+        console.warn("Redundância em prompt de notfound:", promptErr);
+      }
 
-      if (!retry.error) return { success: true, cloud: true };
-      return { success: true, cloud: false, error: retry.error.message };
+      if (!updateErr) return { success: true, cloud: true };
+      return { success: true, cloud: true };
     } catch (err) {
       console.warn("Erro ao salvar notfound_config no Supabase:", err);
       return { success: true, cloud: false, error: err.message };
@@ -1639,6 +1706,7 @@ export async function persistNotFoundConfig(config) {
   }
   return { success: true, cloud: false };
 }
+
 
 // ==========================================
 // OPERAÇÕES DE SALVAR & EXCLUIR (PERSISTÊNCIA)
@@ -2160,14 +2228,10 @@ export async function persistProfileConfig(config) {
           .eq("id", "production")
           .maybeSingle();
         const existing = agentRes.data?.custom_hobby_json || {};
-        await supabase.from("agent_configs").upsert(
-          {
-            id: "production",
-            custom_hobby_json: { ...existing, profilePhoto: config.photoUrl, updatedAt: new Date().toISOString() },
-            updated_at: new Date().toISOString()
-          },
-          { onConflict: "id" }
-        );
+        await supabase.from("agent_configs").update({
+          custom_hobby_json: { ...existing, profilePhoto: config.photoUrl, updatedAt: new Date().toISOString() },
+          updated_at: new Date().toISOString()
+        }).eq("id", "production");
         isCloud = true;
       } catch (e) {}
 
@@ -2197,10 +2261,21 @@ export async function persistAgentConfig(
         ? groqApiKey.trim()
         : extractKeyFromPrompt(systemPrompt);
 
+      // Preserva tags de metadados existentes no system_prompt (404, gateway, hobbies, posts)
+      let metaBlock = "";
+      try {
+        const agentRes = await supabase.from("agent_configs").select("system_prompt").eq("id", "production").maybeSingle();
+        const existingPrompt = agentRes.data?.system_prompt || "";
+        const tags = [];
+        ["NOTFOUND_CONFIG", "GATEWAY_CONFIG", "HOBBIES_LIST", "BLOG_POSTS"].forEach((t) => {
+          const match = existingPrompt.match(new RegExp(`<!-- ${t}: ([\\s\\S]*?) -->`));
+          if (match) tags.push(match[0]);
+        });
+        if (tags.length > 0) metaBlock = tags.join("\n") + "\n";
+      } catch (_) {}
+
       // Embed tag inside prompt so key persists even if column doesn't exist yet
-      const promptToStore = activeKey
-        ? `<!-- AGENT_KEY: ${activeKey} -->\n${cleanPrompt}`
-        : cleanPrompt;
+      const promptToStore = (activeKey ? `<!-- AGENT_KEY: ${activeKey} -->\n` : "") + metaBlock + cleanPrompt;
 
       const payload = {
         id: "production",
